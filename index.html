@@ -665,7 +665,7 @@ footer {
     }
 
     // --------------------------------------------------------------
-    // NUOVO PARSER SCHEDE (file TXT con struttura Cliente : ...)
+    // PARSER SCHEDE COMPLETO (estrae TUTTI i dati)
     // --------------------------------------------------------------
     function parseSCHEDEFile(text, clientsMap) {
         const lines = text.split(/\r?\n/);
@@ -673,9 +673,7 @@ footer {
         let currentData = null;
         let insideTable = false;
         
-        // Funzione per estrarre codice e nome dalla riga "Cliente :"
         function parseClientHeader(line) {
-            // Esempio: "Cliente   : 030275 LA MANDRAGOLA DI MARCO GIANASSI $ C. Snc VIA DI BARBERINO 71 ..."
             let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/);
             if (match) {
                 return { code: match[1], name: match[2].trim() };
@@ -683,22 +681,16 @@ footer {
             return null;
         }
         
-        // Parser per la riga di tabella (formato con 4 coppie Quantità/Data)
         function parseArticoloRow(line) {
-            // Formato: "01070         ITIDET 40 SPRAI 500ml VETR/ACC                                                                        12,00 17/07/2024           3,9800   0,00   0,00"
-            // Oppure con più coppie: "01112         OPTIMAX EXTRA SGRASS. 750ML                                1,00 03/05/2024       6,00 09/04/2025       6,00 01/08/2025           4,1000   0,00   0,00"
-            
-            // Pattern per catturare codice (5-10 cifre/lettere) e descrizione
             let match = line.match(/^(\S+)\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
             if (!match) return null;
             
             const code = match[1];
             let description = match[2];
-            // Rimuovi eventuali informazioni finali
             description = description.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
             description = description.substring(0, 120).trim();
             
-            // Ora estrai tutte le coppie quantità/data dalla riga
+            // Estrai tutte le coppie quantità/data
             const qtyDatePairs = [];
             const qtyDatePattern = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
             let pairMatch;
@@ -708,18 +700,24 @@ footer {
                 qtyDatePairs.push({ quantity: qty, date: date });
             }
             
-            // Estrai prezzo (ultimo numero prima degli sconti)
-            const priceMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
+            // Estrai prezzo, sconto1, sconto2
+            const priceDiscountMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
             let price = 0;
-            if (priceMatch) {
-                price = parseFloat(priceMatch[1].replace(',', '.'));
+            let discount1 = 0;
+            let discount2 = 0;
+            if (priceDiscountMatch) {
+                price = parseFloat(priceDiscountMatch[1].replace(',', '.'));
+                discount1 = parseFloat(priceDiscountMatch[2].replace(',', '.'));
+                discount2 = parseFloat(priceDiscountMatch[3].replace(',', '.'));
             }
             
             return {
                 code: code,
                 description: description,
                 qtyDatePairs: qtyDatePairs,
-                price: price
+                price: price,
+                discount1: discount1,
+                discount2: discount2
             };
         }
         
@@ -727,11 +725,9 @@ footer {
             let line = lines[i].trim();
             if (line === '') continue;
             
-            // Rilevazione inizio nuovo cliente
             if (line.startsWith('Cliente')) {
                 const clientInfo = parseClientHeader(line);
                 if (clientInfo) {
-                    // Cerchiamo se il cliente esiste già (per nome o per codice)
                     let existingClientName = null;
                     for (let [cName, cData] of clientsMap.entries()) {
                         if (cData.codice === clientInfo.code || cName === clientInfo.name) {
@@ -758,19 +754,18 @@ footer {
                 continue;
             }
             
-            // Rilevazione inizio tabella (linea con "Cod. Articolo Descrizione")
-            if (line.includes('Cod. Articolo Descrizione') || line.includes('Cod. Articolo') && line.includes('Descrizione')) {
+            if (line.includes('Cod. Articolo Descrizione') || (line.includes('Cod. Articolo') && line.includes('Descrizione'))) {
                 insideTable = true;
                 continue;
             }
             
-            // Se siamo dentro la tabella e la linea contiene un codice articolo
-            if (insideTable && line.match(/^\d{5,}/)) {
+            if (insideTable && line.match(/^\d{4,}/)) {
                 const art = parseArticoloRow(line);
                 if (art && art.qtyDatePairs.length > 0) {
-                    // Aggiungi ogni movimento come articolo separato
                     for (let pair of art.qtyDatePairs) {
-                        // Cerca se esiste già un articolo con stesso codice e prezzo (approssimativamente)
+                        const grossAmount = pair.quantity * art.price;
+                        const netAmount = grossAmount * (1 - art.discount1 / 100);
+                        
                         let existingItem = currentData.items.find(item => 
                             item.code === art.code && 
                             Math.abs(item.price - art.price) < 0.01
@@ -778,26 +773,31 @@ footer {
                         
                         if (existingItem) {
                             existingItem.quantity += pair.quantity;
-                            existingItem.netAmount += pair.quantity * art.price;
-                            existingItem.grossAmount += pair.quantity * art.price;
+                            existingItem.netAmount += netAmount;
+                            existingItem.grossAmount += grossAmount;
                             existingItem.occurrences = (existingItem.occurrences || 1) + 1;
+                            if (pair.date > (existingItem.lastDate || '')) {
+                                existingItem.lastDate = pair.date;
+                            }
                         } else {
                             currentData.items.push({
                                 code: art.code,
                                 description: art.description,
                                 quantity: pair.quantity,
                                 price: art.price,
-                                discountPercent: 0,
-                                grossAmount: pair.quantity * art.price,
-                                netAmount: pair.quantity * art.price,
-                                occurrences: 1
+                                discountPercent: art.discount1,
+                                discountPercent2: art.discount2,
+                                grossAmount: grossAmount,
+                                netAmount: netAmount,
+                                occurrences: 1,
+                                date: pair.date,
+                                lastDate: pair.date
                             });
                         }
                     }
                 }
             }
             
-            // Fine tabella (linea con altro cliente o fine file)
             if (line.startsWith('Cliente') && i > 0) {
                 insideTable = false;
             }
@@ -824,7 +824,7 @@ footer {
     }
 
     // --------------------------------------------------------------
-    // ESPORTAZIONE HTML PER CLIENTE (stessa del codice originale)
+    // ESPORTAZIONE HTML PER CLIENTE
     // --------------------------------------------------------------
     function generateOrderHTML(clientName, clientData, logoDataURL) {
         const items = aggregateItems(clientData.items);
@@ -1034,17 +1034,14 @@ footer {
                         return orderText;
                     }
 
-                    // Salvataggio automatico
                     const qtyInputs = document.querySelectorAll('.qty-input');
                     qtyInputs.forEach(inp => inp.addEventListener('input', salvaStato));
                     const notesArea = document.getElementById('clientNotes');
                     if (notesArea) notesArea.addEventListener('input', salvaStato);
 
-                    // Reset
                     const resetBtn = document.getElementById('resetQtyBtn');
                     if (resetBtn) resetBtn.addEventListener('click', resetStato);
 
-                    // Invio WhatsApp
                     const sendBtn = document.getElementById('sendOrderBtn');
                     if (sendBtn) {
                         sendBtn.addEventListener('click', function(e) {
@@ -1057,7 +1054,6 @@ footer {
                         });
                     }
 
-                    // Invio Email
                     const emailBtn = document.getElementById('emailOrderBtn');
                     if (emailBtn) {
                         emailBtn.addEventListener('click', function(e) {
@@ -1070,7 +1066,6 @@ footer {
                         });
                     }
 
-                    // Carica stato all'avvio
                     caricaStato();
                 })();
             <\/script>
@@ -1117,7 +1112,7 @@ footer {
     }
 
     // --------------------------------------------------------------
-    // RENDER (tabella principale con 6 colonne)
+    // RENDER
     // --------------------------------------------------------------
     function renderAllTabs(clientsMap) {
         const tabsDiv = document.getElementById('tabsContainer');
@@ -1163,7 +1158,7 @@ footer {
                                 <span class="scadenze-totale">📅 Scadenze: ${(data.saldoScadenze || 0).toFixed(2)} €</span>
                             </div>
                             <table class="scadenze-table">
-                                <thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo fattura (€)</th><th>Scadenza</th><tr></thead>
+                                <thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo fattura (€)</th><th>Scadenza</th></tr></thead>
                                 <tbody>`;
                 for (let s of data.scadenzeDettaglio) {
                     html += `<tr><td>${escapeHtml(s.dataDocumento || '')}</td><td>${escapeHtml(s.numeroFattura || '')}</td><td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td><td>${escapeHtml(s.dataScadenza || '')}</td></tr>`;
@@ -1331,9 +1326,6 @@ footer {
         input.click();
     }
 
-    // --------------------------------------------------------------
-    // NUOVA FUNZIONE CARICA SCHEDE
-    // --------------------------------------------------------------
     function loadSCHEDE() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -1347,7 +1339,6 @@ footer {
             reader.onload = (ev) => {
                 setTimeout(() => {
                     try {
-                        // Se non c'è ancora una mappa clienti, ne creiamo una nuova
                         if (!currentClientsMap || currentClientsMap.size === 0) {
                             currentClientsMap = new Map();
                         }
