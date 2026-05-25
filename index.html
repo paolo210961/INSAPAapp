@@ -40,7 +40,6 @@ body {
     min-height: 100vh;
 }
 
-/* HEADER */
 .header {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     color: white;
@@ -53,7 +52,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     border-bottom: 3px solid var(--accent);
 }
 
@@ -61,7 +60,7 @@ body {
     display: flex;
     align-items: center;
     gap: .7rem;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255,255,255,0.12);
     padding: .5rem 1rem;
     border-radius: 60px;
 }
@@ -71,16 +70,14 @@ body {
     height: 36px;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.2);
     color: white;
     font-size: 1.2rem;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .upload-logo-btn:hover {
     background: var(--accent);
-    transform: scale(1.05);
 }
 
 .logo-img {
@@ -91,7 +88,7 @@ body {
 }
 
 .logo-placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255,255,255,0.7);
     font-size: .9rem;
 }
 
@@ -110,13 +107,12 @@ h1 {
 
 .version {
     font-size: 0.7rem;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.2);
     padding: 0.2rem 0.6rem;
     border-radius: 30px;
     font-family: monospace;
 }
 
-/* UPLOAD AREA */
 .upload-area {
     padding: 1rem 1.5rem;
     display: flex;
@@ -128,7 +124,6 @@ h1 {
     position: sticky;
     top: 70px;
     z-index: 99;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .btn {
@@ -171,7 +166,6 @@ h1 {
     font-size: 0.85rem;
 }
 
-/* VIEW BUTTONS */
 .view-buttons {
     display: flex;
     gap: 0.8rem;
@@ -197,14 +191,8 @@ h1 {
 .view-btn.active {
     background: var(--primary-light);
     color: white;
-    box-shadow: 0 2px 8px rgba(44, 122, 75, 0.3);
 }
 
-.view-btn:hover:not(.active) {
-    background: #cbd5e1;
-}
-
-/* CLIENT SELECTION */
 .client-selection {
     padding: 1rem 1.5rem;
     background: var(--white);
@@ -253,7 +241,6 @@ h1 {
     gap: 8px;
 }
 
-/* CONTENT AREA */
 .content-area {
     padding: 1.5rem;
 }
@@ -275,79 +262,51 @@ h1 {
     font-weight: 600;
 }
 
-/* TABELLA PC */
 @media (min-width: 769px) {
     .table-wrapper {
         overflow-x: auto;
         border-radius: 16px;
         border: 1px solid #e2e8f0;
     }
-    
     table {
         width: 100%;
         border-collapse: collapse;
         font-size: 0.85rem;
         background: white;
     }
-    
     th, td {
         padding: 12px 10px;
         border-bottom: 1px solid #e2e8f0;
         text-align: left;
         vertical-align: middle;
     }
-    
     th {
         background: #f8fafc;
         font-weight: 700;
         border-bottom: 2px solid #e2e8f0;
-        position: sticky;
-        top: 0;
     }
-    
-    tr:hover {
-        background: #f8fafc;
-    }
-    
-    .history-icon {
-        cursor: pointer;
-        font-size: 1.2rem;
-        text-align: center;
-        transition: transform 0.2s;
-    }
-    
-    .history-icon:hover {
-        transform: scale(1.2);
-    }
-    
     .num {
         text-align: right;
     }
 }
 
-/* CARD MOBILI */
 @media (max-width: 768px) {
     .table-wrapper {
         display: block;
     }
-    
     table, thead, tbody, th, td, tr {
         display: block;
     }
-    
     thead {
         display: none;
     }
-    
     tr {
         background: var(--white);
         border-radius: 16px;
         margin-bottom: 16px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         border: 1px solid #e2e8f0;
-        overflow: hidden;
     }
-    
     td {
         display: flex;
         justify-content: space-between;
@@ -356,38 +315,19 @@ h1 {
         border-bottom: 1px solid #f1f5f9;
         font-size: 0.85rem;
     }
-    
-    td:last-child {
-        border-bottom: none;
-    }
-    
     td:before {
         content: attr(data-label);
         font-weight: 700;
         color: var(--text-light);
         font-size: 0.75rem;
-        text-transform: uppercase;
     }
-    
-    td:first-child {
-        background: #f8fafc;
-        font-weight: 700;
-        border-left: 4px solid var(--primary-light);
-    }
-    
     .mobile-detail-row {
         display: none;
         background: #f8fafc;
         padding: 12px 16px;
         flex-direction: column;
-        gap: 8px;
         border-top: 1px solid #e2e8f0;
     }
-    
-    .mobile-detail-row.show {
-        display: flex;
-    }
-    
     .history-toggle {
         background: none;
         border: none;
@@ -399,13 +339,10 @@ h1 {
         cursor: pointer;
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        font-size: 0.8rem;
         border-top: 1px solid #e2e8f0;
     }
 }
 
-/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -436,8 +373,6 @@ h1 {
     justify-content: space-between;
     align-items: center;
     border-radius: 20px 20px 0 0;
-    position: sticky;
-    top: 0;
 }
 
 .modal-close {
@@ -460,7 +395,6 @@ h1 {
 .history-list li {
     padding: 10px;
     border-bottom: 1px solid #e2e8f0;
-    font-size: 0.85rem;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -547,7 +481,6 @@ footer {
 
 </div>
 
-<!-- MODAL -->
 <div id="historyModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -560,25 +493,27 @@ footer {
 
 <script>
     // ==============================================================
-    // STRUTTURA DATI
+    // VARIABILI GLOBALI
     // ==============================================================
-    let ddtData = new Map();      // Dati dal file DDT
-    let scaData = new Map();      // Dati dal file SCA (scadenze)
-    let schedeData = new Map();   // Dati dal file SCHEDE
-    
-    let currentView = 'SCHEDE';   // DDT, SCA, SCHEDE
-    let currentClient = null;      // Nome cliente selezionato
-    
+    let ddtData = new Map();
+    let scaData = new Map();
+    let schedeData = new Map();
+    let currentView = 'SCHEDE';
+    let currentClient = null;
+
     // ==============================================================
     // UTILITY
     // ==============================================================
+    function escapeHtml(str) {
+        return String(str || '').replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
     function cleanImporto(str) {
         if (!str) return 0;
         let cleaned = str.replace(/\./g, '').replace(',', '.');
-        let val = parseFloat(cleaned);
-        return isNaN(val) ? 0 : val;
+        return parseFloat(cleaned) || 0;
     }
-    
+
     function cleanDescription(desc) {
         if (!desc) return '';
         desc = desc.replace(/[=\-]{5,}/g, '');
@@ -594,7 +529,7 @@ footer {
         desc = desc.replace(/\s+/g, ' ').trim();
         return desc.substring(0, 120);
     }
-    
+
     function finalCleanDescription(desc) {
         if (!desc) return '';
         desc = desc.replace(/==\s*Azienda:.*?(?:\n|$)/gi, '');
@@ -605,16 +540,12 @@ footer {
         desc = desc.replace(/\s+/g, ' ').trim();
         return desc.substring(0, 120);
     }
-    
-    function escapeHtml(str) {
-        return String(str || '').replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
-    }
-    
+
     // ==============================================================
-    // PARSER DDT (COMPLETO)
+    // PARSER DDT (ORIGINALE FUNZIONANTE)
     // ==============================================================
     const articoloRegex = /^\s*([A-Z0-9\-]+)\s+(.+?)\s+(KG|N\.?|LT|PZ|ML|GR|CF|CT|MT)\s+([\d.,]+)\s+([\d.,-]+)\s+([\d.,-]+)/i;
-    
+
     function isServiceLine(line) {
         if (!line) return true;
         let l = line.trim();
@@ -624,18 +555,18 @@ footer {
                l.includes('Articolo      Descrizione') || l.includes('Tipo D.d.T.') ||
                l.match(/^[\s=]+$/);
     }
-    
+
     function parseDDTFile(text, targetMap) {
         const lines = text.split(/\r?\n/);
         const clients = new Map();
         let currentClient = null;
         let currentCode = null;
         let pendingArticolo = null;
-        
+
         function cleanLine(str) {
             return str.replace(/[\x00-\x1F\x7F\x0C→←]/g, ' ').replace(/\s+/g, ' ').trim();
         }
-        
+
         function parseClientLine(line) {
             const dates = line.match(/\d{2}\/\d{2}\/\d{4}/g);
             if (!dates) return null;
@@ -650,7 +581,7 @@ footer {
             if (nameTokens.length === 0) return null;
             return { code, name: nameTokens.join(' ') };
         }
-        
+
         for (let rawLine of lines) {
             if (rawLine.trim() === '') continue;
             const cleaned = cleanLine(rawLine);
@@ -677,16 +608,14 @@ footer {
                     const price = parseFloat(artMatch[5].replace(/\./g, '').replace(',', '.'));
                     let discount = parseFloat(artMatch[6].replace(/\./g, '').replace(',', '.').replace('-', ''));
                     if (isNaN(discount)) discount = 0;
-                    const gross = quantity * price;
-                    const net = gross * (1 - discount / 100);
                     pendingArticolo = {
                         code: artMatch[1],
                         description: cleanDescription(artMatch[2]),
                         quantity: quantity,
                         price: price,
                         discountPercent: discount,
-                        grossAmount: gross,
-                        netAmount: net,
+                        grossAmount: quantity * price,
+                        netAmount: quantity * price * (1 - discount / 100),
                         date: new Date().toLocaleDateString()
                     };
                 } else {
@@ -707,12 +636,12 @@ footer {
         for (let [name, data] of clients) {
             targetMap.set(name, data);
         }
-        saveToLocalStorage();
+        saveAllToLocalStorage();
         return targetMap;
     }
-    
+
     // ==============================================================
-    // PARSER SCA (COMPLETO)
+    // PARSER SCA (ORIGINALE FUNZIONANTE)
     // ==============================================================
     function parseSCAFile(text, targetMap) {
         const lines = text.split(/\r?\n/);
@@ -824,12 +753,12 @@ footer {
         for (let [name, data] of clients) {
             targetMap.set(name, data);
         }
-        saveToLocalStorage();
+        saveAllToLocalStorage();
         return targetMap;
     }
-    
+
     // ==============================================================
-    // PARSER SCHEDE
+    // PARSER SCHEDE (ORIGINALE FUNZIONANTE)
     // ==============================================================
     function parseSCHEDEFile(text, targetMap) {
         const lines = text.split(/\r?\n/);
@@ -946,12 +875,12 @@ footer {
         for (let [name, data] of clients) {
             targetMap.set(name, data);
         }
-        saveToLocalStorage();
+        saveAllToLocalStorage();
         return targetMap;
     }
-    
+
     // ==============================================================
-    // AGGREGAZIONE ARTICOLI CON STORICO
+    // AGGREGAZIONE ARTICOLI
     // ==============================================================
     function aggregateItemsWithHistory(items) {
         const map = new Map();
@@ -1013,11 +942,11 @@ footer {
             return a.code.localeCompare(b.code);
         });
     }
-    
+
     // ==============================================================
     // SALVATAGGIO su localStorage
     // ==============================================================
-    function saveToLocalStorage() {
+    function saveAllToLocalStorage() {
         const toSave = {
             ddt: Array.from(ddtData.entries()),
             sca: Array.from(scaData.entries()),
@@ -1027,8 +956,8 @@ footer {
         };
         localStorage.setItem('insapa_all_data', JSON.stringify(toSave));
     }
-    
-    function loadFromLocalStorage() {
+
+    function loadAllFromLocalStorage() {
         const saved = localStorage.getItem('insapa_all_data');
         if (saved) {
             try {
@@ -1039,7 +968,6 @@ footer {
                 currentView = data.currentView || 'SCHEDE';
                 currentClient = data.currentClient || null;
                 
-                // Aggiorna UI dei pulsanti
                 document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
                 if (currentView === 'DDT') document.getElementById('viewDDT').classList.add('active');
                 else if (currentView === 'SCA') document.getElementById('viewSCA').classList.add('active');
@@ -1051,7 +979,7 @@ footer {
         }
         return false;
     }
-    
+
     // ==============================================================
     // RENDER
     // ==============================================================
@@ -1074,7 +1002,7 @@ footer {
                 currentClient = name;
                 renderClientList();
                 renderCurrentView();
-                saveToLocalStorage();
+                saveAllToLocalStorage();
             };
             clientListDiv.appendChild(chip);
         });
@@ -1093,6 +1021,22 @@ footer {
         }
     }
     
+    function openModal(title, historyItems) {
+        const modal = document.getElementById('historyModal');
+        document.getElementById('modalTitle').textContent = title;
+        let html = '<ul class="history-list">';
+        for (let h of historyItems) {
+            html += `<li><span>📅 ${h.date || 'N/D'}</span><span>📊 ${h.quantity.toFixed(2)} pz</span><span>💰 ${h.price.toFixed(2)} €</span><span>🏷️ ${(h.discount || 0).toFixed(0)}%</span></li>`;
+        }
+        const totalQty = historyItems.reduce((s, h) => s + h.quantity, 0);
+        const totalNet = historyItems.reduce((s, h) => s + (h.quantity * h.price * (1 - (h.discount||0)/100)), 0);
+        html += `<li style="background:#f0fdf4;font-weight:bold;margin-top:8px;"><span>📦 Totale pezzi: ${totalQty.toFixed(2)}</span><span>💰 Netto totale: ${totalNet.toFixed(2)} €</span></li></ul>`;
+        document.getElementById('modalBody').innerHTML = html;
+        modal.style.display = 'flex';
+    }
+    
+    window.closeModal = function() { document.getElementById('historyModal').style.display = 'none'; };
+    
     function renderCurrentView() {
         if (!currentClient) {
             document.getElementById('contentWrapper').innerHTML = '<div class="warning">Seleziona un cliente per visualizzare i dati</div>';
@@ -1100,9 +1044,9 @@ footer {
         }
         
         let dataMap = null;
-        if (currentView === 'DDT') { dataMap = ddtData; }
-        else if (currentView === 'SCA') { dataMap = scaData; }
-        else { dataMap = schedeData; }
+        if (currentView === 'DDT') dataMap = ddtData;
+        else if (currentView === 'SCA') dataMap = scaData;
+        else dataMap = schedeData;
         
         if (!dataMap.has(currentClient)) {
             document.getElementById('contentWrapper').innerHTML = `<div class="warning">Nessun dato disponibile per questo cliente nella visualizzazione ${currentView}. Carica il file corrispondente.</div>`;
@@ -1122,14 +1066,9 @@ footer {
             let html = `<div class="client-summary"><div class="stat">💰 Saldo totale: ${saldo.toFixed(2)} €</div><div class="stat">📄 Numero fatture: ${scadenze.length}</div></div>`;
             html += `<div class="table-wrapper"><table><thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo</th><th>Scadenza</th></tr></thead><tbody>`;
             for (let s of scadenze) {
-                html += `<tr>
-                            <td>${escapeHtml(s.dataDocumento || 'N/D')}</td>
-                            <td>${escapeHtml(s.numeroFattura || 'N/D')}</td>
-                            <td class="num">${(s.importo || 0).toFixed(2)} €</td>
-                            <td>${escapeHtml(s.dataScadenza || 'N/D')}</td>
-                        </tr>`;
+                html += `<tr><td>${escapeHtml(s.dataDocumento || 'N/D')}</td><td>${escapeHtml(s.numeroFattura || 'N/D')}</td><td class="num">${(s.importo || 0).toFixed(2)} €</td><td>${escapeHtml(s.dataScadenza || 'N/D')}</td></tr>`;
             }
-            html += `</tbody></table></div>`;
+            html += `</tbody></tr></div>`;
             document.getElementById('contentWrapper').innerHTML = html;
             return;
         }
@@ -1148,104 +1087,25 @@ footer {
                         <div class="stat">📦 Quantità totale: ${totQty.toFixed(2)}</div>
                         <div class="stat">💰 Netto totale: ${totNet.toFixed(2)} €</div>
                     </div>`;
-        html += `<div class="table-wrapper"><table id="mainTable"><thead><tr>
-                    <th>Codice</th><th>Descrizione</th><th>Prezzo €</th><th>Q.tà</th><th>Sconto %</th><th>Ultimo acquisto</th><th style="text-align:center">📜</th>
+        html += `<div class="table-wrapper"><table><thead><tr>
+                    <th>Codice</th><th>Descrizione</th><th>Prezzo €</th><th>Q.tà</th><th>Sconto %</th><th>Ultimo acquisto</th><th></th>
                  </tr></thead><tbody>`;
         
         for (let it of items) {
-            const historyData = it.history.map(h => ({ date: h.date, quantity: h.quantity, price: h.price, discount: h.discount }));
-            const historyJson = JSON.stringify(historyData).replace(/"/g, '&quot;');
-            html += `<tr class="article-row" data-history='${historyJson}'>
+            const historyJson = JSON.stringify(it.history).replace(/"/g, '&quot;');
+            html += `<tr>
                         <td style="font-family:monospace">${escapeHtml(it.code)}</td>
-                        <td style="word-break:break-word;">${escapeHtml(it.description)}</td>
+                        <td>${escapeHtml(it.description)}</td>
                         <td class="num">${it.price.toFixed(2)} €</td>
                         <td class="num">${it.quantity.toFixed(2)}</td>
                         <td class="num">${(it.discountPercent || 0).toFixed(0)}%</td>
                         <td>📅 ${it.lastDate}</td>
-                        <td class="history-icon" style="text-align:center;cursor:pointer;" onclick="openModal('${escapeHtml(it.code)} - ${escapeHtml(it.description.substring(0, 30))}', ${historyJson})">📜</td>
-                     </tr>`;
+                        <td style="text-align:center;cursor:pointer;" onclick="openModal('${escapeHtml(it.code)} - ${escapeHtml(it.description.substring(0, 30))}', ${historyJson})">📜</td>
+                      </tr>`;
         }
         html += `</tbody></table></div>`;
         document.getElementById('contentWrapper').innerHTML = html;
-        
-        if (window.innerWidth <= 768) setupMobileCards();
     }
-    
-    function setupMobileCards() {
-        document.querySelectorAll('.article-row').forEach(row => {
-            const cells = row.cells;
-            if (cells.length < 7) return;
-            const code = cells[0].innerText;
-            const desc = cells[1].innerText;
-            const price = cells[2].innerText;
-            const qty = cells[3].innerText;
-            const discount = cells[4].innerText;
-            const lastDate = cells[5].innerText.replace('📅 ', '');
-            const historyAttr = row.getAttribute('data-history');
-            let history = [];
-            if (historyAttr) try { history = JSON.parse(historyAttr); } catch(e) {}
-            
-            row.style.display = 'none';
-            const tbody = row.parentNode;
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `<td colspan="7" style="padding:0;display:block;">
-                <div style="padding:16px;">
-                    <div style="font-weight:bold;margin-bottom:8px;border-left:4px solid var(--accent);padding-left:10px;">📦 ${escapeHtml(code)} - ${escapeHtml(desc)}</div>
-                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:0.85rem;">
-                        <span>💰 ${price}</span><span>📊 ${qty}</span><span>🏷️ ${discount}</span><span>📅 ${lastDate}</span>
-                    </div>
-                    <button class="history-toggle" data-history='${JSON.stringify(history)}'>📜 Mostra storico <span class="arrow">▼</span></button>
-                    <div class="mobile-detail-row" style="display:none;"></div>
-                </div>
-             </td>`;
-            tbody.appendChild(newRow);
-        });
-        
-        document.querySelectorAll('.history-toggle').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const detailDiv = this.parentElement.querySelector('.mobile-detail-row');
-                const isVisible = detailDiv.style.display === 'flex';
-                const arrow = this.querySelector('.arrow');
-                if (isVisible) {
-                    detailDiv.style.display = 'none';
-                    if (arrow) arrow.style.transform = '';
-                } else {
-                    let history = [];
-                    try { history = JSON.parse(this.getAttribute('data-history') || '[]'); } catch(e) {}
-                    let html = '<div style="padding:8px 0;">';
-                    for (let h of history) {
-                        html += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:0.75rem;">
-                                    <span>📅 ${h.date || 'N/D'}</span><span>📊 ${h.quantity.toFixed(2)} pz</span><span>💰 ${h.price.toFixed(2)} €</span><span>🏷️ ${(h.discount || 0).toFixed(0)}%</span>
-                                </div>`;
-                    }
-                    const totalQty = history.reduce((s, h) => s + h.quantity, 0);
-                    const totalNet = history.reduce((s, h) => s + (h.quantity * h.price * (1 - (h.discount||0)/100)), 0);
-                    html += `<div style="display:flex;justify-content:space-between;padding-top:8px;margin-top:8px;font-weight:bold;border-top:2px solid var(--primary-light);">
-                                <span>📦 Totale: ${totalQty.toFixed(2)} pz</span><span>💰 Netto: ${totalNet.toFixed(2)} €</span>
-                            </div></div>`;
-                    detailDiv.innerHTML = html;
-                    detailDiv.style.display = 'flex';
-                    if (arrow) arrow.style.transform = 'rotate(180deg)';
-                }
-            });
-        });
-    }
-    
-    function openModal(title, historyItems) {
-        const modal = document.getElementById('historyModal');
-        document.getElementById('modalTitle').textContent = title;
-        let html = '<ul class="history-list">';
-        for (let h of historyItems) {
-            html += `<li><span class="history-date">📅 ${h.date || 'N/D'}</span><span>📊 ${h.quantity.toFixed(2)} pz</span><span>💰 ${h.price.toFixed(2)} €</span><span>🏷️ ${(h.discount || 0).toFixed(0)}%</span></li>`;
-        }
-        const totalQty = historyItems.reduce((s, h) => s + h.quantity, 0);
-        const totalNet = historyItems.reduce((s, h) => s + (h.quantity * h.price * (1 - (h.discount||0)/100)), 0);
-        html += `<li style="background:#f0fdf4;font-weight:bold;margin-top:8px;"><span>📦 Totale pezzi: ${totalQty.toFixed(2)}</span><span>💰 Netto totale: ${totalNet.toFixed(2)} €</span></li></ul>`;
-        document.getElementById('modalBody').innerHTML = html;
-        modal.style.display = 'flex';
-    }
-    
-    window.closeModal = function() { document.getElementById('historyModal').style.display = 'none'; };
     
     function refreshUI() {
         renderClientList();
@@ -1354,11 +1214,9 @@ footer {
     document.getElementById('loadSCABtn').addEventListener('click', loadSCA);
     document.getElementById('loadSCHEDEBtn').addEventListener('click', loadSCHEDE);
     document.getElementById('clientSearchInput').addEventListener('input', filterClients);
-    document.getElementById('viewDDT').addEventListener('click', () => { currentView = 'DDT'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewDDT').classList.add('active'); renderCurrentView(); saveToLocalStorage(); });
-    document.getElementById('viewSCA').addEventListener('click', () => { currentView = 'SCA'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewSCA').classList.add('active'); renderCurrentView(); saveToLocalStorage(); });
-    document.getElementById('viewSCHEDE').addEventListener('click', () => { currentView = 'SCHEDE'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewSCHEDE').classList.add('active'); renderCurrentView(); saveToLocalStorage(); });
-    
-    window.addEventListener('resize', () => { if (window.innerWidth <= 768) setupMobileCards(); else renderCurrentView(); });
+    document.getElementById('viewDDT').addEventListener('click', () => { currentView = 'DDT'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewDDT').classList.add('active'); renderCurrentView(); saveAllToLocalStorage(); });
+    document.getElementById('viewSCA').addEventListener('click', () => { currentView = 'SCA'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewSCA').classList.add('active'); renderCurrentView(); saveAllToLocalStorage(); });
+    document.getElementById('viewSCHEDE').addEventListener('click', () => { currentView = 'SCHEDE'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewSCHEDE').classList.add('active'); renderCurrentView(); saveAllToLocalStorage(); });
     
     // Logo
     const logoInput = document.getElementById('logoFileInput');
@@ -1388,8 +1246,8 @@ footer {
     }
     
     // Carica dati salvati
-    if (!loadFromLocalStorage()) {
-        document.getElementById('statusMsg')?.remove();
+    if (!loadAllFromLocalStorage()) {
+        console.log('Nessun dato salvato trovato');
     }
 </script>
 </body>
