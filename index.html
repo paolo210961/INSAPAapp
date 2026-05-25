@@ -330,7 +330,6 @@ th {
     text-align: left;
 }
 
-/* Colonne: Codice, Descrizione, Prezzo, Q.tà, Sconto %, Rip. */
 th:nth-child(1) { width: 14%; }
 th:nth-child(2) { width: 44%; }
 th:nth-child(3) { width: 12%; }
@@ -343,7 +342,6 @@ th:nth-child(3), th:nth-child(4), th:nth-child(5) {
     text-align: right;
 }
 
-/* Grassetto per prezzo e quantità */
 td:nth-child(3), td:nth-child(4) {
     font-weight: bold;
 }
@@ -422,7 +420,7 @@ footer {
 
 <script>
     // --------------------------------------------------------------
-    // PARSER DDT (identico)
+    // PARSER DDT
     // --------------------------------------------------------------
     const articoloRegex = /^\s*([A-Z0-9\-]+)\s+(.+?)\s+(KG|N\.?|LT|PZ|ML|GR|CF|CT|MT)\s+([\d.,]+)\s+([\d.,-]+)\s+([\d.,-]+)/i;
 
@@ -664,9 +662,9 @@ footer {
         return clientsMap;
     }
 
-    // --------------------------------------------------------------
-    // PARSER SCHEDE COMPLETO (estrae TUTTI i dati)
-    // --------------------------------------------------------------
+    // ==============================================================
+    // PARSER SCHEDE COMPLETO - Estrae TUTTE le 4 coppie + sconti
+    // ==============================================================
     function parseSCHEDEFile(text, clientsMap) {
         const lines = text.split(/\r?\n/);
         let currentClient = null;
@@ -674,6 +672,7 @@ footer {
         let insideTable = false;
         
         function parseClientHeader(line) {
+            // Formato: "Cliente   : 030275 LA MANDRAGOLA DI MARCO GIANASSI ..."
             let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/);
             if (match) {
                 return { code: match[1], name: match[2].trim() };
@@ -682,15 +681,17 @@ footer {
         }
         
         function parseArticoloRow(line) {
-            let match = line.match(/^(\S+)\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
+            // Pattern per codice e descrizione (almeno 4 caratteri per il codice)
+            let match = line.match(/^(\S{4,})\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
             if (!match) return null;
             
             const code = match[1];
             let description = match[2];
+            // Pulisci la descrizione rimuovendo le quantità e date che seguono
             description = description.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
             description = description.substring(0, 120).trim();
             
-            // Estrai tutte le coppie quantità/data
+            // Estrai TUTTE le coppie quantità/data (fino a 4)
             const qtyDatePairs = [];
             const qtyDatePattern = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
             let pairMatch;
@@ -700,7 +701,8 @@ footer {
                 qtyDatePairs.push({ quantity: qty, date: date });
             }
             
-            // Estrai prezzo, sconto1, sconto2
+            // Estrai prezzo, sconto1, sconto2 (gli ultimi 3 numeri della riga)
+            // Formato: ... Prezzo Sco1 Sco2
             const priceDiscountMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
             let price = 0;
             let discount1 = 0;
@@ -725,6 +727,7 @@ footer {
             let line = lines[i].trim();
             if (line === '') continue;
             
+            // Rilevazione inizio nuovo cliente
             if (line.startsWith('Cliente')) {
                 const clientInfo = parseClientHeader(line);
                 if (clientInfo) {
@@ -754,18 +757,22 @@ footer {
                 continue;
             }
             
+            // Rilevazione inizio tabella
             if (line.includes('Cod. Articolo Descrizione') || (line.includes('Cod. Articolo') && line.includes('Descrizione'))) {
                 insideTable = true;
                 continue;
             }
             
+            // Se siamo dentro la tabella e la riga inizia con un codice (almeno 4 cifre/lettere)
             if (insideTable && line.match(/^\d{4,}/)) {
                 const art = parseArticoloRow(line);
                 if (art && art.qtyDatePairs.length > 0) {
+                    // Per OGNI coppia quantità/data, crea un movimento separato
                     for (let pair of art.qtyDatePairs) {
                         const grossAmount = pair.quantity * art.price;
                         const netAmount = grossAmount * (1 - art.discount1 / 100);
                         
+                        // Verifica se esiste già un articolo con stesso codice e prezzo
                         let existingItem = currentData.items.find(item => 
                             item.code === art.code && 
                             Math.abs(item.price - art.price) < 0.01
@@ -856,13 +863,15 @@ footer {
                                     <tbody>`;
             for (let s of scadenze) {
                 scadenzeHtml += `<tr>
-                                    <td>${escapeHtml(s.dataDocumento || '')}</td>
-                                    <td>${escapeHtml(s.numeroFattura || '')}</td>
+                                     <td>${escapeHtml(s.dataDocumento || '')}</td>
+                                     <td>${escapeHtml(s.numeroFattura || '')}</td>
                                     <td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td>
-                                    <td>${escapeHtml(s.dataScadenza || '')}</td>
-                                 </tr>`;
+                                     <td>${escapeHtml(s.dataScadenza || '')}</td>
+                                  </tr>`;
             }
-            scadenzeHtml += `</tbody></table></div>`;
+            scadenzeHtml += `</tbody>
+                                </table>
+                            </div>`;
         }
 
         return `<!DOCTYPE html>
@@ -1121,7 +1130,7 @@ footer {
         panelsDiv.innerHTML = '';
         const names = Array.from(clientsMap.keys()).sort();
         document.getElementById('clientCountBadge').innerHTML = `${names.length} clienti`;
-        document.getElementById('statusMsg').innerHTML = `✅ DDT caricato`;
+        document.getElementById('statusMsg').innerHTML = `✅ Caricato`;
         
         names.forEach(name => {
             const data = clientsMap.get(name);
@@ -1161,9 +1170,16 @@ footer {
                                 <thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo fattura (€)</th><th>Scadenza</th></tr></thead>
                                 <tbody>`;
                 for (let s of data.scadenzeDettaglio) {
-                    html += `<tr><td>${escapeHtml(s.dataDocumento || '')}</td><td>${escapeHtml(s.numeroFattura || '')}</td><td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td><td>${escapeHtml(s.dataScadenza || '')}</td></tr>`;
+                    html += `<tr>
+                                <td>${escapeHtml(s.dataDocumento || '')}</td>
+                                <td>${escapeHtml(s.numeroFattura || '')}</td>
+                                <td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td>
+                                <td>${escapeHtml(s.dataScadenza || '')}</td>
+                              </tr>`;
                 }
-                html += `</tbody></table></div>`;
+                html += `</tbody>
+                            </table>
+                        </div>`;
             }
             html += `<div class="table-wrapper">
                         <table>
