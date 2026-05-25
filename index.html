@@ -18,7 +18,6 @@
     --primary-light: #2c7a4b;
     --accent: #ff6b35;
     --danger: #dc3545;
-    --warning: #ffc107;
     --light: #f5f5fa;
     --white: #ffffff;
     --text: #1a1a2e;
@@ -26,7 +25,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background: var(--light);
     padding: 0;
     margin: 0;
@@ -52,7 +51,6 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     border-bottom: 3px solid var(--accent);
 }
 
@@ -76,10 +74,6 @@ body {
     cursor: pointer;
 }
 
-.upload-logo-btn:hover {
-    background: var(--accent);
-}
-
 .logo-img {
     max-height: 60px;
     max-width: 140px;
@@ -89,7 +83,6 @@ body {
 
 .logo-placeholder {
     color: rgba(255,255,255,0.7);
-    font-size: .9rem;
 }
 
 .title-area {
@@ -97,12 +90,10 @@ body {
     align-items: baseline;
     gap: 1rem;
     flex-wrap: wrap;
-    justify-content: flex-end;
 }
 
 h1 {
     font-size: 1.2rem;
-    margin: 0;
 }
 
 .version {
@@ -110,7 +101,6 @@ h1 {
     background: rgba(255,255,255,0.2);
     padding: 0.2rem 0.6rem;
     border-radius: 30px;
-    font-family: monospace;
 }
 
 .upload-area {
@@ -139,7 +129,6 @@ h1 {
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .btn-primary { background: var(--primary-light); }
@@ -163,7 +152,6 @@ h1 {
     min-width: 180px;
     background: transparent;
     outline: none;
-    font-size: 0.85rem;
 }
 
 .view-buttons {
@@ -183,7 +171,6 @@ h1 {
     cursor: pointer;
     font-weight: 700;
     font-size: 0.9rem;
-    transition: all 0.2s;
     background: #e2e8f0;
     color: var(--text);
 }
@@ -215,11 +202,6 @@ h1 {
     padding: 0.5rem 1rem;
     cursor: pointer;
     font-size: 0.8rem;
-    transition: all 0.2s;
-}
-
-.client-chip:hover {
-    background: #e2e8f0;
 }
 
 .client-chip.active {
@@ -236,7 +218,6 @@ h1 {
     font-weight: 600;
     display: flex;
     justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
     gap: 8px;
 }
@@ -278,12 +259,10 @@ h1 {
         padding: 12px 10px;
         border-bottom: 1px solid #e2e8f0;
         text-align: left;
-        vertical-align: middle;
     }
     th {
         background: #f8fafc;
         font-weight: 700;
-        border-bottom: 2px solid #e2e8f0;
     }
     .num {
         text-align: right;
@@ -313,33 +292,11 @@ h1 {
         align-items: center;
         padding: 12px 16px;
         border-bottom: 1px solid #f1f5f9;
-        font-size: 0.85rem;
     }
     td:before {
         content: attr(data-label);
         font-weight: 700;
         color: var(--text-light);
-        font-size: 0.75rem;
-    }
-    .mobile-detail-row {
-        display: none;
-        background: #f8fafc;
-        padding: 12px 16px;
-        flex-direction: column;
-        border-top: 1px solid #e2e8f0;
-    }
-    .history-toggle {
-        background: none;
-        border: none;
-        width: 100%;
-        text-align: left;
-        padding: 12px 16px;
-        font-weight: 600;
-        color: var(--primary-light);
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        border-top: 1px solid #e2e8f0;
     }
 }
 
@@ -419,7 +376,6 @@ h1 {
     align-items: center;
     z-index: 1000;
     color: white;
-    font-size: 1.2rem;
 }
 
 footer {
@@ -477,7 +433,7 @@ footer {
     <div id="contentWrapper"></div>
 </div>
 
-<footer>🔒 INSAPA 0142 - Carica i file DDT, SCA e SCHEDE per iniziare</footer>
+<footer>🔒 INSAPA 0142 - Carica i file DDT, SCA e SCHEDE</footer>
 
 </div>
 
@@ -493,7 +449,7 @@ footer {
 
 <script>
     // ==============================================================
-    // VARIABILI GLOBALI
+    // VARIABILI
     // ==============================================================
     let ddtData = new Map();
     let scaData = new Map();
@@ -514,7 +470,7 @@ footer {
         return parseFloat(cleaned) || 0;
     }
 
-    function cleanDescription(desc) {
+    function pulisciDescrizione(desc) {
         if (!desc) return '';
         desc = desc.replace(/[=\-]{5,}/g, '');
         desc = desc.replace(/\s+attivo\s+\d+%\s+PER\s+PIATTI\s*/gi, '');
@@ -530,118 +486,104 @@ footer {
         return desc.substring(0, 120);
     }
 
-    function finalCleanDescription(desc) {
-        if (!desc) return '';
-        desc = desc.replace(/==\s*Azienda:.*?(?:\n|$)/gi, '');
-        desc = desc.replace(/==\s*$.*?(?:\n|$)/g, '');
-        desc = desc.replace(/STAMPA BROGLIACCIO.*?(?:\n|$)/gi, '');
-        desc = desc.replace(/Pag\.\s*\d+/gi, '');
-        desc = desc.replace(/--------------------------------------------------------------------/g, '');
-        desc = desc.replace(/\s+/g, ' ').trim();
-        return desc.substring(0, 120);
-    }
-
     // ==============================================================
-    // PARSER DDT (ORIGINALE FUNZIONANTE)
+    // PARSER UNICO PER DDT E SCHEDE (stesso formato)
     // ==============================================================
-    const articoloRegex = /^\s*([A-Z0-9\-]+)\s+(.+?)\s+(KG|N\.?|LT|PZ|ML|GR|CF|CT|MT)\s+([\d.,]+)\s+([\d.,-]+)\s+([\d.,-]+)/i;
-
-    function isServiceLine(line) {
-        if (!line) return true;
-        let l = line.trim();
-        return l.startsWith('==') || l.includes('Azienda:') || l.includes('STAMPA BROGLIACCIO') ||
-               l.includes('Pag.') || l.includes('--------------------------------------------------------------------') ||
-               l.includes('Da Data:') || l.includes('Codice Ragione Sociale') ||
-               l.includes('Articolo      Descrizione') || l.includes('Tipo D.d.T.') ||
-               l.match(/^[\s=]+$/);
-    }
-
-    function parseDDTFile(text, targetMap) {
+    function parseFileGenerico(text, targetMap) {
         const lines = text.split(/\r?\n/);
         const clients = new Map();
         let currentClient = null;
         let currentCode = null;
-        let pendingArticolo = null;
-
-        function cleanLine(str) {
-            return str.replace(/[\x00-\x1F\x7F\x0C→←]/g, ' ').replace(/\s+/g, ' ').trim();
+        
+        // Pattern per riga cliente: es "Cliente   : 030275 LA MANDRAGOLA..."
+        function estraiCliente(line) {
+            let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/i);
+            if (match) {
+                return { code: match[1], name: match[2].trim() };
+            }
+            return null;
         }
-
-        function parseClientLine(line) {
-            const dates = line.match(/\d{2}\/\d{2}\/\d{4}/g);
-            if (!dates) return null;
-            const date = dates[dates.length - 1];
-            const idx = line.lastIndexOf(date);
-            const beforeDate = line.substring(0, idx).trim();
-            const tokens = beforeDate.split(/\s+/);
-            if (tokens.length < 2) return null;
-            const code = tokens[0];
-            if (!/^\d+$/.test(code)) return null;
-            let nameTokens = tokens.slice(1).filter(t => !/^\d+$/.test(t));
-            if (nameTokens.length === 0) return null;
-            return { code, name: nameTokens.join(' ') };
+        
+        // Pattern per riga articolo: inizia con codice (almeno 4 caratteri)
+        function estraiArticolo(line) {
+            let match = line.match(/^(\S{4,})\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
+            if (!match) return null;
+            
+            const code = match[1];
+            let desc = match[2];
+            desc = desc.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
+            desc = desc.substring(0, 120).trim();
+            
+            // Estrai tutte le coppie quantità/data
+            const coppie = [];
+            const patternCoppie = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
+            let m;
+            while ((m = patternCoppie.exec(line)) !== null) {
+                let qty = parseFloat(m[1].replace(',', '.'));
+                let date = m[2];
+                coppie.push({ quantity: qty, date: date });
+            }
+            
+            // Estrai prezzo e sconto (ultimi 2-3 numeri)
+            const prezzoMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
+            let price = 0;
+            let discount = 0;
+            if (prezzoMatch) {
+                price = parseFloat(prezzoMatch[1].replace(',', '.'));
+                discount = parseFloat(prezzoMatch[2].replace(',', '.'));
+            }
+            
+            return { code, desc, coppie, price, discount };
         }
-
-        for (let rawLine of lines) {
-            if (rawLine.trim() === '') continue;
-            const cleaned = cleanLine(rawLine);
-            const clientInfo = parseClientLine(cleaned);
-            if (clientInfo) {
-                if (pendingArticolo && currentClient) {
-                    clients.get(currentClient).items.push(pendingArticolo);
-                }
-                currentClient = clientInfo.name;
-                currentCode = clientInfo.code;
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+            
+            const clienteInfo = estraiCliente(line);
+            if (clienteInfo) {
+                currentClient = clienteInfo.name;
+                currentCode = clienteInfo.code;
                 if (!clients.has(currentClient)) {
-                    clients.set(currentClient, { codice: currentCode, items: [], saldoScadenze: 0, scadenzeDettaglio: [] });
+                    clients.set(currentClient, { 
+                        codice: currentCode, 
+                        items: [], 
+                        saldoScadenze: 0, 
+                        scadenzeDettaglio: [] 
+                    });
                 }
-                pendingArticolo = null;
                 continue;
             }
-            if (currentClient) {
-                const artMatch = rawLine.match(articoloRegex);
-                if (artMatch) {
-                    if (pendingArticolo) {
-                        clients.get(currentClient).items.push(pendingArticolo);
-                    }
-                    const quantity = parseFloat(artMatch[4].replace(/\./g, '').replace(',', '.'));
-                    const price = parseFloat(artMatch[5].replace(/\./g, '').replace(',', '.'));
-                    let discount = parseFloat(artMatch[6].replace(/\./g, '').replace(',', '.').replace('-', ''));
-                    if (isNaN(discount)) discount = 0;
-                    pendingArticolo = {
-                        code: artMatch[1],
-                        description: cleanDescription(artMatch[2]),
-                        quantity: quantity,
-                        price: price,
-                        discountPercent: discount,
-                        grossAmount: quantity * price,
-                        netAmount: quantity * price * (1 - discount / 100),
-                        date: new Date().toLocaleDateString()
-                    };
-                } else {
-                    if (pendingArticolo && pendingArticolo.description.length < 300) {
-                        let extra = rawLine.trim();
-                        if (!isServiceLine(extra)) {
-                            pendingArticolo.description += ' ' + extra;
-                            pendingArticolo.description = cleanDescription(pendingArticolo.description);
-                        }
+            
+            if (currentClient && line.match(/^\d{4,}/)) {
+                const articolo = estraiArticolo(line);
+                if (articolo && articolo.coppie.length > 0) {
+                    for (let coppia of articolo.coppie) {
+                        const client = clients.get(currentClient);
+                        client.items.push({
+                            code: articolo.code,
+                            description: pulisciDescrizione(articolo.desc),
+                            quantity: coppia.quantity,
+                            price: articolo.price,
+                            discountPercent: articolo.discount,
+                            netAmount: coppia.quantity * articolo.price * (1 - articolo.discount / 100),
+                            date: coppia.date
+                        });
                     }
                 }
             }
         }
-        if (pendingArticolo && currentClient) {
-            clients.get(currentClient).items.push(pendingArticolo);
-        }
+        
         targetMap.clear();
         for (let [name, data] of clients) {
             targetMap.set(name, data);
         }
-        saveAllToLocalStorage();
+        salvaSuLocalStorage();
         return targetMap;
     }
 
     // ==============================================================
-    // PARSER SCA (ORIGINALE FUNZIONANTE)
+    // PARSER SCA (scadenze)
     // ==============================================================
     function parseSCAFile(text, targetMap) {
         const lines = text.split(/\r?\n/);
@@ -668,7 +610,6 @@ footer {
                 let tokens = codeAndName.split(/\s+/);
                 let codeRaw = tokens[0];
                 let codeClean = codeRaw.replace(/^0+/, '');
-                if (codeClean === '') codeClean = '0';
                 let nomeCompleto = tokens.slice(1).join(' ');
                 let saldo = cleanImporto(saldoPart);
                 if (saldoPart.endsWith('-')) saldo = -saldo;
@@ -680,24 +621,14 @@ footer {
                         break;
                     }
                 }
-                if (!target) {
-                    let nomeSCA = nomeCompleto.toLowerCase().substring(0, 40);
-                    for (let [cliName, cliData] of clients.entries()) {
-                        let nomeCli = cliName.toLowerCase().substring(0, 40);
-                        if (nomeCli.includes(nomeSCA) || nomeSCA.includes(nomeCli)) {
-                            target = { name: cliName, data: cliData };
-                            break;
-                        }
-                    }
-                }
                 if (!target && nomeCompleto.trim() !== '') {
-                    clients.set(nomeCompleto.trim(), {
+                    clients.set(nomeCompleto, {
                         codice: codeClean,
                         items: [],
                         saldoScadenze: 0,
                         scadenzeDettaglio: []
                     });
-                    target = { name: nomeCompleto.trim(), data: clients.get(nomeCompleto.trim()) };
+                    target = { name: nomeCompleto, data: clients.get(nomeCompleto) };
                 }
                 if (target) {
                     target.data.saldoScadenze = saldo;
@@ -737,7 +668,7 @@ footer {
                                     importo = cleanImporto(parts[parts.length - 1]);
                                 }
                                 if (importo !== 0) {
-                                    dettagli.push({ dataScadenza: dataScad, dataDocumento: dataDocumento, numeroFattura: numeroFattura, importo: importo });
+                                    dettagli.push({ dataScadenza: dataScad, dataDocumento, numeroFattura, importo });
                                 }
                             }
                             j++;
@@ -753,136 +684,14 @@ footer {
         for (let [name, data] of clients) {
             targetMap.set(name, data);
         }
-        saveAllToLocalStorage();
-        return targetMap;
-    }
-
-    // ==============================================================
-    // PARSER SCHEDE (ORIGINALE FUNZIONANTE)
-    // ==============================================================
-    function parseSCHEDEFile(text, targetMap) {
-        const lines = text.split(/\r?\n/);
-        const clients = new Map();
-        let currentClient = null;
-        let currentData = null;
-        let insideTable = false;
-        
-        function parseClientHeader(line) {
-            let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/);
-            if (match) {
-                return { code: match[1], name: match[2].trim() };
-            }
-            return null;
-        }
-        
-        function parseArticoloRow(line) {
-            let match = line.match(/^(\S{4,})\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
-            if (!match) return null;
-            
-            const code = match[1];
-            let description = match[2];
-            description = description.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
-            description = description.substring(0, 120).trim();
-            
-            const qtyDatePairs = [];
-            const qtyDatePattern = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
-            let pairMatch;
-            while ((pairMatch = qtyDatePattern.exec(line)) !== null) {
-                let qty = parseFloat(pairMatch[1].replace(',', '.'));
-                let date = pairMatch[2];
-                qtyDatePairs.push({ quantity: qty, date: date });
-            }
-            
-            const priceDiscountMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
-            let price = 0;
-            let discount1 = 0;
-            if (priceDiscountMatch) {
-                price = parseFloat(priceDiscountMatch[1].replace(',', '.'));
-                discount1 = parseFloat(priceDiscountMatch[2].replace(',', '.'));
-            }
-            
-            return {
-                code: code,
-                description: description,
-                qtyDatePairs: qtyDatePairs,
-                price: price,
-                discount1: discount1
-            };
-        }
-        
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (line === '') continue;
-            
-            if (line.startsWith('Cliente')) {
-                const clientInfo = parseClientHeader(line);
-                if (clientInfo) {
-                    let existingClientName = null;
-                    for (let [cName, cData] of clients.entries()) {
-                        if (cData.codice === clientInfo.code || cName === clientInfo.name) {
-                            existingClientName = cName;
-                            break;
-                        }
-                    }
-                    
-                    if (existingClientName) {
-                        currentClient = existingClientName;
-                        currentData = clients.get(currentClient);
-                    } else {
-                        currentClient = clientInfo.name;
-                        currentData = { 
-                            codice: clientInfo.code, 
-                            items: [], 
-                            saldoScadenze: 0, 
-                            scadenzeDettaglio: [] 
-                        };
-                        clients.set(currentClient, currentData);
-                    }
-                    insideTable = false;
-                }
-                continue;
-            }
-            
-            if (line.includes('Cod. Articolo Descrizione')) {
-                insideTable = true;
-                continue;
-            }
-            
-            if (insideTable && line.match(/^\d{4,}/)) {
-                const art = parseArticoloRow(line);
-                if (art && art.qtyDatePairs.length > 0) {
-                    for (let pair of art.qtyDatePairs) {
-                        currentData.items.push({
-                            code: art.code,
-                            description: art.description,
-                            quantity: pair.quantity,
-                            price: art.price,
-                            discountPercent: art.discount1,
-                            grossAmount: pair.quantity * art.price,
-                            netAmount: pair.quantity * art.price * (1 - art.discount1 / 100),
-                            date: pair.date
-                        });
-                    }
-                }
-            }
-            
-            if (line.startsWith('Cliente') && i > 0) {
-                insideTable = false;
-            }
-        }
-        
-        targetMap.clear();
-        for (let [name, data] of clients) {
-            targetMap.set(name, data);
-        }
-        saveAllToLocalStorage();
+        salvaSuLocalStorage();
         return targetMap;
     }
 
     // ==============================================================
     // AGGREGAZIONE ARTICOLI
     // ==============================================================
-    function aggregateItemsWithHistory(items) {
+    function aggregaArticoli(items) {
         const map = new Map();
         for (let it of items) {
             if (map.has(it.code)) {
@@ -902,10 +711,9 @@ footer {
                     ex.discountPercent = it.discountPercent;
                 }
             } else {
-                let desc = cleanDescription(it.description);
                 map.set(it.code, {
                     code: it.code,
-                    description: desc,
+                    description: pulisciDescrizione(it.description),
                     quantity: it.quantity,
                     price: it.price,
                     discountPercent: it.discountPercent || 0,
@@ -927,26 +735,21 @@ footer {
                 if (b.date === 'N/D') return -1;
                 return (b.date || '').localeCompare(a.date || '');
             });
-            if (item.history.length > 0 && item.history[0].date !== 'N/D') {
-                item.lastDate = item.history[0].date;
-                item.price = item.history[0].price;
-                item.discountPercent = item.history[0].discount;
-            }
         }
         return Array.from(map.values()).sort((a, b) => {
             const aNum = parseInt(a.code);
             const bNum = parseInt(b.code);
             if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-            if (!isNaN(aNum) && isNaN(bNum)) return -1;
-            if (isNaN(aNum) && !isNaN(bNum)) return 1;
+            if (!isNaN(aNum)) return -1;
+            if (!isNaN(bNum)) return 1;
             return a.code.localeCompare(b.code);
         });
     }
 
     // ==============================================================
-    // SALVATAGGIO su localStorage
+    // PERSISTENZA
     // ==============================================================
-    function saveAllToLocalStorage() {
+    function salvaSuLocalStorage() {
         const toSave = {
             ddt: Array.from(ddtData.entries()),
             sca: Array.from(scaData.entries()),
@@ -954,11 +757,11 @@ footer {
             currentView: currentView,
             currentClient: currentClient
         };
-        localStorage.setItem('insapa_all_data', JSON.stringify(toSave));
+        localStorage.setItem('insapa_data', JSON.stringify(toSave));
     }
 
-    function loadAllFromLocalStorage() {
-        const saved = localStorage.getItem('insapa_all_data');
+    function caricaDaLocalStorage() {
+        const saved = localStorage.getItem('insapa_data');
         if (saved) {
             try {
                 const data = JSON.parse(saved);
@@ -973,149 +776,141 @@ footer {
                 else if (currentView === 'SCA') document.getElementById('viewSCA').classList.add('active');
                 else document.getElementById('viewSCHEDE').classList.add('active');
                 
-                refreshUI();
+                aggiornaUI();
                 return true;
-            } catch(e) { console.warn(e); }
+            } catch(e) {}
         }
         return false;
     }
 
     // ==============================================================
-    // RENDER
+    // RENDER UI
     // ==============================================================
-    function renderClientList() {
-        let allClients = new Map();
-        for (let [name, data] of ddtData) allClients.set(name, data);
-        for (let [name, data] of scaData) if (!allClients.has(name)) allClients.set(name, data);
-        for (let [name, data] of schedeData) if (!allClients.has(name)) allClients.set(name, data);
+    function aggiornaListaClienti() {
+        let tuttiClienti = new Map();
+        for (let [nome, dati] of ddtData) tuttiClienti.set(nome, dati);
+        for (let [nome, dati] of scaData) if (!tuttiClienti.has(nome)) tuttiClienti.set(nome, dati);
+        for (let [nome, dati] of schedeData) if (!tuttiClienti.has(nome)) tuttiClienti.set(nome, dati);
         
-        const clientListDiv = document.getElementById('clientList');
-        clientListDiv.innerHTML = '';
+        const container = document.getElementById('clientList');
+        container.innerHTML = '';
         
-        const sortedNames = Array.from(allClients.keys()).sort();
-        sortedNames.forEach(name => {
+        const nomiOrdinati = Array.from(tuttiClienti.keys()).sort();
+        for (let nome of nomiOrdinati) {
             const chip = document.createElement('button');
             chip.className = 'client-chip';
-            if (currentClient === name) chip.classList.add('active');
-            chip.textContent = name;
+            if (currentClient === nome) chip.classList.add('active');
+            chip.textContent = nome;
             chip.onclick = () => {
-                currentClient = name;
-                renderClientList();
-                renderCurrentView();
-                saveAllToLocalStorage();
+                currentClient = nome;
+                aggiornaListaClienti();
+                aggiornaVistaCorrente();
+                salvaSuLocalStorage();
             };
-            clientListDiv.appendChild(chip);
-        });
+            container.appendChild(chip);
+        }
         
         const displayDiv = document.getElementById('selectedClientDisplay');
         if (currentClient) {
-            let clientData = null;
-            if (ddtData.has(currentClient)) clientData = ddtData.get(currentClient);
-            else if (scaData.has(currentClient)) clientData = scaData.get(currentClient);
-            else if (schedeData.has(currentClient)) clientData = schedeData.get(currentClient);
-            
-            displayDiv.innerHTML = `<span>📌 Cliente selezionato: <strong>${escapeHtml(currentClient)}</strong></span>
+            let clientData = ddtData.get(currentClient) || scaData.get(currentClient) || schedeData.get(currentClient);
+            displayDiv.innerHTML = `<span>📌 Cliente: <strong>${escapeHtml(currentClient)}</strong></span>
                                    <span class="stat">🏷️ Codice: ${clientData ? clientData.codice : 'N/D'}</span>`;
         } else {
             displayDiv.innerHTML = '<span>📌 Nessun cliente selezionato</span>';
         }
     }
     
-    function openModal(title, historyItems) {
+    function apriModale(titolo, storico) {
         const modal = document.getElementById('historyModal');
-        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalTitle').textContent = titolo;
         let html = '<ul class="history-list">';
-        for (let h of historyItems) {
+        for (let h of storico) {
             html += `<li><span>📅 ${h.date || 'N/D'}</span><span>📊 ${h.quantity.toFixed(2)} pz</span><span>💰 ${h.price.toFixed(2)} €</span><span>🏷️ ${(h.discount || 0).toFixed(0)}%</span></li>`;
         }
-        const totalQty = historyItems.reduce((s, h) => s + h.quantity, 0);
-        const totalNet = historyItems.reduce((s, h) => s + (h.quantity * h.price * (1 - (h.discount||0)/100)), 0);
-        html += `<li style="background:#f0fdf4;font-weight:bold;margin-top:8px;"><span>📦 Totale pezzi: ${totalQty.toFixed(2)}</span><span>💰 Netto totale: ${totalNet.toFixed(2)} €</span></li></ul>`;
+        const totQty = storico.reduce((s, h) => s + h.quantity, 0);
+        const totNet = storico.reduce((s, h) => s + (h.quantity * h.price * (1 - (h.discount||0)/100)), 0);
+        html += `<li style="background:#f0fdf4;font-weight:bold;margin-top:8px;"><span>📦 Totale: ${totQty.toFixed(2)} pz</span><span>💰 Netto: ${totNet.toFixed(2)} €</span></li></ul>`;
         document.getElementById('modalBody').innerHTML = html;
         modal.style.display = 'flex';
     }
     
-    window.closeModal = function() { document.getElementById('historyModal').style.display = 'none'; };
+    window.closeModal = function() {
+        document.getElementById('historyModal').style.display = 'none';
+    };
     
-    function renderCurrentView() {
+    function aggiornaVistaCorrente() {
         if (!currentClient) {
-            document.getElementById('contentWrapper').innerHTML = '<div class="warning">Seleziona un cliente per visualizzare i dati</div>';
+            document.getElementById('contentWrapper').innerHTML = '<div class="warning">Seleziona un cliente</div>';
             return;
         }
         
-        let dataMap = null;
-        if (currentView === 'DDT') dataMap = ddtData;
-        else if (currentView === 'SCA') dataMap = scaData;
-        else dataMap = schedeData;
+        let dati = null;
+        let titolo = '';
+        if (currentView === 'DDT') { dati = ddtData.get(currentClient); titolo = 'DDT'; }
+        else if (currentView === 'SCA') { dati = scaData.get(currentClient); titolo = 'SCA'; }
+        else { dati = schedeData.get(currentClient); titolo = 'SCHEDE'; }
         
-        if (!dataMap.has(currentClient)) {
-            document.getElementById('contentWrapper').innerHTML = `<div class="warning">Nessun dato disponibile per questo cliente nella visualizzazione ${currentView}. Carica il file corrispondente.</div>`;
+        if (!dati) {
+            document.getElementById('contentWrapper').innerHTML = `<div class="warning">Nessun dato ${titolo} per questo cliente. Carica il file corrispondente.</div>`;
             return;
         }
         
-        const clientData = dataMap.get(currentClient);
-        
-        // SCA View
+        // Vista SCA
         if (currentView === 'SCA') {
-            const scadenze = clientData.scadenzeDettaglio || [];
-            const saldo = clientData.saldoScadenze || 0;
+            const scadenze = dati.scadenzeDettaglio || [];
+            const saldo = dati.saldoScadenze || 0;
             if (scadenze.length === 0) {
-                document.getElementById('contentWrapper').innerHTML = '<div class="warning">Nessuna scadenza presente per questo cliente.</div>';
+                document.getElementById('contentWrapper').innerHTML = '<div class="warning">Nessuna scadenza</div>';
                 return;
             }
-            let html = `<div class="client-summary"><div class="stat">💰 Saldo totale: ${saldo.toFixed(2)} €</div><div class="stat">📄 Numero fatture: ${scadenze.length}</div></div>`;
+            let html = `<div class="client-summary"><div class="stat">💰 Saldo: ${saldo.toFixed(2)} €</div><div class="stat">📄 Fatture: ${scadenze.length}</div></div>`;
             html += `<div class="table-wrapper"><table><thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo</th><th>Scadenza</th></tr></thead><tbody>`;
             for (let s of scadenze) {
                 html += `<tr><td>${escapeHtml(s.dataDocumento || 'N/D')}</td><td>${escapeHtml(s.numeroFattura || 'N/D')}</td><td class="num">${(s.importo || 0).toFixed(2)} €</td><td>${escapeHtml(s.dataScadenza || 'N/D')}</td></tr>`;
             }
-            html += `</tbody></tr></div>`;
+            html += `</tbody></table></div>`;
             document.getElementById('contentWrapper').innerHTML = html;
             return;
         }
         
-        // DDT o SCHEDE View
-        const items = aggregateItemsWithHistory(clientData.items);
-        if (items.length === 0) {
-            document.getElementById('contentWrapper').innerHTML = '<div class="warning">Nessun articolo presente per questo cliente.</div>';
+        // Vista DDT o SCHEDE
+        const articoli = aggregaArticoli(dati.items);
+        if (articoli.length === 0) {
+            document.getElementById('contentWrapper').innerHTML = '<div class="warning">Nessun articolo</div>';
             return;
         }
         
         let totQty = 0, totNet = 0;
-        items.forEach(i => { totQty += i.quantity; totNet += i.netAmount; });
+        articoli.forEach(a => { totQty += a.quantity; totNet += a.netAmount; });
         
-        let html = `<div class="client-summary">
-                        <div class="stat">📦 Quantità totale: ${totQty.toFixed(2)}</div>
-                        <div class="stat">💰 Netto totale: ${totNet.toFixed(2)} €</div>
-                    </div>`;
-        html += `<div class="table-wrapper"><table><thead><tr>
-                    <th>Codice</th><th>Descrizione</th><th>Prezzo €</th><th>Q.tà</th><th>Sconto %</th><th>Ultimo acquisto</th><th></th>
-                 </tr></thead><tbody>`;
+        let html = `<div class="client-summary"><div class="stat">📦 Quantità: ${totQty.toFixed(2)}</div><div class="stat">💰 Netto: ${totNet.toFixed(2)} €</div></div>`;
+        html += `<div class="table-wrapper"><table><thead><tr><th>Codice</th><th>Descrizione</th><th>Prezzo</th><th>Q.tà</th><th>Sconto</th><th>Ultimo</th><th></th></tr></thead><tbody>`;
         
-        for (let it of items) {
-            const historyJson = JSON.stringify(it.history).replace(/"/g, '&quot;');
+        for (let a of articoli) {
+            const storicoJson = JSON.stringify(a.history).replace(/"/g, '&quot;');
             html += `<tr>
-                        <td style="font-family:monospace">${escapeHtml(it.code)}</td>
-                        <td>${escapeHtml(it.description)}</td>
-                        <td class="num">${it.price.toFixed(2)} €</td>
-                        <td class="num">${it.quantity.toFixed(2)}</td>
-                        <td class="num">${(it.discountPercent || 0).toFixed(0)}%</td>
-                        <td>📅 ${it.lastDate}</td>
-                        <td style="text-align:center;cursor:pointer;" onclick="openModal('${escapeHtml(it.code)} - ${escapeHtml(it.description.substring(0, 30))}', ${historyJson})">📜</td>
+                        <td>${escapeHtml(a.code)}</td>
+                        <td>${escapeHtml(a.description)}</td>
+                        <td class="num">${a.price.toFixed(2)} €</td>
+                        <td class="num">${a.quantity.toFixed(2)}</td>
+                        <td class="num">${(a.discountPercent || 0).toFixed(0)}%</td>
+                        <td>📅 ${a.lastDate}</td>
+                        <td style="text-align:center;cursor:pointer;" onclick="apriModale('${escapeHtml(a.code)} - ${escapeHtml(a.description.substring(0,30))}', ${storicoJson})">📜</td>
                       </tr>`;
         }
         html += `</tbody></table></div>`;
         document.getElementById('contentWrapper').innerHTML = html;
     }
     
-    function refreshUI() {
-        renderClientList();
-        renderCurrentView();
+    function aggiornaUI() {
+        aggiornaListaClienti();
+        aggiornaVistaCorrente();
     }
     
     // ==============================================================
     // CARICAMENTO FILE
     // ==============================================================
-    function loadDDT() {
+    function caricaDDT() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.txt';
@@ -1128,12 +923,12 @@ footer {
             reader.onload = (ev) => {
                 setTimeout(() => {
                     try {
-                        parseDDTFile(ev.target.result, ddtData);
-                        refreshUI();
+                        parseFileGenerico(ev.target.result, ddtData);
+                        aggiornaUI();
                         document.getElementById('warningArea').style.display = 'none';
                     } catch (err) {
                         document.getElementById('warningArea').style.display = 'block';
-                        document.getElementById('warningArea').innerHTML = 'Errore nel file DDT: ' + err.message;
+                        document.getElementById('warningArea').innerHTML = 'Errore DDT: ' + err.message;
                     }
                     loading.style.display = 'none';
                 }, 10);
@@ -1143,7 +938,7 @@ footer {
         input.click();
     }
     
-    function loadSCA() {
+    function caricaSCA() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.txt';
@@ -1157,11 +952,11 @@ footer {
                 setTimeout(() => {
                     try {
                         parseSCAFile(ev.target.result, scaData);
-                        refreshUI();
+                        aggiornaUI();
                         document.getElementById('warningArea').style.display = 'none';
                     } catch (err) {
                         document.getElementById('warningArea').style.display = 'block';
-                        document.getElementById('warningArea').innerHTML = 'Errore nel file SCA: ' + err.message;
+                        document.getElementById('warningArea').innerHTML = 'Errore SCA: ' + err.message;
                     }
                     loading.style.display = 'none';
                 }, 10);
@@ -1171,7 +966,7 @@ footer {
         input.click();
     }
     
-    function loadSCHEDE() {
+    function caricaSCHEDE() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.txt';
@@ -1184,12 +979,12 @@ footer {
             reader.onload = (ev) => {
                 setTimeout(() => {
                     try {
-                        parseSCHEDEFile(ev.target.result, schedeData);
-                        refreshUI();
+                        parseFileGenerico(ev.target.result, schedeData);
+                        aggiornaUI();
                         document.getElementById('warningArea').style.display = 'none';
                     } catch (err) {
                         document.getElementById('warningArea').style.display = 'block';
-                        document.getElementById('warningArea').innerHTML = 'Errore nel file SCHEDE: ' + err.message;
+                        document.getElementById('warningArea').innerHTML = 'Errore SCHEDE: ' + err.message;
                     }
                     loading.style.display = 'none';
                 }, 10);
@@ -1199,24 +994,42 @@ footer {
         input.click();
     }
     
-    function filterClients() {
-        const searchText = document.getElementById('clientSearchInput').value.toLowerCase();
+    function filtraClienti() {
+        const testo = document.getElementById('clientSearchInput').value.toLowerCase();
         const chips = document.querySelectorAll('.client-chip');
         chips.forEach(chip => {
-            chip.style.display = chip.textContent.toLowerCase().includes(searchText) ? '' : 'none';
+            chip.style.display = chip.textContent.toLowerCase().includes(testo) ? '' : 'none';
         });
     }
     
     // ==============================================================
     // INIT
     // ==============================================================
-    document.getElementById('loadDDTBtn').addEventListener('click', loadDDT);
-    document.getElementById('loadSCABtn').addEventListener('click', loadSCA);
-    document.getElementById('loadSCHEDEBtn').addEventListener('click', loadSCHEDE);
-    document.getElementById('clientSearchInput').addEventListener('input', filterClients);
-    document.getElementById('viewDDT').addEventListener('click', () => { currentView = 'DDT'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewDDT').classList.add('active'); renderCurrentView(); saveAllToLocalStorage(); });
-    document.getElementById('viewSCA').addEventListener('click', () => { currentView = 'SCA'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewSCA').classList.add('active'); renderCurrentView(); saveAllToLocalStorage(); });
-    document.getElementById('viewSCHEDE').addEventListener('click', () => { currentView = 'SCHEDE'; document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); document.getElementById('viewSCHEDE').classList.add('active'); renderCurrentView(); saveAllToLocalStorage(); });
+    document.getElementById('loadDDTBtn').addEventListener('click', caricaDDT);
+    document.getElementById('loadSCABtn').addEventListener('click', caricaSCA);
+    document.getElementById('loadSCHEDEBtn').addEventListener('click', caricaSCHEDE);
+    document.getElementById('clientSearchInput').addEventListener('input', filtraClienti);
+    document.getElementById('viewDDT').addEventListener('click', () => {
+        currentView = 'DDT';
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('viewDDT').classList.add('active');
+        aggiornaVistaCorrente();
+        salvaSuLocalStorage();
+    });
+    document.getElementById('viewSCA').addEventListener('click', () => {
+        currentView = 'SCA';
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('viewSCA').classList.add('active');
+        aggiornaVistaCorrente();
+        salvaSuLocalStorage();
+    });
+    document.getElementById('viewSCHEDE').addEventListener('click', () => {
+        currentView = 'SCHEDE';
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('viewSCHEDE').classList.add('active');
+        aggiornaVistaCorrente();
+        salvaSuLocalStorage();
+    });
     
     // Logo
     const logoInput = document.getElementById('logoFileInput');
@@ -1245,9 +1058,8 @@ footer {
         logoPlaceholder.style.display = 'none';
     }
     
-    // Carica dati salvati
-    if (!loadAllFromLocalStorage()) {
-        console.log('Nessun dato salvato trovato');
+    if (!caricaDaLocalStorage()) {
+        console.log('Nessun dato salvato');
     }
 </script>
 </body>
