@@ -1027,7 +1027,7 @@ footer {
                 html += `</tbody></table></div>`;
             }
             html += `<div class="table-wrapper">
-                        <table>
+                         <table>
                             <thead>
                                 <tr><th>Codice</th><th>Descrizione</th><th>Prezzo €</th><th>Q.tà</th><th>Sconto %</th><th>Rip.</th></tr>
                             </thead>
@@ -1040,9 +1040,11 @@ footer {
                             <td class="num" style="font-weight:bold">${it.quantity.toFixed(2)}</td>
                             <td class="num">${it.discountPercent.toFixed(2)}%</td>
                             <td class="num"><span class="repeat-badge">${it.occurrences}×</span></td>
-                         </tr>`;
+                          </tr>`;
             });
-            html += `</tbody></table></div>`;
+            html += `</tbody>
+                         </table>
+                    </div>`;
             panel.innerHTML = html;
             panelsDiv.appendChild(panel);
         });
