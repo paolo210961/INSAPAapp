@@ -1110,7 +1110,7 @@ footer {
                     <td style="text-align: right">
                         <input type="number" step="1" value="" data-code="${escapeHtml(it.code)}" class="qty-input" style="width:80px; padding:4px; text-align:right;">
                     </td>
-                 </tr>
+                  </tr>
             `;
         });
 
@@ -1468,7 +1468,7 @@ footer {
                                 <td>${escapeHtml(s.numeroFattura || '')}</td>
                                 <td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td>
                                 <td>${escapeHtml(s.dataScadenza || '')}</td>
-                             </tr>`;
+                              </tr>`;
                 }
                 html += `</tbody>
                             </table>
@@ -1505,7 +1505,7 @@ footer {
                             <td class="num">${it.discountPercent.toFixed(0)}%</td>
                             <td>📅 ${lastDate}</td>
                             <td class="history-icon" style="text-align:center; cursor:pointer;" onclick="openModal('${escapeHtml(it.code)} - ${escapeHtml(it.description.substring(0, 30))}', ${historyJson})">📜</td>
-                           </tr>`;
+                          </tr>`;
             }
             
             html += `</tbody></table></div>`;
@@ -1757,7 +1757,7 @@ footer {
     }
 
     // ==============================================================
-    // LOAD SCHEDE CON RESET
+    // LOAD SCHEDE CON RESET TOTALE - SENZA SOMME
     // ==============================================================
     function loadSCHEDE() {
         const input = document.createElement('input');
@@ -1767,19 +1767,14 @@ footer {
             const file = e.target.files[0];
             if (!file) return;
             
-            // RESET: chiedi conferma prima di cancellare i dati esistenti
-            if (currentClientsMap && currentClientsMap.size > 0) {
-                if (!confirm('⚠️ ATTENZIONE: Caricare una nuova SCHEDA cancellerà i dati attuali (DDT e SCHEDE). Continuare?')) {
-                    return;
-                }
-                // Svuota la mappa clienti
-                currentClientsMap.clear();
-                // Svuota anche il localStorage per evitare ripristino
-                clearDDTData();
-                // Resetta l'interfaccia
-                document.getElementById('tabsContainer').innerHTML = '';
-                document.getElementById('panelsContainer').innerHTML = '';
-            }
+            // RESET TOTALE - cancella tutto
+            currentClientsMap = new Map();
+            localStorage.removeItem('ddt_data');
+            document.getElementById('tabsContainer').innerHTML = '';
+            document.getElementById('panelsContainer').innerHTML = '';
+            document.getElementById('warningArea').style.display = 'none';
+            document.getElementById('clientCountBadge').innerHTML = '0 clienti';
+            document.getElementById('statusMsg').innerHTML = '📋 Caricamento SCHEDA in corso...';
             
             const loading = document.getElementById('loadingOverlay');
             loading.style.display = 'flex';
@@ -1787,16 +1782,14 @@ footer {
             reader.onload = (ev) => {
                 setTimeout(() => {
                     try {
-                        if (!currentClientsMap || currentClientsMap.size === 0) {
-                            currentClientsMap = new Map();
-                        }
                         parseSCHEDEFile(ev.target.result, currentClientsMap);
                         renderAllTabs(currentClientsMap);
-                        document.getElementById('statusMsg').innerHTML = '✅ SCHEDE caricato (dati freschi)';
+                        document.getElementById('statusMsg').innerHTML = '✅ SCHEDA caricata (dati freschi)';
                         document.getElementById('warningArea').style.display = 'none';
                     } catch (err) {
                         document.getElementById('warningArea').style.display = 'block';
                         document.getElementById('warningArea').innerHTML = 'Errore nel file SCHEDE: ' + err.message;
+                        document.getElementById('statusMsg').innerHTML = '❌ Errore nel caricamento SCHEDA';
                     }
                     loading.style.display = 'none';
                 }, 10);
@@ -1842,13 +1835,8 @@ footer {
     document.getElementById('clientSearchInput').addEventListener('input', filterClients);
 
     loadLogoFromLocalStorage();
-    const savedData = loadFromLocalStorage();
-    if (savedData && savedData.size > 0) {
-        currentClientsMap = savedData;
-        renderAllTabs(savedData);
-    } else {
-        document.getElementById('statusMsg').innerHTML = 'Carica il file DDT o SCHEDE.';
-    }
+    // Non caricare automaticamente i vecchi dati - partenza sempre da zero
+    document.getElementById('statusMsg').innerHTML = 'Carica un file DDT o SCHEDE.';
 </script>
 </body>
 </html>
