@@ -125,6 +125,7 @@ h1 {
 
 .btn-primary { background: #2c7a4b; }
 .btn-secondary { background: #5a6e7c; }
+.btn-schede { background: #9b59b6; }
 .btn-outline { background: #e9f3ef; color: #1f5e3a; border: 1px solid #cbdcd6; }
 
 .status {
@@ -329,7 +330,7 @@ th {
     text-align: left;
 }
 
-/* Colonne: Codice, Descrizione, Prezzo, Q.tà, Sconto %, Rip. (netto riga rimossa) */
+/* Colonne: Codice, Descrizione, Prezzo, Q.tà, Sconto %, Rip. */
 th:nth-child(1) { width: 14%; }
 th:nth-child(2) { width: 44%; }
 th:nth-child(3) { width: 12%; }
@@ -398,6 +399,7 @@ footer {
 <div class="upload-area">
     <button id="loadDDTBtn" class="btn btn-primary">📂 Carica DDT</button>
     <button id="loadSCABtn" class="btn btn-secondary">📅 Carica SCA</button>
+    <button id="loadSCHEDEBtn" class="btn btn-schede">📋 SCHEDE</button>
     <span class="info-message">📌 RICORDATI DI RINOMINARE I FILE IN: DDT e SCA</span>
     <div class="status" id="statusMsg">Carica il file DDT</div>
     <div class="btn-group" style="display: flex; gap: 0.5rem;">
@@ -662,6 +664,148 @@ footer {
         return clientsMap;
     }
 
+    // --------------------------------------------------------------
+    // NUOVO PARSER SCHEDE (file TXT con struttura Cliente : ...)
+    // --------------------------------------------------------------
+    function parseSCHEDEFile(text, clientsMap) {
+        const lines = text.split(/\r?\n/);
+        let currentClient = null;
+        let currentData = null;
+        let insideTable = false;
+        
+        // Funzione per estrarre codice e nome dalla riga "Cliente :"
+        function parseClientHeader(line) {
+            // Esempio: "Cliente   : 030275 LA MANDRAGOLA DI MARCO GIANASSI $ C. Snc VIA DI BARBERINO 71 ..."
+            let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/);
+            if (match) {
+                return { code: match[1], name: match[2].trim() };
+            }
+            return null;
+        }
+        
+        // Parser per la riga di tabella (formato con 4 coppie Quantità/Data)
+        function parseArticoloRow(line) {
+            // Formato: "01070         ITIDET 40 SPRAI 500ml VETR/ACC                                                                        12,00 17/07/2024           3,9800   0,00   0,00"
+            // Oppure con più coppie: "01112         OPTIMAX EXTRA SGRASS. 750ML                                1,00 03/05/2024       6,00 09/04/2025       6,00 01/08/2025           4,1000   0,00   0,00"
+            
+            // Pattern per catturare codice (5-10 cifre/lettere) e descrizione
+            let match = line.match(/^(\S+)\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
+            if (!match) return null;
+            
+            const code = match[1];
+            let description = match[2];
+            // Rimuovi eventuali informazioni finali
+            description = description.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
+            description = description.substring(0, 120).trim();
+            
+            // Ora estrai tutte le coppie quantità/data dalla riga
+            const qtyDatePairs = [];
+            const qtyDatePattern = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
+            let pairMatch;
+            while ((pairMatch = qtyDatePattern.exec(line)) !== null) {
+                let qty = parseFloat(pairMatch[1].replace(',', '.'));
+                let date = pairMatch[2];
+                qtyDatePairs.push({ quantity: qty, date: date });
+            }
+            
+            // Estrai prezzo (ultimo numero prima degli sconti)
+            const priceMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
+            let price = 0;
+            if (priceMatch) {
+                price = parseFloat(priceMatch[1].replace(',', '.'));
+            }
+            
+            return {
+                code: code,
+                description: description,
+                qtyDatePairs: qtyDatePairs,
+                price: price
+            };
+        }
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') continue;
+            
+            // Rilevazione inizio nuovo cliente
+            if (line.startsWith('Cliente')) {
+                const clientInfo = parseClientHeader(line);
+                if (clientInfo) {
+                    // Cerchiamo se il cliente esiste già (per nome o per codice)
+                    let existingClientName = null;
+                    for (let [cName, cData] of clientsMap.entries()) {
+                        if (cData.codice === clientInfo.code || cName === clientInfo.name) {
+                            existingClientName = cName;
+                            break;
+                        }
+                    }
+                    
+                    if (existingClientName) {
+                        currentClient = existingClientName;
+                        currentData = clientsMap.get(currentClient);
+                    } else {
+                        currentClient = clientInfo.name;
+                        currentData = { 
+                            codice: clientInfo.code, 
+                            items: [], 
+                            saldoScadenze: 0, 
+                            scadenzeDettaglio: [] 
+                        };
+                        clientsMap.set(currentClient, currentData);
+                    }
+                    insideTable = false;
+                }
+                continue;
+            }
+            
+            // Rilevazione inizio tabella (linea con "Cod. Articolo Descrizione")
+            if (line.includes('Cod. Articolo Descrizione') || line.includes('Cod. Articolo') && line.includes('Descrizione')) {
+                insideTable = true;
+                continue;
+            }
+            
+            // Se siamo dentro la tabella e la linea contiene un codice articolo
+            if (insideTable && line.match(/^\d{5,}/)) {
+                const art = parseArticoloRow(line);
+                if (art && art.qtyDatePairs.length > 0) {
+                    // Aggiungi ogni movimento come articolo separato
+                    for (let pair of art.qtyDatePairs) {
+                        // Cerca se esiste già un articolo con stesso codice e prezzo (approssimativamente)
+                        let existingItem = currentData.items.find(item => 
+                            item.code === art.code && 
+                            Math.abs(item.price - art.price) < 0.01
+                        );
+                        
+                        if (existingItem) {
+                            existingItem.quantity += pair.quantity;
+                            existingItem.netAmount += pair.quantity * art.price;
+                            existingItem.grossAmount += pair.quantity * art.price;
+                            existingItem.occurrences = (existingItem.occurrences || 1) + 1;
+                        } else {
+                            currentData.items.push({
+                                code: art.code,
+                                description: art.description,
+                                quantity: pair.quantity,
+                                price: art.price,
+                                discountPercent: 0,
+                                grossAmount: pair.quantity * art.price,
+                                netAmount: pair.quantity * art.price,
+                                occurrences: 1
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Fine tabella (linea con altro cliente o fine file)
+            if (line.startsWith('Cliente') && i > 0) {
+                insideTable = false;
+            }
+        }
+        
+        return clientsMap;
+    }
+
     function aggregateItems(items) {
         const map = new Map();
         for (let it of items) {
@@ -673,14 +817,14 @@ footer {
                 ex.occurrences++;
             } else {
                 let desc = cleanDescription(it.description);
-                map.set(it.code, { ...it, description: desc, occurrences: 1 });
+                map.set(it.code, { ...it, description: desc, occurrences: it.occurrences || 1 });
             }
         }
         return Array.from(map.values()).sort((a, b) => b.netAmount - a.netAmount);
     }
 
     // --------------------------------------------------------------
-    // ESPORTAZIONE HTML PER CLIENTE (versione corretta con persistenza)
+    // ESPORTAZIONE HTML PER CLIENTE (stessa del codice originale)
     // --------------------------------------------------------------
     function generateOrderHTML(clientName, clientData, logoDataURL) {
         const items = aggregateItems(clientData.items);
@@ -973,7 +1117,7 @@ footer {
     }
 
     // --------------------------------------------------------------
-    // RENDER (tabella principale con 6 colonne, netto riga rimossa)
+    // RENDER (tabella principale con 6 colonne)
     // --------------------------------------------------------------
     function renderAllTabs(clientsMap) {
         const tabsDiv = document.getElementById('tabsContainer');
@@ -1019,7 +1163,7 @@ footer {
                                 <span class="scadenze-totale">📅 Scadenze: ${(data.saldoScadenze || 0).toFixed(2)} €</span>
                             </div>
                             <table class="scadenze-table">
-                                <thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo fattura (€)</th><th>Scadenza</th></tr></thead>
+                                <thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo fattura (€)</th><th>Scadenza</th><tr></thead>
                                 <tbody>`;
                 for (let s of data.scadenzeDettaglio) {
                     html += `<tr><td>${escapeHtml(s.dataDocumento || '')}</td><td>${escapeHtml(s.numeroFattura || '')}</td><td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td><td>${escapeHtml(s.dataScadenza || '')}</td></tr>`;
@@ -1027,7 +1171,7 @@ footer {
                 html += `</tbody></table></div>`;
             }
             html += `<div class="table-wrapper">
-                         <table>
+                        <table>
                             <thead>
                                 <tr><th>Codice</th><th>Descrizione</th><th>Prezzo €</th><th>Q.tà</th><th>Sconto %</th><th>Rip.</th></tr>
                             </thead>
@@ -1043,7 +1187,7 @@ footer {
                           </tr>`;
             });
             html += `</tbody>
-                         </table>
+                      </table>
                     </div>`;
             panel.innerHTML = html;
             panelsDiv.appendChild(panel);
@@ -1187,6 +1331,42 @@ footer {
         input.click();
     }
 
+    // --------------------------------------------------------------
+    // NUOVA FUNZIONE CARICA SCHEDE
+    // --------------------------------------------------------------
+    function loadSCHEDE() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = 'flex';
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setTimeout(() => {
+                    try {
+                        // Se non c'è ancora una mappa clienti, ne creiamo una nuova
+                        if (!currentClientsMap || currentClientsMap.size === 0) {
+                            currentClientsMap = new Map();
+                        }
+                        parseSCHEDEFile(ev.target.result, currentClientsMap);
+                        renderAllTabs(currentClientsMap);
+                        document.getElementById('statusMsg').innerHTML = '✅ DDT + SCHEDE caricato';
+                        document.getElementById('warningArea').style.display = 'none';
+                    } catch (err) {
+                        document.getElementById('warningArea').style.display = 'block';
+                        document.getElementById('warningArea').innerHTML = 'Errore nel file SCHEDE: ' + err.message;
+                    }
+                    loading.style.display = 'none';
+                }, 10);
+            };
+            reader.readAsText(file, 'UTF-8');
+        };
+        input.click();
+    }
+
     function filterClients() {
         const searchText = document.getElementById('clientSearchInput').value.toLowerCase();
         const tabs = document.querySelectorAll('.tab-btn');
@@ -1219,6 +1399,7 @@ footer {
     document.getElementById('clientExportBtn').addEventListener('click', exportOrderForClient);
     document.getElementById('loadDDTBtn').addEventListener('click', loadDDT);
     document.getElementById('loadSCABtn').addEventListener('click', loadSCA);
+    document.getElementById('loadSCHEDEBtn').addEventListener('click', loadSCHEDE);
     document.getElementById('clientSearchInput').addEventListener('input', filterClients);
 
     loadLogoFromLocalStorage();
@@ -1227,7 +1408,7 @@ footer {
         currentClientsMap = savedData;
         renderAllTabs(savedData);
     } else {
-        document.getElementById('statusMsg').innerHTML = 'Carica il file DDT.';
+        document.getElementById('statusMsg').innerHTML = 'Carica il file DDT o SCHEDE.';
     }
 </script>
 </body>
