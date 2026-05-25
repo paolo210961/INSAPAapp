@@ -672,7 +672,6 @@ footer {
         let insideTable = false;
         
         function parseClientHeader(line) {
-            // Formato: "Cliente   : 030275 LA MANDRAGOLA DI MARCO GIANASSI ..."
             let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/);
             if (match) {
                 return { code: match[1], name: match[2].trim() };
@@ -681,17 +680,17 @@ footer {
         }
         
         function parseArticoloRow(line) {
-            // Pattern per codice e descrizione (almeno 4 caratteri per il codice)
+            // Pattern per codice (almeno 4 caratteri alfanumerici)
             let match = line.match(/^(\S{4,})\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
             if (!match) return null;
             
             const code = match[1];
             let description = match[2];
-            // Pulisci la descrizione rimuovendo le quantità e date che seguono
+            // Pulisci la descrizione: rimuovi le quantità e date che seguono
             description = description.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
             description = description.substring(0, 120).trim();
             
-            // Estrai TUTTE le coppie quantità/data (fino a 4)
+            // Estrai TUTTE le coppie quantità/data dalla riga (fino a 4)
             const qtyDatePairs = [];
             const qtyDatePattern = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
             let pairMatch;
@@ -702,7 +701,6 @@ footer {
             }
             
             // Estrai prezzo, sconto1, sconto2 (gli ultimi 3 numeri della riga)
-            // Formato: ... Prezzo Sco1 Sco2
             const priceDiscountMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
             let price = 0;
             let discount1 = 0;
@@ -763,7 +761,7 @@ footer {
                 continue;
             }
             
-            // Se siamo dentro la tabella e la riga inizia con un codice (almeno 4 cifre/lettere)
+            // Se siamo dentro la tabella e la riga inizia con un codice (almeno 4 caratteri)
             if (insideTable && line.match(/^\d{4,}/)) {
                 const art = parseArticoloRow(line);
                 if (art && art.qtyDatePairs.length > 0) {
@@ -863,10 +861,10 @@ footer {
                                     <tbody>`;
             for (let s of scadenze) {
                 scadenzeHtml += `<tr>
-                                     <td>${escapeHtml(s.dataDocumento || '')}</td>
-                                     <td>${escapeHtml(s.numeroFattura || '')}</td>
+                                    <td>${escapeHtml(s.dataDocumento || '')}</td>
+                                    <td>${escapeHtml(s.numeroFattura || '')}</td>
                                     <td style="text-align:right; font-weight:bold">${s.importo.toFixed(2)} €</td>
-                                     <td>${escapeHtml(s.dataScadenza || '')}</td>
+                                    <td>${escapeHtml(s.dataScadenza || '')}</td>
                                   </tr>`;
             }
             scadenzeHtml += `</tbody>
@@ -1182,7 +1180,7 @@ footer {
                         </div>`;
             }
             html += `<div class="table-wrapper">
-                        <table>
+                        </table>
                             <thead>
                                 <tr><th>Codice</th><th>Descrizione</th><th>Prezzo €</th><th>Q.tà</th><th>Sconto %</th><th>Rip.</th></tr>
                             </thead>
