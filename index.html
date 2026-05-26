@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Gestione Documenti - DDT | ORD | SCA</title>
+    <title>Lettore DDT - ORD - SCA</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -26,111 +20,60 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
-
         header {
             background: linear-gradient(135deg, #2c3e50, #1a1a2e);
             color: white;
             padding: 20px 30px;
         }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        h1 { font-size: 1.5rem; margin-bottom: 15px; }
         .controls {
             display: flex;
             gap: 15px;
             align-items: center;
             flex-wrap: wrap;
         }
-
-        .btn-primary {
+        .btn {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 10px 20px;
             border-radius: 25px;
             cursor: pointer;
             font-size: 14px;
-            transition: transform 0.2s, background 0.2s;
+            transition: transform 0.2s;
         }
-
-        .btn-primary:hover {
-            background: #45a049;
-            transform: scale(1.05);
-        }
-
-        .btn-drive {
-            background: #4285f4;
-        }
-
-        .btn-drive:hover {
-            background: #3367d6;
-        }
-
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .filter-group select {
-            padding: 8px 15px;
+        .btn:hover { transform: scale(1.05); }
+        .btn-drive { background: #4285f4; }
+        select {
+            padding: 10px 15px;
             border-radius: 25px;
             border: none;
             background: rgba(255,255,255,0.2);
             color: white;
             cursor: pointer;
         }
-
-        .filter-group select option {
-            background: #2c3e50;
-            color: white;
-        }
-
-        .documents-list {
-            padding: 20px;
-            overflow-x: auto;
-        }
-
-        .doc-table {
+        select option { background: #2c3e50; }
+        .documents-list { padding: 20px; overflow-x: auto; }
+        table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
         }
-
-        .doc-table th {
+        th {
             background: #2c3e50;
             color: white;
             padding: 12px 10px;
             text-align: left;
-            font-weight: 600;
             position: sticky;
             top: 0;
         }
-
-        .doc-table td {
+        td {
             padding: 12px 10px;
             border-bottom: 1px solid #eee;
         }
-
-        .doc-table tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .doc-table tr:nth-child(odd) {
-            background-color: #ffffff;
-        }
-
-        .doc-table tr:hover {
-            background-color: #e3f2fd;
-            cursor: pointer;
-        }
-
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        tr:nth-child(odd) { background-color: #ffffff; }
+        tr:hover { background-color: #e3f2fd; }
         .type-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -138,301 +81,192 @@
             font-weight: bold;
             font-size: 12px;
         }
-
         .type-DDT { background: #e74c3c; color: white; }
         .type-ORD { background: #2ecc71; color: white; }
         .type-SCA { background: #3498db; color: white; }
-
         .detail-btn {
             background: #2196F3;
             color: white;
             border: none;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 12px;
             transition: all 0.2s;
         }
-
-        .detail-btn:hover {
-            background: #0b7dda;
-            transform: scale(1.05);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #ff6b6b;
-            color: white;
-            padding: 15px;
-            margin: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Modale */
+        .detail-btn:hover { background: #0b7dda; transform: scale(1.05); }
         .modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
-
         .modal-content {
             background: white;
             border-radius: 15px;
             width: 90%;
-            max-width: 700px;
-            max-height: 80vh;
+            max-width: 750px;
+            max-height: 85vh;
             overflow: auto;
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.2s ease;
         }
-
         @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 18px 22px;
             background: linear-gradient(135deg, #2c3e50, #1a1a2e);
             color: white;
             border-radius: 15px 15px 0 0;
         }
-
         .close-btn {
             background: none;
             border: none;
-            font-size: 30px;
+            font-size: 32px;
             color: white;
             cursor: pointer;
+            line-height: 1;
         }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-body pre {
-            background: #f4f4f4;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
+        .close-btn:hover { opacity: 0.7; }
+        .modal-body { padding: 22px; }
         .detail-section {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 15px;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 10px;
         }
-
         .detail-section h4 {
             color: #2c3e50;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             border-bottom: 2px solid #3498db;
-            padding-bottom: 5px;
+            padding-bottom: 6px;
         }
-
-        .file-input-area {
+        .detail-section p { margin: 6px 0; line-height: 1.5; }
+        .modal-body pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+        }
+        .hidden { display: none !important; }
+        .info-area {
             margin: 20px;
             padding: 20px;
-            background: #f0f4f8;
+            background: #e8f0fe;
             border-radius: 15px;
             text-align: center;
+            border-left: 4px solid #4285f4;
         }
-
-        .file-input-area input {
-            margin: 10px 0;
-            padding: 10px;
+        .badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 8px;
         }
-
-        .info-text {
-            color: #666;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
         @media (max-width: 768px) {
-            .doc-table th, .doc-table td {
-                padding: 8px 5px;
-                font-size: 11px;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .btn-primary, .filter-group {
-                width: 100%;
-                justify-content: center;
-            }
+            th, td { padding: 8px 5px; font-size: 11px; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .btn, select { width: 100%; text-align: center; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📋 Gestione Documenti</h1>
+            <h1>📋 Documenti DDT · ORD · SCA</h1>
             <div class="controls">
-                <input type="file" id="fileInput" accept=".txt" multiple style="display: none;">
-                <button id="selectFilesBtn" class="btn-primary">📂 Seleziona file TXT</button>
-                <button id="openDriveBtn" class="btn-primary btn-drive">📁 Apri cartella Google Drive</button>
-                <div class="filter-group">
-                    <label>📌 Filtra:</label>
-                    <select id="typeFilter">
-                        <option value="all">Tutti</option>
-                        <option value="DDT">DDT</option>
-                        <option value="ORD">ORD</option>
-                        <option value="SCA">SCA</option>
-                    </select>
-                </div>
+                <input type="file" id="fileInput" accept=".txt" multiple style="display:none;">
+                <button id="selectBtn" class="btn">📂 Seleziona file TXT</button>
+                <button id="driveBtn" class="btn btn-drive">📁 Apri cartella Drive</button>
+                <select id="filterSelect">
+                    <option value="all">📌 Tutti i documenti</option>
+                    <option value="DDT">📦 DDT</option>
+                    <option value="ORD">📋 ORD</option>
+                    <option value="SCA">💰 SCA</option>
+                </select>
             </div>
         </header>
 
-        <div class="file-input-area">
-            <p>📌 Carica i tuoi file dalla cartella Drive:</p>
-            <p style="font-size: 13px; color: #666;">1. Clicca "Apri cartella Google Drive" → 2. Scarica i file → 3. Torna qui e selezionali</p>
+        <div class="info-area">
+            <strong>📌 Come funziona:</strong><br>
+            1️⃣ Clicca "Apri cartella Drive" e scarica i file che vuoi vedere<br>
+            2️⃣ Torna qui e clicca "Seleziona file TXT"<br>
+            3️⃣ Scegli i file scaricati e i dati appariranno in tabella<br>
+            4️⃣ Clicca su "📄 Dettagli" per vedere il contenuto completo
         </div>
 
-        <div id="loadingIndicator" class="loading hidden">
-            <div class="spinner"></div>
-            <p>Caricamento documenti...</p>
+        <div id="docList" class="documents-list">
+            <p style="text-align:center; padding:60px; color:#aaa;">✨ Seleziona uno o più file TXT per iniziare</p>
         </div>
-
-        <div id="errorMessage" class="error hidden"></div>
-
-        <main>
-            <div id="documentsList" class="documents-list">
-                <p style="text-align: center; padding: 40px; color: #999;">👆 Seleziona i file TXT per iniziare</p>
-            </div>
-        </main>
     </div>
 
-    <!-- Modale dettagli -->
+    <!-- MODALE DETTAGLI -->
     <div id="detailModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Dettagli documento</h2>
-                <button class="close-btn">&times;</button>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
-            <div class="modal-body" id="modalBody">
-            </div>
+            <div id="modalBody" class="modal-body"></div>
         </div>
     </div>
 
     <script>
         // ==================== CONFIGURAZIONE ====================
         const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4';
-        
-        let currentDocuments = [];
+        let allDocuments = [];
 
-        // ==================== PARSER PER TIPO FILE ====================
-        
+        // ==================== PARSER FILE ====================
         function parseDDT(filename, content) {
             const match = filename.match(/^DDT-(\d+)\.txt$/i);
             if (!match) return null;
             
-            const numeroAgente = match[1];
             const records = [];
             const lines = content.split('\n');
             
-            // Cerca righe con formato DDT (hanno N.Doc. e Data e Tot.D.d.T.)
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                // Pattern per trovare righe DDT: inizio con codice cliente (numeri), poi nome, poi N.Doc., poi Data
-                const ddtMatch = line.match(/^\s*(\d+)\s+([A-Z\s\.]+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+(\d+)\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+([\d\.,]+)/);
-                if (ddtMatch) {
-                    records.push({
-                        tipo: 'DDT',
-                        agente: numeroAgente,
-                        codiceCliente: ddtMatch[1],
-                        cliente: ddtMatch[2].trim(),
-                        nDoc: ddtMatch[3],
-                        data: ddtMatch[4],
-                        totale: ddtMatch[6].replace(',', '.'),
-                        fullContent: content,
-                        rigaOriginale: line
-                    });
-                }
-            }
-            
-            return records;
-        }
-
-        function parseORD(filename, content) {
-            const match = filename.match(/^ORD-(\d+)\.txt$/i);
-            if (!match) return null;
-            
-            const numeroAgente = match[1];
-            const records = [];
-            const lines = content.split('\n');
-            
-            // Estrai nome cliente dalla prima riga
-            let cliente = '';
-            const clienteMatch = content.match(/Cliente\s*:\s*\d+\s+([A-Z\s\.]+)/);
-            if (clienteMatch) {
-                cliente = clienteMatch[1].trim();
-            }
-            
-            // Cerca righe articoli (hanno codice, descrizione, quantità, prezzo)
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                // Pattern per righe con articoli (esclude quelle con * INESISTENTE)
-                if (line.match(/^\s*\d{5,}\s+[A-Z]/) && !line.includes('INESISTENTE')) {
-                    const parts = line.split(/\s{2,}/);
-                    if (parts.length >= 2) {
-                        const codice = parts[0].trim();
-                        const descrizione = parts[1]?.trim() || '';
-                        // Cerca prezzo alla fine della riga
-                        const prezzoMatch = line.match(/([\d\.,]+)\s*$[^\d]*$/);
-                        const prezzo = prezzoMatch ? prezzoMatch[1].replace(',', '.') : '';
-                        
+            for (let line of lines) {
+                // Cerca righe con data e numero documento
+                if (line.match(/\d{2}\/\d{2}\/\d{4}/) && line.match(/\d{2}\/\d{2}\/\d{4}/)) {
+                    const parts = line.trim().split(/\s+/);
+                    let data = '', nDoc = '', totale = '', cliente = '';
+                    
+                    for (let part of parts) {
+                        if (part.match(/\d{2}\/\d{2}\/\d{4}/)) data = part;
+                        if (part.match(/^\d{1,5}$/) && part.length >= 2 && part.length <= 5) nDoc = part;
+                        if (part.match(/[\d\.,]+$/) && !part.includes('/')) totale = part.replace(',', '.');
+                    }
+                    
+                    // Cerca nome cliente (parole dopo il codice)
+                    const clienteMatch = line.match(/^\s*\d+\s+([A-Z\s\.]+?)\s+\d/);
+                    if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 40);
+                    
+                    if (nDoc || data) {
                         records.push({
-                            tipo: 'ORD',
-                            agente: numeroAgente,
-                            cliente: cliente,
-                            codiceArticolo: codice,
-                            descrizione: descrizione.substring(0, 50),
-                            prezzo: prezzo,
+                            tipo: 'DDT',
+                            agente: match[1],
+                            cliente: cliente || 'Cliente',
+                            nDoc: nDoc || '-',
+                            data: data || '-',
+                            importo: totale || '-',
                             fullContent: content,
                             rigaOriginale: line
                         });
@@ -440,176 +274,190 @@
                 }
             }
             
-            if (records.length === 0) {
-                // Se non trova articoli, crea un record riassuntivo
-                records.push({
-                    tipo: 'ORD',
-                    agente: numeroAgente,
-                    cliente: cliente || 'Cliente non trovato',
-                    codiceArticolo: '-',
-                    descrizione: 'Visualizza dettagli completo',
-                    prezzo: '-',
-                    fullContent: content,
-                    rigaOriginale: ''
-                });
-            }
+            return records.length ? records : [{
+                tipo: 'DDT',
+                agente: match[1],
+                cliente: 'Visualizza nel dettaglio',
+                nDoc: '-',
+                data: '-',
+                importo: '-',
+                fullContent: content
+            }];
+        }
+
+        function parseORD(filename, content) {
+            const match = filename.match(/^ORD-(\d+)\.txt$/i);
+            if (!match) return null;
             
-            return records;
+            let cliente = 'Cliente';
+            const clienteMatch = content.match(/Cliente\s*:\s*\d+\s+([A-Z\s\.\']+)/);
+            if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 50);
+            
+            return [{
+                tipo: 'ORD',
+                agente: match[1],
+                cliente: cliente,
+                nDoc: 'Ordine cliente',
+                data: 'Vedi dettagli',
+                importo: 'Dettagli',
+                fullContent: content
+            }];
         }
 
         function parseSCA(filename, content) {
             const match = filename.match(/^SCA-(\d+)\.txt$/i);
             if (!match) return null;
             
-            const numeroAgente = match[1];
             const records = [];
             const lines = content.split('\n');
-            
             let currentCliente = '';
             
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
+            for (let line of lines) {
+                const clienteMatch = line.match(/CLIENTE:\s+\d+\s+(.+)/);
+                if (clienteMatch) currentCliente = clienteMatch[1].trim().substring(0, 50);
                 
-                // Cerca riga cliente
-                const clienteMatch = line.match(/CLIENTE:\s+\d+\s+([A-Z\s\.\']+)/);
-                if (clienteMatch) {
-                    currentCliente = clienteMatch[1].trim();
-                }
-                
-                // Cerca righe scadenze
-                const scadenzaMatch = line.match(/^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/);
-                if (scadenzaMatch && currentCliente) {
+                const scadMatch = line.match(/(\d{2}\/\d{2}\/\d{4})\s+.*?\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/);
+                if (scadMatch && currentCliente) {
                     records.push({
                         tipo: 'SCA',
-                        agente: numeroAgente,
+                        agente: match[1],
                         cliente: currentCliente,
-                        scadenza: scadenzaMatch[1],
-                        descrizione: scadenzaMatch[2].trim(),
-                        nDoc: scadenzaMatch[3],
-                        dataDoc: scadenzaMatch[4],
-                        importo: scadenzaMatch[5].replace(',', '.'),
+                        nDoc: scadMatch[2],
+                        data: scadMatch[1],
+                        importo: scadMatch[4].replace(',', '.'),
                         fullContent: content,
-                        rigaOriginale: line
+                        dataDoc: scadMatch[3],
+                        descrizione: scadMatch[0].split(/\s+/).slice(1, -4).join(' ')
                     });
                 }
             }
             
-            return records;
+            return records.length ? records : [{
+                tipo: 'SCA',
+                agente: match[1],
+                cliente: currentCliente || 'Scadenziario',
+                nDoc: '-',
+                data: '-',
+                importo: '-',
+                fullContent: content
+            }];
         }
 
-        // ==================== PARSER GENERALE ====================
-        
         function parseFile(filename, content) {
-            if (filename.match(/^DDT-\d+\.txt$/i)) {
-                return parseDDT(filename, content);
-            } else if (filename.match(/^ORD-\d+\.txt$/i)) {
-                return parseORD(filename, content);
-            } else if (filename.match(/^SCA-\d+\.txt$/i)) {
-                return parseSCA(filename, content);
-            }
+            if (filename.match(/^DDT-\d+\.txt$/i)) return parseDDT(filename, content);
+            if (filename.match(/^ORD-\d+\.txt$/i)) return parseORD(filename, content);
+            if (filename.match(/^SCA-\d+\.txt$/i)) return parseSCA(filename, content);
             return null;
         }
 
-        // ==================== RENDER TABELLA ====================
-        
-        function renderDocuments(documents) {
-            const container = document.getElementById('documentsList');
-            const filter = document.getElementById('typeFilter').value;
+        // ==================== CARICAMENTO FILE ====================
+        async function loadFiles(files) {
+            const newDocs = [];
             
-            let filtered = documents;
-            if (filter !== 'all') {
-                filtered = documents.filter(doc => doc.tipo === filter);
+            for (let file of files) {
+                if (!file.name.endsWith('.txt')) continue;
+                try {
+                    const content = await file.text();
+                    const parsed = parseFile(file.name, content);
+                    if (parsed) {
+                        if (Array.isArray(parsed)) newDocs.push(...parsed);
+                        else newDocs.push(parsed);
+                    }
+                } catch (err) {
+                    console.error('Errore lettura file:', file.name, err);
+                }
             }
             
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="error" style="display:block;">Nessun documento trovato</div>';
+            allDocuments = newDocs;
+            renderTable();
+            
+            if (newDocs.length === 0) {
+                alert('Nessun file valido trovato. Usa file con nome DDT-XX.txt, ORD-XX.txt o SCA-XX.txt');
+            }
+        }
+
+        // ==================== RENDER TABELLA ====================
+        function renderTable() {
+            const filter = document.getElementById('filterSelect').value;
+            let filtered = filter === 'all' ? allDocuments : allDocuments.filter(d => d.tipo === filter);
+            const container = document.getElementById('docList');
+            
+            if (!filtered.length) {
+                container.innerHTML = '<p style="text-align:center; padding:60px; color:#aaa;">📭 Nessun documento da mostrare. Seleziona dei file TXT.</p>';
                 return;
             }
             
-            const html = `
-                <table class="doc-table">
-                    <thead>
-                        <tr>
-                            <th>Tipo</th>
-                            <th>N° Agente</th>
-                            <th>Cliente / Descrizione</th>
-                            <th>N° Documento</th>
-                            <th>Data / Scadenza</th>
-                            <th>Importo</th>
-                            <th>Dettagli</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filtered.map((doc, idx) => `
-                            <tr data-index="${idx}">
-                                <td><span class="type-badge type-${doc.tipo}">${doc.tipo}</span></td>
-                                <td>${doc.agente || '-'}</td>
-                                <td>${doc.cliente || doc.descrizione || '-'}</td>
-                                <td>${doc.nDoc || doc.codiceArticolo || doc.scadenza || '-'}</td>
-                                <td>${doc.data || doc.dataDoc || doc.scadenza || '-'}</td>
-                                <td>${doc.totale || doc.importo || doc.prezzo || '-'}</td>
-                                <td><button class="detail-btn" data-index="${idx}">📄 Dettagli</button></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+            let html = `<table><thead><tr>
+                <th>Tipo</th><th>Agente</th><th>Cliente / Descrizione</th><th>N° Documento</th><th>Data</th><th>Importo</th><th>Azioni</th>
+            </tr></thead><tbody>`;
             
+            filtered.forEach((doc, idx) => {
+                html += `<tr data-idx="${idx}">
+                    <td><span class="type-badge type-${doc.tipo}">${doc.tipo}</span></td>
+                    <td>${doc.agente || '-'}</td>
+                    <td>${doc.cliente || '-'}</td>
+                    <td>${doc.nDoc || '-'}</td>
+                    <td>${doc.data || '-'}</td>
+                    <td>${doc.importo && doc.importo !== '-' ? '€ ' + doc.importo : doc.importo || '-'}</td>
+                    <td><button class="detail-btn" data-idx="${idx}">📄 Dettagli</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
             container.innerHTML = html;
             
-            // Attacca eventi ai pulsanti dettagli
+            // Attacca eventi SOLO ai pulsanti (nessun click automatico!)
             document.querySelectorAll('.detail-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const index = parseInt(btn.getAttribute('data-index'));
-                    showDetails(filtered[index]);
+                    const idx = parseInt(btn.getAttribute('data-idx'));
+                    const currentFilter = document.getElementById('filterSelect').value;
+                    const currentFiltered = currentFilter === 'all' ? allDocuments : allDocuments.filter(d => d.tipo === currentFilter);
+                    if (currentFiltered[idx]) showDetailModal(currentFiltered[idx]);
                 });
             });
         }
-        
+
         // ==================== MODALE DETTAGLI ====================
-        
-        function showDetails(doc) {
+        function showDetailModal(doc) {
             const modal = document.getElementById('detailModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalBody = document.getElementById('modalBody');
             
-            modalTitle.textContent = `${doc.tipo} - Dettagli completi`;
+            modalTitle.textContent = `${doc.tipo} · Documento dettagliato`;
             
-            // Costruisci contenuto dettagliato in base al tipo
-            let detailsHtml = '<div class="detail-section"><h4>📋 Informazioni principali</h4>';
-            detailsHtml += `<p><strong>Tipo:</strong> ${doc.tipo}</p>`;
-            detailsHtml += `<p><strong>Agente:</strong> ${doc.agente || '-'}</p>`;
+            let html = `<div class="detail-section">
+                <h4>📋 Informazioni principali</h4>
+                <p><strong>Tipo documento:</strong> ${doc.tipo}</p>
+                <p><strong>Numero agente:</strong> ${doc.agente || '-'}</p>
+                <p><strong>Cliente / Riferimento:</strong> ${doc.cliente || '-'}</p>
+                <p><strong>Numero documento:</strong> ${doc.nDoc || '-'}</p>
+                <p><strong>Data / Scadenza:</strong> ${doc.data || '-'}</p>
+                <p><strong>Importo:</strong> ${doc.importo && doc.importo !== '-' ? '€ ' + doc.importo : doc.importo || '-'}</p>
+            </div>`;
             
-            if (doc.tipo === 'DDT') {
-                detailsHtml += `<p><strong>Codice Cliente:</strong> ${doc.codiceCliente || '-'}</p>`;
-                detailsHtml += `<p><strong>Cliente:</strong> ${doc.cliente || '-'}</p>`;
-                detailsHtml += `<p><strong>N. Documento:</strong> ${doc.nDoc || '-'}</p>`;
-                detailsHtml += `<p><strong>Data:</strong> ${doc.data || '-'}</p>`;
-                detailsHtml += `<p><strong>Totale:</strong> € ${doc.totale || '-'}</p>`;
-            } else if (doc.tipo === 'ORD') {
-                detailsHtml += `<p><strong>Cliente:</strong> ${doc.cliente || '-'}</p>`;
-                detailsHtml += `<p><strong>Codice Articolo:</strong> ${doc.codiceArticolo || '-'}</p>`;
-                detailsHtml += `<p><strong>Descrizione:</strong> ${doc.descrizione || '-'}</p>`;
-                detailsHtml += `<p><strong>Prezzo:</strong> € ${doc.prezzo || '-'}</p>`;
-            } else if (doc.tipo === 'SCA') {
-                detailsHtml += `<p><strong>Cliente:</strong> ${doc.cliente || '-'}</p>`;
-                detailsHtml += `<p><strong>Scadenza:</strong> ${doc.scadenza || '-'}</p>`;
-                detailsHtml += `<p><strong>Descrizione:</strong> ${doc.descrizione || '-'}</p>`;
-                detailsHtml += `<p><strong>N. Documento:</strong> ${doc.nDoc || '-'}</p>`;
-                detailsHtml += `<p><strong>Data Documento:</strong> ${doc.dataDoc || '-'}</p>`;
-                detailsHtml += `<p><strong>Importo:</strong> € ${doc.importo || '-'}</p>`;
+            if (doc.descrizione) {
+                html += `<div class="detail-section">
+                    <h4>📝 Descrizione</h4>
+                    <p>${doc.descrizione}</p>
+                </div>`;
             }
             
-            detailsHtml += '</div>';
-            detailsHtml += '<div class="detail-section"><h4>📄 Contenuto completo del file</h4>';
-            detailsHtml += `<pre>${escapeHtml(doc.fullContent || 'Nessun contenuto')}</pre>`;
-            detailsHtml += '</div>';
+            if (doc.dataDoc) {
+                html += `<div class="detail-section">
+                    <h4>📅 Data documento</h4>
+                    <p>${doc.dataDoc}</p>
+                </div>`;
+            }
             
-            modalBody.innerHTML = detailsHtml;
+            html += `<div class="detail-section">
+                <h4>📄 Contenuto completo del file</h4>
+                <pre>${escapeHtml(doc.fullContent || 'Nessun contenuto')}</pre>
+            </div>`;
+            
+            modalBody.innerHTML = html;
             modal.classList.remove('hidden');
         }
-        
+
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, function(m) {
@@ -619,98 +467,24 @@
                 return m;
             });
         }
-        
-        // ==================== GESTIONE FILE ====================
-        
-        async function handleFiles(files) {
-            const loadingDiv = document.getElementById('loadingIndicator');
-            const errorDiv = document.getElementById('errorMessage');
-            
-            loadingDiv.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-            
-            const allRecords = [];
-            
-            for (const file of files) {
-                if (!file.name.endsWith('.txt')) continue;
-                
-                try {
-                    const content = await file.text();
-                    const parsed = parseFile(file.name, content);
-                    
-                    if (parsed) {
-                        if (Array.isArray(parsed)) {
-                            allRecords.push(...parsed);
-                        } else {
-                            allRecords.push(parsed);
-                        }
-                    } else {
-                        console.warn(`Formato non riconosciuto: ${file.name}`);
-                    }
-                } catch (err) {
-                    console.error(`Errore lettura ${file.name}:`, err);
-                    errorDiv.textContent = `Errore lettura ${file.name}`;
-                    errorDiv.classList.remove('hidden');
-                    setTimeout(() => errorDiv.classList.add('hidden'), 3000);
-                }
-            }
-            
-            currentDocuments = allRecords;
-            renderDocuments(currentDocuments);
-            loadingDiv.classList.add('hidden');
-            
-            if (allRecords.length === 0) {
-                errorDiv.textContent = 'Nessun documento valido trovato. Usa file DDT-XX.txt, ORD-XX.txt o SCA-XX.txt';
-                errorDiv.classList.remove('hidden');
-                setTimeout(() => errorDiv.classList.add('hidden'), 5000);
-            }
-        }
-        
+
         // ==================== SETUP EVENTI ====================
+        document.getElementById('selectBtn').onclick = () => document.getElementById('fileInput').click();
+        document.getElementById('fileInput').onchange = (e) => {
+            if (e.target.files.length) loadFiles(Array.from(e.target.files));
+            e.target.value = '';
+        };
+        document.getElementById('driveBtn').onclick = () => window.open(DRIVE_FOLDER_URL, '_blank');
+        document.getElementById('filterSelect').onchange = () => renderTable();
         
-        function setupEventListeners() {
-            const fileInput = document.getElementById('fileInput');
-            const selectBtn = document.getElementById('selectFilesBtn');
-            const openDriveBtn = document.getElementById('openDriveBtn');
-            const filterSelect = document.getElementById('typeFilter');
-            
-            selectBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            fileInput.addEventListener('change', (event) => {
-                if (event.target.files.length > 0) {
-                    handleFiles(Array.from(event.target.files));
-                }
-                fileInput.value = '';
-            });
-            
-            openDriveBtn.addEventListener('click', () => {
-                window.open(DRIVE_FOLDER_URL, '_blank');
-            });
-            
-            filterSelect.addEventListener('change', () => {
-                renderDocuments(currentDocuments);
-            });
-            
-            // Chiudi modale
-            document.querySelector('.close-btn').addEventListener('click', () => {
-                document.getElementById('detailModal').classList.add('hidden');
-            });
-            
-            window.addEventListener('click', (e) => {
-                const modal = document.getElementById('detailModal');
-                if (e.target === modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        }
+        // Chiudi modale
+        document.getElementById('closeModalBtn').onclick = () => document.getElementById('detailModal').classList.add('hidden');
+        window.onclick = (e) => {
+            const modal = document.getElementById('detailModal');
+            if (e.target === modal) modal.classList.add('hidden');
+        };
         
-        // ==================== INIT ====================
-        
-        setupEventListeners();
-        
-        console.log('App pronta! Carica i file DDT-XX.txt, ORD-XX.txt, SCA-XX.txt');
+        console.log('✅ App pronta! Carica i file DDT-XX.txt, ORD-XX.txt, SCA-XX.txt');
     </script>
 </body>
 </html>
