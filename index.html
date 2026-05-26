@@ -1,1066 +1,716 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>INSAPA 0142 - Gestione Clienti</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Gestione Documenti - DDT | ORD | SCA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-:root {
-    --primary: #1a5d3a;
-    --primary-dark: #0f3d26;
-    --primary-light: #2c7a4b;
-    --accent: #ff6b35;
-    --danger: #dc3545;
-    --light: #f5f5fa;
-    --white: #ffffff;
-    --text: #1a1a2e;
-    --text-light: #6c757d;
-}
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--light);
-    padding: 0;
-    margin: 0;
-    color: var(--text);
-}
+        header {
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            color: white;
+            padding: 20px 30px;
+        }
 
-.app-container {
-    max-width: 1600px;
-    margin: 0 auto;
-    background: var(--white);
-    min-height: 100vh;
-}
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.header {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    color: white;
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 3px solid var(--accent);
-}
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-.logo-area {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    background: rgba(255,255,255,0.12);
-    padding: .5rem 1rem;
-    border-radius: 60px;
-}
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s, background 0.2s;
+        }
 
-.upload-logo-btn {
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
+        .btn-primary:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
 
-.logo-img {
-    max-height: 60px;
-    max-width: 140px;
-    object-fit: contain;
-    display: none;
-}
+        .btn-drive {
+            background: #4285f4;
+        }
 
-.logo-placeholder {
-    color: rgba(255,255,255,0.7);
-}
+        .btn-drive:hover {
+            background: #3367d6;
+        }
 
-.title-area {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-h1 {
-    font-size: 1.2rem;
-}
+        .filter-group select {
+            padding: 8px 15px;
+            border-radius: 25px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+        }
 
-.version {
-    font-size: 0.7rem;
-    background: rgba(255,255,255,0.2);
-    padding: 0.2rem 0.6rem;
-    border-radius: 30px;
-}
+        .filter-group select option {
+            background: #2c3e50;
+            color: white;
+        }
 
-.upload-area {
-    padding: 1rem 1.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .8rem;
-    background: var(--white);
-    border-bottom: 1px solid #e0e0e0;
-    align-items: center;
-    position: sticky;
-    top: 70px;
-    z-index: 99;
-}
+        .documents-list {
+            padding: 20px;
+            overflow-x: auto;
+        }
 
-.btn {
-    border: none;
-    border-radius: 40px;
-    padding: 0.6rem 1.2rem;
-    cursor: pointer;
-    font-weight: 700;
-    color: white;
-    font-size: 0.8rem;
-    transition: all 0.2s;
-}
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
 
-.btn:hover {
-    transform: translateY(-2px);
-}
+        .doc-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
 
-.btn-primary { background: var(--primary-light); }
-.btn-secondary { background: #4a5568; }
-.btn-schede { background: #8b5cf6; }
+        .doc-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+        }
 
-.client-search-group {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    background: white;
-    padding: 0.2rem 0.5rem 0.2rem 1rem;
-    border-radius: 40px;
-    border: 1px solid #e2e8f0;
-    margin-left: auto;
-}
+        .doc-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
 
-.client-search-group .search-box {
-    border: none;
-    padding: 0.5rem 0;
-    min-width: 180px;
-    background: transparent;
-    outline: none;
-}
+        .doc-table tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
 
-.view-buttons {
-    display: flex;
-    gap: 0.8rem;
-    justify-content: center;
-    padding: 1rem 1.5rem;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    flex-wrap: wrap;
-}
+        .doc-table tr:hover {
+            background-color: #e3f2fd;
+            cursor: pointer;
+        }
 
-.view-btn {
-    border: none;
-    border-radius: 40px;
-    padding: 0.7rem 1.5rem;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    background: #e2e8f0;
-    color: var(--text);
-}
+        .type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+        }
 
-.view-btn.active {
-    background: var(--primary-light);
-    color: white;
-}
+        .type-DDT { background: #e74c3c; color: white; }
+        .type-ORD { background: #2ecc71; color: white; }
+        .type-SCA { background: #3498db; color: white; }
 
-.client-selection {
-    padding: 1rem 1.5rem;
-    background: var(--white);
-    border-bottom: 1px solid #e2e8f0;
-}
+        .detail-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
 
-.client-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 120px;
-    overflow-y: auto;
-    padding: 8px 0;
-}
+        .detail-btn:hover {
+            background: #0b7dda;
+            transform: scale(1.05);
+        }
 
-.client-chip {
-    background: #f1f5f9;
-    border: none;
-    border-radius: 40px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
 
-.client-chip.active {
-    background: var(--primary-light);
-    color: white;
-}
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
 
-.selected-client {
-    margin-top: 12px;
-    padding: 10px;
-    background: #f0fdf4;
-    border-radius: 12px;
-    border-left: 4px solid var(--primary-light);
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-}
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-.content-area {
-    padding: 1.5rem;
-}
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
 
-.client-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e2e8f0;
-}
+        .hidden {
+            display: none;
+        }
 
-.stat {
-    background: #f1f5f9;
-    padding: 0.5rem 1rem;
-    border-radius: 40px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
+        /* Modale */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
 
-@media (min-width: 769px) {
-    .table-wrapper {
-        overflow-x: auto;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.85rem;
-        background: white;
-    }
-    th, td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #e2e8f0;
-        text-align: left;
-    }
-    th {
-        background: #f8fafc;
-        font-weight: 700;
-    }
-    .num {
-        text-align: right;
-    }
-}
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: auto;
+            animation: slideIn 0.3s ease;
+        }
 
-@media (max-width: 768px) {
-    .table-wrapper {
-        display: block;
-    }
-    table, thead, tbody, th, td, tr {
-        display: block;
-    }
-    thead {
-        display: none;
-    }
-    tr {
-        background: var(--white);
-        border-radius: 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        border: 1px solid #e2e8f0;
-    }
-    td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    td:before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--text-light);
-    }
-}
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
 
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
 
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-}
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
 
-.modal-header {
-    padding: 1rem;
-    background: var(--primary);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 20px 20px 0 0;
-}
+        .modal-body {
+            padding: 20px;
+        }
 
-.modal-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
+        .modal-body pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
 
-.modal-body {
-    padding: 1rem;
-}
+        .detail-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
 
-.history-list {
-    list-style: none;
-    padding: 0;
-}
+        .detail-section h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
 
-.history-list li {
-    padding: 10px;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-}
+        .file-input-area {
+            margin: 20px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 15px;
+            text-align: center;
+        }
 
-.warning {
-    margin: 1rem;
-    padding: 1rem;
-    border-radius: 12px;
-    background: #fee2e2;
-    color: var(--danger);
-    display: none;
-}
+        .file-input-area input {
+            margin: 10px 0;
+            padding: 10px;
+        }
 
-.loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    color: white;
-}
+        .info-text {
+            color: #666;
+            font-size: 12px;
+            margin-top: 10px;
+        }
 
-footer {
-    padding: 1rem;
-    text-align: center;
-    color: var(--text-light);
-    font-size: .7rem;
-    border-top: 1px solid #e2e8f0;
-}
-</style>
+        @media (max-width: 768px) {
+            .doc-table th, .doc-table td {
+                padding: 8px 5px;
+                font-size: 11px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-primary, .filter-group {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>📋 Gestione Documenti</h1>
+            <div class="controls">
+                <input type="file" id="fileInput" accept=".txt" multiple style="display: none;">
+                <button id="selectFilesBtn" class="btn-primary">📂 Seleziona file TXT</button>
+                <button id="openDriveBtn" class="btn-primary btn-drive">📁 Apri cartella Google Drive</button>
+                <div class="filter-group">
+                    <label>📌 Filtra:</label>
+                    <select id="typeFilter">
+                        <option value="all">Tutti</option>
+                        <option value="DDT">DDT</option>
+                        <option value="ORD">ORD</option>
+                        <option value="SCA">SCA</option>
+                    </select>
+                </div>
+            </div>
+        </header>
 
-<div class="loading-overlay" id="loadingOverlay">⏳ Elaborazione file...</div>
-
-<div class="app-container">
-
-<div class="header">
-    <div class="logo-area">
-        <button id="uploadLogoBtn" class="upload-logo-btn">+</button>
-        <img id="logoImg" class="logo-img">
-        <div id="logoPlaceholder" class="logo-placeholder">🏢 Logo</div>
-        <input type="file" id="logoFileInput" accept="image/*" hidden>
-    </div>
-    <div class="title-area">
-        <h1>📊 INSAPA 0142</h1>
-        <span class="version">VERSIONE 0142</span>
-    </div>
-</div>
-
-<div class="upload-area">
-    <button id="loadDDTBtn" class="btn btn-primary">📂 Carica DDT</button>
-    <button id="loadSCABtn" class="btn btn-secondary">📅 Carica SCA</button>
-    <button id="loadSCHEDEBtn" class="btn btn-schede">📋 Carica SCHEDE</button>
-    <div class="client-search-group">
-        <input type="text" id="clientSearchInput" class="search-box" placeholder="Cerca cliente...">
-    </div>
-</div>
-
-<div class="view-buttons">
-    <button id="viewDDT" class="view-btn">📦 DDT</button>
-    <button id="viewSCA" class="view-btn">📅 SCA</button>
-    <button id="viewSCHEDE" class="view-btn active">📋 SCHEDE</button>
-</div>
-
-<div class="client-selection">
-    <div class="client-list" id="clientList"></div>
-    <div class="selected-client" id="selectedClientDisplay">
-        <span>📌 Nessun cliente selezionato</span>
-    </div>
-</div>
-
-<div class="content-area" id="contentArea">
-    <div id="warningArea" class="warning"></div>
-    <div id="contentWrapper"></div>
-</div>
-
-<footer>🔒 INSAPA 0142 - Carica i file DDT, SCA e SCHEDE</footer>
-
-</div>
-
-<div id="historyModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Storico articolo</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div class="file-input-area">
+            <p>📌 Carica i tuoi file dalla cartella Drive:</p>
+            <p style="font-size: 13px; color: #666;">1. Clicca "Apri cartella Google Drive" → 2. Scarica i file → 3. Torna qui e selezionali</p>
         </div>
-        <div class="modal-body" id="modalBody"></div>
+
+        <div id="loadingIndicator" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Caricamento documenti...</p>
+        </div>
+
+        <div id="errorMessage" class="error hidden"></div>
+
+        <main>
+            <div id="documentsList" class="documents-list">
+                <p style="text-align: center; padding: 40px; color: #999;">👆 Seleziona i file TXT per iniziare</p>
+            </div>
+        </main>
     </div>
-</div>
 
-<script>
-    // ==============================================================
-    // VARIABILI
-    // ==============================================================
-    let ddtData = new Map();
-    let scaData = new Map();
-    let schedeData = new Map();
-    let currentView = 'SCHEDE';
-    let currentClient = null;
+    <!-- Modale dettagli -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Dettagli documento</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
 
-    // ==============================================================
-    // UTILITY
-    // ==============================================================
-    function escapeHtml(str) {
-        return String(str || '').replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
-    }
-
-    function cleanImporto(str) {
-        if (!str) return 0;
-        let cleaned = str.replace(/\./g, '').replace(',', '.');
-        return parseFloat(cleaned) || 0;
-    }
-
-    function pulisciDescrizione(desc) {
-        if (!desc) return '';
-        desc = desc.replace(/[=\-]{5,}/g, '');
-        desc = desc.replace(/\s+attivo\s+\d+%\s+PER\s+PIATTI\s*/gi, '');
-        desc = desc.replace(/\s+5kg\s+c\.u\.\s+Pretagliata\s+LISCIA\s*/gi, '');
-        desc = desc.replace(/\s+SENZA\s+BOX\s*/gi, '');
-        desc = desc.replace(/\s+CHAMPAGNE\s*/gi, '');
-        desc = desc.replace(/\s+CACAO\s*/gi, '');
-        desc = desc.replace(/\s+BORDEAUX\s*/gi, '');
-        desc = desc.replace(/\s+MICROGOFFRATI?\s+2VELI\s*/gi, '');
-        desc = desc.replace(/\s+MICROGOFFRATO\s+2\s+VELI\s*/gi, '');
-        desc = desc.replace(/\s+[0-9]+(?:[.,][0-9]+)?\s*/g, ' ');
-        desc = desc.replace(/\s+/g, ' ').trim();
-        return desc.substring(0, 120);
-    }
-
-    // ==============================================================
-    // PARSER UNICO PER DDT E SCHEDE (stesso formato)
-    // ==============================================================
-    function parseFileGenerico(text, targetMap) {
-        const lines = text.split(/\r?\n/);
-        const clients = new Map();
-        let currentClient = null;
-        let currentCode = null;
+    <script>
+        // ==================== CONFIGURAZIONE ====================
+        const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4';
         
-        // Pattern per riga cliente: es "Cliente   : 030275 LA MANDRAGOLA..."
-        function estraiCliente(line) {
-            let match = line.match(/Cliente\s*:\s*(\d+)\s+(.+?)(?:\s*-|$)/i);
-            if (match) {
-                return { code: match[1], name: match[2].trim() };
-            }
-            return null;
-        }
+        let currentDocuments = [];
+
+        // ==================== PARSER PER TIPO FILE ====================
         
-        // Pattern per riga articolo: inizia con codice (almeno 4 caratteri)
-        function estraiArticolo(line) {
-            let match = line.match(/^(\S{4,})\s+(.+?)\s+(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/);
+        function parseDDT(filename, content) {
+            const match = filename.match(/^DDT-(\d+)\.txt$/i);
             if (!match) return null;
             
-            const code = match[1];
-            let desc = match[2];
-            desc = desc.replace(/\s+\d+[,.]?\d*\s+\d{2}\/\d{2}\/\d{4}.*$/, '');
-            desc = desc.substring(0, 120).trim();
+            const numeroAgente = match[1];
+            const records = [];
+            const lines = content.split('\n');
             
-            // Estrai tutte le coppie quantità/data
-            const coppie = [];
-            const patternCoppie = /(\d+[,.]?\d*)\s+(\d{2}\/\d{2}\/\d{4})/g;
-            let m;
-            while ((m = patternCoppie.exec(line)) !== null) {
-                let qty = parseFloat(m[1].replace(',', '.'));
-                let date = m[2];
-                coppie.push({ quantity: qty, date: date });
-            }
-            
-            // Estrai prezzo e sconto (ultimi 2-3 numeri)
-            const prezzoMatch = line.match(/(\d+[,.]?\d*)\s+(\d+[,.]?\d*)\s+(\d+[,.]?\d*)$/);
-            let price = 0;
-            let discount = 0;
-            if (prezzoMatch) {
-                price = parseFloat(prezzoMatch[1].replace(',', '.'));
-                discount = parseFloat(prezzoMatch[2].replace(',', '.'));
-            }
-            
-            return { code, desc, coppie, price, discount };
-        }
-        
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (line === '') continue;
-            
-            const clienteInfo = estraiCliente(line);
-            if (clienteInfo) {
-                currentClient = clienteInfo.name;
-                currentCode = clienteInfo.code;
-                if (!clients.has(currentClient)) {
-                    clients.set(currentClient, { 
-                        codice: currentCode, 
-                        items: [], 
-                        saldoScadenze: 0, 
-                        scadenzeDettaglio: [] 
+            // Cerca righe con formato DDT (hanno N.Doc. e Data e Tot.D.d.T.)
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                // Pattern per trovare righe DDT: inizio con codice cliente (numeri), poi nome, poi N.Doc., poi Data
+                const ddtMatch = line.match(/^\s*(\d+)\s+([A-Z\s\.]+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+(\d+)\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+([\d\.,]+)/);
+                if (ddtMatch) {
+                    records.push({
+                        tipo: 'DDT',
+                        agente: numeroAgente,
+                        codiceCliente: ddtMatch[1],
+                        cliente: ddtMatch[2].trim(),
+                        nDoc: ddtMatch[3],
+                        data: ddtMatch[4],
+                        totale: ddtMatch[6].replace(',', '.'),
+                        fullContent: content,
+                        rigaOriginale: line
                     });
                 }
-                continue;
             }
             
-            if (currentClient && line.match(/^\d{4,}/)) {
-                const articolo = estraiArticolo(line);
-                if (articolo && articolo.coppie.length > 0) {
-                    for (let coppia of articolo.coppie) {
-                        const client = clients.get(currentClient);
-                        client.items.push({
-                            code: articolo.code,
-                            description: pulisciDescrizione(articolo.desc),
-                            quantity: coppia.quantity,
-                            price: articolo.price,
-                            discountPercent: articolo.discount,
-                            netAmount: coppia.quantity * articolo.price * (1 - articolo.discount / 100),
-                            date: coppia.date
+            return records;
+        }
+
+        function parseORD(filename, content) {
+            const match = filename.match(/^ORD-(\d+)\.txt$/i);
+            if (!match) return null;
+            
+            const numeroAgente = match[1];
+            const records = [];
+            const lines = content.split('\n');
+            
+            // Estrai nome cliente dalla prima riga
+            let cliente = '';
+            const clienteMatch = content.match(/Cliente\s*:\s*\d+\s+([A-Z\s\.]+)/);
+            if (clienteMatch) {
+                cliente = clienteMatch[1].trim();
+            }
+            
+            // Cerca righe articoli (hanno codice, descrizione, quantità, prezzo)
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                // Pattern per righe con articoli (esclude quelle con * INESISTENTE)
+                if (line.match(/^\s*\d{5,}\s+[A-Z]/) && !line.includes('INESISTENTE')) {
+                    const parts = line.split(/\s{2,}/);
+                    if (parts.length >= 2) {
+                        const codice = parts[0].trim();
+                        const descrizione = parts[1]?.trim() || '';
+                        // Cerca prezzo alla fine della riga
+                        const prezzoMatch = line.match(/([\d\.,]+)\s*$[^\d]*$/);
+                        const prezzo = prezzoMatch ? prezzoMatch[1].replace(',', '.') : '';
+                        
+                        records.push({
+                            tipo: 'ORD',
+                            agente: numeroAgente,
+                            cliente: cliente,
+                            codiceArticolo: codice,
+                            descrizione: descrizione.substring(0, 50),
+                            prezzo: prezzo,
+                            fullContent: content,
+                            rigaOriginale: line
                         });
                     }
                 }
             }
-        }
-        
-        targetMap.clear();
-        for (let [name, data] of clients) {
-            targetMap.set(name, data);
-        }
-        salvaSuLocalStorage();
-        return targetMap;
-    }
-
-    // ==============================================================
-    // PARSER SCA (scadenze)
-    // ==============================================================
-    function parseSCAFile(text, targetMap) {
-        const lines = text.split(/\r?\n/);
-        const clients = new Map();
-        
-        for (let [name, data] of targetMap) {
-            clients.set(name, {
-                codice: data.codice,
-                items: data.items || [],
-                saldoScadenze: 0,
-                scadenzeDettaglio: []
-            });
-        }
-        
-        let i = 0;
-        while (i < lines.length) {
-            let line = lines[i].trim();
-            if (line.startsWith('CLIENTE:')) {
-                let rest = line.substring(8).trim();
-                let saldoIndex = rest.lastIndexOf('Saldo');
-                if (saldoIndex === -1) { i++; continue; }
-                let codeAndName = rest.substring(0, saldoIndex).trim();
-                let saldoPart = rest.substring(saldoIndex + 5).trim();
-                let tokens = codeAndName.split(/\s+/);
-                let codeRaw = tokens[0];
-                let codeClean = codeRaw.replace(/^0+/, '');
-                let nomeCompleto = tokens.slice(1).join(' ');
-                let saldo = cleanImporto(saldoPart);
-                if (saldoPart.endsWith('-')) saldo = -saldo;
-                
-                let target = null;
-                for (let [cliName, cliData] of clients.entries()) {
-                    if (cliData.codice === codeClean) {
-                        target = { name: cliName, data: cliData };
-                        break;
-                    }
-                }
-                if (!target && nomeCompleto.trim() !== '') {
-                    clients.set(nomeCompleto, {
-                        codice: codeClean,
-                        items: [],
-                        saldoScadenze: 0,
-                        scadenzeDettaglio: []
-                    });
-                    target = { name: nomeCompleto, data: clients.get(nomeCompleto) };
-                }
-                if (target) {
-                    target.data.saldoScadenze = saldo;
-                    let j = i + 1;
-                    while (j < lines.length && !lines[j].includes('Scadenza')) j++;
-                    if (j < lines.length) {
-                        j++;
-                        while (j < lines.length && (lines[j].trim() === '' || lines[j].includes('---'))) j++;
-                        let dettagli = [];
-                        while (j < lines.length) {
-                            let detLine = lines[j].trim();
-                            if (detLine === '') { j++; continue; }
-                            if (detLine.startsWith('VOSTRO DARE') || detLine.startsWith('CLIENTE:') ||
-                                detLine.includes('---')) break;
-                            if (detLine.match(/^\d{2}\/\d{2}\/\d{4}/)) {
-                                let parts = detLine.split(/\s+/);
-                                let dataScad = parts[0].replace('*', '');
-                                let dataDocumento = '';
-                                for (let k = 1; k < parts.length; k++) {
-                                    if (parts[k].match(/^\d{2}\/\d{2}\/\d{4}/)) {
-                                        dataDocumento = parts[k];
-                                        break;
-                                    }
-                                }
-                                let numeroFattura = '';
-                                for (let k = 0; k < parts.length; k++) {
-                                    if (parts[k].match(/^\d+$/)) {
-                                        numeroFattura = parts[k];
-                                        break;
-                                    }
-                                }
-                                let importo = 0;
-                                let euroIdx = parts.findIndex(p => p === 'Euro');
-                                if (euroIdx !== -1 && euroIdx + 1 < parts.length) {
-                                    importo = cleanImporto(parts[euroIdx + 1]);
-                                } else {
-                                    importo = cleanImporto(parts[parts.length - 1]);
-                                }
-                                if (importo !== 0) {
-                                    dettagli.push({ dataScadenza: dataScad, dataDocumento, numeroFattura, importo });
-                                }
-                            }
-                            j++;
-                        }
-                        target.data.scadenzeDettaglio = dettagli;
-                        i = j;
-                    } else i++;
-                } else i++;
-            } else i++;
-        }
-        
-        targetMap.clear();
-        for (let [name, data] of clients) {
-            targetMap.set(name, data);
-        }
-        salvaSuLocalStorage();
-        return targetMap;
-    }
-
-    // ==============================================================
-    // AGGREGAZIONE ARTICOLI
-    // ==============================================================
-    function aggregaArticoli(items) {
-        const map = new Map();
-        for (let it of items) {
-            if (map.has(it.code)) {
-                const ex = map.get(it.code);
-                ex.quantity += it.quantity;
-                ex.netAmount += it.netAmount;
-                ex.occurrences++;
-                ex.history.push({
-                    date: it.date || 'N/D',
-                    quantity: it.quantity,
-                    price: it.price,
-                    discount: it.discountPercent || 0
-                });
-                if (it.date && (!ex.lastDate || it.date > ex.lastDate)) {
-                    ex.lastDate = it.date;
-                    ex.price = it.price;
-                    ex.discountPercent = it.discountPercent;
-                }
-            } else {
-                map.set(it.code, {
-                    code: it.code,
-                    description: pulisciDescrizione(it.description),
-                    quantity: it.quantity,
-                    price: it.price,
-                    discountPercent: it.discountPercent || 0,
-                    netAmount: it.netAmount,
-                    lastDate: it.date || 'N/D',
-                    history: [{
-                        date: it.date || 'N/D',
-                        quantity: it.quantity,
-                        price: it.price,
-                        discount: it.discountPercent || 0
-                    }],
-                    occurrences: 1
+            
+            if (records.length === 0) {
+                // Se non trova articoli, crea un record riassuntivo
+                records.push({
+                    tipo: 'ORD',
+                    agente: numeroAgente,
+                    cliente: cliente || 'Cliente non trovato',
+                    codiceArticolo: '-',
+                    descrizione: 'Visualizza dettagli completo',
+                    prezzo: '-',
+                    fullContent: content,
+                    rigaOriginale: ''
                 });
             }
+            
+            return records;
         }
-        for (let [_, item] of map) {
-            item.history.sort((a, b) => {
-                if (a.date === 'N/D') return 1;
-                if (b.date === 'N/D') return -1;
-                return (b.date || '').localeCompare(a.date || '');
-            });
-        }
-        return Array.from(map.values()).sort((a, b) => {
-            const aNum = parseInt(a.code);
-            const bNum = parseInt(b.code);
-            if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-            if (!isNaN(aNum)) return -1;
-            if (!isNaN(bNum)) return 1;
-            return a.code.localeCompare(b.code);
-        });
-    }
 
-    // ==============================================================
-    // PERSISTENZA
-    // ==============================================================
-    function salvaSuLocalStorage() {
-        const toSave = {
-            ddt: Array.from(ddtData.entries()),
-            sca: Array.from(scaData.entries()),
-            schede: Array.from(schedeData.entries()),
-            currentView: currentView,
-            currentClient: currentClient
-        };
-        localStorage.setItem('insapa_data', JSON.stringify(toSave));
-    }
-
-    function caricaDaLocalStorage() {
-        const saved = localStorage.getItem('insapa_data');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                ddtData = new Map(data.ddt);
-                scaData = new Map(data.sca);
-                schedeData = new Map(data.schede);
-                currentView = data.currentView || 'SCHEDE';
-                currentClient = data.currentClient || null;
+        function parseSCA(filename, content) {
+            const match = filename.match(/^SCA-(\d+)\.txt$/i);
+            if (!match) return null;
+            
+            const numeroAgente = match[1];
+            const records = [];
+            const lines = content.split('\n');
+            
+            let currentCliente = '';
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
                 
-                document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-                if (currentView === 'DDT') document.getElementById('viewDDT').classList.add('active');
-                else if (currentView === 'SCA') document.getElementById('viewSCA').classList.add('active');
-                else document.getElementById('viewSCHEDE').classList.add('active');
+                // Cerca riga cliente
+                const clienteMatch = line.match(/CLIENTE:\s+\d+\s+([A-Z\s\.\']+)/);
+                if (clienteMatch) {
+                    currentCliente = clienteMatch[1].trim();
+                }
                 
-                aggiornaUI();
-                return true;
-            } catch(e) {}
+                // Cerca righe scadenze
+                const scadenzaMatch = line.match(/^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/);
+                if (scadenzaMatch && currentCliente) {
+                    records.push({
+                        tipo: 'SCA',
+                        agente: numeroAgente,
+                        cliente: currentCliente,
+                        scadenza: scadenzaMatch[1],
+                        descrizione: scadenzaMatch[2].trim(),
+                        nDoc: scadenzaMatch[3],
+                        dataDoc: scadenzaMatch[4],
+                        importo: scadenzaMatch[5].replace(',', '.'),
+                        fullContent: content,
+                        rigaOriginale: line
+                    });
+                }
+            }
+            
+            return records;
         }
-        return false;
-    }
 
-    // ==============================================================
-    // RENDER UI
-    // ==============================================================
-    function aggiornaListaClienti() {
-        let tuttiClienti = new Map();
-        for (let [nome, dati] of ddtData) tuttiClienti.set(nome, dati);
-        for (let [nome, dati] of scaData) if (!tuttiClienti.has(nome)) tuttiClienti.set(nome, dati);
-        for (let [nome, dati] of schedeData) if (!tuttiClienti.has(nome)) tuttiClienti.set(nome, dati);
+        // ==================== PARSER GENERALE ====================
         
-        const container = document.getElementById('clientList');
-        container.innerHTML = '';
-        
-        const nomiOrdinati = Array.from(tuttiClienti.keys()).sort();
-        for (let nome of nomiOrdinati) {
-            const chip = document.createElement('button');
-            chip.className = 'client-chip';
-            if (currentClient === nome) chip.classList.add('active');
-            chip.textContent = nome;
-            chip.onclick = () => {
-                currentClient = nome;
-                aggiornaListaClienti();
-                aggiornaVistaCorrente();
-                salvaSuLocalStorage();
-            };
-            container.appendChild(chip);
+        function parseFile(filename, content) {
+            if (filename.match(/^DDT-\d+\.txt$/i)) {
+                return parseDDT(filename, content);
+            } else if (filename.match(/^ORD-\d+\.txt$/i)) {
+                return parseORD(filename, content);
+            } else if (filename.match(/^SCA-\d+\.txt$/i)) {
+                return parseSCA(filename, content);
+            }
+            return null;
         }
+
+        // ==================== RENDER TABELLA ====================
         
-        const displayDiv = document.getElementById('selectedClientDisplay');
-        if (currentClient) {
-            let clientData = ddtData.get(currentClient) || scaData.get(currentClient) || schedeData.get(currentClient);
-            displayDiv.innerHTML = `<span>📌 Cliente: <strong>${escapeHtml(currentClient)}</strong></span>
-                                   <span class="stat">🏷️ Codice: ${clientData ? clientData.codice : 'N/D'}</span>`;
-        } else {
-            displayDiv.innerHTML = '<span>📌 Nessun cliente selezionato</span>';
-        }
-    }
-    
-    function apriModale(titolo, storico) {
-        const modal = document.getElementById('historyModal');
-        document.getElementById('modalTitle').textContent = titolo;
-        let html = '<ul class="history-list">';
-        for (let h of storico) {
-            html += `<li><span>📅 ${h.date || 'N/D'}</span><span>📊 ${h.quantity.toFixed(2)} pz</span><span>💰 ${h.price.toFixed(2)} €</span><span>🏷️ ${(h.discount || 0).toFixed(0)}%</span></li>`;
-        }
-        const totQty = storico.reduce((s, h) => s + h.quantity, 0);
-        const totNet = storico.reduce((s, h) => s + (h.quantity * h.price * (1 - (h.discount||0)/100)), 0);
-        html += `<li style="background:#f0fdf4;font-weight:bold;margin-top:8px;"><span>📦 Totale: ${totQty.toFixed(2)} pz</span><span>💰 Netto: ${totNet.toFixed(2)} €</span></li></ul>`;
-        document.getElementById('modalBody').innerHTML = html;
-        modal.style.display = 'flex';
-    }
-    
-    window.closeModal = function() {
-        document.getElementById('historyModal').style.display = 'none';
-    };
-    
-    function aggiornaVistaCorrente() {
-        if (!currentClient) {
-            document.getElementById('contentWrapper').innerHTML = '<div class="warning">Seleziona un cliente</div>';
-            return;
-        }
-        
-        let dati = null;
-        let titolo = '';
-        if (currentView === 'DDT') { dati = ddtData.get(currentClient); titolo = 'DDT'; }
-        else if (currentView === 'SCA') { dati = scaData.get(currentClient); titolo = 'SCA'; }
-        else { dati = schedeData.get(currentClient); titolo = 'SCHEDE'; }
-        
-        if (!dati) {
-            document.getElementById('contentWrapper').innerHTML = `<div class="warning">Nessun dato ${titolo} per questo cliente. Carica il file corrispondente.</div>`;
-            return;
-        }
-        
-        // Vista SCA
-        if (currentView === 'SCA') {
-            const scadenze = dati.scadenzeDettaglio || [];
-            const saldo = dati.saldoScadenze || 0;
-            if (scadenze.length === 0) {
-                document.getElementById('contentWrapper').innerHTML = '<div class="warning">Nessuna scadenza</div>';
+        function renderDocuments(documents) {
+            const container = document.getElementById('documentsList');
+            const filter = document.getElementById('typeFilter').value;
+            
+            let filtered = documents;
+            if (filter !== 'all') {
+                filtered = documents.filter(doc => doc.tipo === filter);
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="error" style="display:block;">Nessun documento trovato</div>';
                 return;
             }
-            let html = `<div class="client-summary"><div class="stat">💰 Saldo: ${saldo.toFixed(2)} €</div><div class="stat">📄 Fatture: ${scadenze.length}</div></div>`;
-            html += `<div class="table-wrapper"><table><thead><tr><th>Data fattura</th><th>N° fattura</th><th>Importo</th><th>Scadenza</th></tr></thead><tbody>`;
-            for (let s of scadenze) {
-                html += `<tr><td>${escapeHtml(s.dataDocumento || 'N/D')}</td><td>${escapeHtml(s.numeroFattura || 'N/D')}</td><td class="num">${(s.importo || 0).toFixed(2)} €</td><td>${escapeHtml(s.dataScadenza || 'N/D')}</td></tr>`;
+            
+            const html = `
+                <table class="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>N° Agente</th>
+                            <th>Cliente / Descrizione</th>
+                            <th>N° Documento</th>
+                            <th>Data / Scadenza</th>
+                            <th>Importo</th>
+                            <th>Dettagli</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map((doc, idx) => `
+                            <tr data-index="${idx}">
+                                <td><span class="type-badge type-${doc.tipo}">${doc.tipo}</span></td>
+                                <td>${doc.agente || '-'}</td>
+                                <td>${doc.cliente || doc.descrizione || '-'}</td>
+                                <td>${doc.nDoc || doc.codiceArticolo || doc.scadenza || '-'}</td>
+                                <td>${doc.data || doc.dataDoc || doc.scadenza || '-'}</td>
+                                <td>${doc.totale || doc.importo || doc.prezzo || '-'}</td>
+                                <td><button class="detail-btn" data-index="${idx}">📄 Dettagli</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+            
+            // Attacca eventi ai pulsanti dettagli
+            document.querySelectorAll('.detail-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = parseInt(btn.getAttribute('data-index'));
+                    showDetails(filtered[index]);
+                });
+            });
+        }
+        
+        // ==================== MODALE DETTAGLI ====================
+        
+        function showDetails(doc) {
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${doc.tipo} - Dettagli completi`;
+            
+            // Costruisci contenuto dettagliato in base al tipo
+            let detailsHtml = '<div class="detail-section"><h4>📋 Informazioni principali</h4>';
+            detailsHtml += `<p><strong>Tipo:</strong> ${doc.tipo}</p>`;
+            detailsHtml += `<p><strong>Agente:</strong> ${doc.agente || '-'}</p>`;
+            
+            if (doc.tipo === 'DDT') {
+                detailsHtml += `<p><strong>Codice Cliente:</strong> ${doc.codiceCliente || '-'}</p>`;
+                detailsHtml += `<p><strong>Cliente:</strong> ${doc.cliente || '-'}</p>`;
+                detailsHtml += `<p><strong>N. Documento:</strong> ${doc.nDoc || '-'}</p>`;
+                detailsHtml += `<p><strong>Data:</strong> ${doc.data || '-'}</p>`;
+                detailsHtml += `<p><strong>Totale:</strong> € ${doc.totale || '-'}</p>`;
+            } else if (doc.tipo === 'ORD') {
+                detailsHtml += `<p><strong>Cliente:</strong> ${doc.cliente || '-'}</p>`;
+                detailsHtml += `<p><strong>Codice Articolo:</strong> ${doc.codiceArticolo || '-'}</p>`;
+                detailsHtml += `<p><strong>Descrizione:</strong> ${doc.descrizione || '-'}</p>`;
+                detailsHtml += `<p><strong>Prezzo:</strong> € ${doc.prezzo || '-'}</p>`;
+            } else if (doc.tipo === 'SCA') {
+                detailsHtml += `<p><strong>Cliente:</strong> ${doc.cliente || '-'}</p>`;
+                detailsHtml += `<p><strong>Scadenza:</strong> ${doc.scadenza || '-'}</p>`;
+                detailsHtml += `<p><strong>Descrizione:</strong> ${doc.descrizione || '-'}</p>`;
+                detailsHtml += `<p><strong>N. Documento:</strong> ${doc.nDoc || '-'}</p>`;
+                detailsHtml += `<p><strong>Data Documento:</strong> ${doc.dataDoc || '-'}</p>`;
+                detailsHtml += `<p><strong>Importo:</strong> € ${doc.importo || '-'}</p>`;
             }
-            html += `</tbody></table></div>`;
-            document.getElementById('contentWrapper').innerHTML = html;
-            return;
+            
+            detailsHtml += '</div>';
+            detailsHtml += '<div class="detail-section"><h4>📄 Contenuto completo del file</h4>';
+            detailsHtml += `<pre>${escapeHtml(doc.fullContent || 'Nessun contenuto')}</pre>`;
+            detailsHtml += '</div>';
+            
+            modalBody.innerHTML = detailsHtml;
+            modal.classList.remove('hidden');
         }
         
-        // Vista DDT o SCHEDE
-        const articoli = aggregaArticoli(dati.items);
-        if (articoli.length === 0) {
-            document.getElementById('contentWrapper').innerHTML = '<div class="warning">Nessun articolo</div>';
-            return;
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
         
-        let totQty = 0, totNet = 0;
-        articoli.forEach(a => { totQty += a.quantity; totNet += a.netAmount; });
+        // ==================== GESTIONE FILE ====================
         
-        let html = `<div class="client-summary"><div class="stat">📦 Quantità: ${totQty.toFixed(2)}</div><div class="stat">💰 Netto: ${totNet.toFixed(2)} €</div></div>`;
-        html += `<div class="table-wrapper"><table><thead><tr><th>Codice</th><th>Descrizione</th><th>Prezzo</th><th>Q.tà</th><th>Sconto</th><th>Ultimo</th><th></th></tr></thead><tbody>`;
-        
-        for (let a of articoli) {
-            const storicoJson = JSON.stringify(a.history).replace(/"/g, '&quot;');
-            html += `<tr>
-                        <td>${escapeHtml(a.code)}</td>
-                        <td>${escapeHtml(a.description)}</td>
-                        <td class="num">${a.price.toFixed(2)} €</td>
-                        <td class="num">${a.quantity.toFixed(2)}</td>
-                        <td class="num">${(a.discountPercent || 0).toFixed(0)}%</td>
-                        <td>📅 ${a.lastDate}</td>
-                        <td style="text-align:center;cursor:pointer;" onclick="apriModale('${escapeHtml(a.code)} - ${escapeHtml(a.description.substring(0,30))}', ${storicoJson})">📜</td>
-                      </tr>`;
-        }
-        html += `</tbody></table></div>`;
-        document.getElementById('contentWrapper').innerHTML = html;
-    }
-    
-    function aggiornaUI() {
-        aggiornaListaClienti();
-        aggiornaVistaCorrente();
-    }
-    
-    // ==============================================================
-    // CARICAMENTO FILE
-    // ==============================================================
-    function caricaDDT() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.txt';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const loading = document.getElementById('loadingOverlay');
-            loading.style.display = 'flex';
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                setTimeout(() => {
-                    try {
-                        parseFileGenerico(ev.target.result, ddtData);
-                        aggiornaUI();
-                        document.getElementById('warningArea').style.display = 'none';
-                    } catch (err) {
-                        document.getElementById('warningArea').style.display = 'block';
-                        document.getElementById('warningArea').innerHTML = 'Errore DDT: ' + err.message;
+        async function handleFiles(files) {
+            const loadingDiv = document.getElementById('loadingIndicator');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            loadingDiv.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            
+            const allRecords = [];
+            
+            for (const file of files) {
+                if (!file.name.endsWith('.txt')) continue;
+                
+                try {
+                    const content = await file.text();
+                    const parsed = parseFile(file.name, content);
+                    
+                    if (parsed) {
+                        if (Array.isArray(parsed)) {
+                            allRecords.push(...parsed);
+                        } else {
+                            allRecords.push(parsed);
+                        }
+                    } else {
+                        console.warn(`Formato non riconosciuto: ${file.name}`);
                     }
-                    loading.style.display = 'none';
-                }, 10);
-            };
-            reader.readAsText(file, 'UTF-8');
-        };
-        input.click();
-    }
-    
-    function caricaSCA() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.txt';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const loading = document.getElementById('loadingOverlay');
-            loading.style.display = 'flex';
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                setTimeout(() => {
-                    try {
-                        parseSCAFile(ev.target.result, scaData);
-                        aggiornaUI();
-                        document.getElementById('warningArea').style.display = 'none';
-                    } catch (err) {
-                        document.getElementById('warningArea').style.display = 'block';
-                        document.getElementById('warningArea').innerHTML = 'Errore SCA: ' + err.message;
-                    }
-                    loading.style.display = 'none';
-                }, 10);
-            };
-            reader.readAsText(file, 'UTF-8');
-        };
-        input.click();
-    }
-    
-    function caricaSCHEDE() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.txt';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const loading = document.getElementById('loadingOverlay');
-            loading.style.display = 'flex';
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                setTimeout(() => {
-                    try {
-                        parseFileGenerico(ev.target.result, schedeData);
-                        aggiornaUI();
-                        document.getElementById('warningArea').style.display = 'none';
-                    } catch (err) {
-                        document.getElementById('warningArea').style.display = 'block';
-                        document.getElementById('warningArea').innerHTML = 'Errore SCHEDE: ' + err.message;
-                    }
-                    loading.style.display = 'none';
-                }, 10);
-            };
-            reader.readAsText(file, 'UTF-8');
-        };
-        input.click();
-    }
-    
-    function filtraClienti() {
-        const testo = document.getElementById('clientSearchInput').value.toLowerCase();
-        const chips = document.querySelectorAll('.client-chip');
-        chips.forEach(chip => {
-            chip.style.display = chip.textContent.toLowerCase().includes(testo) ? '' : 'none';
-        });
-    }
-    
-    // ==============================================================
-    // INIT
-    // ==============================================================
-    document.getElementById('loadDDTBtn').addEventListener('click', caricaDDT);
-    document.getElementById('loadSCABtn').addEventListener('click', caricaSCA);
-    document.getElementById('loadSCHEDEBtn').addEventListener('click', caricaSCHEDE);
-    document.getElementById('clientSearchInput').addEventListener('input', filtraClienti);
-    document.getElementById('viewDDT').addEventListener('click', () => {
-        currentView = 'DDT';
-        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('viewDDT').classList.add('active');
-        aggiornaVistaCorrente();
-        salvaSuLocalStorage();
-    });
-    document.getElementById('viewSCA').addEventListener('click', () => {
-        currentView = 'SCA';
-        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('viewSCA').classList.add('active');
-        aggiornaVistaCorrente();
-        salvaSuLocalStorage();
-    });
-    document.getElementById('viewSCHEDE').addEventListener('click', () => {
-        currentView = 'SCHEDE';
-        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('viewSCHEDE').classList.add('active');
-        aggiornaVistaCorrente();
-        salvaSuLocalStorage();
-    });
-    
-    // Logo
-    const logoInput = document.getElementById('logoFileInput');
-    const logoImg = document.getElementById('logoImg');
-    const logoPlaceholder = document.getElementById('logoPlaceholder');
-    document.getElementById('uploadLogoBtn').onclick = () => logoInput.click();
-    logoInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const url = ev.target.result;
-                logoImg.src = url;
-                logoImg.style.display = 'block';
-                logoPlaceholder.style.display = 'none';
-                localStorage.setItem('logo_data', url);
-            };
-            reader.readAsDataURL(file);
+                } catch (err) {
+                    console.error(`Errore lettura ${file.name}:`, err);
+                    errorDiv.textContent = `Errore lettura ${file.name}`;
+                    errorDiv.classList.remove('hidden');
+                    setTimeout(() => errorDiv.classList.add('hidden'), 3000);
+                }
+            }
+            
+            currentDocuments = allRecords;
+            renderDocuments(currentDocuments);
+            loadingDiv.classList.add('hidden');
+            
+            if (allRecords.length === 0) {
+                errorDiv.textContent = 'Nessun documento valido trovato. Usa file DDT-XX.txt, ORD-XX.txt o SCA-XX.txt';
+                errorDiv.classList.remove('hidden');
+                setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+            }
         }
-    };
-    
-    const savedLogo = localStorage.getItem('logo_data');
-    if (savedLogo) {
-        logoImg.src = savedLogo;
-        logoImg.style.display = 'block';
-        logoPlaceholder.style.display = 'none';
-    }
-    
-    if (!caricaDaLocalStorage()) {
-        console.log('Nessun dato salvato');
-    }
-</script>
+        
+        // ==================== SETUP EVENTI ====================
+        
+        function setupEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            const selectBtn = document.getElementById('selectFilesBtn');
+            const openDriveBtn = document.getElementById('openDriveBtn');
+            const filterSelect = document.getElementById('typeFilter');
+            
+            selectBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', (event) => {
+                if (event.target.files.length > 0) {
+                    handleFiles(Array.from(event.target.files));
+                }
+                fileInput.value = '';
+            });
+            
+            openDriveBtn.addEventListener('click', () => {
+                window.open(DRIVE_FOLDER_URL, '_blank');
+            });
+            
+            filterSelect.addEventListener('change', () => {
+                renderDocuments(currentDocuments);
+            });
+            
+            // Chiudi modale
+            document.querySelector('.close-btn').addEventListener('click', () => {
+                document.getElementById('detailModal').classList.add('hidden');
+            });
+            
+            window.addEventListener('click', (e) => {
+                const modal = document.getElementById('detailModal');
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+        
+        // ==================== INIT ====================
+        
+        setupEventListeners();
+        
+        console.log('App pronta! Carica i file DDT-XX.txt, ORD-XX.txt, SCA-XX.txt');
+    </script>
 </body>
 </html>
