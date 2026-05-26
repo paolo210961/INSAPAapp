@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lettore DDT - ORD - SCA</title>
+    <title>Documenti DDT · ORD · SCA - Memoria persistente</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -31,6 +31,7 @@
             gap: 15px;
             align-items: center;
             flex-wrap: wrap;
+            margin-bottom: 15px;
         }
         .btn {
             background: #4CAF50;
@@ -42,8 +43,10 @@
             font-size: 14px;
             transition: transform 0.2s;
         }
-        .btn:hover { transform: scale(1.05); }
+        .btn:hover { transform: scale(1.02); }
         .btn-drive { background: #4285f4; }
+        .btn-danger { background: #e74c3c; }
+        .btn-secondary { background: #666; }
         select {
             padding: 10px 15px;
             border-radius: 25px;
@@ -52,8 +55,70 @@
             color: white;
             cursor: pointer;
         }
-        select option { background: #2c3e50; }
-        .documents-list { padding: 20px; overflow-x: auto; }
+        
+        /* Sezione memoria */
+        .memory-section {
+            margin: 20px;
+            padding: 15px;
+            background: #e8f0fe;
+            border-radius: 15px;
+        }
+        .memory-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .file-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .file-btn {
+            background: white;
+            border: 2px solid #4CAF50;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-btn:hover {
+            background: #4CAF50;
+            color: white;
+            transform: scale(1.02);
+        }
+        .file-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .delete-file {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+        .delete-file:hover { color: #e74c3c; }
+        
+        /* Upload area */
+        .upload-area {
+            margin: 20px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px dashed #ccc;
+            cursor: pointer;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -73,7 +138,6 @@
         }
         tr:nth-child(even) { background-color: #f8f9fa; }
         tr:nth-child(odd) { background-color: #ffffff; }
-        tr:hover { background-color: #e3f2fd; }
         .type-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -88,13 +152,10 @@
             background: #2196F3;
             color: white;
             border: none;
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
         }
-        .detail-btn:hover { background: #0b7dda; transform: scale(1.05); }
         .modal {
             position: fixed;
             top: 0;
@@ -114,11 +175,6 @@
             max-width: 750px;
             max-height: 85vh;
             overflow: auto;
-            animation: slideIn 0.2s ease;
-        }
-        @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
         .modal-header {
             display: flex;
@@ -127,7 +183,6 @@
             padding: 18px 22px;
             background: linear-gradient(135deg, #2c3e50, #1a1a2e);
             color: white;
-            border-radius: 15px 15px 0 0;
         }
         .close-btn {
             background: none;
@@ -135,23 +190,8 @@
             font-size: 32px;
             color: white;
             cursor: pointer;
-            line-height: 1;
         }
-        .close-btn:hover { opacity: 0.7; }
         .modal-body { padding: 22px; }
-        .detail-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        .detail-section h4 {
-            color: #2c3e50;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 6px;
-        }
-        .detail-section p { margin: 6px 0; line-height: 1.5; }
         .modal-body pre {
             background: #2d2d2d;
             color: #f8f8f2;
@@ -159,63 +199,62 @@
             border-radius: 10px;
             overflow-x: auto;
             font-size: 11px;
-            font-family: 'Courier New', monospace;
             white-space: pre-wrap;
-            word-wrap: break-word;
-            max-height: 400px;
         }
         .hidden { display: none !important; }
-        .info-area {
-            margin: 20px;
-            padding: 20px;
-            background: #e8f0fe;
-            border-radius: 15px;
-            text-align: center;
-            border-left: 4px solid #4285f4;
-        }
-        .badge {
+        .badge-count {
             display: inline-block;
-            background: #e74c3c;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            margin-left: 8px;
+            background: #4CAF50;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
         }
         @media (max-width: 768px) {
             th, td { padding: 8px 5px; font-size: 11px; }
             .controls { flex-direction: column; align-items: stretch; }
             .btn, select { width: 100%; text-align: center; }
+            .file-buttons { justify-content: center; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📋 Documenti DDT · ORD · SCA</h1>
+            <h1>📋 DDT · ORD · SCA <span id="docCount" class="badge-count">0</span></h1>
             <div class="controls">
-                <input type="file" id="fileInput" accept=".txt" multiple style="display:none;">
-                <button id="selectBtn" class="btn">📂 Seleziona file TXT</button>
-                <button id="driveBtn" class="btn btn-drive">📁 Apri cartella Drive</button>
+                <button id="driveBtn" class="btn btn-drive">📁 Apri Drive</button>
                 <select id="filterSelect">
-                    <option value="all">📌 Tutti i documenti</option>
+                    <option value="all">📌 Tutti</option>
                     <option value="DDT">📦 DDT</option>
                     <option value="ORD">📋 ORD</option>
                     <option value="SCA">💰 SCA</option>
                 </select>
+                <button id="clearAllBtn" class="btn btn-danger">🗑️ Cancella tutto</button>
             </div>
         </header>
 
-        <div class="info-area">
-            <strong>📌 Come funziona:</strong><br>
-            1️⃣ Clicca "Apri cartella Drive" e scarica i file che vuoi vedere<br>
-            2️⃣ Torna qui e clicca "Seleziona file TXT"<br>
-            3️⃣ Scegli i file scaricati e i dati appariranno in tabella<br>
-            4️⃣ Clicca su "📄 Dettagli" per vedere il contenuto completo
+        <!-- MEMORIA FILE SALVATI -->
+        <div class="memory-section" id="memorySection">
+            <div class="memory-title">
+                <span>💾 FILE IN MEMORIA (persistenti)</span>
+                <span style="font-size: 12px;">⬇️ Clicca un file per caricarlo</span>
+            </div>
+            <div id="fileButtonsList" class="file-buttons">
+                <span style="color:#999;">Nessun file in memoria. Caricane uno!</span>
+            </div>
         </div>
 
-        <div id="docList" class="documents-list">
-            <p style="text-align:center; padding:60px; color:#aaa;">✨ Seleziona uno o più file TXT per iniziare</p>
+        <!-- AREA CARICAMENTO -->
+        <div class="upload-area" id="uploadArea">
+            📂 <strong>Clicca qui</strong> per selezionare file TXT<br>
+            <span style="font-size: 12px; color:#666;">(DDT-01.txt, ORD-15.txt, SCA-03.txt ...)</span>
+            <input type="file" id="fileInput" accept=".txt" multiple style="display:none;">
+        </div>
+
+        <!-- TABELLA DATI -->
+        <div id="docList" class="documents-list" style="padding:20px">
+            <p style="text-align:center; padding:40px; color:#aaa;">✨ Carica un file o clicca un file dalla memoria</p>
         </div>
     </div>
 
@@ -224,28 +263,44 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Dettagli documento</h2>
-                <button class="close-btn" id="closeModalBtn">&times;</button>
+                <button class="close-btn">&times;</button>
             </div>
             <div id="modalBody" class="modal-body"></div>
         </div>
     </div>
 
     <script>
-        // ==================== CONFIGURAZIONE ====================
-        const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4';
+        const DRIVE_URL = 'https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4';
+        const STORAGE_KEY = 'saved_files_data';
+        
         let allDocuments = [];
+        let savedFiles = []; // { name, content, tipo }
 
-        // ==================== PARSER FILE ====================
-        function parseDDT(filename, content) {
-            const match = filename.match(/^DDT-(\d+)\.txt$/i);
-            if (!match) return null;
-            
+        // ==================== CARICA DA MEMORIA ====================
+        function loadFromLocalStorage() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    savedFiles = JSON.parse(stored);
+                    renderFileButtons();
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedFiles));
+            renderFileButtons();
+        }
+
+        // ==================== PARSER ====================
+        function parseDDT(content, nomeFile) {
+            const match = nomeFile.match(/(\d+)/);
+            const agente = match ? match[1] : '??';
             const records = [];
             const lines = content.split('\n');
             
             for (let line of lines) {
-                // Cerca righe con data e numero documento
-                if (line.match(/\d{2}\/\d{2}\/\d{4}/) && line.match(/\d{2}\/\d{2}\/\d{4}/)) {
+                if (line.match(/\d{2}\/\d{2}\/\d{4}/) && (line.match(/COOP/) || line.match(/SRL/))) {
                     const parts = line.trim().split(/\s+/);
                     let data = '', nDoc = '', totale = '', cliente = '';
                     
@@ -255,59 +310,33 @@
                         if (part.match(/[\d\.,]+$/) && !part.includes('/')) totale = part.replace(',', '.');
                     }
                     
-                    // Cerca nome cliente (parole dopo il codice)
                     const clienteMatch = line.match(/^\s*\d+\s+([A-Z\s\.]+?)\s+\d/);
-                    if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 40);
+                    if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 45);
                     
                     if (nDoc || data) {
                         records.push({
-                            tipo: 'DDT',
-                            agente: match[1],
-                            cliente: cliente || 'Cliente',
-                            nDoc: nDoc || '-',
-                            data: data || '-',
-                            importo: totale || '-',
-                            fullContent: content,
-                            rigaOriginale: line
+                            tipo: 'DDT', agente: agente, cliente: cliente || 'Cliente',
+                            nDoc: nDoc || '-', data: data || '-', importo: totale || '-',
+                            fullContent: content
                         });
                     }
                 }
             }
-            
-            return records.length ? records : [{
-                tipo: 'DDT',
-                agente: match[1],
-                cliente: 'Visualizza nel dettaglio',
-                nDoc: '-',
-                data: '-',
-                importo: '-',
-                fullContent: content
-            }];
+            return records.length ? records : [{ tipo: 'DDT', agente: agente, cliente: 'Contenuto grezzo', nDoc: '-', data: '-', importo: '-', fullContent: content }];
         }
 
-        function parseORD(filename, content) {
-            const match = filename.match(/^ORD-(\d+)\.txt$/i);
-            if (!match) return null;
-            
-            let cliente = 'Cliente';
-            const clienteMatch = content.match(/Cliente\s*:\s*\d+\s+([A-Z\s\.\']+)/);
+        function parseORD(content, nomeFile) {
+            const match = nomeFile.match(/(\d+)/);
+            const agente = match ? match[1] : '??';
+            let cliente = 'Ordine cliente';
+            const clienteMatch = content.match(/Cliente\s*:\s*\d+\s+([^\n]+)/);
             if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 50);
-            
-            return [{
-                tipo: 'ORD',
-                agente: match[1],
-                cliente: cliente,
-                nDoc: 'Ordine cliente',
-                data: 'Vedi dettagli',
-                importo: 'Dettagli',
-                fullContent: content
-            }];
+            return [{ tipo: 'ORD', agente: agente, cliente: cliente, nDoc: 'Ordine', data: 'Vedi dettagli', importo: '-', fullContent: content }];
         }
 
-        function parseSCA(filename, content) {
-            const match = filename.match(/^SCA-(\d+)\.txt$/i);
-            if (!match) return null;
-            
+        function parseSCA(content, nomeFile) {
+            const match = nomeFile.match(/(\d+)/);
+            const agente = match ? match[1] : '??';
             const records = [];
             const lines = content.split('\n');
             let currentCliente = '';
@@ -319,172 +348,214 @@
                 const scadMatch = line.match(/(\d{2}\/\d{2}\/\d{4})\s+.*?\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/);
                 if (scadMatch && currentCliente) {
                     records.push({
-                        tipo: 'SCA',
-                        agente: match[1],
-                        cliente: currentCliente,
-                        nDoc: scadMatch[2],
-                        data: scadMatch[1],
-                        importo: scadMatch[4].replace(',', '.'),
-                        fullContent: content,
-                        dataDoc: scadMatch[3],
-                        descrizione: scadMatch[0].split(/\s+/).slice(1, -4).join(' ')
+                        tipo: 'SCA', agente: agente, cliente: currentCliente,
+                        nDoc: scadMatch[2], data: scadMatch[1], importo: scadMatch[4].replace(',', '.'),
+                        fullContent: content
                     });
                 }
             }
-            
-            return records.length ? records : [{
-                tipo: 'SCA',
-                agente: match[1],
-                cliente: currentCliente || 'Scadenziario',
-                nDoc: '-',
-                data: '-',
-                importo: '-',
-                fullContent: content
-            }];
+            return records.length ? records : [{ tipo: 'SCA', agente: agente, cliente: currentCliente || 'Scadenziario', nDoc: '-', data: '-', importo: '-', fullContent: content }];
         }
 
-        function parseFile(filename, content) {
-            if (filename.match(/^DDT-\d+\.txt$/i)) return parseDDT(filename, content);
-            if (filename.match(/^ORD-\d+\.txt$/i)) return parseORD(filename, content);
-            if (filename.match(/^SCA-\d+\.txt$/i)) return parseSCA(filename, content);
-            return null;
+        function processContent(name, content) {
+            const upperName = name.toUpperCase();
+            let parsed = null;
+            if (upperName.includes('DDT')) parsed = parseDDT(content, name);
+            else if (upperName.includes('ORD')) parsed = parseORD(content, name);
+            else if (upperName.includes('SCA')) parsed = parseSCA(content, name);
+            
+            if (parsed) {
+                if (Array.isArray(parsed)) allDocuments.push(...parsed);
+                else allDocuments.push(parsed);
+            }
+            return parsed;
+        }
+
+        // ==================== SALVA FILE IN MEMORIA ====================
+        function saveFileToMemory(name, content) {
+            // Controlla se esiste già
+            const existingIndex = savedFiles.findIndex(f => f.name === name);
+            const fileData = { name: name, content: content, tipo: name.toUpperCase().includes('DDT') ? 'DDT' : (name.toUpperCase().includes('ORD') ? 'ORD' : 'SCA') };
+            
+            if (existingIndex !== -1) {
+                savedFiles[existingIndex] = fileData;
+            } else {
+                savedFiles.push(fileData);
+            }
+            saveToLocalStorage();
+        }
+
+        function deleteFileFromMemory(name) {
+            savedFiles = savedFiles.filter(f => f.name !== name);
+            saveToLocalStorage();
+            // Se il file cancellato era quello attivo, ricarica i rimanenti
+            renderFileButtons();
+        }
+
+        function loadFileFromMemory(name) {
+            const file = savedFiles.find(f => f.name === name);
+            if (file) {
+                allDocuments = [];
+                processContent(file.name, file.content);
+                renderTable();
+            }
+        }
+
+        // ==================== RENDER PULSANTI FILE ====================
+        function renderFileButtons() {
+            const container = document.getElementById('fileButtonsList');
+            if (!savedFiles.length) {
+                container.innerHTML = '<span style="color:#999;">📭 Nessun file in memoria. Caricane uno!</span>';
+                return;
+            }
+            
+            let html = '';
+            savedFiles.forEach(file => {
+                let tipoIcon = '';
+                if (file.tipo === 'DDT') tipoIcon = '📦';
+                else if (file.tipo === 'ORD') tipoIcon = '📋';
+                else tipoIcon = '💰';
+                
+                html += `
+                    <div class="file-btn" data-name="${file.name}">
+                        ${tipoIcon} ${file.name}
+                        <button class="delete-file" data-name="${file.name}" title="Cancella dalla memoria">🗑️</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            
+            // Eventi per caricare file
+            document.querySelectorAll('.file-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete-file')) return;
+                    const name = btn.getAttribute('data-name');
+                    loadFileFromMemory(name);
+                });
+            });
+            
+            // Eventi per cancellare
+            document.querySelectorAll('.delete-file').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const name = btn.getAttribute('data-name');
+                    deleteFileFromMemory(name);
+                });
+            });
         }
 
         // ==================== CARICAMENTO FILE ====================
-        async function loadFiles(files) {
-            const newDocs = [];
-            
+        async function handleFiles(files) {
             for (let file of files) {
                 if (!file.name.endsWith('.txt')) continue;
-                try {
-                    const content = await file.text();
-                    const parsed = parseFile(file.name, content);
-                    if (parsed) {
-                        if (Array.isArray(parsed)) newDocs.push(...parsed);
-                        else newDocs.push(parsed);
-                    }
-                } catch (err) {
-                    console.error('Errore lettura file:', file.name, err);
-                }
+                const content = await file.text();
+                
+                // Salva in memoria
+                saveFileToMemory(file.name, content);
+                
+                // Elabora per visualizzazione
+                processContent(file.name, content);
             }
-            
-            allDocuments = newDocs;
             renderTable();
-            
-            if (newDocs.length === 0) {
-                alert('Nessun file valido trovato. Usa file con nome DDT-XX.txt, ORD-XX.txt o SCA-XX.txt');
-            }
+            updateCount();
         }
 
-        // ==================== RENDER TABELLA ====================
         function renderTable() {
             const filter = document.getElementById('filterSelect').value;
             let filtered = filter === 'all' ? allDocuments : allDocuments.filter(d => d.tipo === filter);
             const container = document.getElementById('docList');
             
             if (!filtered.length) {
-                container.innerHTML = '<p style="text-align:center; padding:60px; color:#aaa;">📭 Nessun documento da mostrare. Seleziona dei file TXT.</p>';
+                container.innerHTML = '<p style="text-align:center; padding:40px; color:#aaa;">📭 Nessun documento. Carica un file o clicca un file dalla memoria</p>';
                 return;
             }
             
-            let html = `<table><thead><tr>
-                <th>Tipo</th><th>Agente</th><th>Cliente / Descrizione</th><th>N° Documento</th><th>Data</th><th>Importo</th><th>Azioni</th>
-            </tr></thead><tbody>`;
-            
+            let html = `<table><thead><tr><th>Tipo</th><th>Agente</th><th>Cliente</th><th>N.Doc</th><th>Data</th><th>Importo</th><th></th></tr></thead><tbody>`;
             filtered.forEach((doc, idx) => {
-                html += `<tr data-idx="${idx}">
+                html += `<tr>
                     <td><span class="type-badge type-${doc.tipo}">${doc.tipo}</span></td>
-                    <td>${doc.agente || '-'}</td>
-                    <td>${doc.cliente || '-'}</td>
-                    <td>${doc.nDoc || '-'}</td>
-                    <td>${doc.data || '-'}</td>
-                    <td>${doc.importo && doc.importo !== '-' ? '€ ' + doc.importo : doc.importo || '-'}</td>
-                    <td><button class="detail-btn" data-idx="${idx}">📄 Dettagli</button></td>
+                    <td>${doc.agente}</td>
+                    <td>${doc.cliente.substring(0, 40)}</td>
+                    <td>${doc.nDoc}</td>
+                    <td>${doc.data}</td>
+                    <td>${doc.importo !== '-' ? '€ ' + doc.importo : '-'}</td>
+                    <td><button class="detail-btn" data-idx="${idx}" data-filter="${filter}">📄</button></td>
                 </tr>`;
             });
             html += '</tbody></table>';
             container.innerHTML = html;
             
-            // Attacca eventi SOLO ai pulsanti (nessun click automatico!)
             document.querySelectorAll('.detail-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const idx = parseInt(btn.getAttribute('data-idx'));
+                    const idx = parseInt(btn.dataset.idx);
                     const currentFilter = document.getElementById('filterSelect').value;
                     const currentFiltered = currentFilter === 'all' ? allDocuments : allDocuments.filter(d => d.tipo === currentFilter);
-                    if (currentFiltered[idx]) showDetailModal(currentFiltered[idx]);
+                    showModal(currentFiltered[idx]);
                 });
             });
         }
 
-        // ==================== MODALE DETTAGLI ====================
-        function showDetailModal(doc) {
+        function showModal(doc) {
             const modal = document.getElementById('detailModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            
-            modalTitle.textContent = `${doc.tipo} · Documento dettagliato`;
-            
-            let html = `<div class="detail-section">
-                <h4>📋 Informazioni principali</h4>
-                <p><strong>Tipo documento:</strong> ${doc.tipo}</p>
-                <p><strong>Numero agente:</strong> ${doc.agente || '-'}</p>
-                <p><strong>Cliente / Riferimento:</strong> ${doc.cliente || '-'}</p>
-                <p><strong>Numero documento:</strong> ${doc.nDoc || '-'}</p>
-                <p><strong>Data / Scadenza:</strong> ${doc.data || '-'}</p>
-                <p><strong>Importo:</strong> ${doc.importo && doc.importo !== '-' ? '€ ' + doc.importo : doc.importo || '-'}</p>
-            </div>`;
-            
-            if (doc.descrizione) {
-                html += `<div class="detail-section">
-                    <h4>📝 Descrizione</h4>
-                    <p>${doc.descrizione}</p>
-                </div>`;
-            }
-            
-            if (doc.dataDoc) {
-                html += `<div class="detail-section">
-                    <h4>📅 Data documento</h4>
-                    <p>${doc.dataDoc}</p>
-                </div>`;
-            }
-            
-            html += `<div class="detail-section">
-                <h4>📄 Contenuto completo del file</h4>
-                <pre>${escapeHtml(doc.fullContent || 'Nessun contenuto')}</pre>
-            </div>`;
-            
-            modalBody.innerHTML = html;
+            document.getElementById('modalTitle').textContent = `${doc.tipo} - Dettagli`;
+            document.getElementById('modalBody').innerHTML = `
+                <div style="margin-bottom:15px">
+                    <p><strong>Tipo:</strong> ${doc.tipo}</p>
+                    <p><strong>Agente:</strong> ${doc.agente}</p>
+                    <p><strong>Cliente:</strong> ${doc.cliente}</p>
+                    <p><strong>N.Documento:</strong> ${doc.nDoc}</p>
+                    <p><strong>Data:</strong> ${doc.data}</p>
+                    <p><strong>Importo:</strong> ${doc.importo !== '-' ? '€ ' + doc.importo : '-'}</p>
+                </div>
+                <hr>
+                <h4>Contenuto completo:</h4>
+                <pre>${escapeHtml(doc.fullContent)}</pre>
+            `;
             modal.classList.remove('hidden');
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
+        function updateCount() {
+            document.getElementById('docCount').textContent = allDocuments.length;
         }
 
-        // ==================== SETUP EVENTI ====================
-        document.getElementById('selectBtn').onclick = () => document.getElementById('fileInput').click();
-        document.getElementById('fileInput').onchange = (e) => {
-            if (e.target.files.length) loadFiles(Array.from(e.target.files));
-            e.target.value = '';
-        };
-        document.getElementById('driveBtn').onclick = () => window.open(DRIVE_FOLDER_URL, '_blank');
+        function clearAll() {
+            if (confirm('⚠️ Cancellare TUTTI i file dalla memoria? L\'operazione è irreversibile!')) {
+                savedFiles = [];
+                allDocuments = [];
+                saveToLocalStorage();
+                renderTable();
+                updateCount();
+                renderFileButtons();
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+        }
+
+        // ==================== SETUP ====================
+        document.getElementById('driveBtn').onclick = () => window.open(DRIVE_URL, '_blank');
         document.getElementById('filterSelect').onchange = () => renderTable();
+        document.getElementById('clearAllBtn').onclick = clearAll;
         
-        // Chiudi modale
-        document.getElementById('closeModalBtn').onclick = () => document.getElementById('detailModal').classList.add('hidden');
-        window.onclick = (e) => {
-            const modal = document.getElementById('detailModal');
-            if (e.target === modal) modal.classList.add('hidden');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+            if (e.target.files.length) {
+                handleFiles(Array.from(e.target.files));
+                fileInput.value = '';
+            }
         };
         
-        console.log('✅ App pronta! Carica i file DDT-XX.txt, ORD-XX.txt, SCA-XX.txt');
+        document.querySelector('.close-btn').onclick = () => document.getElementById('detailModal').classList.add('hidden');
+        window.onclick = (e) => { if (e.target === document.getElementById('detailModal')) document.getElementById('detailModal').classList.add('hidden'); };
+        
+        // Carica memoria all'avvio
+        loadFromLocalStorage();
+        
+        console.log('✅ App pronta! I file rimangono in memoria anche dopo chiusura!');
     </script>
 </body>
 </html>
