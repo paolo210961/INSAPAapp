@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Documenti DDT · ORD · SCA - Memoria persistente</title>
+    <title>DDT · ORD · SCA - DIAGNOSTICO</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -24,15 +24,13 @@
             background: linear-gradient(135deg, #2c3e50, #1a1a2e);
             color: white;
             padding: 20px 30px;
-        }
-        h1 { font-size: 1.5rem; margin-bottom: 15px; }
-        .controls {
             display: flex;
-            gap: 15px;
+            justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 15px;
+            gap: 15px;
         }
+        h1 { font-size: 1.5rem; }
         .btn {
             background: #4CAF50;
             color: white;
@@ -41,521 +39,380 @@
             border-radius: 25px;
             cursor: pointer;
             font-size: 14px;
-            transition: transform 0.2s;
         }
-        .btn:hover { transform: scale(1.02); }
         .btn-drive { background: #4285f4; }
-        .btn-danger { background: #e74c3c; }
-        .btn-secondary { background: #666; }
-        select {
+        .btn-gray { background: #666; }
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 15px 20px;
+        }
+        select, input {
             padding: 10px 15px;
             border-radius: 25px;
-            border: none;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            cursor: pointer;
+            border: 1px solid #ccc;
+            font-size: 14px;
         }
-        
-        /* Sezione memoria */
-        .memory-section {
+        .cliente-section {
             margin: 20px;
-            padding: 15px;
-            background: #e8f0fe;
+            background: white;
             border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .memory-title {
-            font-weight: bold;
-            margin-bottom: 10px;
+        .cliente-header {
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            color: white;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
         }
-        .file-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .file-btn {
-            background: white;
-            border: 2px solid #4CAF50;
-            padding: 8px 16px;
+        .cliente-totale {
+            background: #4CAF50;
+            padding: 5px 15px;
             border-radius: 25px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-        .file-btn:hover {
-            background: #4CAF50;
-            color: white;
-            transform: scale(1.02);
-        }
-        .file-btn.active {
-            background: #4CAF50;
-            color: white;
-        }
-        .delete-file {
-            background: none;
-            border: none;
-            color: #999;
-            cursor: pointer;
-            font-size: 16px;
-            margin-left: 5px;
-        }
-        .delete-file:hover { color: #e74c3c; }
-        
-        /* Upload area */
-        .upload-area {
-            margin: 20px;
-            padding: 20px;
-            background: #f0f4f8;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px dashed #ccc;
-            cursor: pointer;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
         }
-        th {
-            background: #2c3e50;
-            color: white;
-            padding: 12px 10px;
+        th, td {
+            padding: 10px;
             text-align: left;
-            position: sticky;
-            top: 0;
-        }
-        td {
-            padding: 12px 10px;
             border-bottom: 1px solid #eee;
         }
         tr:nth-child(even) { background-color: #f8f9fa; }
-        tr:nth-child(odd) { background-color: #ffffff; }
-        .type-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        .type-DDT { background: #e74c3c; color: white; }
-        .type-ORD { background: #2ecc71; color: white; }
-        .type-SCA { background: #3498db; color: white; }
-        .detail-btn {
+        .rep-count {
             background: #2196F3;
             color: white;
-            border: none;
-            padding: 5px 12px;
+            padding: 2px 8px;
             border-radius: 20px;
-            cursor: pointer;
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 750px;
-            max-height: 85vh;
-            overflow: auto;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 22px;
-            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
-            color: white;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 32px;
-            color: white;
-            cursor: pointer;
-        }
-        .modal-body { padding: 22px; }
-        .modal-body pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 10px;
-            overflow-x: auto;
             font-size: 11px;
+        }
+        .empty-msg { text-align: center; padding: 40px; color: #999; }
+        .debug-panel {
+            margin: 20px;
+            padding: 15px;
+            background: #1e1e1e;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 11px;
+            border-radius: 10px;
+            max-height: 400px;
+            overflow: auto;
             white-space: pre-wrap;
         }
-        .hidden { display: none !important; }
-        .badge-count {
-            display: inline-block;
-            background: #4CAF50;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
         @media (max-width: 768px) {
-            th, td { padding: 8px 5px; font-size: 11px; }
-            .controls { flex-direction: column; align-items: stretch; }
-            .btn, select { width: 100%; text-align: center; }
-            .file-buttons { justify-content: center; }
+            header { flex-direction: column; align-items: stretch; }
+            .filter-row { flex-direction: column; align-items: stretch; }
+            select, input { width: 100%; }
+            th, td { font-size: 12px; padding: 6px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📋 DDT · ORD · SCA <span id="docCount" class="badge-count">0</span></h1>
-            <div class="controls">
-                <button id="driveBtn" class="btn btn-drive">📁 Apri Drive</button>
-                <select id="filterSelect">
-                    <option value="all">📌 Tutti</option>
-                    <option value="DDT">📦 DDT</option>
-                    <option value="ORD">📋 ORD</option>
-                    <option value="SCA">💰 SCA</option>
-                </select>
-                <button id="clearAllBtn" class="btn btn-danger">🗑️ Cancella tutto</button>
-            </div>
-        </header>
-
-        <!-- MEMORIA FILE SALVATI -->
-        <div class="memory-section" id="memorySection">
-            <div class="memory-title">
-                <span>💾 FILE IN MEMORIA (persistenti)</span>
-                <span style="font-size: 12px;">⬇️ Clicca un file per caricarlo</span>
-            </div>
-            <div id="fileButtonsList" class="file-buttons">
-                <span style="color:#999;">Nessun file in memoria. Caricane uno!</span>
-            </div>
+<div class="container">
+    <header>
+        <h1>📋 DDT · ORD · SCA (DIAGNOSTICO)</h1>
+        <div style="display: flex; gap: 10px;">
+            <button id="driveBtn" class="btn btn-drive">📁 Apri Drive</button>
+            <button id="loadBtn" class="btn">📂 Carica file</button>
+            <button id="clearBtn" class="btn btn-gray">🗑️ Cancella memoria</button>
         </div>
+    </header>
 
-        <!-- AREA CARICAMENTO -->
-        <div class="upload-area" id="uploadArea">
-            📂 <strong>Clicca qui</strong> per selezionare file TXT<br>
-            <span style="font-size: 12px; color:#666;">(DDT-01.txt, ORD-15.txt, SCA-03.txt ...)</span>
-            <input type="file" id="fileInput" accept=".txt" multiple style="display:none;">
-        </div>
-
-        <!-- TABELLA DATI -->
-        <div id="docList" class="documents-list" style="padding:20px">
-            <p style="text-align:center; padding:40px; color:#aaa;">✨ Carica un file o clicca un file dalla memoria</p>
-        </div>
+    <div class="filter-row">
+        <select id="tipoSelect">
+            <option value="DDT">📦 DDT</option>
+            <option value="ORD">📋 ORD</option>
+        </select>
+        <select id="clientSelect"><option value="">-- Seleziona cliente --</option></select>
+        <input type="text" id="clientSearch" placeholder="🔍 Cerca cliente">
     </div>
 
-    <!-- MODALE DETTAGLI -->
-    <div id="detailModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Dettagli documento</h2>
-                <button class="close-btn">&times;</button>
-            </div>
-            <div id="modalBody" class="modal-body"></div>
-        </div>
-    </div>
+    <div id="debugPanel" class="debug-panel">📌 Carica un file DDT per vedere il debug...</div>
 
-    <script>
-        const DRIVE_URL = 'https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4';
-        const STORAGE_KEY = 'saved_files_data';
+    <div id="mainContent" style="padding: 0 20px 20px 20px;">
+        <div class="empty-msg">📌 Clicca "Carica file" e seleziona i tuoi file .txt</div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = 'saved_files_data';
+    let currentData = null;
+    let savedFiles = [];
+    let debugLogs = [];
+
+    function debug(msg) {
+        debugLogs.push(msg);
+        console.log(msg);
+        const panel = document.getElementById('debugPanel');
+        panel.innerHTML = debugLogs.slice(-50).join('<br>');
+        panel.scrollTop = panel.scrollHeight;
+    }
+
+    function parseDDT(content) {
+        debug('========== INIZIO PARSER DDT ==========');
+        const lines = content.split('\n');
+        debug(`Totale righe: ${lines.length}`);
         
-        let allDocuments = [];
-        let savedFiles = []; // { name, content, tipo }
-
-        // ==================== CARICA DA MEMORIA ====================
-        function loadFromLocalStorage() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    savedFiles = JSON.parse(stored);
-                    renderFileButtons();
-                } catch(e) { console.error(e); }
+        const clienti = new Map();
+        const occorrenzeArticoli = new Map();
+        
+        // Conta occorrenze di ogni codice articolo
+        for (let line of lines) {
+            const match = line.match(/^\s{5,}([A-Z0-9]{5,})\s/);
+            if (match) {
+                const codice = match[1];
+                occorrenzeArticoli.set(codice, (occorrenzeArticoli.get(codice) || 0) + 1);
             }
         }
-
-        function saveToLocalStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedFiles));
-            renderFileButtons();
-        }
-
-        // ==================== PARSER ====================
-        function parseDDT(content, nomeFile) {
-            const match = nomeFile.match(/(\d+)/);
-            const agente = match ? match[1] : '??';
-            const records = [];
-            const lines = content.split('\n');
+        debug(`Occorrenze articoli contate: ${occorrenzeArticoli.size} codici unici`);
+        
+        let currentCliente = null;
+        let rigaNum = 0;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            rigaNum++;
             
-            for (let line of lines) {
-                if (line.match(/\d{2}\/\d{2}\/\d{4}/) && (line.match(/COOP/) || line.match(/SRL/))) {
-                    const parts = line.trim().split(/\s+/);
-                    let data = '', nDoc = '', totale = '', cliente = '';
+            // Rileva intestazione cliente
+            const clienteMatch = line.match(/^\s*(\d+)\s+([A-Z\s\.\'\&\(\)\-\/]+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})/);
+            if (clienteMatch && !line.includes('DEST.') && !line.includes('Rif.') && !line.includes('AGENTE')) {
+                const nomeCliente = clienteMatch[2].trim();
+                let totaleDDT = 0;
+                const totaleMatch = line.match(/(\d{1,3}(?:\.\d{3})*,\d{2})\s*$/);
+                if (totaleMatch) {
+                    totaleDDT = parseFloat(totaleMatch[1].replace(/\./g, '').replace(',', '.'));
+                }
+                
+                if (!clienti.has(nomeCliente)) {
+                    clienti.set(nomeCliente, { nome: nomeCliente, totale: 0, articoli: new Map() });
+                    debug(`[RIGA ${rigaNum}] NUOVO CLIENTE: "${nomeCliente}" - Totale DDT: ${totaleDDT}`);
+                } else {
+                    debug(`[RIGA ${rigaNum}] CLIENTE ESISTENTE: "${nomeCliente}" - Aggiunto totale: ${totaleDDT}`);
+                }
+                const cliente = clienti.get(nomeCliente);
+                cliente.totale += totaleDDT;
+                currentCliente = cliente;
+                continue;
+            }
+            
+            // Rileva articolo
+            if (currentCliente) {
+                // Cerca pattern articolo
+                const artMatch = line.match(/^\s{5,}([A-Z0-9]{5,})\s+([A-Z0-9\s\.\-\(\)\*\+\/\\\&\'\,]+?)\s{2,}([A-Z]{1,3})\s+(\d+)\s+([\d\.,]+)/);
+                if (artMatch) {
+                    const codice = artMatch[1];
+                    const descrizione = artMatch[2].trim().substring(0, 55);
+                    const um = artMatch[3];
+                    const quantita = parseFloat(artMatch[4]) || 0;
+                    const prezzo = parseFloat(artMatch[5].replace(',', '.')) || 0;
                     
-                    for (let part of parts) {
-                        if (part.match(/\d{2}\/\d{2}\/\d{4}/)) data = part;
-                        if (part.match(/^\d{1,5}$/) && part.length >= 2 && part.length <= 5) nDoc = part;
-                        if (part.match(/[\d\.,]+$/) && !part.includes('/')) totale = part.replace(',', '.');
-                    }
+                    debug(`[RIGA ${rigaNum}] ARTICOLO: codice=${codice}, descrizione="${descrizione.substring(0, 30)}...", um=${um}, qta=${quantita}, prezzo=${prezzo}`);
                     
-                    const clienteMatch = line.match(/^\s*\d+\s+([A-Z\s\.]+?)\s+\d/);
-                    if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 45);
-                    
-                    if (nDoc || data) {
-                        records.push({
-                            tipo: 'DDT', agente: agente, cliente: cliente || 'Cliente',
-                            nDoc: nDoc || '-', data: data || '-', importo: totale || '-',
-                            fullContent: content
+                    if (!currentCliente.articoli.has(codice)) {
+                        currentCliente.articoli.set(codice, {
+                            codice: codice,
+                            descrizione: descrizione,
+                            um: um,
+                            quantita: quantita,
+                            prezzo: prezzo,
+                            sconto: 0,
+                            count: occorrenzeArticoli.get(codice) || 1
                         });
+                        debug(`  -> Nuovo articolo aggiunto al cliente ${currentCliente.nome}`);
+                    } else {
+                        const existing = currentCliente.articoli.get(codice);
+                        existing.quantita += quantita;
+                        existing.prezzo = prezzo;
+                        debug(`  -> Articolo esistente, quantità aggiornata a ${existing.quantita}`);
                     }
                 }
             }
-            return records.length ? records : [{ tipo: 'DDT', agente: agente, cliente: 'Contenuto grezzo', nDoc: '-', data: '-', importo: '-', fullContent: content }];
         }
-
-        function parseORD(content, nomeFile) {
-            const match = nomeFile.match(/(\d+)/);
-            const agente = match ? match[1] : '??';
-            let cliente = 'Ordine cliente';
-            const clienteMatch = content.match(/Cliente\s*:\s*\d+\s+([^\n]+)/);
-            if (clienteMatch) cliente = clienteMatch[1].trim().substring(0, 50);
-            return [{ tipo: 'ORD', agente: agente, cliente: cliente, nDoc: 'Ordine', data: 'Vedi dettagli', importo: '-', fullContent: content }];
+        
+        debug(`========== TOTALE CLIENTI UNICI: ${clienti.size} ==========`);
+        for (let cliente of clienti.values()) {
+            debug(`Cliente: "${cliente.nome}" - Totale speso: ${cliente.totale.toFixed(2)} - Articoli unici: ${cliente.articoli.size}`);
         }
-
-        function parseSCA(content, nomeFile) {
-            const match = nomeFile.match(/(\d+)/);
-            const agente = match ? match[1] : '??';
-            const records = [];
-            const lines = content.split('\n');
-            let currentCliente = '';
-            
-            for (let line of lines) {
-                const clienteMatch = line.match(/CLIENTE:\s+\d+\s+(.+)/);
-                if (clienteMatch) currentCliente = clienteMatch[1].trim().substring(0, 50);
-                
-                const scadMatch = line.match(/(\d{2}\/\d{2}\/\d{4})\s+.*?\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/);
-                if (scadMatch && currentCliente) {
-                    records.push({
-                        tipo: 'SCA', agente: agente, cliente: currentCliente,
-                        nDoc: scadMatch[2], data: scadMatch[1], importo: scadMatch[4].replace(',', '.'),
-                        fullContent: content
-                    });
-                }
-            }
-            return records.length ? records : [{ tipo: 'SCA', agente: agente, cliente: currentCliente || 'Scadenziario', nDoc: '-', data: '-', importo: '-', fullContent: content }];
-        }
-
-        function processContent(name, content) {
-            const upperName = name.toUpperCase();
-            let parsed = null;
-            if (upperName.includes('DDT')) parsed = parseDDT(content, name);
-            else if (upperName.includes('ORD')) parsed = parseORD(content, name);
-            else if (upperName.includes('SCA')) parsed = parseSCA(content, name);
-            
-            if (parsed) {
-                if (Array.isArray(parsed)) allDocuments.push(...parsed);
-                else allDocuments.push(parsed);
-            }
-            return parsed;
-        }
-
-        // ==================== SALVA FILE IN MEMORIA ====================
-        function saveFileToMemory(name, content) {
-            // Controlla se esiste già
-            const existingIndex = savedFiles.findIndex(f => f.name === name);
-            const fileData = { name: name, content: content, tipo: name.toUpperCase().includes('DDT') ? 'DDT' : (name.toUpperCase().includes('ORD') ? 'ORD' : 'SCA') };
-            
-            if (existingIndex !== -1) {
-                savedFiles[existingIndex] = fileData;
+        
+        const result = [];
+        for (let cliente of clienti.values()) {
+            if (cliente.articoli.size > 0) {
+                result.push({
+                    nome: cliente.nome,
+                    totale: cliente.totale,
+                    articoli: Array.from(cliente.articoli.values())
+                });
             } else {
-                savedFiles.push(fileData);
-            }
-            saveToLocalStorage();
-        }
-
-        function deleteFileFromMemory(name) {
-            savedFiles = savedFiles.filter(f => f.name !== name);
-            saveToLocalStorage();
-            // Se il file cancellato era quello attivo, ricarica i rimanenti
-            renderFileButtons();
-        }
-
-        function loadFileFromMemory(name) {
-            const file = savedFiles.find(f => f.name === name);
-            if (file) {
-                allDocuments = [];
-                processContent(file.name, file.content);
-                renderTable();
+                debug(`ATTENZIONE: Cliente "${cliente.nome}" ha 0 articoli!`);
             }
         }
+        return result;
+    }
 
-        // ==================== RENDER PULSANTI FILE ====================
-        function renderFileButtons() {
-            const container = document.getElementById('fileButtonsList');
-            if (!savedFiles.length) {
-                container.innerHTML = '<span style="color:#999;">📭 Nessun file in memoria. Caricane uno!</span>';
-                return;
-            }
-            
-            let html = '';
-            savedFiles.forEach(file => {
-                let tipoIcon = '';
-                if (file.tipo === 'DDT') tipoIcon = '📦';
-                else if (file.tipo === 'ORD') tipoIcon = '📋';
-                else tipoIcon = '💰';
-                
-                html += `
-                    <div class="file-btn" data-name="${file.name}">
-                        ${tipoIcon} ${file.name}
-                        <button class="delete-file" data-name="${file.name}" title="Cancella dalla memoria">🗑️</button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-            
-            // Eventi per caricare file
-            document.querySelectorAll('.file-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('delete-file')) return;
-                    const name = btn.getAttribute('data-name');
-                    loadFileFromMemory(name);
-                });
-            });
-            
-            // Eventi per cancellare
-            document.querySelectorAll('.delete-file').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const name = btn.getAttribute('data-name');
-                    deleteFileFromMemory(name);
-                });
-            });
-        }
+    function parseORD(content) {
+        const match = content.match(/Cliente\s*:\s*\d+\s+([^\n]+)/);
+        const cliente = match ? match[1].trim() : 'Cliente';
+        return [{ nome: cliente, totale: 0, articoli: [] }];
+    }
 
-        // ==================== CARICAMENTO FILE ====================
-        async function handleFiles(files) {
-            for (let file of files) {
-                if (!file.name.endsWith('.txt')) continue;
-                const content = await file.text();
-                
-                // Salva in memoria
-                saveFileToMemory(file.name, content);
-                
-                // Elabora per visualizzazione
-                processContent(file.name, content);
-            }
-            renderTable();
-            updateCount();
-        }
+    function detectType(content) {
+        const u = content.toUpperCase();
+        if (u.includes('STAMPA BROGLIACCIO D.D.T.')) return 'DDT';
+        if (u.includes('CLIENTE') && (u.includes('COD. ARTICOLO') || u.includes('DESCRIZIONE'))) return 'ORD';
+        return null;
+    }
 
-        function renderTable() {
-            const filter = document.getElementById('filterSelect').value;
-            let filtered = filter === 'all' ? allDocuments : allDocuments.filter(d => d.tipo === filter);
-            const container = document.getElementById('docList');
-            
-            if (!filtered.length) {
-                container.innerHTML = '<p style="text-align:center; padding:40px; color:#aaa;">📭 Nessun documento. Carica un file o clicca un file dalla memoria</p>';
-                return;
-            }
-            
-            let html = `<table><thead><tr><th>Tipo</th><th>Agente</th><th>Cliente</th><th>N.Doc</th><th>Data</th><th>Importo</th><th></th></tr></thead><tbody>`;
-            filtered.forEach((doc, idx) => {
-                html += `<tr>
-                    <td><span class="type-badge type-${doc.tipo}">${doc.tipo}</span></td>
-                    <td>${doc.agente}</td>
-                    <td>${doc.cliente.substring(0, 40)}</td>
-                    <td>${doc.nDoc}</td>
-                    <td>${doc.data}</td>
-                    <td>${doc.importo !== '-' ? '€ ' + doc.importo : '-'}</td>
-                    <td><button class="detail-btn" data-idx="${idx}" data-filter="${filter}">📄</button></td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-            container.innerHTML = html;
-            
-            document.querySelectorAll('.detail-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const idx = parseInt(btn.dataset.idx);
-                    const currentFilter = document.getElementById('filterSelect').value;
-                    const currentFiltered = currentFilter === 'all' ? allDocuments : allDocuments.filter(d => d.tipo === currentFilter);
-                    showModal(currentFiltered[idx]);
-                });
-            });
-        }
+    function processFile(name, content) {
+        debug(`\n📄 PROCESSANDO FILE: ${name}`);
+        const tipo = detectType(content);
+        debug(`Tipo rilevato: ${tipo}`);
+        if (tipo === 'DDT') return parseDDT(content);
+        if (tipo === 'ORD') return parseORD(content);
+        return null;
+    }
 
-        function showModal(doc) {
-            const modal = document.getElementById('detailModal');
-            document.getElementById('modalTitle').textContent = `${doc.tipo} - Dettagli`;
-            document.getElementById('modalBody').innerHTML = `
-                <div style="margin-bottom:15px">
-                    <p><strong>Tipo:</strong> ${doc.tipo}</p>
-                    <p><strong>Agente:</strong> ${doc.agente}</p>
-                    <p><strong>Cliente:</strong> ${doc.cliente}</p>
-                    <p><strong>N.Documento:</strong> ${doc.nDoc}</p>
-                    <p><strong>Data:</strong> ${doc.data}</p>
-                    <p><strong>Importo:</strong> ${doc.importo !== '-' ? '€ ' + doc.importo : '-'}</p>
-                </div>
-                <hr>
-                <h4>Contenuto completo:</h4>
-                <pre>${escapeHtml(doc.fullContent)}</pre>
-            `;
-            modal.classList.remove('hidden');
-        }
-
-        function updateCount() {
-            document.getElementById('docCount').textContent = allDocuments.length;
-        }
-
-        function clearAll() {
-            if (confirm('⚠️ Cancellare TUTTI i file dalla memoria? L\'operazione è irreversibile!')) {
-                savedFiles = [];
-                allDocuments = [];
-                saveToLocalStorage();
-                renderTable();
-                updateCount();
-                renderFileButtons();
-            }
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-        }
-
-        // ==================== SETUP ====================
-        document.getElementById('driveBtn').onclick = () => window.open(DRIVE_URL, '_blank');
-        document.getElementById('filterSelect').onchange = () => renderTable();
-        document.getElementById('clearAllBtn').onclick = clearAll;
+    async function loadFiles(files) {
+        debugLogs = [];
+        debug('🔍 Caricamento file in corso...');
         
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        
-        uploadArea.onclick = () => fileInput.click();
-        fileInput.onchange = (e) => {
-            if (e.target.files.length) {
-                handleFiles(Array.from(e.target.files));
-                fileInput.value = '';
+        for (let file of files) {
+            if (!file.name.endsWith('.txt')) continue;
+            const content = await file.text();
+            const idx = savedFiles.findIndex(f => f.name === file.name);
+            if (idx !== -1) savedFiles[idx] = { name: file.name, content };
+            else savedFiles.push({ name: file.name, content });
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedFiles));
+        reloadAllData();
+    }
+
+    function reloadAllData() {
+        let allRecords = [];
+        let firstTipo = null;
+        for (let f of savedFiles) {
+            const parsed = processFile(f.name, f.content);
+            if (parsed && parsed.length > 0) {
+                if (!firstTipo) firstTipo = f.name.toUpperCase().includes('DDT') ? 'DDT' : 'ORD';
+                allRecords.push(...parsed);
             }
-        };
+        }
+        if (allRecords.length) {
+            currentData = { tipo: firstTipo, parsed: allRecords };
+            renderClientSelect();
+            renderMainContent();
+            debug(`✅ Caricamento completato. Clienti visualizzati: ${allRecords.length}`);
+        } else {
+            document.getElementById('mainContent').innerHTML = '<div class="empty-msg">📭 Nessun file valido. Carica DDT o ORD.</div>';
+            document.getElementById('clientSelect').innerHTML = '<option value="">-- Nessun cliente --</option>';
+        }
+    }
+
+    function renderClientSelect() {
+        const sel = document.getElementById('clientSelect');
+        if (!currentData || !currentData.parsed || currentData.parsed.length === 0) {
+            sel.innerHTML = '<option value="">-- Nessun cliente --</option>';
+            return;
+        }
+        let html = '<option value="">-- Seleziona un cliente --</option>';
+        for (let c of currentData.parsed) {
+            html += `<option value="${escapeHtml(c.nome)}">${escapeHtml(c.nome)}</option>`;
+        }
+        sel.innerHTML = html;
+    }
+
+    function renderMainContent() {
+        const tipo = document.getElementById('tipoSelect').value;
+        if (!currentData || currentData.tipo !== tipo) {
+            document.getElementById('mainContent').innerHTML = `<div class="empty-msg">📭 Cambia a ${currentData?.tipo || 'DDT'}</div>`;
+            return;
+        }
+        const selected = document.getElementById('clientSelect').value;
+        if (!selected) {
+            document.getElementById('mainContent').innerHTML = '<div class="empty-msg">👆 Seleziona un cliente dalla tendina</div>';
+            return;
+        }
+        const client = currentData.parsed.find(c => c.nome === selected);
+        if (!client || !client.articoli.length) {
+            document.getElementById('mainContent').innerHTML = `<div class="empty-msg">Nessun articolo trovato per ${escapeHtml(selected)}</div>`;
+            return;
+        }
         
-        document.querySelector('.close-btn').onclick = () => document.getElementById('detailModal').classList.add('hidden');
-        window.onclick = (e) => { if (e.target === document.getElementById('detailModal')) document.getElementById('detailModal').classList.add('hidden'); };
+        let html = `<div class="cliente-section">
+            <div class="cliente-header">
+                <span>🏢 ${escapeHtml(client.nome)}</span>
+                <span class="cliente-totale">💰 Totale: € ${client.totale.toFixed(2)}</span>
+            </div>
+            <table class="articoli-table">
+                <thead>
+                    <tr><th>Codice</th><th>Descrizione</th><th>Um</th><th>Qtà</th><th>Prezzo €</th><th>Sconto %</th><th>Acquisti</th></tr>
+                </thead>
+                <tbody>`;
         
-        // Carica memoria all'avvio
-        loadFromLocalStorage();
-        
-        console.log('✅ App pronta! I file rimangono in memoria anche dopo chiusura!');
-    </script>
+        for (let art of client.articoli) {
+            html += `<tr>
+                <td>${escapeHtml(art.codice)}</td>
+                <td style="max-width:300px;">${escapeHtml(art.descrizione)}</td>
+                <td>${art.um || '-'}</td>
+                <td>${art.quantita}</td>
+                <td>€ ${art.prezzo.toFixed(4)}</td>
+                <td>${art.sconto}%</td>
+                <td><span class="rep-count">${art.count} volte</span></td>
+            </tr>`;
+        }
+        html += `</tbody>}</div>`;
+        document.getElementById('mainContent').innerHTML = html;
+    }
+
+    function escapeHtml(s) { 
+        if (!s) return '';
+        return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
+    }
+
+    function clearMemory() {
+        if (confirm('Cancellare tutti i file salvati?')) {
+            savedFiles = [];
+            localStorage.removeItem(STORAGE_KEY);
+            currentData = null;
+            document.getElementById('mainContent').innerHTML = '<div class="empty-msg">Memoria cancellata. Ricarica i file.</div>';
+            document.getElementById('clientSelect').innerHTML = '<option value="">-- Nessun cliente --</option>';
+            debugLogs = [];
+            document.getElementById('debugPanel').innerHTML = '📌 Memoria cancellata';
+        }
+    }
+
+    document.getElementById('driveBtn').onclick = () => window.open('https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4', '_blank');
+    document.getElementById('loadBtn').onclick = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.txt';
+        input.onchange = (e) => loadFiles(Array.from(e.target.files));
+        input.click();
+    };
+    document.getElementById('clearBtn').onclick = clearMemory;
+    document.getElementById('tipoSelect').onchange = () => renderMainContent();
+    document.getElementById('clientSelect').onchange = () => renderMainContent();
+    document.getElementById('clientSearch').oninput = (e) => {
+        const term = e.target.value.toLowerCase();
+        const opts = document.getElementById('clientSelect').options;
+        for (let i = 1; i < opts.length; i++) {
+            opts[i].style.display = opts[i].text.toLowerCase().includes(term) ? '' : 'none';
+        }
+    };
+
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        try {
+            savedFiles = JSON.parse(stored);
+            reloadAllData();
+        } catch(e) {}
+    }
+</script>
 </body>
 </html>
