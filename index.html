@@ -2,417 +2,659 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>DDT · ORD · SCA - DIAGNOSTICO</title>
+    <title>AGENTI - Gestione DDT, ORD, SCA</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: #eef2f5;
             min-height: 100vh;
-            padding: 20px;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .header {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        header {
-            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
-            color: white;
-            padding: 20px 30px;
+            padding: 15px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
         }
-        h1 { font-size: 1.5rem; }
-        .btn {
-            background: #4CAF50;
+        .title-area {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+        .version {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-img {
+            max-height: 60px;
+            max-width: 200px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 4px;
+            background: white;
+        }
+        .logo-img:active {
+            transform: scale(0.98);
+        }
+        .btn-logo {
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-logo:hover {
+            background: #dfe6e9;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        .file-upload-section {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+        .upload-btn {
+            background: #2c3e50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 10px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            width: 100%;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
-        .btn-drive { background: #4285f4; }
-        .btn-gray { background: #666; }
-        .filter-row {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin: 15px 20px;
+        .upload-btn:hover {
+            background: #1a252f;
         }
-        select, input {
-            padding: 10px 15px;
-            border-radius: 25px;
+        .file-status {
+            font-size: 0.75rem;
+            color: #27ae60;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .filter-group {
+            margin-bottom: 25px;
+        }
+        .filter-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
             border: 1px solid #ccc;
-            font-size: 14px;
-        }
-        .cliente-section {
-            margin: 20px;
+            font-size: 0.9rem;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
-        .cliente-header {
-            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
+        .cliente-rosso {
+            color: #c0392b;
+            font-weight: bold;
         }
-        .cliente-totale {
-            background: #4CAF50;
-            padding: 5px 15px;
-            border-radius: 25px;
+        .content-area {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
         }
-        table {
+        .scadenze-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+        }
+        .scadenze-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .tabella {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85rem;
         }
-        th, td {
-            padding: 10px;
+        .tabella th, .tabella td {
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            vertical-align: top;
         }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        .rep-count {
-            background: #2196F3;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
+        .tabella th {
+            background: #e9ecef;
         }
-        .empty-msg { text-align: center; padding: 40px; color: #999; }
-        .debug-panel {
-            margin: 20px;
-            padding: 15px;
-            background: #1e1e1e;
-            color: #0f0;
+        .articolo-ord {
+            margin-bottom: 10px;
             font-family: monospace;
-            font-size: 11px;
-            border-radius: 10px;
-            max-height: 400px;
-            overflow: auto;
             white-space: pre-wrap;
+            border-bottom: 1px solid #eee;
+            padding: 5px;
         }
-        @media (max-width: 768px) {
-            header { flex-direction: column; align-items: stretch; }
-            .filter-row { flex-direction: column; align-items: stretch; }
-            select, input { width: 100%; }
-            th, td { font-size: 12px; padding: 6px; }
+        .info-messaggio {
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 15px;
+            text-align: center;
+        }
+        .error {
+            color: #c0392b;
+            background: #fae2e2;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        footer {
+            text-align: center;
+            margin: 20px;
+            font-size: 0.7rem;
+            color: #95a5a6;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>📋 DDT · ORD · SCA (DIAGNOSTICO)</h1>
-        <div style="display: flex; gap: 10px;">
-            <button id="driveBtn" class="btn btn-drive">📁 Apri Drive</button>
-            <button id="loadBtn" class="btn">📂 Carica file</button>
-            <button id="clearBtn" class="btn btn-gray">🗑️ Cancella memoria</button>
+    <div class="header">
+        <div class="title-area">
+            <h1>AGENTI</h1>
+            <span class="version">v1.0</span>
         </div>
-    </header>
-
-    <div class="filter-row">
-        <select id="tipoSelect">
-            <option value="DDT">📦 DDT</option>
-            <option value="ORD">📋 ORD</option>
-        </select>
-        <select id="clientSelect"><option value="">-- Seleziona cliente --</option></select>
-        <input type="text" id="clientSearch" placeholder="🔍 Cerca cliente">
+        <div class="logo-area" id="logoArea">
+            <button id="btnCaricaLogo" class="btn-logo">📁 Carica logo</button>
+            <img id="logoImmagine" class="logo-img" style="display: none;" alt="Logo azienda">
+        </div>
     </div>
 
-    <div id="debugPanel" class="debug-panel">📌 Carica un file DDT per vedere il debug...</div>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="file-upload-section">
+                <button id="btnCaricaFile" class="upload-btn">📂 Carica DDT + ORD + SCA</button>
+                <div id="fileStatus" class="file-status">Nessun file caricato</div>
+                <input type="file" id="fileInputMulti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
+            </div>
+            <div class="filter-group">
+                <label>👥 Cliente</label>
+                <select id="selectCliente" disabled>
+                    <option value="">-- Seleziona cliente --</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📄 Tipo documento</label>
+                <select id="selectTipo" disabled>
+                    <option value="DDT">DDT (Distinta Trasporto)</option>
+                    <option value="ORD">ORD (Ordini)</option>
+                </select>
+            </div>
+        </div>
 
-    <div id="mainContent" style="padding: 0 20px 20px 20px;">
-        <div class="empty-msg">📌 Clicca "Carica file" e seleziona i tuoi file .txt</div>
+        <!-- Area contenuti: scadenze e articoli sotto le tendine -->
+        <div class="content-area">
+            <div id="scadenzeContainer"></div>
+            <div id="dettaglioContainer"></div>
+        </div>
     </div>
-</div>
+    <footer>I file vengono letti localmente nel browser. Premere 3 secondi sul logo per cambiarlo.</footer>
 
-<script>
-    const STORAGE_KEY = 'saved_files_data';
-    let currentData = null;
-    let savedFiles = [];
-    let debugLogs = [];
+    <script>
+        // --------------------------------------------------------------
+        // PARSER DDT CONSOLIDATO (funzionante)
+        // --------------------------------------------------------------
+        function parseDDT(text) {
+            const lines = text.split(/\r?\n/);
+            const clienti = new Map();
+            let currentCliente = null;
+            let currentArticolo = null;
+            let descrizioneBuffer = "";
 
-    function debug(msg) {
-        debugLogs.push(msg);
-        console.log(msg);
-        const panel = document.getElementById('debugPanel');
-        panel.innerHTML = debugLogs.slice(-50).join('<br>');
-        panel.scrollTop = panel.scrollHeight;
-    }
-
-    function parseDDT(content) {
-        debug('========== INIZIO PARSER DDT ==========');
-        const lines = content.split('\n');
-        debug(`Totale righe: ${lines.length}`);
-        
-        const clienti = new Map();
-        const occorrenzeArticoli = new Map();
-        
-        // Conta occorrenze di ogni codice articolo
-        for (let line of lines) {
-            const match = line.match(/^\s{5,}([A-Z0-9]{5,})\s/);
-            if (match) {
-                const codice = match[1];
-                occorrenzeArticoli.set(codice, (occorrenzeArticoli.get(codice) || 0) + 1);
-            }
-        }
-        debug(`Occorrenze articoli contate: ${occorrenzeArticoli.size} codici unici`);
-        
-        let currentCliente = null;
-        let rigaNum = 0;
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            rigaNum++;
-            
-            // Rileva intestazione cliente
-            const clienteMatch = line.match(/^\s*(\d+)\s+([A-Z\s\.\'\&\(\)\-\/]+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})/);
-            if (clienteMatch && !line.includes('DEST.') && !line.includes('Rif.') && !line.includes('AGENTE')) {
-                const nomeCliente = clienteMatch[2].trim();
-                let totaleDDT = 0;
-                const totaleMatch = line.match(/(\d{1,3}(?:\.\d{3})*,\d{2})\s*$/);
-                if (totaleMatch) {
-                    totaleDDT = parseFloat(totaleMatch[1].replace(/\./g, '').replace(',', '.'));
-                }
-                
-                if (!clienti.has(nomeCliente)) {
-                    clienti.set(nomeCliente, { nome: nomeCliente, totale: 0, articoli: new Map() });
-                    debug(`[RIGA ${rigaNum}] NUOVO CLIENTE: "${nomeCliente}" - Totale DDT: ${totaleDDT}`);
+            function salvaArticolo() {
+                if (!currentArticolo || !currentCliente) return;
+                let descrizione = descrizioneBuffer ? currentArticolo.descRaw + " " + descrizioneBuffer : currentArticolo.descRaw;
+                descrizione = descrizione.replace(/\s+/g, ' ').trim();
+                const existing = currentCliente.articoli.get(currentArticolo.codice);
+                if (existing) {
+                    existing.quantitaTot += currentArticolo.quantita;
+                    existing.conteggio++;
+                    existing.ultimoPrezzo = currentArticolo.prezzo;
                 } else {
-                    debug(`[RIGA ${rigaNum}] CLIENTE ESISTENTE: "${nomeCliente}" - Aggiunto totale: ${totaleDDT}`);
+                    currentCliente.articoli.set(currentArticolo.codice, {
+                        codice: currentArticolo.codice,
+                        descrizione: descrizione,
+                        um: currentArticolo.um,
+                        quantitaTot: currentArticolo.quantita,
+                        ultimoPrezzo: currentArticolo.prezzo,
+                        conteggio: 1
+                    });
                 }
-                const cliente = clienti.get(nomeCliente);
-                cliente.totale += totaleDDT;
-                currentCliente = cliente;
-                continue;
+                currentArticolo = null;
+                descrizioneBuffer = "";
             }
-            
-            // Rileva articolo
-            if (currentCliente) {
-                // Cerca pattern articolo
-                const artMatch = line.match(/^\s{5,}([A-Z0-9]{5,})\s+([A-Z0-9\s\.\-\(\)\*\+\/\\\&\'\,]+?)\s{2,}([A-Z]{1,3})\s+(\d+)\s+([\d\.,]+)/);
-                if (artMatch) {
-                    const codice = artMatch[1];
-                    const descrizione = artMatch[2].trim().substring(0, 55);
-                    const um = artMatch[3];
-                    const quantita = parseFloat(artMatch[4]) || 0;
-                    const prezzo = parseFloat(artMatch[5].replace(',', '.')) || 0;
-                    
-                    debug(`[RIGA ${rigaNum}] ARTICOLO: codice=${codice}, descrizione="${descrizione.substring(0, 30)}...", um=${um}, qta=${quantita}, prezzo=${prezzo}`);
-                    
-                    if (!currentCliente.articoli.has(codice)) {
-                        currentCliente.articoli.set(codice, {
-                            codice: codice,
-                            descrizione: descrizione,
-                            um: um,
-                            quantita: quantita,
-                            prezzo: prezzo,
-                            sconto: 0,
-                            count: occorrenzeArticoli.get(codice) || 1
-                        });
-                        debug(`  -> Nuovo articolo aggiunto al cliente ${currentCliente.nome}`);
-                    } else {
-                        const existing = currentCliente.articoli.get(codice);
-                        existing.quantita += quantita;
-                        existing.prezzo = prezzo;
-                        debug(`  -> Articolo esistente, quantità aggiornata a ${existing.quantita}`);
+
+            const reCliente = /^\s{4,}(\d+)\s+(.+?)\s+\d+\s+\d{2}\/\d{2}\/\d{4}/;
+            const reArticolo = /^\s{20,}([A-Z0-9]+)\s+(.+?)\s+([A-Z\.]+)\s+(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)/;
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (line.trim() === "" || line.startsWith("===") || line.startsWith("----------------------------------------------------------------")) continue;
+
+                let mCliente = line.match(reCliente);
+                if (mCliente) {
+                    salvaArticolo();
+                    const codiceCliente = mCliente[1];
+                    let resto = mCliente[2];
+                    let numeroDocMatch = resto.match(/\s+(\d+)\s*$/);
+                    let ragioneSociale = numeroDocMatch ? resto.substring(0, resto.lastIndexOf(numeroDocMatch[1])).trim() : resto.trim();
+                    const key = `${codiceCliente}|${ragioneSociale}`;
+                    if (!clienti.has(key)) {
+                        clienti.set(key, { codice: codiceCliente, ragione: ragioneSociale, articoli: new Map() });
+                    }
+                    currentCliente = clienti.get(key);
+                    continue;
+                }
+                if (!currentCliente) continue;
+
+                if (line.includes("Totale") || line.includes("VOSTRO DARE") || line.includes("ELIMINATO") || line.includes("INESISTENTE") ||
+                    line.includes("Rif.:") || line.includes("Destinaz.") || line.includes("Telefoni") || line.includes("Ord.") ||
+                    line.includes("Riferimento") || line.includes("----") || line.includes("====")) {
+                    continue;
+                }
+
+                let mArt = line.match(reArticolo);
+                if (mArt) {
+                    salvaArticolo();
+                    currentArticolo = {
+                        codice: mArt[1],
+                        descRaw: mArt[2].trim(),
+                        um: mArt[3].trim(),
+                        quantita: parseFloat(mArt[4].replace(',', '.')),
+                        prezzo: parseFloat(mArt[5].replace(',', '.')),
+                        sconto1: parseFloat(mArt[6].replace(',', '.'))
+                    };
+                    descrizioneBuffer = "";
+                    if (i+1 < lines.length) {
+                        let nextLine = lines[i+1];
+                        if (nextLine.match(/^\s{30,}/) && !nextLine.match(/^\s{20,}[A-Z0-9]/)) {
+                            descrizioneBuffer = nextLine.trim();
+                            i++;
+                        }
+                    }
+                } else if (currentArticolo && line.trim() && !line.includes("==") && !line.includes("--")) {
+                    if (descrizioneBuffer) descrizioneBuffer += " " + line.trim();
+                    else descrizioneBuffer = line.trim();
+                }
+            }
+            salvaArticolo();
+
+            const result = [];
+            for (let [_, val] of clienti) {
+                result.push({
+                    codice: val.codice,
+                    ragione: val.ragione,
+                    articoli: Array.from(val.articoli.values())
+                });
+            }
+            return result;
+        }
+
+        // --------------------------------------------------------------
+        // PARSER ORD
+        // --------------------------------------------------------------
+        function parseORD(text) {
+            const lines = text.split(/\r?\n/);
+            const clienti = new Map();
+            let currentCliente = null;
+            const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
+            const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
+
+            for (let line of lines) {
+                line = line.trimEnd();
+                if (line === "") continue;
+
+                let mCliente = line.match(reCliente);
+                if (mCliente) {
+                    currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] };
+                    clienti.set(currentCliente.codice, currentCliente);
+                    continue;
+                }
+                if (!currentCliente) continue;
+                if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO"))
+                    continue;
+
+                let coppie = [];
+                let match;
+                while ((match = reCoppia.exec(line)) !== null) {
+                    let qta = parseFloat(match[1].replace(',', '.'));
+                    let data = match[2];
+                    coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
+                }
+                if (coppie.length === 0) continue;
+
+                let firstCoppiaStart = coppie[0].start;
+                let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
+                let tokens = descrizioneRaw.split(/\s+/);
+                let codice = tokens[0];
+                let descrizione = tokens.slice(1).join(" ");
+
+                let lastCoppiaEnd = coppie[coppie.length-1].end;
+                let afterCoppie = line.substring(lastCoppiaEnd).trim();
+                let numTokens = afterCoppie.split(/\s+/);
+                let prezzo = 0, sconto1 = 0;
+                if (numTokens.length >= 2) {
+                    prezzo = parseFloat(numTokens[0].replace(',', '.'));
+                    sconto1 = parseFloat(numTokens[1].replace(',', '.'));
+                }
+
+                coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+                currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
+            }
+            return Array.from(clienti.values());
+        }
+
+        // --------------------------------------------------------------
+        // PARSER SCA
+        // --------------------------------------------------------------
+        function parseSCA(text) {
+            const lines = text.split(/\r?\n/);
+            const clienti = new Map();
+            let currentCliente = null;
+            const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/;
+            const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (line === "") continue;
+
+                let mCliente = line.match(reCliente);
+                if (mCliente) {
+                    currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] };
+                    clienti.set(currentCliente.codice, currentCliente);
+                    continue;
+                }
+                if (currentCliente) {
+                    let mScad = line.match(reScadenza);
+                    if (mScad) {
+                        let scadenza = mScad[1];
+                        let numDoc = mScad[2];
+                        let dataDoc = mScad[3];
+                        let importoStr = mScad[4].replace(/\./g, '').replace(',', '.');
+                        let importo = parseFloat(importoStr);
+                        currentCliente.scadenze.push({ scadenza, numDoc, dataDoc, importo });
                     }
                 }
             }
+            return Array.from(clienti.values());
         }
-        
-        debug(`========== TOTALE CLIENTI UNICI: ${clienti.size} ==========`);
-        for (let cliente of clienti.values()) {
-            debug(`Cliente: "${cliente.nome}" - Totale speso: ${cliente.totale.toFixed(2)} - Articoli unici: ${cliente.articoli.size}`);
+
+        // --------------------------------------------------------------
+        // STATO APPLICAZIONE
+        // --------------------------------------------------------------
+        let dati = {
+            ddt: [],      // array clienti DDT
+            ord: [],      // array clienti ORD
+            sca: []       // array clienti SCA
+        };
+        let clientiUnici = new Map(); // key: "codice|ragione", value: { codice, ragione, hasScadenze }
+
+        function aggiornaClientiUnici() {
+            clientiUnici.clear();
+            // Aggiungi clienti DDT
+            for (let c of dati.ddt) {
+                let key = `${c.codice}|${c.ragione}`;
+                if (!clientiUnici.has(key)) {
+                    clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
+                }
+            }
+            // Aggiungi clienti ORD
+            for (let c of dati.ord) {
+                let key = `${c.codice}|${c.ragione}`;
+                if (!clientiUnici.has(key)) {
+                    clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
+                }
+            }
+            // Aggiungi clienti SCA
+            for (let c of dati.sca) {
+                let key = `${c.codice}|${c.ragione}`;
+                if (!clientiUnici.has(key)) {
+                    clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
+                }
+                if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
+                    let cli = clientiUnici.get(key);
+                    if (cli) cli.hasScadenze = true;
+                }
+            }
+            // Popola select clienti
+            const select = document.getElementById('selectCliente');
+            select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
+            const sorted = Array.from(clientiUnici.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+            for (let cli of sorted) {
+                const option = document.createElement('option');
+                option.value = `${cli.codice}|${cli.ragione}`;
+                option.textContent = `${cli.codice} - ${cli.ragione}`;
+                if (cli.hasScadenze) {
+                    option.classList.add('cliente-rosso');
+                    option.style.color = '#c0392b';
+                    option.style.fontWeight = 'bold';
+                }
+                select.appendChild(option);
+            }
+            select.disabled = (sorted.length === 0);
         }
-        
-        const result = [];
-        for (let cliente of clienti.values()) {
-            if (cliente.articoli.size > 0) {
-                result.push({
-                    nome: cliente.nome,
-                    totale: cliente.totale,
-                    articoli: Array.from(cliente.articoli.values())
-                });
+
+        function mostraScadenze(clienteKey) {
+            const container = document.getElementById('scadenzeContainer');
+            if (!clienteKey) {
+                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente per vedere le scadenze.</div>';
+                return;
+            }
+            const [codice, ragione] = clienteKey.split('|');
+            const clienteSCA = dati.sca.find(c => c.codice === codice && c.ragione === ragione);
+            if (!clienteSCA || clienteSCA.scadenze.length === 0) {
+                container.innerHTML = `<div class="info-messaggio">Nessuna scadenza per il cliente selezionato.</div>`;
+                return;
+            }
+            let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>`;
+            html += `<table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
+            for (let s of clienteSCA.scadenze) {
+                html += `<tr><td>${s.scadenza}</td><td>${s.numDoc}</td><td>${s.dataDoc}</td><td>${s.importo.toFixed(2).replace('.', ',')}</td></tr>`;
+            }
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+
+        function mostraDettaglio(clienteKey, tipo) {
+            const container = document.getElementById('dettaglioContainer');
+            if (!clienteKey) {
+                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente e un tipo documento.</div>';
+                return;
+            }
+            const [codice, ragione] = clienteKey.split('|');
+            let cliente = null;
+            if (tipo === 'DDT') {
+                cliente = dati.ddt.find(c => c.codice === codice && c.ragione === ragione);
             } else {
-                debug(`ATTENZIONE: Cliente "${cliente.nome}" ha 0 articoli!`);
+                cliente = dati.ord.find(c => c.codice === codice && c.ragione === ragione);
             }
-        }
-        return result;
-    }
-
-    function parseORD(content) {
-        const match = content.match(/Cliente\s*:\s*\d+\s+([^\n]+)/);
-        const cliente = match ? match[1].trim() : 'Cliente';
-        return [{ nome: cliente, totale: 0, articoli: [] }];
-    }
-
-    function detectType(content) {
-        const u = content.toUpperCase();
-        if (u.includes('STAMPA BROGLIACCIO D.D.T.')) return 'DDT';
-        if (u.includes('CLIENTE') && (u.includes('COD. ARTICOLO') || u.includes('DESCRIZIONE'))) return 'ORD';
-        return null;
-    }
-
-    function processFile(name, content) {
-        debug(`\n📄 PROCESSANDO FILE: ${name}`);
-        const tipo = detectType(content);
-        debug(`Tipo rilevato: ${tipo}`);
-        if (tipo === 'DDT') return parseDDT(content);
-        if (tipo === 'ORD') return parseORD(content);
-        return null;
-    }
-
-    async function loadFiles(files) {
-        debugLogs = [];
-        debug('🔍 Caricamento file in corso...');
-        
-        for (let file of files) {
-            if (!file.name.endsWith('.txt')) continue;
-            const content = await file.text();
-            const idx = savedFiles.findIndex(f => f.name === file.name);
-            if (idx !== -1) savedFiles[idx] = { name: file.name, content };
-            else savedFiles.push({ name: file.name, content });
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedFiles));
-        reloadAllData();
-    }
-
-    function reloadAllData() {
-        let allRecords = [];
-        let firstTipo = null;
-        for (let f of savedFiles) {
-            const parsed = processFile(f.name, f.content);
-            if (parsed && parsed.length > 0) {
-                if (!firstTipo) firstTipo = f.name.toUpperCase().includes('DDT') ? 'DDT' : 'ORD';
-                allRecords.push(...parsed);
+            if (!cliente || (tipo === 'DDT' && cliente.articoli.length === 0) || (tipo === 'ORD' && cliente.articoli.length === 0)) {
+                container.innerHTML = `<div class="info-messaggio">Nessun dato ${tipo} per il cliente selezionato.</div>`;
+                return;
             }
+            let html = `<h3>${tipo === 'DDT' ? '📦 DDT - Riepilogo articoli' : '📋 ORD - Storico ordini'}</h3>`;
+            if (tipo === 'DDT') {
+                html += `<table class="tabella"><thead>——
+<th>Codice</th><th>Descrizione</th><th>UM</th><th>Quantità totale</th><th>Ultimo prezzo</th><th>N° acquisti</th>
+</thead><tbody>`;
+                for (let art of cliente.articoli) {
+                    html += `<tr>
+                        <td>${art.codice}</td>
+                        <td>${art.descrizione.substring(0, 100)}</td>
+                        <td>${art.um}</td>
+                        <td>${art.quantitaTot}</td>
+                        <td>${art.ultimoPrezzo.toFixed(2).replace('.', ',')}</td>
+                        <td>${art.conteggio}</td>
+                    </tr>`;
+                }
+                html += `</tbody></table>`;
+            } else {
+                for (let art of cliente.articoli) {
+                    let coppieStr = '';
+                    let num = art.coppie.length;
+                    for (let c of art.coppie) {
+                        coppieStr += `${num}°-${c.qta.toFixed(2).replace('.', ',')} ${c.data} `;
+                        num--;
+                    }
+                    coppieStr = coppieStr.trim();
+                    html += `<div class="articolo-ord"><strong>${art.codice}</strong> ${art.descrizione}<br>${coppieStr}<br>prezzo e sconto ${art.prezzo.toFixed(2).replace('.', ',')} ${art.sconto1.toFixed(2).replace('.', ',')}</div>`;
+                }
+            }
+            container.innerHTML = html;
         }
-        if (allRecords.length) {
-            currentData = { tipo: firstTipo, parsed: allRecords };
-            renderClientSelect();
-            renderMainContent();
-            debug(`✅ Caricamento completato. Clienti visualizzati: ${allRecords.length}`);
-        } else {
-            document.getElementById('mainContent').innerHTML = '<div class="empty-msg">📭 Nessun file valido. Carica DDT o ORD.</div>';
-            document.getElementById('clientSelect').innerHTML = '<option value="">-- Nessun cliente --</option>';
-        }
-    }
 
-    function renderClientSelect() {
-        const sel = document.getElementById('clientSelect');
-        if (!currentData || !currentData.parsed || currentData.parsed.length === 0) {
-            sel.innerHTML = '<option value="">-- Nessun cliente --</option>';
-            return;
+        function aggiornaTutto() {
+            const clienteKey = document.getElementById('selectCliente').value;
+            const tipo = document.getElementById('selectTipo').value;
+            if (!clienteKey) {
+                document.getElementById('scadenzeContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
+                document.getElementById('dettaglioContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente e un tipo documento.</div>';
+                return;
+            }
+            mostraScadenze(clienteKey);
+            mostraDettaglio(clienteKey, tipo);
         }
-        let html = '<option value="">-- Seleziona un cliente --</option>';
-        for (let c of currentData.parsed) {
-            html += `<option value="${escapeHtml(c.nome)}">${escapeHtml(c.nome)}</option>`;
-        }
-        sel.innerHTML = html;
-    }
 
-    function renderMainContent() {
-        const tipo = document.getElementById('tipoSelect').value;
-        if (!currentData || currentData.tipo !== tipo) {
-            document.getElementById('mainContent').innerHTML = `<div class="empty-msg">📭 Cambia a ${currentData?.tipo || 'DDT'}</div>`;
-            return;
-        }
-        const selected = document.getElementById('clientSelect').value;
-        if (!selected) {
-            document.getElementById('mainContent').innerHTML = '<div class="empty-msg">👆 Seleziona un cliente dalla tendina</div>';
-            return;
-        }
-        const client = currentData.parsed.find(c => c.nome === selected);
-        if (!client || !client.articoli.length) {
-            document.getElementById('mainContent').innerHTML = `<div class="empty-msg">Nessun articolo trovato per ${escapeHtml(selected)}</div>`;
-            return;
-        }
-        
-        let html = `<div class="cliente-section">
-            <div class="cliente-header">
-                <span>🏢 ${escapeHtml(client.nome)}</span>
-                <span class="cliente-totale">💰 Totale: € ${client.totale.toFixed(2)}</span>
-            </div>
-            <table class="articoli-table">
-                <thead>
-                    <tr><th>Codice</th><th>Descrizione</th><th>Um</th><th>Qtà</th><th>Prezzo €</th><th>Sconto %</th><th>Acquisti</th></tr>
-                </thead>
-                <tbody>`;
-        
-        for (let art of client.articoli) {
-            html += `<tr>
-                <td>${escapeHtml(art.codice)}</td>
-                <td style="max-width:300px;">${escapeHtml(art.descrizione)}</td>
-                <td>${art.um || '-'}</td>
-                <td>${art.quantita}</td>
-                <td>€ ${art.prezzo.toFixed(4)}</td>
-                <td>${art.sconto}%</td>
-                <td><span class="rep-count">${art.count} volte</span></td>
-            </tr>`;
-        }
-        html += `</tbody>}</div>`;
-        document.getElementById('mainContent').innerHTML = html;
-    }
+        // Caricamento file multiplo
+        document.getElementById('btnCaricaFile').addEventListener('click', () => {
+            document.getElementById('fileInputMulti').click();
+        });
 
-    function escapeHtml(s) { 
-        if (!s) return '';
-        return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
-    }
+        document.getElementById('fileInputMulti').addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            let loaded = 0;
+            let ddtText = null, ordText = null, scaText = null;
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const content = ev.target.result;
+                    const nome = file.name.toLowerCase();
+                    if (nome.includes('ddt')) ddtText = content;
+                    else if (nome.includes('ord')) ordText = content;
+                    else if (nome.includes('sca')) scaText = content;
+                    loaded++;
+                    if (loaded === files.length) {
+                        if (ddtText) dati.ddt = parseDDT(ddtText);
+                        if (ordText) dati.ord = parseORD(ordText);
+                        if (scaText) dati.sca = parseSCA(scaText);
+                        aggiornaClientiUnici();
+                        document.getElementById('selectTipo').disabled = false;
+                        document.getElementById('fileStatus').innerHTML = `✅ Caricati: ${files.length} file(i)`;
+                        document.getElementById('selectCliente').value = '';
+                        document.getElementById('scadenzeContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
+                        document.getElementById('dettaglioContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente e un tipo documento.</div>';
+                        alert("File caricati e parsati con successo.");
+                    }
+                };
+                reader.readAsText(file, "UTF-8");
+            }
+            e.target.value = '';
+        });
 
-    function clearMemory() {
-        if (confirm('Cancellare tutti i file salvati?')) {
-            savedFiles = [];
-            localStorage.removeItem(STORAGE_KEY);
-            currentData = null;
-            document.getElementById('mainContent').innerHTML = '<div class="empty-msg">Memoria cancellata. Ricarica i file.</div>';
-            document.getElementById('clientSelect').innerHTML = '<option value="">-- Nessun cliente --</option>';
-            debugLogs = [];
-            document.getElementById('debugPanel').innerHTML = '📌 Memoria cancellata';
-        }
-    }
+        document.getElementById('selectCliente').addEventListener('change', aggiornaTutto);
+        document.getElementById('selectTipo').addEventListener('change', aggiornaTutto);
 
-    document.getElementById('driveBtn').onclick = () => window.open('https://drive.google.com/drive/folders/1V7BH-_UZzLz7GshRN1ypMtWnvx36NcC4', '_blank');
-    document.getElementById('loadBtn').onclick = () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.accept = '.txt';
-        input.onchange = (e) => loadFiles(Array.from(e.target.files));
-        input.click();
-    };
-    document.getElementById('clearBtn').onclick = clearMemory;
-    document.getElementById('tipoSelect').onchange = () => renderMainContent();
-    document.getElementById('clientSelect').onchange = () => renderMainContent();
-    document.getElementById('clientSearch').oninput = (e) => {
-        const term = e.target.value.toLowerCase();
-        const opts = document.getElementById('clientSelect').options;
-        for (let i = 1; i < opts.length; i++) {
-            opts[i].style.display = opts[i].text.toLowerCase().includes(term) ? '' : 'none';
-        }
-    };
+        // LOGO
+        const btnLogo = document.getElementById('btnCaricaLogo');
+        const imgLogo = document.getElementById('logoImmagine');
+        let pressTimer = null;
 
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-        try {
-            savedFiles = JSON.parse(stored);
-            reloadAllData();
-        } catch(e) {}
-    }
-</script>
+        btnLogo.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        imgLogo.src = ev.target.result;
+                        imgLogo.style.display = 'block';
+                        btnLogo.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        });
+
+        imgLogo.addEventListener('mousedown', () => {
+            pressTimer = setTimeout(() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            imgLogo.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                input.click();
+                pressTimer = null;
+            }, 3000);
+        });
+        imgLogo.addEventListener('mouseup', () => {
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        });
+        imgLogo.addEventListener('mouseleave', () => {
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        });
+    </script>
 </body>
 </html>
