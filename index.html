@@ -262,6 +262,26 @@
             font-weight: bold;
             font-family: monospace;
         }
+        .editable-cell {
+            cursor: pointer;
+            min-width: 80px;
+        }
+        .editable-cell:hover {
+            background-color: #fff3cd;
+        }
+        .cell-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 4px;
+            margin: -4px;
+        }
+        .cell-input:focus {
+            outline: 1px solid #3498db;
+            background: white;
+        }
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -341,17 +361,7 @@
             </div>
             <button id="btnCalcolaSaldo" class="btn-success">📊 Calcola saldo mese</button>
             <hr>
-            <div class="form-group">
-                <label>➕ Aggiungi riga prima nota</label>
-                <input type="date" id="nuovaData" value="2026-05-30">
-                <input type="text" id="nuovaDescrizione" placeholder="Descrizione">
-                <div class="row-flex">
-                    <input type="number" id="nuovoAvere" step="0.01" placeholder="Avere (entrate)" style="flex:1">
-                    <input type="number" id="nuovoDare" step="0.01" placeholder="Dare (uscite)" style="flex:1">
-                </div>
-                <button id="btnAggiungiRiga">➕ Aggiungi riga</button>
-                <button id="btnAggiungiContanti" class="btn-success">💵 Aggiungi incasso contanti</button>
-            </div>
+            <button id="btnAggiungiRiga" class="btn-success">➕ Aggiungi riga vuota</button>
             <button id="btnEliminaUltimaRiga" class="btn-danger">🗑 Elimina ultima riga</button>
             <hr>
             <div class="form-group">
@@ -380,7 +390,6 @@
             </div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
             
-            <!-- Ricerca cliente -->
             <div class="search-box">
                 <label>🔍 Cerca cliente</label>
                 <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
@@ -436,7 +445,7 @@
             </div>
         </div>
     </div>
-    <footer>Premere 3 secondi sul logo per cambiarlo. I dati sono salvati in localStorage e file JSON.</footer>
+    <footer>Premere 3 secondi sul logo per cambiarlo. Clicca sulle celle per modificarle.</footer>
 </div>
 
 <!-- Modal per dettaglio coppie Agenti -->
@@ -469,16 +478,35 @@
     let saldoIniziale = 0;
     let nextFatturaId = 1;
     
-    // Funzioni utility
+    // Formatta numero con punto delle migliaia e virgola decimale
+    function formatNumber(n) {
+        if (n === null || n === undefined || n === '') return '';
+        let num = parseFloat(n);
+        if (isNaN(num)) return '';
+        return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function parseNumber(s) {
+        if (!s || s === '') return 0;
+        // rimuove punti (separatori migliaia) e sostituisce virgola con punto
+        let clean = s.toString().replace(/\./g, '').replace(',', '.');
+        let num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
+    }
+    
     function formatDate(dateStr) {
         if (!dateStr) return "";
         let d = new Date(dateStr);
         return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
     }
     
-    function formatNumber(n) {
-        if (n === null || n === undefined) return '';
-        return n.toFixed(2).replace('.', ',');
+    function parseDate(itDate) {
+        let parts = itDate.split('/');
+        if (parts.length === 3) {
+            let d = new Date(parts[2], parts[1]-1, parts[0]);
+            if (!isNaN(d)) return d;
+        }
+        return null;
     }
     
     // Salva stato corrente in localStorage
@@ -517,48 +545,209 @@
     }
     
     function calcolaSaldo() {
-        let totaleAvere = primaNota.reduce((sum, r) => sum + (r.avere || 0), 0);
-        let totaleDare = primaNota.reduce((sum, r) => sum + (r.dare || 0), 0);
-        let totaleContanti = primaNota.reduce((sum, r) => sum + (r.incassoContanti || 0), 0);
+        let totaleAvere = primaNota.reduce((sum, r) => sum + (parseNumber(r.avere) || 0), 0);
+        let totaleDare = primaNota.reduce((sum, r) => sum + (parseNumber(r.dare) || 0), 0);
+        let totaleContanti = primaNota.reduce((sum, r) => sum + (parseNumber(r.incassoContanti) || 0), 0);
         let saldo = saldoIniziale + totaleAvere - totaleDare;
         document.getElementById('saldoInfo').innerHTML = `
             <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
                 <div><strong>📈 Totale Avere (entrate):</strong> ${formatNumber(totaleAvere)} €</div>
                 <div><strong>📉 Totale Dare (uscite):</strong> ${formatNumber(totaleDare)} €</div>
                 <div><strong>💰 Saldo mese:</strong> ${formatNumber(saldo)} €</div>
-                <div><strong>💵 Incasso Contanti mese:</strong> ${formatNumber(totaleContanti)} €</div>
+                <div><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(totaleContanti)} €</div>
             </div>
         `;
     }
     
+    // Celle editabili per Prima Nota
+    function makeEditableCell(value, rowIdx, field, type = 'number') {
+        let displayValue = '';
+        if (field === 'verificato') {
+            let chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = value === true;
+            chk.style.cursor = 'pointer';
+            chk.onchange = (function(r, f) { return function(e) { 
+                primaNota[r][f] = e.target.checked;
+                aggiornaUI();
+                salvaStatoCorrente();
+            }; })(rowIdx, field);
+            return chk;
+        } else {
+            if (field === 'data') {
+                displayValue = value || '';
+            } else if (field === 'descrizione') {
+                displayValue = value || '';
+            } else {
+                displayValue = formatNumber(value) || '';
+            }
+            let span = document.createElement('span');
+            span.textContent = displayValue || '';
+            span.className = 'editable-cell';
+            span.style.cursor = 'pointer';
+            span.onclick = (function(r, f, currentValue) { return function() {
+                let input = document.createElement('input');
+                input.className = 'cell-input';
+                if (f === 'data') {
+                    // converte dd/mm/yyyy in yyyy-mm-dd per l'input date
+                    let dateVal = '';
+                    if (currentValue) {
+                        let parts = currentValue.split('/');
+                        if (parts.length === 3) {
+                            dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                        }
+                    }
+                    input.type = 'date';
+                    input.value = dateVal;
+                } else if (f === 'descrizione') {
+                    input.type = 'text';
+                    input.value = currentValue || '';
+                } else {
+                    input.type = 'text';
+                    input.value = formatNumber(currentValue) || '';
+                }
+                span.style.display = 'none';
+                span.parentNode.insertBefore(input, span);
+                input.focus();
+                input.onblur = function() {
+                    let newValue;
+                    if (f === 'data') {
+                        newValue = input.value ? formatDate(input.value) : '';
+                    } else if (f === 'descrizione') {
+                        newValue = input.value;
+                    } else {
+                        let raw = input.value;
+                        newValue = parseNumber(raw);
+                    }
+                    primaNota[r][f] = newValue;
+                    // Validazione: se avere o dare > 0, incassoContanti deve essere 0 e viceversa
+                    if (f === 'avere' && parseNumber(newValue) > 0) {
+                        primaNota[r].dare = 0;
+                        primaNota[r].incassoContanti = 0;
+                    } else if (f === 'dare' && parseNumber(newValue) > 0) {
+                        primaNota[r].avere = 0;
+                        primaNota[r].incassoContanti = 0;
+                    } else if (f === 'incassoContanti' && parseNumber(newValue) > 0) {
+                        primaNota[r].avere = 0;
+                        primaNota[r].dare = 0;
+                    }
+                    aggiornaUI();
+                    salvaStatoCorrente();
+                    input.remove();
+                    span.style.display = 'inline';
+                };
+                input.onkeypress = function(e) {
+                    if (e.key === 'Enter') {
+                        input.blur();
+                    }
+                };
+            }; })(rowIdx, field, primaNota[rowIdx][field]);
+            return span;
+        }
+    }
+    
     function aggiornaUI() {
+        // Prima Nota
         let tbody = document.getElementById('primaNotaBody');
         tbody.innerHTML = '';
         primaNota.forEach((riga, idx) => {
             let row = tbody.insertRow();
             row.insertCell(0).innerText = idx+1;
-            row.insertCell(1).innerText = riga.data;
-            row.insertCell(2).innerText = riga.descrizione;
-            row.insertCell(3).innerText = riga.avere ? formatNumber(riga.avere) : '';
-            row.insertCell(4).innerText = riga.dare ? formatNumber(riga.dare) : '';
-            let checkCell = row.insertCell(5);
-            let chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.checked = riga.verificato || false;
-            chk.onchange = (function(idx) { return function(e) { primaNota[idx].verificato = e.target.checked; aggiornaUI(); salvaStatoCorrente(); }; })(idx);
-            checkCell.appendChild(chk);
-            row.insertCell(6).innerText = riga.incassoContanti ? formatNumber(riga.incassoContanti) : '';
+            row.insertCell(1).appendChild(makeEditableCell(riga.data, idx, 'data'));
+            row.insertCell(2).appendChild(makeEditableCell(riga.descrizione, idx, 'descrizione'));
+            row.insertCell(3).appendChild(makeEditableCell(riga.avere, idx, 'avere'));
+            row.insertCell(4).appendChild(makeEditableCell(riga.dare, idx, 'dare'));
+            row.insertCell(5).appendChild(makeEditableCell(riga.verificato, idx, 'verificato'));
+            row.insertCell(6).appendChild(makeEditableCell(riga.incassoContanti, idx, 'incassoContanti'));
         });
         calcolaSaldo();
         
+        // Fatture Fornitori (editabili)
         let fattureBody = document.getElementById('fattureBody');
         fattureBody.innerHTML = '';
         fattureFornitori.forEach((fatt, idx) => {
             let row = fattureBody.insertRow();
             row.insertCell(0).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
-            row.insertCell(1).innerText = fatt.data;
-            row.insertCell(2).innerText = fatt.fornitore;
-            row.insertCell(3).innerText = fatt.numeroFattura;
+            
+            // Data editabile
+            let dataCell = row.insertCell(1);
+            let dataSpan = document.createElement('span');
+            dataSpan.textContent = fatt.data || '';
+            dataSpan.className = 'editable-cell';
+            dataSpan.style.cursor = 'pointer';
+            dataSpan.onclick = (function(r) { return function() {
+                let input = document.createElement('input');
+                input.type = 'date';
+                let dateVal = '';
+                if (fattureFornitori[r].data) {
+                    let parts = fattureFornitori[r].data.split('/');
+                    if (parts.length === 3) {
+                        dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                    }
+                }
+                input.value = dateVal;
+                dataSpan.style.display = 'none';
+                dataSpan.parentNode.insertBefore(input, dataSpan);
+                input.focus();
+                input.onblur = function() {
+                    fattureFornitori[r].data = input.value ? formatDate(input.value) : '';
+                    aggiornaUI();
+                    salvaStatoCorrente();
+                    input.remove();
+                    dataSpan.style.display = 'inline';
+                };
+            }; })(idx);
+            dataCell.appendChild(dataSpan);
+            
+            // Fornitore editabile
+            let fornitoreCell = row.insertCell(2);
+            let fornitoreSpan = document.createElement('span');
+            fornitoreSpan.textContent = fatt.fornitore || '';
+            fornitoreSpan.className = 'editable-cell';
+            fornitoreSpan.style.cursor = 'pointer';
+            fornitoreSpan.onclick = (function(r) { return function() {
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.value = fattureFornitori[r].fornitore || '';
+                input.className = 'cell-input';
+                fornitoreSpan.style.display = 'none';
+                fornitoreSpan.parentNode.insertBefore(input, fornitoreSpan);
+                input.focus();
+                input.onblur = function() {
+                    fattureFornitori[r].fornitore = input.value;
+                    aggiornaUI();
+                    salvaStatoCorrente();
+                    input.remove();
+                    fornitoreSpan.style.display = 'inline';
+                };
+                input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+            }; })(idx);
+            fornitoreCell.appendChild(fornitoreSpan);
+            
+            // N. Fattura editabile
+            let numCell = row.insertCell(3);
+            let numSpan = document.createElement('span');
+            numSpan.textContent = fatt.numeroFattura || '';
+            numSpan.className = 'editable-cell';
+            numSpan.style.cursor = 'pointer';
+            numSpan.onclick = (function(r) { return function() {
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.value = fattureFornitori[r].numeroFattura || '';
+                input.className = 'cell-input';
+                numSpan.style.display = 'none';
+                numSpan.parentNode.insertBefore(input, numSpan);
+                input.focus();
+                input.onblur = function() {
+                    fattureFornitori[r].numeroFattura = input.value;
+                    aggiornaUI();
+                    salvaStatoCorrente();
+                    input.remove();
+                    numSpan.style.display = 'inline';
+                };
+                input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+            }; })(idx);
+            numCell.appendChild(numSpan);
         });
         
         document.getElementById('annoSelect').value = currentYear;
@@ -654,8 +843,8 @@
         let csvRows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]];
         for (let riga of primaNota) {
             csvRows.push([
-                riga.data,
-                riga.descrizione,
+                riga.data || '',
+                riga.descrizione || '',
                 riga.avere ? riga.avere.toString().replace('.',',') : '',
                 riga.dare ? riga.dare.toString().replace('.',',') : '',
                 riga.incassoContanti ? riga.incassoContanti.toString().replace('.',',') : '',
@@ -750,7 +939,7 @@
     }
     
     // --------------------------------------------------------------
-    // GESTIONE AGENTI (con matching flessibile e filtri)
+    // GESTIONE AGENTI
     // --------------------------------------------------------------
     let datiAgenti = { ord: [], sca: [] };
     let clientiUniciAgenti = [];
@@ -785,12 +974,9 @@
     function aggiornaTendinaClienti() {
         const select = document.getElementById('selectClienteAgenti');
         const searchText = document.getElementById('cercaCliente').value.toLowerCase();
-        
-        // Filtra clienti
         clientiFiltrati = clientiUniciAgenti.filter(cli => 
             cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText)
         );
-        
         select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
         for (let cli of clientiFiltrati) {
             const option = document.createElement('option');
@@ -840,7 +1026,6 @@
         }
         const [codice, ragione] = clienteKey.split('|');
         
-        // Cerca cliente ORD (prima esatto, poi solo per codice)
         let clienteORD = datiAgenti.ord.find(c => c.codice === codice && c.ragione === ragione);
         if (!clienteORD) {
             clienteORD = datiAgenti.ord.find(c => c.codice === codice);
@@ -852,7 +1037,6 @@
             return;
         }
         
-        // Aggiungi campo ricerca articolo
         document.getElementById('ricercaArticoloContainer').innerHTML = `
             <div class="search-box">
                 <label>🔍 Cerca articolo</label>
@@ -863,7 +1047,8 @@
         articoliFiltratiGlobali = [...clienteORD.articoli];
         const searchInput = document.getElementById('cercaArticolo');
         if (searchInput) {
-            searchInput.addEventListener('input', () => filtraArticoli());
+            searchInput.removeEventListener('input', filtraArticoli);
+            searchInput.addEventListener('input', filtraArticoli);
         }
         
         filtraArticoli();
@@ -899,40 +1084,15 @@
     // EVENTI CONTABILITÀ
     // --------------------------------------------------------------
     document.getElementById('btnAggiungiRiga').addEventListener('click', () => {
-        let data = document.getElementById('nuovaData').value;
-        let descrizione = document.getElementById('nuovaDescrizione').value;
-        let avere = parseFloat(document.getElementById('nuovoAvere').value) || 0;
-        let dare = parseFloat(document.getElementById('nuovoDare').value) || 0;
-        if (!descrizione) { alert("Inserisci una descrizione"); return; }
-        if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare sulla stessa riga"); return; }
-        if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo in Avere o Dare"); return; }
+        let oggi = new Date();
+        let dataDefault = formatDate(oggi.toISOString().slice(0,10));
         primaNota.push({
-            data: formatDate(data),
-            descrizione: descrizione,
-            avere: avere || null,
-            dare: dare || null,
+            data: dataDefault,
+            descrizione: "",
+            avere: 0,
+            dare: 0,
             verificato: false,
-            incassoContanti: null
-        });
-        document.getElementById('nuovaDescrizione').value = '';
-        document.getElementById('nuovoAvere').value = '';
-        document.getElementById('nuovoDare').value = '';
-        aggiornaUI();
-    });
-    
-    document.getElementById('btnAggiungiContanti').addEventListener('click', () => {
-        let data = document.getElementById('nuovaData').value;
-        let importo = prompt("Inserisci l'importo incassato in contanti:", "0");
-        if (importo === null) return;
-        let imp = parseFloat(importo.replace(',', '.')) || 0;
-        if (imp <= 0) { alert("Importo non valido"); return; }
-        primaNota.push({
-            data: formatDate(data),
-            descrizione: "Incasso contanti",
-            avere: imp,
-            dare: null,
-            verificato: false,
-            incassoContanti: imp
+            incassoContanti: 0
         });
         aggiornaUI();
     });
@@ -961,7 +1121,7 @@
     });
     
     document.getElementById('btnCalcolaSaldo').addEventListener('click', () => aggiornaUI());
-    document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseFloat(e.target.value) || 0; aggiornaUI(); });
+    document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaUI(); });
     document.getElementById('btnSalvaMese').addEventListener('click', () => salvaSuFile());
     document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
     document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
@@ -982,7 +1142,6 @@
         document.getElementById('confermaPassword').value = '';
     });
     
-    // Ricerca cliente in tempo reale
     document.getElementById('cercaCliente')?.addEventListener('input', () => {
         aggiornaTendinaClienti();
     });
