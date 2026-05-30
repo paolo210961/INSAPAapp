@@ -282,6 +282,48 @@
             outline: 1px solid #3498db;
             background: white;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header h3 {
+            margin: 0;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+        }
+        .close-modal:hover {
+            color: #c0392b;
+        }
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -361,16 +403,11 @@
             </div>
             <button id="btnCalcolaSaldo" class="btn-success">📊 Calcola saldo mese</button>
             <hr>
-            <button id="btnAggiungiRiga" class="btn-success">➕ Aggiungi riga vuota</button>
+            <button id="btnAggiungiRiga" class="btn-success">➕ Aggiungi riga normale</button>
+            <button id="btnAggiungiContanti" class="btn-warning">💵 Aggiungi incasso contanti</button>
             <button id="btnEliminaUltimaRiga" class="btn-danger">🗑 Elimina ultima riga</button>
             <hr>
-            <div class="form-group">
-                <label>📄 Aggiungi fattura fornitore</label>
-                <input type="date" id="fatturaData" value="2026-05-30">
-                <input type="text" id="fatturaFornitore" placeholder="Fornitore">
-                <input type="text" id="fatturaNumero" placeholder="N. Fattura">
-                <button id="btnAggiungiFattura">➕ Aggiungi fattura</button>
-            </div>
+            <button id="btnAggiungiFattura" class="btn-success">📄 Aggiungi fattura fornitore</button>
             <hr>
             <div class="form-group">
                 <label>📁 Archiviazione</label>
@@ -449,13 +486,86 @@
 </div>
 
 <!-- Modal per dettaglio coppie Agenti -->
-<div id="modalCoppie" style="display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-    <div style="background:white; border-radius:16px; padding:20px; width:90%; max-width:400px;">
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #ddd; padding-bottom:10px;">
-            <h3 style="margin:0;">📦 Dettaglio ordini</h3>
-            <button id="closeModalBtn" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+<div id="modalCoppie" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📦 Dettaglio ordini</h3>
+            <button class="close-modal" id="closeModalBtn">&times;</button>
         </div>
         <div id="modalBody"></div>
+    </div>
+</div>
+
+<!-- Modal per aggiungere riga normale -->
+<div id="modalAggiungiRiga" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>➕ Aggiungi riga normale</h3>
+            <button class="close-modal" id="closeRigaModal">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="nuovaData" value="">
+        </div>
+        <div class="form-group">
+            <label>Descrizione</label>
+            <input type="text" id="nuovaDescrizione" placeholder="Inserisci descrizione">
+        </div>
+        <div class="form-group">
+            <label>Avere (entrate) €</label>
+            <input type="number" id="nuovoAvere" step="0.01" value="0">
+        </div>
+        <div class="form-group">
+            <label>Dare (uscite) €</label>
+            <input type="number" id="nuovoDare" step="0.01" value="0">
+        </div>
+        <button id="btnConfermaRiga" class="btn-success">✅ Conferma</button>
+    </div>
+</div>
+
+<!-- Modal per aggiungere incasso contanti -->
+<div id="modalAggiungiContanti" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💵 Aggiungi incasso contanti</h3>
+            <button class="close-modal" id="closeContantiModal">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="contantiData" value="">
+        </div>
+        <div class="form-group">
+            <label>Descrizione</label>
+            <input type="text" id="contantiDescrizione" placeholder="Inserisci descrizione">
+        </div>
+        <div class="form-group">
+            <label>Incasso Contanti €</label>
+            <input type="number" id="contantiImporto" step="0.01" value="0">
+        </div>
+        <button id="btnConfermaContanti" class="btn-success">✅ Conferma</button>
+    </div>
+</div>
+
+<!-- Modal per aggiungere fattura fornitore -->
+<div id="modalAggiungiFattura" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📄 Aggiungi fattura fornitore</h3>
+            <button class="close-modal" id="closeFatturaModal">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="fatturaData" value="">
+        </div>
+        <div class="form-group">
+            <label>Fornitore</label>
+            <input type="text" id="fatturaFornitore" placeholder="Nome fornitore">
+        </div>
+        <div class="form-group">
+            <label>N. Fattura</label>
+            <input type="text" id="fatturaNumero" placeholder="Numero fattura">
+        </div>
+        <button id="btnConfermaFattura" class="btn-success">✅ Conferma</button>
     </div>
 </div>
 
@@ -488,7 +598,6 @@
     
     function parseNumber(s) {
         if (!s || s === '') return 0;
-        // rimuove punti (separatori migliaia) e sostituisce virgola con punto
         let clean = s.toString().replace(/\./g, '').replace(',', '.');
         let num = parseFloat(clean);
         return isNaN(num) ? 0 : num;
@@ -498,15 +607,6 @@
         if (!dateStr) return "";
         let d = new Date(dateStr);
         return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
-    }
-    
-    function parseDate(itDate) {
-        let parts = itDate.split('/');
-        if (parts.length === 3) {
-            let d = new Date(parts[2], parts[1]-1, parts[0]);
-            if (!isNaN(d)) return d;
-        }
-        return null;
     }
     
     // Salva stato corrente in localStorage
@@ -561,7 +661,6 @@
     
     // Celle editabili per Prima Nota
     function makeEditableCell(value, rowIdx, field, type = 'number') {
-        let displayValue = '';
         if (field === 'verificato') {
             let chk = document.createElement('input');
             chk.type = 'checkbox';
@@ -574,6 +673,7 @@
             }; })(rowIdx, field);
             return chk;
         } else {
+            let displayValue = '';
             if (field === 'data') {
                 displayValue = value || '';
             } else if (field === 'descrizione') {
@@ -589,7 +689,6 @@
                 let input = document.createElement('input');
                 input.className = 'cell-input';
                 if (f === 'data') {
-                    // converte dd/mm/yyyy in yyyy-mm-dd per l'input date
                     let dateVal = '';
                     if (currentValue) {
                         let parts = currentValue.split('/');
@@ -620,7 +719,6 @@
                         newValue = parseNumber(raw);
                     }
                     primaNota[r][f] = newValue;
-                    // Validazione: se avere o dare > 0, incassoContanti deve essere 0 e viceversa
                     if (f === 'avere' && parseNumber(newValue) > 0) {
                         primaNota[r].dare = 0;
                         primaNota[r].incassoContanti = 0;
@@ -669,7 +767,6 @@
             let row = fattureBody.insertRow();
             row.insertCell(0).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
             
-            // Data editabile
             let dataCell = row.insertCell(1);
             let dataSpan = document.createElement('span');
             dataSpan.textContent = fatt.data || '';
@@ -699,7 +796,6 @@
             }; })(idx);
             dataCell.appendChild(dataSpan);
             
-            // Fornitore editabile
             let fornitoreCell = row.insertCell(2);
             let fornitoreSpan = document.createElement('span');
             fornitoreSpan.textContent = fatt.fornitore || '';
@@ -724,7 +820,6 @@
             }; })(idx);
             fornitoreCell.appendChild(fornitoreSpan);
             
-            // N. Fattura editabile
             let numCell = row.insertCell(3);
             let numSpan = document.createElement('span');
             numSpan.textContent = fatt.numeroFattura || '';
@@ -860,6 +955,128 @@
         a.click();
         URL.revokeObjectURL(url);
     }
+    
+    // --------------------------------------------------------------
+    // MODAL PER AGGIUNGERE RIGHE
+    // --------------------------------------------------------------
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Riga normale
+    document.getElementById('btnAggiungiRiga').addEventListener('click', () => {
+        let oggi = new Date();
+        document.getElementById('nuovaData').value = oggi.toISOString().slice(0,10);
+        document.getElementById('nuovaDescrizione').value = '';
+        document.getElementById('nuovoAvere').value = 0;
+        document.getElementById('nuovoDare').value = 0;
+        openModal('modalAggiungiRiga');
+    });
+    
+    document.getElementById('btnConfermaRiga').addEventListener('click', () => {
+        let data = document.getElementById('nuovaData').value;
+        let descrizione = document.getElementById('nuovaDescrizione').value;
+        let avere = parseFloat(document.getElementById('nuovoAvere').value) || 0;
+        let dare = parseFloat(document.getElementById('nuovoDare').value) || 0;
+        if (!descrizione) { alert("Inserisci una descrizione"); return; }
+        if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare sulla stessa riga"); return; }
+        if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo in Avere o Dare"); return; }
+        primaNota.push({
+            data: formatDate(data),
+            descrizione: descrizione,
+            avere: avere || null,
+            dare: dare || null,
+            verificato: false,
+            incassoContanti: null
+        });
+        closeModal('modalAggiungiRiga');
+        aggiornaUI();
+    });
+    
+    // Incasso contanti
+    document.getElementById('btnAggiungiContanti').addEventListener('click', () => {
+        let oggi = new Date();
+        document.getElementById('contantiData').value = oggi.toISOString().slice(0,10);
+        document.getElementById('contantiDescrizione').value = '';
+        document.getElementById('contantiImporto').value = 0;
+        openModal('modalAggiungiContanti');
+    });
+    
+    document.getElementById('btnConfermaContanti').addEventListener('click', () => {
+        let data = document.getElementById('contantiData').value;
+        let descrizione = document.getElementById('contantiDescrizione').value;
+        let importo = parseFloat(document.getElementById('contantiImporto').value) || 0;
+        if (!descrizione) { alert("Inserisci una descrizione"); return; }
+        if (importo <= 0) { alert("Inserisci un importo valido"); return; }
+        primaNota.push({
+            data: formatDate(data),
+            descrizione: descrizione,
+            avere: null,
+            dare: null,
+            verificato: false,
+            incassoContanti: importo
+        });
+        closeModal('modalAggiungiContanti');
+        aggiornaUI();
+    });
+    
+    // Fattura fornitore
+    document.getElementById('btnAggiungiFattura').addEventListener('click', () => {
+        let oggi = new Date();
+        document.getElementById('fatturaData').value = oggi.toISOString().slice(0,10);
+        document.getElementById('fatturaFornitore').value = '';
+        document.getElementById('fatturaNumero').value = '';
+        openModal('modalAggiungiFattura');
+    });
+    
+    document.getElementById('btnConfermaFattura').addEventListener('click', () => {
+        let data = document.getElementById('fatturaData').value;
+        let fornitore = document.getElementById('fatturaFornitore').value.trim();
+        let numeroFattura = document.getElementById('fatturaNumero').value.trim();
+        if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
+        fattureFornitori.push({
+            data: formatDate(data),
+            fornitore: fornitore,
+            numeroFattura: numeroFattura
+        });
+        nextFatturaId++;
+        closeModal('modalAggiungiFattura');
+        aggiornaUI();
+    });
+    
+    // Elimina ultima riga
+    document.getElementById('btnEliminaUltimaRiga').addEventListener('click', () => {
+        if (primaNota.length > 0 && confirm("Eliminare l'ultima riga?")) {
+            primaNota.pop();
+            aggiornaUI();
+        }
+    });
+    
+    document.getElementById('btnCalcolaSaldo').addEventListener('click', () => aggiornaUI());
+    document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaUI(); });
+    document.getElementById('btnSalvaMese').addEventListener('click', () => salvaSuFile());
+    document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
+    document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
+    document.getElementById('btnRiprendiCorrente').addEventListener('click', () => riprendiMeseCorrente());
+    document.getElementById('btnEsportaCSV').addEventListener('click', () => esportaCSV());
+    document.getElementById('annoSelect').addEventListener('change', () => cambiaMese());
+    document.getElementById('meseSelect').addEventListener('change', () => cambiaMese());
+    
+    document.getElementById('btnSalvaPassword').addEventListener('click', () => {
+        let nuova = document.getElementById('nuovaPassword').value;
+        let conferma = document.getElementById('confermaPassword').value;
+        if (!nuova) { alert("Inserisci una nuova password"); return; }
+        if (nuova !== conferma) { alert("Le password non coincidono"); return; }
+        ADMIN_PASSWORD = nuova;
+        localStorage.setItem('admin_password', nuova);
+        alert("Password cambiata con successo!");
+        document.getElementById('nuovaPassword').value = '';
+        document.getElementById('confermaPassword').value = '';
+    });
     
     // --------------------------------------------------------------
     // PARSER AGENTI
@@ -1081,72 +1298,6 @@
     }
     
     // --------------------------------------------------------------
-    // EVENTI CONTABILITÀ
-    // --------------------------------------------------------------
-    document.getElementById('btnAggiungiRiga').addEventListener('click', () => {
-        let oggi = new Date();
-        let dataDefault = formatDate(oggi.toISOString().slice(0,10));
-        primaNota.push({
-            data: dataDefault,
-            descrizione: "",
-            avere: 0,
-            dare: 0,
-            verificato: false,
-            incassoContanti: 0
-        });
-        aggiornaUI();
-    });
-    
-    document.getElementById('btnEliminaUltimaRiga').addEventListener('click', () => {
-        if (primaNota.length > 0 && confirm("Eliminare l'ultima riga?")) {
-            primaNota.pop();
-            aggiornaUI();
-        }
-    });
-    
-    document.getElementById('btnAggiungiFattura').addEventListener('click', () => {
-        let data = document.getElementById('fatturaData').value;
-        let fornitore = document.getElementById('fatturaFornitore').value.trim();
-        let numeroFattura = document.getElementById('fatturaNumero').value.trim();
-        if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
-        fattureFornitori.push({
-            data: formatDate(data),
-            fornitore: fornitore,
-            numeroFattura: numeroFattura
-        });
-        nextFatturaId++;
-        document.getElementById('fatturaFornitore').value = '';
-        document.getElementById('fatturaNumero').value = '';
-        aggiornaUI();
-    });
-    
-    document.getElementById('btnCalcolaSaldo').addEventListener('click', () => aggiornaUI());
-    document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaUI(); });
-    document.getElementById('btnSalvaMese').addEventListener('click', () => salvaSuFile());
-    document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
-    document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
-    document.getElementById('btnRiprendiCorrente').addEventListener('click', () => riprendiMeseCorrente());
-    document.getElementById('btnEsportaCSV').addEventListener('click', () => esportaCSV());
-    document.getElementById('annoSelect').addEventListener('change', () => cambiaMese());
-    document.getElementById('meseSelect').addEventListener('change', () => cambiaMese());
-    
-    document.getElementById('btnSalvaPassword').addEventListener('click', () => {
-        let nuova = document.getElementById('nuovaPassword').value;
-        let conferma = document.getElementById('confermaPassword').value;
-        if (!nuova) { alert("Inserisci una nuova password"); return; }
-        if (nuova !== conferma) { alert("Le password non coincidono"); return; }
-        ADMIN_PASSWORD = nuova;
-        localStorage.setItem('admin_password', nuova);
-        alert("Password cambiata con successo!");
-        document.getElementById('nuovaPassword').value = '';
-        document.getElementById('confermaPassword').value = '';
-    });
-    
-    document.getElementById('cercaCliente')?.addEventListener('input', () => {
-        aggiornaTendinaClienti();
-    });
-    
-    // --------------------------------------------------------------
     // LOGIN E NAVIGAZIONE
     // --------------------------------------------------------------
     document.getElementById('btnAdmin').addEventListener('click', () => {
@@ -1207,6 +1358,10 @@
         document.getElementById('loginScreen').style.display = 'flex';
         document.getElementById('adminPasswordDiv').style.display = 'none';
         document.getElementById('adminPassword').value = '';
+    });
+    
+    document.getElementById('cercaCliente')?.addEventListener('input', () => {
+        aggiornaTendinaClienti();
     });
     
     // --------------------------------------------------------------
@@ -1291,14 +1446,19 @@
     imgLogo.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
     imgLogo.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
     
-    // Chiusura modal
-    document.getElementById('closeModalBtn').addEventListener('click', () => {
-        document.getElementById('modalCoppie').style.display = 'none';
+    // Chiusura modali
+    const modals = ['modalAggiungiRiga', 'modalAggiungiContanti', 'modalAggiungiFattura', 'modalCoppie'];
+    modals.forEach(modalId => {
+        const closeBtn = document.getElementById(`close${modalId.charAt(0).toUpperCase() + modalId.slice(1)}`);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => closeModal(modalId));
+        }
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById(modalId);
+            if (e.target === modal) closeModal(modalId);
+        });
     });
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('modalCoppie');
-        if (e.target === modal) modal.style.display = 'none';
-    });
+    document.getElementById('closeModalBtn')?.addEventListener('click', () => closeModal('modalCoppie'));
 </script>
 </body>
 </html>
