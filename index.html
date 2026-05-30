@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AGENTI - Gestione ORD e SCA</title>
+    <title>inSAPA - Contabilità e Agenti</title>
     <style>
         * {
             box-sizing: border-box;
@@ -66,16 +66,38 @@
             cursor: pointer;
             font-size: 0.75rem;
         }
-        /* Layout principale */
+        /* Navigazione */
+        .nav-bar {
+            background: #2c3e50;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 8px 20px;
+        }
+        .nav-btn {
+            background: transparent;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .nav-btn:hover {
+            background: #1a252f;
+        }
+        .nav-btn.active {
+            background: #3498db;
+        }
+        /* Contenitore principale */
         .main-container {
             display: flex;
-            flex-direction: row;
             gap: 20px;
             padding: 20px;
             max-width: 1600px;
             margin: 0 auto;
         }
-        /* Sidebar */
         .sidebar {
             width: 280px;
             background: white;
@@ -86,56 +108,6 @@
             position: sticky;
             top: 20px;
         }
-        .file-upload-section {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 20px;
-        }
-        .upload-group {
-            margin-bottom: 15px;
-        }
-        .upload-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .upload-btn:hover {
-            opacity: 0.85;
-        }
-        .file-status {
-            font-size: 0.7rem;
-            color: #27ae60;
-            margin-top: 5px;
-            text-align: center;
-        }
-        .filter-group {
-            margin-bottom: 25px;
-        }
-        .filter-group label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
-        }
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 0.9rem;
-            background: white;
-        }
-        .cliente-rosso {
-            color: #c0392b;
-            font-weight: bold;
-        }
-        /* Area contenuti */
         .content-area {
             flex: 1;
             background: white;
@@ -144,24 +116,53 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             overflow-x: auto;
         }
-        .scadenze-box {
-            background: #f8f9fa;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            overflow-x: auto;
+        /* Form e tabelle */
+        .form-group {
+            margin-bottom: 15px;
         }
-        .scadenze-box h3 {
-            margin-top: 0;
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
             color: #2c3e50;
-            font-size: 1.1rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2c3e50;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #1e8449;
         }
         .tabella {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.8rem;
-            min-width: 400px;
+            margin-top: 15px;
         }
         .tabella th, .tabella td {
             border: 1px solid #ddd;
@@ -172,105 +173,13 @@
         .tabella th {
             background: #e9ecef;
         }
-        /* Articolo ORD - due righe con pulsante sulla destra */
-        .ord-item {
-            background: #fff;
-            border: 1px solid #e0e0e0;
+        .scadenze-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 25px;
             border-radius: 10px;
-            margin-bottom: 12px;
-            padding: 10px 12px;
-        }
-        .ord-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .ord-codice-desc {
-            font-weight: bold;
-            font-size: 0.9rem;
-            word-break: break-word;
-            flex: 1;
-        }
-        .btn-dettaglio {
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            white-space: nowrap;
-        }
-        .btn-dettaglio:hover {
-            background: #2c3e50;
-        }
-        .ord-prezzo {
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #2c3e50;
-            margin-top: 6px;
-            padding-left: 4px;
-        }
-        /* Modal per dettaglio coppie */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: white;
-            border-radius: 16px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            animation: fadeIn 0.2s;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #888;
-        }
-        .close-modal:hover {
-            color: #c0392b;
-        }
-        .coppie-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .coppie-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            overflow-x: auto;
         }
         .info-messaggio {
             color: #7f8c8d;
@@ -278,35 +187,85 @@
             padding: 15px;
             text-align: center;
         }
+        /* Login screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-card h2 {
+            margin-top: 0;
+        }
+        .profile-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .profile-btn {
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+        }
+        .password-input {
+            margin-top: 20px;
+        }
+        /* Footer */
         footer {
             text-align: center;
             margin: 20px;
             font-size: 0.7rem;
             color: #95a5a6;
         }
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                position: static;
-            }
-            h1 {
-                font-size: 1.2rem;
-            }
-            .content-area {
-                padding: 15px;
-            }
+        .row-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end;
         }
     </style>
 </head>
 <body>
+
+<!-- Schermata di selezione profilo -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <h2>🏢 inSAPA s.a.s.</h2>
+        <p>Seleziona il tuo profilo</p>
+        <div class="profile-buttons">
+            <button id="btnAdmin" class="profile-btn">🔐 AMMINISTRAZIONE</button>
+            <button id="btnAgenti" class="profile-btn">👥 AGENTI</button>
+        </div>
+        <div id="adminPasswordDiv" class="password-input" style="display: none;">
+            <label>Password Amministratore</label>
+            <input type="password" id="adminPassword" placeholder="Inserisci password">
+            <button id="btnVerifyAdmin" style="margin-top: 10px;">Accedi</button>
+            <p style="font-size: 0.7rem; margin-top: 10px;">Password di default: <strong>insapa2026</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- App principale (inizialmente nascosta) -->
+<div id="appContainer" style="display: none;">
     <div class="header">
         <div class="title-area">
-            <h1>AGENTI</h1>
-            <span class="version">v1.4</span>
+            <h1>inSAPA</h1>
+            <span class="version" id="appVersion">v1.0 - Contabilità</span>
         </div>
         <div class="logo-area" id="logoArea">
             <button id="btnCaricaLogo" class="btn-logo">📁 Carica logo</button>
@@ -314,310 +273,688 @@
         </div>
     </div>
 
+    <div class="nav-bar" id="navBar">
+        <button id="navContabilita" class="nav-btn active">📊 Contabilità</button>
+        <button id="navAgenti" class="nav-btn">👥 Agenti</button>
+        <button id="navChangePwd" class="nav-btn">🔑 Cambia Password</button>
+        <button id="navLogout" class="nav-btn">🚪 Esci</button>
+    </div>
+
     <div class="main-container">
-        <div class="sidebar">
+        <!-- Sidebar per Contabilità -->
+        <div id="sidebarContabilita" class="sidebar">
+            <div class="form-group">
+                <label>📅 Anno</label>
+                <select id="annoSelect">
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📆 Mese</label>
+                <select id="meseSelect">
+                    <option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option>
+                    <option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option>
+                    <option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option>
+                    <option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>💰 Saldo iniziale (€)</label>
+                <input type="number" id="saldoIniziale" step="0.01" value="0">
+            </div>
+            <button id="btnCalcolaSaldo" class="btn-success">📊 Calcola saldo mese</button>
+            <hr>
+            <div class="form-group">
+                <label>➕ Aggiungi riga prima nota</label>
+                <input type="date" id="nuovaData" value="2026-05-30">
+                <input type="text" id="nuovaDescrizione" placeholder="Descrizione">
+                <input type="number" id="nuovoDare" step="0.01" placeholder="Dare (€)">
+                <input type="number" id="nuovoAvere" step="0.01" placeholder="Avere (€)">
+                <input type="number" id="nuovoContanti" step="0.01" placeholder="Incasso Contanti (€)">
+                <button id="btnAggiungiRiga">➕ Aggiungi</button>
+            </div>
+            <button id="btnEliminaUltimaRiga" class="btn-danger">🗑 Elimina ultima riga</button>
+            <hr>
+            <div class="form-group">
+                <label>📄 Aggiungi fattura fornitore</label>
+                <input type="date" id="fatturaData" value="2026-05-30">
+                <input type="text" id="fatturaFornitore" placeholder="Fornitore">
+                <input type="text" id="fatturaNumero" placeholder="N. Fattura">
+                <button id="btnAggiungiFattura">➕ Aggiungi fattura</button>
+            </div>
+            <hr>
+            <div class="form-group">
+                <label>📁 Archiviazione</label>
+                <button id="btnSalvaMese" class="btn-success">💾 Salva mese su file</button>
+                <button id="btnCaricaMese" class="btn">📂 Carica mese da file</button>
+                <button id="btnNuovoMese" class="btn-danger">📅 Nuovo mese</button>
+                <button id="btnEsportaCSV" class="btn">📎 Esporta CSV per ragioniere</button>
+            </div>
+            <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
+        </div>
+
+        <!-- Sidebar per Agenti (inizialmente nascosta) -->
+        <div id="sidebarAgenti" class="sidebar" style="display: none;">
             <div class="file-upload-section">
                 <div class="upload-group">
-                    <button id="btnCaricaFile" class="upload-btn">📂 Carica ORD + SCA</button>
-                    <div id="fileStatus" class="file-status"></div>
+                    <button id="btnCaricaFileAgenti" class="upload-btn">📂 Carica ORD + SCA</button>
+                    <div id="fileStatusAgenti" class="file-status"></div>
                 </div>
-                <input type="file" id="fileInputMulti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
+                <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
             </div>
             <div class="filter-group">
                 <label>👥 Cliente</label>
-                <select id="selectCliente" disabled>
+                <select id="selectClienteAgenti" disabled>
                     <option value="">-- Seleziona cliente --</option>
                 </select>
             </div>
         </div>
 
+        <!-- Area contenuti -->
         <div class="content-area">
             <div id="scadenzeContainer"></div>
             <div id="dettaglioContainer"></div>
-        </div>
-    </div>
+            <div id="contabilitaContainer" style="display: block;">
+                <!-- Prima Nota -->
+                <div class="scadenze-box">
+                    <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
+                    <div id="saldoInfo"></div>
+                    <table class="tabella" id="tabellaPrimaNota">
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Data</th><th>Descrizione</th><th>Dare (€)</th><th>Avere (€)</th><th>✅</th><th>Incasso Contanti (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="primaNotaBody"></tbody>
+                    </table>
+                </div>
 
-    <!-- Modal per i dettagli delle coppie -->
-    <div id="modalCoppie" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>📦 Dettaglio ordini</h3>
-                <button class="close-modal" id="closeModalBtn">&times;</button>
+                <!-- Fatture Fornitori -->
+                <div class="scadenze-box">
+                    <h3>📄 FATTURE FORNITORI (numerazione interna annuale)</h3>
+                    <table class="tabella" id="tabellaFatture">
+                        <thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
+                        <tbody id="fattureBody"></tbody>
+                    </table>
+                </div>
             </div>
-            <div id="modalBody"></div>
+
+            <!-- Container per Agenti (inizialmente nascosto) -->
+            <div id="agentiContainer" style="display: none;">
+                <div id="scadenzeAgenti"></div>
+                <div id="dettaglioAgenti"></div>
+            </div>
+
+            <!-- Container Cambia Password -->
+            <div id="changePwdContainer" style="display: none;">
+                <div class="scadenze-box">
+                    <h3>🔑 Cambia Password Amministratore</h3>
+                    <div class="form-group">
+                        <label>Nuova Password</label>
+                        <input type="password" id="nuovaPassword" placeholder="Inserisci nuova password">
+                    </div>
+                    <div class="form-group">
+                        <label>Conferma Password</label>
+                        <input type="password" id="confermaPassword" placeholder="Conferma nuova password">
+                    </div>
+                    <button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button>
+                    <p style="font-size: 0.8rem; margin-top: 10px;">⚠️ La password viene salvata nel browser. Se cancelli i dati, torna a "insapa2026".</p>
+                </div>
+            </div>
         </div>
     </div>
+    <footer>I dati vengono salvati in file JSON. Premere 3 secondi sul logo per cambiarlo.</footer>
+</div>
 
-    <footer>Premere 3 secondi sul logo per cambiarlo. Selezionare ORD e SCA insieme (Ctrl/Cmd).</footer>
+<!-- Modal per dettaglio coppie (Agenti) -->
+<div id="modalCoppie" class="modal" style="display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+    <div style="background:white; border-radius:16px; padding:20px; width:90%; max-width:400px;">
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #ddd; padding-bottom:10px;">
+            <h3 style="margin:0;">📦 Dettaglio ordini</h3>
+            <button id="closeModalBtn" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
 
-    <script>
-        // --------------------------------------------------------------
-        // PARSER ORD
-        // --------------------------------------------------------------
-        function parseORD(text) {
-            const lines = text.split(/\r?\n/);
-            const clienti = new Map();
-            let currentCliente = null;
-            const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
-            const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
+<script>
+    // --------------------------------------------------------------
+    // CONFIGURAZIONE INIZIALE
+    // --------------------------------------------------------------
+    let ADMIN_PASSWORD = "insapa2026";
+    let currentUser = null; // 'admin' o 'agenti'
+    let currentYear = 2026;
+    let currentMonth = 4; // Maggio (0-index)
+    
+    // Dati contabilità
+    let primaNota = [];     // { data, descrizione, dare, avere, verificato, incassoContanti }
+    let fattureFornitori = []; // { data, fornitore, numeroFattura }
+    let saldoIniziale = 0;
+    let nextFatturaId = 1;  // progressivo annuale per fatture
+    
+    // Dati Agenti (come da versione precedente)
+    let datiAgenti = { ord: [], sca: [] };
+    let clientiUniciAgenti = new Map();
 
-            for (let line of lines) {
-                line = line.trimEnd();
-                if (line === "") continue;
-
-                let mCliente = line.match(reCliente);
-                if (mCliente) {
-                    currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] };
-                    clienti.set(currentCliente.codice, currentCliente);
-                    continue;
-                }
-                if (!currentCliente) continue;
-                if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO"))
-                    continue;
-
-                let coppie = [];
-                let match;
-                while ((match = reCoppia.exec(line)) !== null) {
-                    let qta = parseFloat(match[1].replace(',', '.'));
-                    let data = match[2];
-                    coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
-                }
-                if (coppie.length === 0) continue;
-
-                let firstCoppiaStart = coppie[0].start;
-                let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
-                let tokens = descrizioneRaw.split(/\s+/);
-                let codice = tokens[0];
-                let descrizione = tokens.slice(1).join(" ");
-
-                let lastCoppiaEnd = coppie[coppie.length-1].end;
-                let afterCoppie = line.substring(lastCoppiaEnd).trim();
-                let numTokens = afterCoppie.split(/\s+/);
-                let prezzo = 0, sconto1 = 0;
-                if (numTokens.length >= 2) {
-                    prezzo = parseFloat(numTokens[0].replace(',', '.'));
-                    sconto1 = parseFloat(numTokens[1].replace(',', '.'));
-                }
-
-                coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
-                currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
-            }
-            return Array.from(clienti.values());
+    // --------------------------------------------------------------
+    // FUNZIONI UTILI
+    // --------------------------------------------------------------
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        let d = new Date(dateStr);
+        return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+    }
+    
+    function parseDate(itDate) {
+        let parts = itDate.split('/');
+        if (parts.length === 3) {
+            return new Date(parts[2], parts[1]-1, parts[0]);
         }
-
-        // --------------------------------------------------------------
-        // PARSER SCA
-        // --------------------------------------------------------------
-        function parseSCA(text) {
-            const lines = text.split(/\r?\n/);
-            const clienti = new Map();
-            let currentCliente = null;
-            const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/;
-            const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
-
-            for (let line of lines) {
-                line = line.trim();
-                if (line === "") continue;
-
-                let mCliente = line.match(reCliente);
-                if (mCliente) {
-                    currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] };
-                    clienti.set(currentCliente.codice, currentCliente);
-                    continue;
+        return null;
+    }
+    
+    function formatNumber(n) {
+        return n.toFixed(2).replace('.', ',');
+    }
+    
+    // Calcola saldo mese
+    function calcolaSaldo() {
+        let totaleDare = primaNota.reduce((sum, r) => sum + (r.dare || 0), 0);
+        let totaleAvere = primaNota.reduce((sum, r) => sum + (r.avere || 0), 0);
+        let totaleContanti = primaNota.reduce((sum, r) => sum + (r.incassoContanti || 0), 0);
+        let saldo = saldoIniziale + totaleDare - totaleAvere;
+        document.getElementById('saldoInfo').innerHTML = `
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
+                <div><strong>📈 Totale Dare:</strong> ${formatNumber(totaleDare)} €</div>
+                <div><strong>📉 Totale Avere:</strong> ${formatNumber(totaleAvere)} €</div>
+                <div><strong>💰 Saldo mese:</strong> ${formatNumber(saldo)} €</div>
+                <div><strong>💵 Incasso Contanti mese:</strong> ${formatNumber(totaleContanti)} €</div>
+            </div>
+        `;
+    }
+    
+    // Aggiorna tabelle UI
+    function aggiornaUI() {
+        // Prima Nota
+        let tbody = document.getElementById('primaNotaBody');
+        tbody.innerHTML = '';
+        primaNota.forEach((riga, idx) => {
+            let row = tbody.insertRow();
+            row.insertCell(0).innerText = idx+1;
+            row.insertCell(1).innerText = riga.data;
+            row.insertCell(2).innerText = riga.descrizione;
+            row.insertCell(3).innerText = riga.dare ? formatNumber(riga.dare) : '';
+            row.insertCell(4).innerText = riga.avere ? formatNumber(riga.avere) : '';
+            let checkCell = row.insertCell(5);
+            let chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = riga.verificato || false;
+            chk.onchange = (function(idx) { return function(e) { primaNota[idx].verificato = e.target.checked; aggiornaUI(); }; })(idx);
+            checkCell.appendChild(chk);
+            row.insertCell(6).innerText = riga.incassoContanti ? formatNumber(riga.incassoContanti) : '';
+        });
+        calcolaSaldo();
+        
+        // Fatture Fornitori
+        let fattureBody = document.getElementById('fattureBody');
+        fattureBody.innerHTML = '';
+        fattureFornitori.forEach((fatt, idx) => {
+            let row = fattureBody.insertRow();
+            row.insertCell(0).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
+            row.insertCell(1).innerText = fatt.data;
+            row.insertCell(2).innerText = fatt.fornitore;
+            row.insertCell(3).innerText = fatt.numeroFattura;
+        });
+    }
+    
+    // Salva dati correnti in JSON per il mese
+    function salvaMeseSuFile() {
+        const data = {
+            anno: currentYear,
+            mese: currentMonth,
+            saldoIniziale: saldoIniziale,
+            primaNota: primaNota,
+            fattureFornitori: fattureFornitori,
+            nextFatturaId: nextFatturaId
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    // Carica dati da file JSON
+    function caricaMeseDaFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                currentYear = data.anno || currentYear;
+                currentMonth = data.mese || currentMonth;
+                saldoIniziale = data.saldoIniziale || 0;
+                primaNota = data.primaNota || [];
+                fattureFornitori = data.fattureFornitori || [];
+                nextFatturaId = data.nextFatturaId || (fattureFornitori.length + 1);
+                document.getElementById('annoSelect').value = currentYear;
+                document.getElementById('meseSelect').value = currentMonth;
+                document.getElementById('saldoIniziale').value = saldoIniziale;
+                aggiornaUI();
+                alert("Dati caricati con successo!");
+            } catch(err) {
+                alert("Errore nel caricamento del file: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+    
+    // Nuovo mese
+    function nuovoMese() {
+        if (confirm("Attenzione! Questo cancellerà tutti i dati del mese corrente. Continuare?")) {
+            primaNota = [];
+            fattureFornitori = [];
+            nextFatturaId = 1;
+            saldoIniziale = 0;
+            document.getElementById('saldoIniziale').value = 0;
+            aggiornaUI();
+        }
+    }
+    
+    // Esporta CSV per ragioniere
+    function esportaCSV() {
+        let csvRows = [["Data","Descrizione","Dare","Avere","IncassoContanti","Verificato"]];
+        for (let riga of primaNota) {
+            csvRows.push([
+                riga.data,
+                riga.descrizione,
+                riga.dare ? riga.dare.toString().replace('.',',') : '',
+                riga.avere ? riga.avere.toString().replace('.',',') : '',
+                riga.incassoContanti ? riga.incassoContanti.toString().replace('.',',') : '',
+                riga.verificato ? "Sì" : "No"
+            ]);
+        }
+        const csvContent = csvRows.map(row => row.join(",")).join("\n");
+        const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    // --------------------------------------------------------------
+    // PARSER AGENTI (stesso della versione 1.4)
+    // --------------------------------------------------------------
+    function parseORD(text) {
+        const lines = text.split(/\r?\n/);
+        const clienti = new Map();
+        let currentCliente = null;
+        const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
+        const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
+        for (let line of lines) {
+            line = line.trimEnd();
+            if (line === "") continue;
+            let mCliente = line.match(reCliente);
+            if (mCliente) {
+                currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] };
+                clienti.set(currentCliente.codice, currentCliente);
+                continue;
+            }
+            if (!currentCliente) continue;
+            if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
+            let coppie = [];
+            let match;
+            while ((match = reCoppia.exec(line)) !== null) {
+                let qta = parseFloat(match[1].replace(',', '.'));
+                let data = match[2];
+                coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
+            }
+            if (coppie.length === 0) continue;
+            let firstCoppiaStart = coppie[0].start;
+            let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
+            let tokens = descrizioneRaw.split(/\s+/);
+            let codice = tokens[0];
+            let descrizione = tokens.slice(1).join(" ");
+            let lastCoppiaEnd = coppie[coppie.length-1].end;
+            let afterCoppie = line.substring(lastCoppiaEnd).trim();
+            let numTokens = afterCoppie.split(/\s+/);
+            let prezzo = 0, sconto1 = 0;
+            if (numTokens.length >= 2) {
+                prezzo = parseFloat(numTokens[0].replace(',', '.'));
+                sconto1 = parseFloat(numTokens[1].replace(',', '.'));
+            }
+            coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+            currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
+        }
+        return Array.from(clienti.values());
+    }
+    
+    function parseSCA(text) {
+        const lines = text.split(/\r?\n/);
+        const clienti = new Map();
+        let currentCliente = null;
+        const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/;
+        const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
+        for (let line of lines) {
+            line = line.trim();
+            if (line === "") continue;
+            let mCliente = line.match(reCliente);
+            if (mCliente) {
+                currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] };
+                clienti.set(currentCliente.codice, currentCliente);
+                continue;
+            }
+            if (currentCliente) {
+                let mScad = line.match(reScadenza);
+                if (mScad) {
+                    let scadenza = mScad[1];
+                    let numDoc = mScad[2];
+                    let dataDoc = mScad[3];
+                    let importoStr = mScad[4].replace(/\./g, '').replace(',', '.');
+                    let importo = parseFloat(importoStr);
+                    currentCliente.scadenze.push({ scadenza, numDoc, dataDoc, importo });
                 }
-                if (currentCliente) {
-                    let mScad = line.match(reScadenza);
-                    if (mScad) {
-                        let scadenza = mScad[1];
-                        let numDoc = mScad[2];
-                        let dataDoc = mScad[3];
-                        let importoStr = mScad[4].replace(/\./g, '').replace(',', '.');
-                        let importo = parseFloat(importoStr);
-                        currentCliente.scadenze.push({ scadenza, numDoc, dataDoc, importo });
+            }
+        }
+        return Array.from(clienti.values());
+    }
+    
+    // --------------------------------------------------------------
+    // GESTIONE NAVIGAZIONE E PROFILI
+    // --------------------------------------------------------------
+    function mostraSezione(sezione) {
+        document.getElementById('contabilitaContainer').style.display = sezione === 'contabilita' ? 'block' : 'none';
+        document.getElementById('agentiContainer').style.display = sezione === 'agenti' ? 'block' : 'none';
+        document.getElementById('changePwdContainer').style.display = sezione === 'changePwd' ? 'block' : 'none';
+        document.getElementById('sidebarContabilita').style.display = sezione === 'contabilita' ? 'block' : 'none';
+        document.getElementById('sidebarAgenti').style.display = sezione === 'agenti' ? 'block' : 'none';
+        
+        // Aggiorna classe active nei bottoni nav
+        document.getElementById('navContabilita').classList.toggle('active', sezione === 'contabilita');
+        document.getElementById('navAgenti').classList.toggle('active', sezione === 'agenti');
+        document.getElementById('navChangePwd').classList.toggle('active', sezione === 'changePwd');
+        
+        if (sezione === 'agenti') {
+            aggiornaClientiUniciAgenti();
+        }
+    }
+    
+    function aggiornaClientiUniciAgenti() {
+        clientiUniciAgenti.clear();
+        for (let c of datiAgenti.ord) {
+            let key = `${c.codice}|${c.ragione}`;
+            if (!clientiUniciAgenti.has(key)) clientiUniciAgenti.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
+        }
+        for (let c of datiAgenti.sca) {
+            let key = `${c.codice}|${c.ragione}`;
+            if (!clientiUniciAgenti.has(key)) clientiUniciAgenti.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
+            if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
+                let cli = clientiUniciAgenti.get(key);
+                if (cli) cli.hasScadenze = true;
+            }
+        }
+        const select = document.getElementById('selectClienteAgenti');
+        select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
+        const sorted = Array.from(clientiUniciAgenti.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+        for (let cli of sorted) {
+            const option = document.createElement('option');
+            option.value = `${cli.codice}|${cli.ragione}`;
+            option.textContent = `${cli.codice} - ${cli.ragione}`;
+            if (cli.hasScadenze) option.style.color = '#c0392b';
+            select.appendChild(option);
+        }
+        select.disabled = (sorted.length === 0);
+    }
+    
+    // --------------------------------------------------------------
+    // EVENTI
+    // --------------------------------------------------------------
+    document.getElementById('btnAggiungiRiga').addEventListener('click', () => {
+        let data = document.getElementById('nuovaData').value;
+        let descrizione = document.getElementById('nuovaDescrizione').value;
+        let dare = parseFloat(document.getElementById('nuovoDare').value) || 0;
+        let avere = parseFloat(document.getElementById('nuovoAvere').value) || 0;
+        let incassoContanti = parseFloat(document.getElementById('nuovoContanti').value) || 0;
+        if (!descrizione) { alert("Inserisci una descrizione"); return; }
+        if (dare > 0 && avere > 0) { alert("Non puoi inserire sia Dare che Avere sulla stessa riga"); return; }
+        if (dare === 0 && avere === 0) { alert("Inserisci almeno un importo in Dare o Avere"); return; }
+        primaNota.push({
+            data: formatDate(data),
+            descrizione: descrizione,
+            dare: dare || null,
+            avere: avere || null,
+            verificato: false,
+            incassoContanti: dare > 0 ? incassoContanti : null
+        });
+        document.getElementById('nuovaDescrizione').value = '';
+        document.getElementById('nuovoDare').value = '';
+        document.getElementById('nuovoAvere').value = '';
+        document.getElementById('nuovoContanti').value = '';
+        aggiornaUI();
+    });
+    
+    document.getElementById('btnEliminaUltimaRiga').addEventListener('click', () => {
+        if (primaNota.length > 0 && confirm("Eliminare l'ultima riga?")) {
+            primaNota.pop();
+            aggiornaUI();
+        }
+    });
+    
+    document.getElementById('btnAggiungiFattura').addEventListener('click', () => {
+        let data = document.getElementById('fatturaData').value;
+        let fornitore = document.getElementById('fatturaFornitore').value.trim();
+        let numeroFattura = document.getElementById('fatturaNumero').value.trim();
+        if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
+        fattureFornitori.push({
+            data: formatDate(data),
+            fornitore: fornitore,
+            numeroFattura: numeroFattura
+        });
+        nextFatturaId++;
+        document.getElementById('fatturaFornitore').value = '';
+        document.getElementById('fatturaNumero').value = '';
+        aggiornaUI();
+    });
+    
+    document.getElementById('btnCalcolaSaldo').addEventListener('click', () => { aggiornaUI(); });
+    document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseFloat(e.target.value) || 0; aggiornaUI(); });
+    document.getElementById('btnSalvaMese').addEventListener('click', () => { salvaMeseSuFile(); });
+    document.getElementById('btnCaricaMese').addEventListener('click', () => { document.getElementById('fileCaricaMese').click(); });
+    document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaMeseDaFile(e.target.files[0]); });
+    document.getElementById('btnNuovoMese').addEventListener('click', () => { nuovoMese(); });
+    document.getElementById('btnEsportaCSV').addEventListener('click', () => { esportaCSV(); });
+    
+    // Cambia password
+    document.getElementById('btnSalvaPassword').addEventListener('click', () => {
+        let nuova = document.getElementById('nuovaPassword').value;
+        let conferma = document.getElementById('confermaPassword').value;
+        if (!nuova) { alert("Inserisci una nuova password"); return; }
+        if (nuova !== conferma) { alert("Le password non coincidono"); return; }
+        ADMIN_PASSWORD = nuova;
+        localStorage.setItem('admin_password', nuova);
+        alert("Password cambiata con successo!");
+        document.getElementById('nuovaPassword').value = '';
+        document.getElementById('confermaPassword').value = '';
+    });
+    
+    // Recupera password salvata
+    let savedPwd = localStorage.getItem('admin_password');
+    if (savedPwd) ADMIN_PASSWORD = savedPwd;
+    
+    // LOGIN
+    document.getElementById('btnAdmin').addEventListener('click', () => {
+        document.getElementById('adminPasswordDiv').style.display = 'block';
+        document.getElementById('btnAgenti').style.display = 'inline-block';
+    });
+    document.getElementById('btnVerifyAdmin').addEventListener('click', () => {
+        let pwd = document.getElementById('adminPassword').value;
+        if (pwd === ADMIN_PASSWORD) {
+            currentUser = 'admin';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('appVersion').innerText = 'v1.0 - Amministrazione';
+            mostraSezione('contabilita');
+            aggiornaUI();
+        } else {
+            alert("Password errata!");
+        }
+    });
+    document.getElementById('btnAgenti').addEventListener('click', () => {
+        currentUser = 'agenti';
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('appVersion').innerText = 'v1.0 - Agenti';
+        mostraSezione('agenti');
+    });
+    
+    document.getElementById('navContabilita').addEventListener('click', () => { if(currentUser === 'admin') mostraSezione('contabilita'); });
+    document.getElementById('navAgenti').addEventListener('click', () => { mostraSezione('agenti'); });
+    document.getElementById('navChangePwd').addEventListener('click', () => { if(currentUser === 'admin') mostraSezione('changePwd'); });
+    document.getElementById('navLogout').addEventListener('click', () => {
+        currentUser = null;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('adminPasswordDiv').style.display = 'none';
+    });
+    
+    // Caricamento file Agenti
+    const btnCaricaAgenti = document.getElementById('btnCaricaFileAgenti');
+    const fileInputAgenti = document.getElementById('fileInputMultiAgenti');
+    const statusAgenti = document.getElementById('fileStatusAgenti');
+    btnCaricaAgenti.addEventListener('click', () => fileInputAgenti.click());
+    fileInputAgenti.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        let loaded = 0;
+        let ordText = null, scaText = null;
+        for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const content = ev.target.result;
+                const nome = file.name.toLowerCase();
+                if (nome.includes('ord')) ordText = content;
+                else if (nome.includes('sca')) scaText = content;
+                loaded++;
+                if (loaded === files.length) {
+                    if (ordText) datiAgenti.ord = parseORD(ordText);
+                    if (scaText) datiAgenti.sca = parseSCA(scaText);
+                    aggiornaClientiUniciAgenti();
+                    statusAgenti.innerHTML = `✅ Caricati: ${files.length} file (ORD: ${datiAgenti.ord.length} clienti, SCA: ${datiAgenti.sca.length} clienti)`;
+                    if (document.getElementById('selectClienteAgenti').options.length > 1) {
+                        document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value;
                     }
+                    mostraScadenzeAgenti();
+                    mostraDettaglioAgenti();
                 }
-            }
-            return Array.from(clienti.values());
+            };
+            reader.readAsText(file, "UTF-8");
         }
-
-        // --------------------------------------------------------------
-        // STATO APPLICAZIONE
-        // --------------------------------------------------------------
-        let dati = { ord: [], sca: [] };
-
-        function aggiornaClientiUnici() {
-            const clientiUnici = new Map();
-            for (let c of dati.ord) {
-                let key = `${c.codice}|${c.ragione}`;
-                if (!clientiUnici.has(key)) clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
-            }
-            for (let c of dati.sca) {
-                let key = `${c.codice}|${c.ragione}`;
-                if (!clientiUnici.has(key)) clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
-                if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
-                    let cli = clientiUnici.get(key);
-                    if (cli) cli.hasScadenze = true;
-                }
-            }
-            const select = document.getElementById('selectCliente');
-            select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-            const sorted = Array.from(clientiUnici.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
-            for (let cli of sorted) {
-                const option = document.createElement('option');
-                option.value = `${cli.codice}|${cli.ragione}`;
-                option.textContent = `${cli.codice} - ${cli.ragione}`;
-                if (cli.hasScadenze) {
-                    option.style.color = '#c0392b';
-                    option.style.fontWeight = 'bold';
-                }
-                select.appendChild(option);
-            }
-            select.disabled = (sorted.length === 0);
+        fileInputAgenti.value = '';
+    });
+    
+    function mostraScadenzeAgenti() {
+        const clienteKey = document.getElementById('selectClienteAgenti').value;
+        const container = document.getElementById('scadenzeAgenti');
+        if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
+        const [codice, ragione] = clienteKey.split('|');
+        const clienteSCA = datiAgenti.sca.find(c => c.codice === codice && c.ragione === ragione);
+        if (!clienteSCA || clienteSCA.scadenze.length === 0) {
+            container.innerHTML = `<div class="info-messaggio">Nessuna scadenza per ${ragione}</div>`;
+            return;
         }
-
-        function mostraScadenze(clienteKey) {
-            const container = document.getElementById('scadenzeContainer');
-            if (!clienteKey) {
-                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-                return;
-            }
-            const [codice, ragione] = clienteKey.split('|');
-            const clienteSCA = dati.sca.find(c => c.codice === codice && c.ragione === ragione);
-            if (!clienteSCA || clienteSCA.scadenze.length === 0) {
-                container.innerHTML = `<div class="info-messaggio">Nessuna scadenza per ${ragione}</div>`;
-                return;
-            }
-            let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
-                        <table class="tabella"><thead>——
-<th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th>
-</thead><tbody>`;
-            for (let s of clienteSCA.scadenze) {
-                html += `<tr><td>${s.scadenza}</td><td>${s.numDoc}</td><td>${s.dataDoc}</td><td>${s.importo.toFixed(2).replace('.', ',')}</td></tr>`;
-            }
-            html += `</tbody></table></div>`;
-            container.innerHTML = html;
+        let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
+                    <table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
+        for (let s of clienteSCA.scadenze) {
+            html += `<tr><td>${s.scadenza}</td><td>${s.numDoc}</td><td>${s.dataDoc}</td><td>${s.importo.toFixed(2).replace('.', ',')}</td></tr>`;
         }
-
-        // Modal
-        const modal = document.getElementById('modalCoppie');
-        const modalBody = document.getElementById('modalBody');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-
-        function mostraModal(coppie, codice, descrizione) {
-            if (!coppie || coppie.length === 0) return;
-            let html = `<p><strong>${codice}</strong> ${descrizione}</p><ul class="coppie-list">`;
-            let num = coppie.length;
-            for (let c of coppie) {
-                html += `<li>${num}° - ${c.qta.toFixed(2).replace('.', ',')} ${c.data}</li>`;
+        html += `</tbody></table></div>`;
+        container.innerHTML = html;
+    }
+    
+    function mostraDettaglioAgenti() {
+        const clienteKey = document.getElementById('selectClienteAgenti').value;
+        const container = document.getElementById('dettaglioAgenti');
+        if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
+        const [codice, ragione] = clienteKey.split('|');
+        const clienteORD = datiAgenti.ord.find(c => c.codice === codice && c.ragione === ragione);
+        if (!clienteORD || clienteORD.articoli.length === 0) {
+            container.innerHTML = `<div class="info-messaggio">Nessun ordine per ${ragione}</div>`;
+            return;
+        }
+        let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
+        for (let art of clienteORD.articoli) {
+            let coppieStr = '';
+            let num = art.coppie.length;
+            for (let c of art.coppie) {
+                coppieStr += `${num}°-${c.qta.toFixed(2).replace('.', ',')} ${c.data} `;
                 num--;
             }
-            html += `</ul>`;
-            modalBody.innerHTML = html;
-            modal.style.display = 'flex';
+            html += `<div class="ord-item" style="border:1px solid #ddd; border-radius:8px; padding:10px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                            <div><strong>${art.codice}</strong> ${art.descrizione}</div>
+                            <button class="btn-dettaglio-agenti" data-codice="${art.codice}" data-descrizione="${art.descrizione.replace(/"/g, '&quot;')}" data-coppie='${JSON.stringify(art.coppie)}' style="background:#3498db; color:white; border:none; border-radius:6px; padding:5px 10px; cursor:pointer;">📋 Dettaglio</button>
+                        </div>
+                        <div style="margin-top:6px;">prezzo e sconto ${art.prezzo.toFixed(2).replace('.', ',')} ${art.sconto1.toFixed(2).replace('.', ',')}</div>
+                    </div>`;
         }
-
-        function mostraDettaglio(clienteKey) {
-            const container = document.getElementById('dettaglioContainer');
-            if (!clienteKey) {
-                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-                return;
-            }
-            const [codice, ragione] = clienteKey.split('|');
-            const clienteORD = dati.ord.find(c => c.codice === codice && c.ragione === ragione);
-            if (!clienteORD || clienteORD.articoli.length === 0) {
-                container.innerHTML = `<div class="info-messaggio">Nessun ordine per ${ragione}</div>`;
-                return;
-            }
-            let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
-            for (let art of clienteORD.articoli) {
-                html += `<div class="ord-item">
-                            <div class="ord-header">
-                                <div class="ord-codice-desc"><strong>${art.codice}</strong> ${art.descrizione}</div>
-                                <button class="btn-dettaglio" data-codice="${art.codice}" data-descrizione="${art.descrizione.replace(/"/g, '&quot;')}" data-coppie='${JSON.stringify(art.coppie)}'>📋 Dettaglio</button>
-                            </div>
-                            <div class="ord-prezzo">prezzo e sconto ${art.prezzo.toFixed(2).replace('.', ',')} ${art.sconto1.toFixed(2).replace('.', ',')}</div>
-                        </div>`;
-            }
-            container.innerHTML = html;
-
-            document.querySelectorAll('.btn-dettaglio').forEach(btn => {
-                btn.removeEventListener('click', dettaglioHandler);
-                btn.addEventListener('click', dettaglioHandler);
+        container.innerHTML = html;
+        document.querySelectorAll('.btn-dettaglio-agenti').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const codice = btn.getAttribute('data-codice');
+                const descrizione = btn.getAttribute('data-descrizione');
+                const coppie = JSON.parse(btn.getAttribute('data-coppie'));
+                const modal = document.getElementById('modalCoppie');
+                const modalBody = document.getElementById('modalBody');
+                let modalHtml = `<p><strong>${codice}</strong> ${descrizione}</p><ul class="coppie-list">`;
+                let num = coppie.length;
+                for (let c of coppie) {
+                    modalHtml += `<li>${num}° - ${c.qta.toFixed(2).replace('.', ',')} ${c.data}</li>`;
+                    num--;
+                }
+                modalHtml += `</ul>`;
+                modalBody.innerHTML = modalHtml;
+                modal.style.display = 'flex';
             });
-        }
-
-        function dettaglioHandler(e) {
-            const btn = e.currentTarget;
-            const codice = btn.getAttribute('data-codice');
-            const descrizione = btn.getAttribute('data-descrizione');
-            const coppieJson = btn.getAttribute('data-coppie');
-            try {
-                const coppie = JSON.parse(coppieJson);
-                mostraModal(coppie, codice, descrizione);
-            } catch(err) {
-                alert("Errore nel visualizzare i dettagli.");
-            }
-        }
-
-        function aggiornaTutto() {
-            const clienteKey = document.getElementById('selectCliente').value;
-            if (!clienteKey) {
-                document.getElementById('scadenzeContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-                document.getElementById('dettaglioContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-                return;
-            }
-            mostraScadenze(clienteKey);
-            mostraDettaglio(clienteKey);
-        }
-
-        // --------------------------------------------------------------
-        // CARICAMENTO MULTIPLO ORD + SCA
-        // --------------------------------------------------------------
-        const btnCarica = document.getElementById('btnCaricaFile');
-        const fileInputMulti = document.getElementById('fileInputMulti');
-        const statusDiv = document.getElementById('fileStatus');
-
-        btnCarica.addEventListener('click', () => fileInputMulti.click());
-        fileInputMulti.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-            let loaded = 0;
-            let ordText = null, scaText = null;
-            for (let file of files) {
+        });
+    }
+    
+    document.getElementById('selectClienteAgenti').addEventListener('change', () => {
+        mostraScadenzeAgenti();
+        mostraDettaglioAgenti();
+    });
+    
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+        document.getElementById('modalCoppie').style.display = 'none';
+    });
+    
+    // Logo
+    const btnLogo = document.getElementById('btnCaricaLogo');
+    const imgLogo = document.getElementById('logoImmagine');
+    let pressTimer = null;
+    btnLogo.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    const content = ev.target.result;
-                    const nome = file.name.toLowerCase();
-                    if (nome.includes('ord')) ordText = content;
-                    else if (nome.includes('sca')) scaText = content;
-                    loaded++;
-                    if (loaded === files.length) {
-                        if (ordText) dati.ord = parseORD(ordText);
-                        if (scaText) dati.sca = parseSCA(scaText);
-                        aggiornaClientiUnici();
-                        statusDiv.innerHTML = `✅ Caricati: ${files.length} file (ORD: ${dati.ord.length} clienti, SCA: ${dati.sca.length} clienti)`;
-                        if (document.getElementById('selectCliente').options.length > 1) {
-                            document.getElementById('selectCliente').value = document.getElementById('selectCliente').options[1].value;
-                        }
-                        aggiornaTutto();
-                    }
+                    imgLogo.src = ev.target.result;
+                    imgLogo.style.display = 'block';
+                    btnLogo.style.display = 'none';
                 };
-                reader.readAsText(file, "UTF-8");
+                reader.readAsDataURL(file);
             }
-            fileInputMulti.value = '';
-        });
-
-        document.getElementById('selectCliente').addEventListener('change', aggiornaTutto);
-
-        // Chiusura modal
-        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
-        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-
-        // LOGO (3 secondi premuto per cambiare)
-        const btnLogo = document.getElementById('btnCaricaLogo');
-        const imgLogo = document.getElementById('logoImmagine');
-        let pressTimer = null;
-        btnLogo.addEventListener('click', () => {
+        };
+        input.click();
+    });
+    imgLogo.addEventListener('mousedown', () => {
+        pressTimer = setTimeout(() => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -625,35 +962,20 @@
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        imgLogo.src = ev.target.result;
-                        imgLogo.style.display = 'block';
-                        btnLogo.style.display = 'none';
-                    };
+                    reader.onload = (ev) => { imgLogo.src = ev.target.result; };
                     reader.readAsDataURL(file);
                 }
             };
             input.click();
-        });
-        imgLogo.addEventListener('mousedown', () => {
-            pressTimer = setTimeout(() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => { imgLogo.src = ev.target.result; };
-                        reader.readAsDataURL(file);
-                    }
-                };
-                input.click();
-                pressTimer = null;
-            }, 3000);
-        });
-        imgLogo.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-        imgLogo.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-    </script>
+            pressTimer = null;
+        }, 3000);
+    });
+    imgLogo.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+    imgLogo.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+    
+    // Inizializza anno e mese
+    document.getElementById('annoSelect').value = currentYear;
+    document.getElementById('meseSelect').value = currentMonth;
+</script>
 </body>
 </html>
