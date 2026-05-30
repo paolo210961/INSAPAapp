@@ -2,33 +2,38 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>AGENTI - Gestione DDT, ORD, SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AGENTI - Gestione ORD e SCA</title>
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             background: #eef2f5;
             min-height: 100vh;
         }
+        /* Header */
         .header {
             background: white;
-            padding: 15px 25px;
+            padding: 12px 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
         .title-area {
             display: flex;
             align-items: baseline;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         h1 {
             margin: 0;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: #2c3e50;
         }
         .version {
@@ -36,45 +41,41 @@
             color: white;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: bold;
         }
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         .logo-img {
-            max-height: 60px;
-            max-width: 200px;
+            max-height: 50px;
+            max-width: 150px;
             cursor: pointer;
-            transition: transform 0.1s;
             border-radius: 8px;
             border: 1px solid #ddd;
             padding: 4px;
             background: white;
         }
-        .logo-img:active {
-            transform: scale(0.98);
-        }
         .btn-logo {
             background: #ecf0f1;
             border: 1px solid #bdc3c7;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
-        .btn-logo:hover {
-            background: #dfe6e9;
-        }
+        /* Layout principale */
         .main-container {
             display: flex;
+            flex-direction: row;
             gap: 20px;
             padding: 20px;
             max-width: 1600px;
             margin: 0 auto;
         }
+        /* Sidebar */
         .sidebar {
             width: 280px;
             background: white;
@@ -90,24 +91,27 @@
             border-bottom: 1px solid #e0e0e0;
             padding-bottom: 20px;
         }
+        .upload-group {
+            margin-bottom: 15px;
+        }
         .upload-btn {
-            background: #2c3e50;
+            background: #27ae60;
             color: white;
             border: none;
-            padding: 10px 16px;
+            padding: 10px 12px;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 0.9rem;
         }
         .upload-btn:hover {
-            background: #1a252f;
+            opacity: 0.85;
         }
         .file-status {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #27ae60;
-            margin-top: 8px;
+            margin-top: 5px;
             text-align: center;
         }
         .filter-group {
@@ -131,6 +135,7 @@
             color: #c0392b;
             font-weight: bold;
         }
+        /* Area contenuti */
         .content-area {
             flex: 1;
             background: white;
@@ -145,15 +150,18 @@
             padding: 15px;
             margin-bottom: 25px;
             border-radius: 10px;
+            overflow-x: auto;
         }
         .scadenze-box h3 {
             margin-top: 0;
             color: #2c3e50;
+            font-size: 1.1rem;
         }
         .tabella {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            min-width: 400px;
         }
         .tabella th, .tabella td {
             border: 1px solid #ddd;
@@ -164,12 +172,105 @@
         .tabella th {
             background: #e9ecef;
         }
-        .articolo-ord {
-            margin-bottom: 10px;
+        /* Articolo ORD - due righe con pulsante sulla destra */
+        .ord-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+        }
+        .ord-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ord-codice-desc {
+            font-weight: bold;
+            font-size: 0.9rem;
+            word-break: break-word;
+            flex: 1;
+        }
+        .btn-dettaglio {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        .btn-dettaglio:hover {
+            background: #2c3e50;
+        }
+        .ord-prezzo {
             font-family: monospace;
-            white-space: pre-wrap;
-            border-bottom: 1px solid #eee;
-            padding: 5px;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            margin-top: 6px;
+            padding-left: 4px;
+        }
+        /* Modal per dettaglio coppie */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: fadeIn 0.2s;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+        }
+        .close-modal:hover {
+            color: #c0392b;
+        }
+        .coppie-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .coppie-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
         .info-messaggio {
             color: #7f8c8d;
@@ -177,18 +278,27 @@
             padding: 15px;
             text-align: center;
         }
-        .error {
-            color: #c0392b;
-            background: #fae2e2;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-        }
         footer {
             text-align: center;
             margin: 20px;
             font-size: 0.7rem;
             color: #95a5a6;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            .content-area {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -196,7 +306,7 @@
     <div class="header">
         <div class="title-area">
             <h1>AGENTI</h1>
-            <span class="version">v1.0</span>
+            <span class="version">v1.4</span>
         </div>
         <div class="logo-area" id="logoArea">
             <button id="btnCaricaLogo" class="btn-logo">📁 Carica logo</button>
@@ -205,11 +315,12 @@
     </div>
 
     <div class="main-container">
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="file-upload-section">
-                <button id="btnCaricaFile" class="upload-btn">📂 Carica DDT + ORD + SCA</button>
-                <div id="fileStatus" class="file-status">Nessun file caricato</div>
+                <div class="upload-group">
+                    <button id="btnCaricaFile" class="upload-btn">📂 Carica ORD + SCA</button>
+                    <div id="fileStatus" class="file-status"></div>
+                </div>
                 <input type="file" id="fileInputMulti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
             </div>
             <div class="filter-group">
@@ -218,123 +329,28 @@
                     <option value="">-- Seleziona cliente --</option>
                 </select>
             </div>
-            <div class="filter-group">
-                <label>📄 Tipo documento</label>
-                <select id="selectTipo" disabled>
-                    <option value="DDT">DDT (Distinta Trasporto)</option>
-                    <option value="ORD">ORD (Ordini)</option>
-                </select>
-            </div>
         </div>
 
-        <!-- Area contenuti: scadenze e articoli sotto le tendine -->
         <div class="content-area">
             <div id="scadenzeContainer"></div>
             <div id="dettaglioContainer"></div>
         </div>
     </div>
-    <footer>I file vengono letti localmente nel browser. Premere 3 secondi sul logo per cambiarlo.</footer>
+
+    <!-- Modal per i dettagli delle coppie -->
+    <div id="modalCoppie" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📦 Dettaglio ordini</h3>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer>Premere 3 secondi sul logo per cambiarlo. Selezionare ORD e SCA insieme (Ctrl/Cmd).</footer>
 
     <script>
-        // --------------------------------------------------------------
-        // PARSER DDT CONSOLIDATO (funzionante)
-        // --------------------------------------------------------------
-        function parseDDT(text) {
-            const lines = text.split(/\r?\n/);
-            const clienti = new Map();
-            let currentCliente = null;
-            let currentArticolo = null;
-            let descrizioneBuffer = "";
-
-            function salvaArticolo() {
-                if (!currentArticolo || !currentCliente) return;
-                let descrizione = descrizioneBuffer ? currentArticolo.descRaw + " " + descrizioneBuffer : currentArticolo.descRaw;
-                descrizione = descrizione.replace(/\s+/g, ' ').trim();
-                const existing = currentCliente.articoli.get(currentArticolo.codice);
-                if (existing) {
-                    existing.quantitaTot += currentArticolo.quantita;
-                    existing.conteggio++;
-                    existing.ultimoPrezzo = currentArticolo.prezzo;
-                } else {
-                    currentCliente.articoli.set(currentArticolo.codice, {
-                        codice: currentArticolo.codice,
-                        descrizione: descrizione,
-                        um: currentArticolo.um,
-                        quantitaTot: currentArticolo.quantita,
-                        ultimoPrezzo: currentArticolo.prezzo,
-                        conteggio: 1
-                    });
-                }
-                currentArticolo = null;
-                descrizioneBuffer = "";
-            }
-
-            const reCliente = /^\s{4,}(\d+)\s+(.+?)\s+\d+\s+\d{2}\/\d{2}\/\d{4}/;
-            const reArticolo = /^\s{20,}([A-Z0-9]+)\s+(.+?)\s+([A-Z\.]+)\s+(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)/;
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
-                if (line.trim() === "" || line.startsWith("===") || line.startsWith("----------------------------------------------------------------")) continue;
-
-                let mCliente = line.match(reCliente);
-                if (mCliente) {
-                    salvaArticolo();
-                    const codiceCliente = mCliente[1];
-                    let resto = mCliente[2];
-                    let numeroDocMatch = resto.match(/\s+(\d+)\s*$/);
-                    let ragioneSociale = numeroDocMatch ? resto.substring(0, resto.lastIndexOf(numeroDocMatch[1])).trim() : resto.trim();
-                    const key = `${codiceCliente}|${ragioneSociale}`;
-                    if (!clienti.has(key)) {
-                        clienti.set(key, { codice: codiceCliente, ragione: ragioneSociale, articoli: new Map() });
-                    }
-                    currentCliente = clienti.get(key);
-                    continue;
-                }
-                if (!currentCliente) continue;
-
-                if (line.includes("Totale") || line.includes("VOSTRO DARE") || line.includes("ELIMINATO") || line.includes("INESISTENTE") ||
-                    line.includes("Rif.:") || line.includes("Destinaz.") || line.includes("Telefoni") || line.includes("Ord.") ||
-                    line.includes("Riferimento") || line.includes("----") || line.includes("====")) {
-                    continue;
-                }
-
-                let mArt = line.match(reArticolo);
-                if (mArt) {
-                    salvaArticolo();
-                    currentArticolo = {
-                        codice: mArt[1],
-                        descRaw: mArt[2].trim(),
-                        um: mArt[3].trim(),
-                        quantita: parseFloat(mArt[4].replace(',', '.')),
-                        prezzo: parseFloat(mArt[5].replace(',', '.')),
-                        sconto1: parseFloat(mArt[6].replace(',', '.'))
-                    };
-                    descrizioneBuffer = "";
-                    if (i+1 < lines.length) {
-                        let nextLine = lines[i+1];
-                        if (nextLine.match(/^\s{30,}/) && !nextLine.match(/^\s{20,}[A-Z0-9]/)) {
-                            descrizioneBuffer = nextLine.trim();
-                            i++;
-                        }
-                    }
-                } else if (currentArticolo && line.trim() && !line.includes("==") && !line.includes("--")) {
-                    if (descrizioneBuffer) descrizioneBuffer += " " + line.trim();
-                    else descrizioneBuffer = line.trim();
-                }
-            }
-            salvaArticolo();
-
-            const result = [];
-            for (let [_, val] of clienti) {
-                result.push({
-                    codice: val.codice,
-                    ragione: val.ragione,
-                    articoli: Array.from(val.articoli.values())
-                });
-            }
-            return result;
-        }
-
         // --------------------------------------------------------------
         // PARSER ORD
         // --------------------------------------------------------------
@@ -427,41 +443,22 @@
         // --------------------------------------------------------------
         // STATO APPLICAZIONE
         // --------------------------------------------------------------
-        let dati = {
-            ddt: [],      // array clienti DDT
-            ord: [],      // array clienti ORD
-            sca: []       // array clienti SCA
-        };
-        let clientiUnici = new Map(); // key: "codice|ragione", value: { codice, ragione, hasScadenze }
+        let dati = { ord: [], sca: [] };
 
         function aggiornaClientiUnici() {
-            clientiUnici.clear();
-            // Aggiungi clienti DDT
-            for (let c of dati.ddt) {
-                let key = `${c.codice}|${c.ragione}`;
-                if (!clientiUnici.has(key)) {
-                    clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
-                }
-            }
-            // Aggiungi clienti ORD
+            const clientiUnici = new Map();
             for (let c of dati.ord) {
                 let key = `${c.codice}|${c.ragione}`;
-                if (!clientiUnici.has(key)) {
-                    clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
-                }
+                if (!clientiUnici.has(key)) clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
             }
-            // Aggiungi clienti SCA
             for (let c of dati.sca) {
                 let key = `${c.codice}|${c.ragione}`;
-                if (!clientiUnici.has(key)) {
-                    clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
-                }
+                if (!clientiUnici.has(key)) clientiUnici.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
                 if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
                     let cli = clientiUnici.get(key);
                     if (cli) cli.hasScadenze = true;
                 }
             }
-            // Popola select clienti
             const select = document.getElementById('selectCliente');
             select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
             const sorted = Array.from(clientiUnici.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
@@ -470,7 +467,6 @@
                 option.value = `${cli.codice}|${cli.ragione}`;
                 option.textContent = `${cli.codice} - ${cli.ragione}`;
                 if (cli.hasScadenze) {
-                    option.classList.add('cliente-rosso');
                     option.style.color = '#c0392b';
                     option.style.fontWeight = 'bold';
                 }
@@ -482,17 +478,19 @@
         function mostraScadenze(clienteKey) {
             const container = document.getElementById('scadenzeContainer');
             if (!clienteKey) {
-                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente per vedere le scadenze.</div>';
+                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
                 return;
             }
             const [codice, ragione] = clienteKey.split('|');
             const clienteSCA = dati.sca.find(c => c.codice === codice && c.ragione === ragione);
             if (!clienteSCA || clienteSCA.scadenze.length === 0) {
-                container.innerHTML = `<div class="info-messaggio">Nessuna scadenza per il cliente selezionato.</div>`;
+                container.innerHTML = `<div class="info-messaggio">Nessuna scadenza per ${ragione}</div>`;
                 return;
             }
-            let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>`;
-            html += `<table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
+            let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
+                        <table class="tabella"><thead>——
+<th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th>
+</thead><tbody>`;
             for (let s of clienteSCA.scadenze) {
                 html += `<tr><td>${s.scadenza}</td><td>${s.numDoc}</td><td>${s.dataDoc}</td><td>${s.importo.toFixed(2).replace('.', ',')}</td></tr>`;
             }
@@ -500,111 +498,125 @@
             container.innerHTML = html;
         }
 
-        function mostraDettaglio(clienteKey, tipo) {
+        // Modal
+        const modal = document.getElementById('modalCoppie');
+        const modalBody = document.getElementById('modalBody');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        function mostraModal(coppie, codice, descrizione) {
+            if (!coppie || coppie.length === 0) return;
+            let html = `<p><strong>${codice}</strong> ${descrizione}</p><ul class="coppie-list">`;
+            let num = coppie.length;
+            for (let c of coppie) {
+                html += `<li>${num}° - ${c.qta.toFixed(2).replace('.', ',')} ${c.data}</li>`;
+                num--;
+            }
+            html += `</ul>`;
+            modalBody.innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        function mostraDettaglio(clienteKey) {
             const container = document.getElementById('dettaglioContainer');
             if (!clienteKey) {
-                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente e un tipo documento.</div>';
+                container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
                 return;
             }
             const [codice, ragione] = clienteKey.split('|');
-            let cliente = null;
-            if (tipo === 'DDT') {
-                cliente = dati.ddt.find(c => c.codice === codice && c.ragione === ragione);
-            } else {
-                cliente = dati.ord.find(c => c.codice === codice && c.ragione === ragione);
-            }
-            if (!cliente || (tipo === 'DDT' && cliente.articoli.length === 0) || (tipo === 'ORD' && cliente.articoli.length === 0)) {
-                container.innerHTML = `<div class="info-messaggio">Nessun dato ${tipo} per il cliente selezionato.</div>`;
+            const clienteORD = dati.ord.find(c => c.codice === codice && c.ragione === ragione);
+            if (!clienteORD || clienteORD.articoli.length === 0) {
+                container.innerHTML = `<div class="info-messaggio">Nessun ordine per ${ragione}</div>`;
                 return;
             }
-            let html = `<h3>${tipo === 'DDT' ? '📦 DDT - Riepilogo articoli' : '📋 ORD - Storico ordini'}</h3>`;
-            if (tipo === 'DDT') {
-                html += `<table class="tabella"><thead>——
-<th>Codice</th><th>Descrizione</th><th>UM</th><th>Quantità totale</th><th>Ultimo prezzo</th><th>N° acquisti</th>
-</thead><tbody>`;
-                for (let art of cliente.articoli) {
-                    html += `<tr>
-                        <td>${art.codice}</td>
-                        <td>${art.descrizione.substring(0, 100)}</td>
-                        <td>${art.um}</td>
-                        <td>${art.quantitaTot}</td>
-                        <td>${art.ultimoPrezzo.toFixed(2).replace('.', ',')}</td>
-                        <td>${art.conteggio}</td>
-                    </tr>`;
-                }
-                html += `</tbody></table>`;
-            } else {
-                for (let art of cliente.articoli) {
-                    let coppieStr = '';
-                    let num = art.coppie.length;
-                    for (let c of art.coppie) {
-                        coppieStr += `${num}°-${c.qta.toFixed(2).replace('.', ',')} ${c.data} `;
-                        num--;
-                    }
-                    coppieStr = coppieStr.trim();
-                    html += `<div class="articolo-ord"><strong>${art.codice}</strong> ${art.descrizione}<br>${coppieStr}<br>prezzo e sconto ${art.prezzo.toFixed(2).replace('.', ',')} ${art.sconto1.toFixed(2).replace('.', ',')}</div>`;
-                }
+            let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
+            for (let art of clienteORD.articoli) {
+                html += `<div class="ord-item">
+                            <div class="ord-header">
+                                <div class="ord-codice-desc"><strong>${art.codice}</strong> ${art.descrizione}</div>
+                                <button class="btn-dettaglio" data-codice="${art.codice}" data-descrizione="${art.descrizione.replace(/"/g, '&quot;')}" data-coppie='${JSON.stringify(art.coppie)}'>📋 Dettaglio</button>
+                            </div>
+                            <div class="ord-prezzo">prezzo e sconto ${art.prezzo.toFixed(2).replace('.', ',')} ${art.sconto1.toFixed(2).replace('.', ',')}</div>
+                        </div>`;
             }
             container.innerHTML = html;
+
+            document.querySelectorAll('.btn-dettaglio').forEach(btn => {
+                btn.removeEventListener('click', dettaglioHandler);
+                btn.addEventListener('click', dettaglioHandler);
+            });
+        }
+
+        function dettaglioHandler(e) {
+            const btn = e.currentTarget;
+            const codice = btn.getAttribute('data-codice');
+            const descrizione = btn.getAttribute('data-descrizione');
+            const coppieJson = btn.getAttribute('data-coppie');
+            try {
+                const coppie = JSON.parse(coppieJson);
+                mostraModal(coppie, codice, descrizione);
+            } catch(err) {
+                alert("Errore nel visualizzare i dettagli.");
+            }
         }
 
         function aggiornaTutto() {
             const clienteKey = document.getElementById('selectCliente').value;
-            const tipo = document.getElementById('selectTipo').value;
             if (!clienteKey) {
                 document.getElementById('scadenzeContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-                document.getElementById('dettaglioContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente e un tipo documento.</div>';
+                document.getElementById('dettaglioContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
                 return;
             }
             mostraScadenze(clienteKey);
-            mostraDettaglio(clienteKey, tipo);
+            mostraDettaglio(clienteKey);
         }
 
-        // Caricamento file multiplo
-        document.getElementById('btnCaricaFile').addEventListener('click', () => {
-            document.getElementById('fileInputMulti').click();
-        });
+        // --------------------------------------------------------------
+        // CARICAMENTO MULTIPLO ORD + SCA
+        // --------------------------------------------------------------
+        const btnCarica = document.getElementById('btnCaricaFile');
+        const fileInputMulti = document.getElementById('fileInputMulti');
+        const statusDiv = document.getElementById('fileStatus');
 
-        document.getElementById('fileInputMulti').addEventListener('change', (e) => {
+        btnCarica.addEventListener('click', () => fileInputMulti.click());
+        fileInputMulti.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
             let loaded = 0;
-            let ddtText = null, ordText = null, scaText = null;
+            let ordText = null, scaText = null;
             for (let file of files) {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     const content = ev.target.result;
                     const nome = file.name.toLowerCase();
-                    if (nome.includes('ddt')) ddtText = content;
-                    else if (nome.includes('ord')) ordText = content;
+                    if (nome.includes('ord')) ordText = content;
                     else if (nome.includes('sca')) scaText = content;
                     loaded++;
                     if (loaded === files.length) {
-                        if (ddtText) dati.ddt = parseDDT(ddtText);
                         if (ordText) dati.ord = parseORD(ordText);
                         if (scaText) dati.sca = parseSCA(scaText);
                         aggiornaClientiUnici();
-                        document.getElementById('selectTipo').disabled = false;
-                        document.getElementById('fileStatus').innerHTML = `✅ Caricati: ${files.length} file(i)`;
-                        document.getElementById('selectCliente').value = '';
-                        document.getElementById('scadenzeContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-                        document.getElementById('dettaglioContainer').innerHTML = '<div class="info-messaggio">Seleziona un cliente e un tipo documento.</div>';
-                        alert("File caricati e parsati con successo.");
+                        statusDiv.innerHTML = `✅ Caricati: ${files.length} file (ORD: ${dati.ord.length} clienti, SCA: ${dati.sca.length} clienti)`;
+                        if (document.getElementById('selectCliente').options.length > 1) {
+                            document.getElementById('selectCliente').value = document.getElementById('selectCliente').options[1].value;
+                        }
+                        aggiornaTutto();
                     }
                 };
                 reader.readAsText(file, "UTF-8");
             }
-            e.target.value = '';
+            fileInputMulti.value = '';
         });
 
         document.getElementById('selectCliente').addEventListener('change', aggiornaTutto);
-        document.getElementById('selectTipo').addEventListener('change', aggiornaTutto);
 
-        // LOGO
+        // Chiusura modal
+        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+        // LOGO (3 secondi premuto per cambiare)
         const btnLogo = document.getElementById('btnCaricaLogo');
         const imgLogo = document.getElementById('logoImmagine');
         let pressTimer = null;
-
         btnLogo.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -623,7 +635,6 @@
             };
             input.click();
         });
-
         imgLogo.addEventListener('mousedown', () => {
             pressTimer = setTimeout(() => {
                 const input = document.createElement('input');
@@ -633,9 +644,7 @@
                     const file = e.target.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            imgLogo.src = ev.target.result;
-                        };
+                        reader.onload = (ev) => { imgLogo.src = ev.target.result; };
                         reader.readAsDataURL(file);
                     }
                 };
@@ -643,18 +652,8 @@
                 pressTimer = null;
             }, 3000);
         });
-        imgLogo.addEventListener('mouseup', () => {
-            if (pressTimer) {
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
-        });
-        imgLogo.addEventListener('mouseleave', () => {
-            if (pressTimer) {
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
-        });
+        imgLogo.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+        imgLogo.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
     </script>
 </body>
 </html>
