@@ -238,6 +238,30 @@
             margin-top: 5px;
             text-align: center;
         }
+        .search-box {
+            margin-bottom: 15px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.85rem;
+        }
+        .articolo-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .articolo-titolo {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .articolo-prezzo {
+            font-weight: bold;
+            font-family: monospace;
+        }
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -355,9 +379,16 @@
                 <div id="fileStatusAgenti" class="file-status"></div>
             </div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
+            
+            <!-- Ricerca cliente -->
+            <div class="search-box">
+                <label>🔍 Cerca cliente</label>
+                <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
+            </div>
+            
             <div class="filter-group" style="margin-top:15px;">
                 <label>👥 Cliente</label>
-                <select id="selectClienteAgenti" disabled>
+                <select id="selectClienteAgenti" disabled size="10" style="height: auto; min-height: 150px;">
                     <option value="">-- Seleziona cliente --</option>
                 </select>
             </div>
@@ -386,6 +417,7 @@
             </div>
             <div id="agentiContainer" style="display: none;">
                 <div id="scadenzeAgenti"></div>
+                <div id="ricercaArticoloContainer" style="margin-bottom: 15px;"></div>
                 <div id="dettaglioAgenti"></div>
             </div>
             <div id="changePwdContainer" style="display: none;">
@@ -718,36 +750,49 @@
     }
     
     // --------------------------------------------------------------
-    // GESTIONE AGENTI (con matching flessibile)
+    // GESTIONE AGENTI (con matching flessibile e filtri)
     // --------------------------------------------------------------
     let datiAgenti = { ord: [], sca: [] };
-    let clientiUniciAgenti = new Map();
+    let clientiUniciAgenti = [];
+    let clientiFiltrati = [];
     
     function aggiornaClientiUniciAgenti() {
-        clientiUniciAgenti.clear();
+        const mappa = new Map();
         for (let c of datiAgenti.ord) {
             let key = `${c.codice}|${c.ragione}`;
-            if (!clientiUniciAgenti.has(key)) {
-                clientiUniciAgenti.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true });
+            if (!mappa.has(key)) {
+                mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true });
             } else {
-                let cli = clientiUniciAgenti.get(key);
+                let cli = mappa.get(key);
                 cli.hasOrdini = true;
             }
         }
         for (let c of datiAgenti.sca) {
             let key = `${c.codice}|${c.ragione}`;
-            if (!clientiUniciAgenti.has(key)) {
-                clientiUniciAgenti.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false });
+            if (!mappa.has(key)) {
+                mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false });
             }
             if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
-                let cli = clientiUniciAgenti.get(key);
+                let cli = mappa.get(key);
                 if (cli) cli.hasScadenze = true;
             }
         }
+        clientiUniciAgenti = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+        clientiFiltrati = [...clientiUniciAgenti];
+        aggiornaTendinaClienti();
+    }
+    
+    function aggiornaTendinaClienti() {
         const select = document.getElementById('selectClienteAgenti');
+        const searchText = document.getElementById('cercaCliente').value.toLowerCase();
+        
+        // Filtra clienti
+        clientiFiltrati = clientiUniciAgenti.filter(cli => 
+            cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText)
+        );
+        
         select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-        const sorted = Array.from(clientiUniciAgenti.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
-        for (let cli of sorted) {
+        for (let cli of clientiFiltrati) {
             const option = document.createElement('option');
             option.value = `${cli.codice}|${cli.ragione}`;
             option.textContent = `${cli.codice} - ${cli.ragione}`;
@@ -757,7 +802,7 @@
             }
             select.appendChild(option);
         }
-        select.disabled = (sorted.length === 0);
+        select.disabled = (clientiFiltrati.length === 0);
     }
     
     function mostraScadenzeAgenti() {
@@ -784,6 +829,8 @@
         container.innerHTML = html;
     }
     
+    let articoliFiltratiGlobali = [];
+    
     function mostraDettaglioAgenti() {
         const clienteKey = document.getElementById('selectClienteAgenti').value;
         const container = document.getElementById('dettaglioAgenti');
@@ -793,66 +840,59 @@
         }
         const [codice, ragione] = clienteKey.split('|');
         
-        // DEBUG in console
-        console.log("=== DEBUG AGENTI ===");
-        console.log("Cliente selezionato - Codice:", codice, "Ragione:", ragione);
-        console.log("Clienti ORD disponibili:", datiAgenti.ord.map(c => c.codice + " - " + c.ragione));
-        
-        // Prima cerca esatto, poi solo per codice
+        // Cerca cliente ORD (prima esatto, poi solo per codice)
         let clienteORD = datiAgenti.ord.find(c => c.codice === codice && c.ragione === ragione);
         if (!clienteORD) {
-            console.log("Matching esatto fallito, provo solo per codice...");
             clienteORD = datiAgenti.ord.find(c => c.codice === codice);
-            if (clienteORD) {
-                console.log("Trovato per codice! Ragione ORD:", clienteORD.ragione);
-            }
         }
         
         if (!clienteORD || clienteORD.articoli.length === 0) {
             container.innerHTML = `<div class="info-messaggio">Nessun ordine (ORD) per il cliente ${codice}</div>`;
+            document.getElementById('ricercaArticoloContainer').innerHTML = '';
             return;
         }
         
-        let html = `<h3>📋 ORD - ${codice} ${clienteORD.ragione}</h3>`;
-        for (let art of clienteORD.articoli) {
-            let coppieStr = '';
-            let num = art.coppie.length;
-            for (let c of art.coppie) {
-                coppieStr += `${num}°-${formatNumber(c.qta)} ${c.data} `;
-                num--;
-            }
-            html += `<div style="border:1px solid #ddd; border-radius:8px; padding:10px; margin-bottom:10px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-                            <div><strong>${art.codice}</strong> ${art.descrizione}</div>
-                            <button class="btn-dettaglio-agenti" data-codice="${art.codice}" data-descrizione="${art.descrizione.replace(/"/g, '&quot;')}" data-coppie='${JSON.stringify(art.coppie)}' style="background:#3498db; color:white; border:none; border-radius:6px; padding:5px 10px; cursor:pointer;">📋 Dettaglio</button>
-                        </div>
-                        <div style="margin-top:6px;">prezzo e sconto ${formatNumber(art.prezzo)} ${formatNumber(art.sconto1)}</div>
-                    </div>`;
-        }
-        container.innerHTML = html;
+        // Aggiungi campo ricerca articolo
+        document.getElementById('ricercaArticoloContainer').innerHTML = `
+            <div class="search-box">
+                <label>🔍 Cerca articolo</label>
+                <input type="text" id="cercaArticolo" placeholder="Digita codice o descrizione articolo...">
+            </div>
+        `;
         
-        document.querySelectorAll('.btn-dettaglio-agenti').forEach(btn => {
-            btn.removeEventListener('click', dettaglioHandlerAgenti);
-            btn.addEventListener('click', dettaglioHandlerAgenti);
-        });
+        articoliFiltratiGlobali = [...clienteORD.articoli];
+        const searchInput = document.getElementById('cercaArticolo');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => filtraArticoli());
+        }
+        
+        filtraArticoli();
     }
     
-    function dettaglioHandlerAgenti(e) {
-        const btn = e.currentTarget;
-        const codice = btn.getAttribute('data-codice');
-        const descrizione = btn.getAttribute('data-descrizione');
-        const coppie = JSON.parse(btn.getAttribute('data-coppie'));
-        const modal = document.getElementById('modalCoppie');
-        const modalBody = document.getElementById('modalBody');
-        let modalHtml = `<p><strong>${codice}</strong> ${descrizione}</p><ul style="list-style:none; padding:0;">`;
-        let num = coppie.length;
-        for (let c of coppie) {
-            modalHtml += `<li style="padding:5px 0;">${num}° - ${formatNumber(c.qta)} ${c.data}</li>`;
-            num--;
+    function filtraArticoli() {
+        const searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || '';
+        const articoliFiltrati = articoliFiltratiGlobali.filter(art => 
+            art.codice.toLowerCase().includes(searchText) || 
+            art.descrizione.toLowerCase().includes(searchText)
+        );
+        
+        const container = document.getElementById('dettaglioAgenti');
+        const clienteKey = document.getElementById('selectClienteAgenti').value;
+        if (!clienteKey) return;
+        
+        const [codice, ragione] = clienteKey.split('|');
+        
+        let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
+        for (let art of articoliFiltrati) {
+            html += `<div class="articolo-item">
+                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
+                        <div class="articolo-prezzo"><strong>€. ${formatNumber(art.prezzo)}     Sc.% ${formatNumber(art.sconto1)}</strong></div>
+                    </div>`;
         }
-        modalHtml += `</ul>`;
-        modalBody.innerHTML = modalHtml;
-        modal.style.display = 'flex';
+        if (articoliFiltrati.length === 0) {
+            html += `<div class="info-messaggio">Nessun articolo trovato.</div>`;
+        }
+        container.innerHTML = html;
     }
     
     // --------------------------------------------------------------
@@ -942,6 +982,11 @@
         document.getElementById('confermaPassword').value = '';
     });
     
+    // Ricerca cliente in tempo reale
+    document.getElementById('cercaCliente')?.addEventListener('input', () => {
+        aggiornaTendinaClienti();
+    });
+    
     // --------------------------------------------------------------
     // LOGIN E NAVIGAZIONE
     // --------------------------------------------------------------
@@ -982,6 +1027,7 @@
             if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) {
                 document.getElementById('scadenzeAgenti').innerHTML = '<div class="info-messaggio">Carica i file ORD e SCA per iniziare.</div>';
                 document.getElementById('dettaglioAgenti').innerHTML = '';
+                document.getElementById('ricercaArticoloContainer').innerHTML = '';
             } else {
                 aggiornaClientiUniciAgenti();
                 if (document.getElementById('selectClienteAgenti').options.length > 1) {
