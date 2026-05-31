@@ -5,76 +5,441 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>inSAPA - Contabilità e Agenti</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
-        .header { background: white; padding: 12px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .title-area { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-        h1 { margin: 0; font-size: 1.5rem; color: #2c3e50; }
-        .version { background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
-        .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-img { max-height: 50px; max-width: 150px; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; padding: 4px; background: white; }
-        .btn-logo { background: #ecf0f1; border: 1px solid #bdc3c7; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; }
-        .nav-bar { background: #2c3e50; display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 20px; }
-        .nav-btn { background: transparent; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-        .nav-btn:hover { background: #1a252f; }
-        .nav-btn.active { background: #3498db; }
-        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; }
-        .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 20px; }
-        .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
-        input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; }
-        button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0; width: 100%; font-weight: bold; }
-        button:hover { opacity: 0.85; }
-        .btn-danger { background: #e74c3c; }
-        .btn-success { background: #27ae60; }
-        .btn-warning { background: #f39c12; color: #2c3e50; }
-        .btn-warning strong { color: black; }
-        .btn-blue { background: #2980b9; }
-        .btn-yellow { background: #f1c40f; color: black; }
-        .btn-yellow strong { color: black; }
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-        .btn-group button { width: auto; flex: 1; }
-        .tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 15px; }
-        .tabella th, .tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
-        .tabella th { background: #e9ecef; }
-        .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
-        .info-messaggio { color: #7f8c8d; font-style: italic; padding: 15px; text-align: center; }
-        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .login-card { background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; text-align: center; }
-        .profile-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
-        .profile-btn { padding: 15px 25px; font-size: 1.2rem; border-radius: 12px; }
-        .editable-cell { cursor: pointer; min-width: 80px; display: inline-block; width: 100%; }
-        .editable-cell:hover { background-color: #fff3cd; }
-        .cell-input { width: 100%; border: none; background: transparent; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
-        .cell-input:focus { outline: 1px solid #3498db; background: white; }
-        .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
-        .search-box { margin-bottom: 15px; }
-        .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
-        .articolo-titolo { font-weight: bold; margin-bottom: 5px; }
-        .articolo-prezzo { font-weight: bold; font-family: monospace; }
-        .scheda-btn { background: #ecf0f1; color: black; font-weight: bold; border: 1px solid #bdc3c7; }
-        .scheda-btn.active-scheda { background: #3498db; color: white; border-color: #3498db; }
-        .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
-        footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
-        .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; margin-bottom: 10px; }
-        .action-buttons button { width: auto; flex: 1; }
-        .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
-        .archive-box { background: #f0f4f8; border: 1px solid #d0d7de; border-radius: 12px; padding: 15px; margin-top: 15px; }
-        .archive-box .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
-        .archive-box button { width: 100%; margin: 0; text-align: center; justify-content: center; }
-        .btn-memorizza { width: 100%; }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: #eef2f5;
+            min-height: 100vh;
+        }
+        /* HEADER FISSATO IN ALTO */
+        .header {
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        /* LOGO A SINISTRA - Area rettangolare raddoppiata */
+        .logo-area-sx {
+            flex-shrink: 0;
+        }
+        .logo-rettangolo {
+            width: 320px;
+            height: 100px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+        .logo-rettangolo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .logo-placeholder {
+            text-align: center;
+            padding: 10px;
+        }
+        .logo-placeholder span {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .btn-carica-logo-primo {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .btn-carica-logo-primo:hover {
+            background: #2980b9;
+        }
+        /* BOX PULSANTI A DESTRA - proporzionato al logo */
+        .nav-box {
+            background: #2c3e50;
+            border-radius: 16px;
+            padding: 15px 25px;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            flex: 1;
+            max-width: 500px;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 25px;
+        }
+        .nav-btn {
+            background: transparent;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            white-space: nowrap;
+            text-align: center;
+        }
+        .nav-btn:hover {
+            background: #1a252f;
+            transform: translateY(-1px);
+        }
+        .nav-btn.active {
+            background: #3498db;
+        }
+        /* CONTENUTO PRINCIPALE CON MARGINE SUPERIORE PER HEADER FISSO */
+        .main-content {
+            padding-top: 0;
+        }
+        .title-area {
+            display: none;
+        }
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 100;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .sidebar {
+            width: 340px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        .content-area {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin: 5px 0;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover {
+            opacity: 0.85;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-warning {
+            background: #f39c12;
+            color: #2c3e50;
+        }
+        .btn-warning strong {
+            color: black;
+        }
+        .btn-blue {
+            background: #2980b9;
+        }
+        .btn-yellow {
+            background: #f1c40f;
+            color: black;
+        }
+        .btn-yellow strong {
+            color: black;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .btn-group button {
+            width: auto;
+            flex: 1;
+        }
+        .tabella {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
+        .tabella th, .tabella td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .tabella th {
+            background: #e9ecef;
+        }
+        .scadenze-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+        .info-messaggio {
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 15px;
+            text-align: center;
+        }
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .profile-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .profile-btn {
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+        }
+        .editable-cell {
+            cursor: pointer;
+            min-width: 80px;
+            display: inline-block;
+            width: 100%;
+        }
+        .editable-cell:hover {
+            background-color: #fff3cd;
+        }
+        .cell-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 4px;
+            margin: -4px;
+        }
+        .cell-input:focus {
+            outline: 1px solid #3498db;
+            background: white;
+        }
+        .editable-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            background-color: #f5f5f5;
+        }
+        .editable-disabled:hover {
+            background-color: #f5f5f5;
+        }
+        .search-box {
+            margin-bottom: 15px;
+        }
+        .articolo-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .articolo-titolo {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .articolo-prezzo {
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .scheda-btn {
+            background: #ecf0f1;
+            color: black;
+            font-weight: bold;
+            border: 1px solid #bdc3c7;
+        }
+        .scheda-btn.active-scheda {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .file-status {
+            font-size: 0.7rem;
+            color: #27ae60;
+            margin-top: 5px;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            margin: 20px;
+            font-size: 0.7rem;
+            color: #95a5a6;
+        }
+        .action-buttons {
+            display: none;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .action-buttons button {
+            width: auto;
+            flex: 1;
+        }
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .password-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .archive-box {
+            background: #f0f4f8;
+            border: 1px solid #d0d7de;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .archive-box .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 0;
+        }
+        .archive-box button {
+            width: 100%;
+            margin: 0;
+            text-align: center;
+            justify-content: center;
+        }
+        .btn-memorizza {
+            width: 100%;
+        }
         @media (max-width: 768px) {
-            .main-container { flex-direction: column; }
-            .sidebar { width: 100%; position: static; }
-            .archive-box .btn-group { grid-template-columns: 1fr; }
-            .header { flex-direction: column; align-items: stretch; }
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                top: 0;
+            }
+            .archive-box .btn-group {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-box {
+                width: 100%;
+                max-width: 100%;
+            }
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .nav-btn {
+                text-align: center;
+            }
+            .logo-rettangolo {
+                width: 100%;
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
 <body>
 
+<!-- Schermata di selezione profilo -->
 <div id="loginScreen" class="login-screen">
     <div class="login-card">
         <h2>🏢 inSAPA s.a.s.</h2>
@@ -86,566 +451,1514 @@
     </div>
 </div>
 
+<!-- App principale -->
 <div id="appContainer" style="display: none;">
     <div class="header">
-        <div class="title-area">
-            <h1>inSAPA</h1>
-            <span class="version" id="appVersion">v2.01 - Contabilità</span>
+        <!-- LOGO A SINISTRA - Area rettangolare raddoppiata senza sfondo -->
+        <div class="logo-area-sx">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <div id="logoPlaceholder" class="logo-placeholder">
+                    <span>🏢 LOGO AZIENDA</span>
+                    <button id="btnCaricaLogoPrimo" class="btn-carica-logo-primo">📁 CARICA LOGO</button>
+                </div>
+                <img id="logoImmagine" style="display: none; width: 100%; height: 100%; object-fit: contain;" alt="Logo">
+            </div>
         </div>
-        <div class="logo-area" id="logoArea">
-            <button id="btnCaricaLogo" class="btn-logo">📁 Carica logo</button>
-            <img id="logoImmagine" class="logo-img" style="display: none;" alt="Logo azienda">
+
+        <!-- BOX PULSANTI A DESTRA proporzionato -->
+        <div class="nav-box">
+            <div class="nav-grid">
+                <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
+                <button id="navAgenti" class="nav-btn">👥 AGENTI</button>
+                <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                <button id="navLogout" class="nav-btn">🚪 ESCI</button>
+            </div>
         </div>
     </div>
 
-    <div class="nav-bar" id="navBar">
-        <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
-        <button id="navAgenti" class="nav-btn">👥 AGENTI</button>
-        <button id="navChangePwd" class="nav-btn">🔑 Cambia Password</button>
-        <button id="navLogout" class="nav-btn">🚪 Esci</button>
-    </div>
+    <div class="version" id="appVersion">v2.03 - Contabilità</div>
 
     <div class="main-container">
+        <!-- Sidebar Contabilità -->
         <div id="sidebarContabilita" class="sidebar">
-            <div class="form-group"><label>📅 Anno</label><select id="annoSelect"><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
-            <div class="form-group"><label>📆 Mese</label><select id="meseSelect"><option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option><option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option><option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option><option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option></select></div>
-            <div class="form-group"><label>💰 Saldo iniziale (€)</label><input type="number" id="saldoIniziale" step="0.01" value="0"></div>
+            <div class="form-group">
+                <label>📅 Anno</label>
+                <select id="annoSelect">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📆 Mese</label>
+                <select id="meseSelect">
+                    <option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option>
+                    <option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option>
+                    <option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option>
+                    <option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>💰 Saldo iniziale (€)</label>
+                <input type="number" id="saldoIniziale" step="0.01" value="0">
+            </div>
             <hr>
-            <div class="btn-group"><button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button><button id="btnContanti" class="scheda-btn">💵 CONTANTI</button><button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button></div>
+            <div class="btn-group">
+                <button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button>
+                <button id="btnContanti" class="scheda-btn">💵 CONTANTI</button>
+                <button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button>
+            </div>
             <hr>
-            <div id="formArea"></div>
-            <div class="form-group"><button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button></div>
+            <div id="formArea">
+                <!-- Form dinamico in base alla scheda selezionata -->
+            </div>
+            <div class="form-group">
+                <button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button>
+            </div>
             <hr>
-            <div class="archive-box"><div class="btn-group"><button id="btnCaricaMese" class="btn-blue">📂 CARICA MESE</button><button id="btnRiprendiCorrente" class="btn-success">📅 RIPRENDI MESE CORRENTE</button><button id="btnEsportaCSVAnno" class="btn-yellow"><strong>📎 ESPORTA CSV PER ANNO</strong></button><button id="btnEsportaCSVMese" class="btn-yellow"><strong>📎 ESPORTA CSV PER MESE</strong></button></div></div>
+            <div class="archive-box">
+                <div class="btn-group">
+                    <button id="btnCaricaMese" class="btn-blue">📂 CARICA MESE</button>
+                    <button id="btnRiprendiCorrente" class="btn-success">📅 RIPRENDI MESE CORRENTE</button>
+                    <button id="btnEsportaCSVAnno" class="btn-yellow"><strong>📎 ESPORTA CSV PER ANNO</strong></button>
+                    <button id="btnEsportaCSVMese" class="btn-yellow"><strong>📎 ESPORTA CSV PER MESE</strong></button>
+                </div>
+            </div>
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
         </div>
 
+        <!-- Sidebar Agenti -->
         <div id="sidebarAgenti" class="sidebar" style="display: none;">
-            <div class="upload-group"><button id="btnCaricaFileAgenti" class="btn-success" style="width:100%">📂 Carica ORD + SCA</button><div id="fileStatusAgenti" class="file-status"></div></div>
+            <div class="upload-group">
+                <button id="btnCaricaFileAgenti" class="btn-success" style="width:100%">📂 Carica ORD + SCA</button>
+                <div id="fileStatusAgenti" class="file-status"></div>
+            </div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
-            <div class="search-box"><label>🔍 Cerca cliente</label><input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente..."></div>
-            <div class="filter-group" style="margin-top:15px;"><label>👥 Cliente</label><select id="selectClienteAgenti" disabled size="10" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select></div>
+            
+            <div class="search-box">
+                <label>🔍 Cerca cliente</label>
+                <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
+            </div>
+            
+            <div class="filter-group" style="margin-top:15px;">
+                <label>👥 Cliente</label>
+                <select id="selectClienteAgenti" disabled size="10" style="height: auto; min-height: 150px;">
+                    <option value="">-- Seleziona cliente --</option>
+                </select>
+            </div>
         </div>
 
+        <!-- Area contenuti -->
         <div class="content-area">
             <div id="contabilitaContainer">
-                <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><div id="saldoInfo"></div><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)<br>entrate</th><th>Dare (€)<br>uscite</th><th>✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA SELEZIONATI</button></div></div>
-                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso Contanti (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA SELEZIONATI</button></div></div>
-                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI (numerazione interna annuale)</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA SELEZIONATI</button></div></div>
+                <!-- PRIMA NOTA -->
+                <div id="tabellaPrimaNotaContainer" class="scadenze-box">
+                    <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
+                    <div id="saldoInfo"></div>
+                    <table class="tabella" id="tabellaPrimaNota">
+                        <thead>
+                            <tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th>
+                            <th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)<br>entrate</th><th>Dare (€)<br>uscite</th><th>✅</th>
+                        </thead>
+                        <tbody id="primaNotaBody"></tbody>
+                    </table>
+                    <div id="primaNotaActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
+                    </div>
+                </div>
+                
+                <!-- CONTANTI -->
+                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
+                    <h3>💵 INCASSO CONTANTI</h3>
+                    <div id="totaleContantiInfo"></div>
+                    <table class="tabella" id="tabellaContanti">
+                        <thead>
+                            <tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th>
+                            <th>#</th><th>Data</th><th>Descrizione</th><th>Incasso Contanti (€)</th>
+                        </thead>
+                        <tbody id="contantiBody"></tbody>
+                    </table>
+                    <div id="contantiActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
+                    </div>
+                </div>
+                
+                <!-- FORNITORI -->
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
+                    <h3>📄 FATTURE FORNITORI (numerazione interna annuale)</h3>
+                    <table class="tabella" id="tabellaFornitori">
+                        <thead>
+                            <tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th>
+                            <th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th>
+                        </thead>
+                        <tbody id="fornitoriBody"></tbody>
+                    </table>
+                    <div id="fornitoriActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
+                    </div>
+                </div>
             </div>
-            <div id="agentiContainer" style="display: none;"><div id="scadenzeAgenti"></div><div id="ricercaArticoloContainer" style="margin-bottom: 15px;"></div><div id="dettaglioAgenti"></div></div>
-            <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword" placeholder="Inserisci nuova password"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword" placeholder="Conferma nuova password"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button></div></div>
+            <div id="agentiContainer" style="display: none;">
+                <div id="scadenzeAgenti"></div>
+                <div id="ricercaArticoloContainer" style="margin-bottom: 15px;"></div>
+                <div id="dettaglioAgenti"></div>
+            </div>
+            <div id="changePwdContainer" style="display: none;">
+                <div class="scadenze-box">
+                    <h3>🔑 Cambia Password Amministratore</h3>
+                    <div class="form-group">
+                        <label>Nuova Password</label>
+                        <input type="password" id="nuovaPassword" placeholder="Inserisci nuova password">
+                    </div>
+                    <div class="form-group">
+                        <label>Conferma Password</label>
+                        <input type="password" id="confermaPassword" placeholder="Conferma nuova password">
+                    </div>
+                    <button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button>
+                </div>
+            </div>
         </div>
     </div>
-    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona un rigo per modificare le celle.</footer>
+    <footer>Logo: clicca su CARICA LOGO la prima volta. Per cambiarlo, tieni premuto 3 secondi sul logo.</footer>
 </div>
 
 <script>
-// ==================== v2.01 - VERSIONE BASE FUNZIONANTE ====================
-let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
-let currentUser = null;
-let isContabilitaSbloccata = false;
-let currentYear = 2026;
-let currentMonth = 4;
-let backupPreCaricamento = null;
-let currentScheda = 'primanota';
-
-let primaNota = [];
-let contanti = [];
-let fattureFornitori = [];
-let saldoIniziale = 0;
-let nextFatturaId = 1;
-let pendingChanges = {};
-
-function formatNumber(n) { if (n === null || n === undefined || n === '') return ''; let num = parseFloat(n); if (isNaN(num)) return ''; return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function parseNumber(s) { if (!s || s === '') return 0; let clean = s.toString().replace(/\./g, '').replace(',', '.'); let num = parseFloat(clean); return isNaN(num) ? 0 : num; }
-function formatDate(dateStr) { if (!dateStr) return ""; let d = new Date(dateStr); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; }
-
-function salvaStatoCorrente() {
-    const stato = { anno: currentYear, mese: currentMonth, saldoIniziale, primaNota, contanti, fattureFornitori, nextFatturaId };
-    localStorage.setItem(`contabilita_${currentYear}_${currentMonth}`, JSON.stringify(stato));
-    localStorage.setItem('ultimoMeseLavorato', JSON.stringify({ anno: currentYear, mese: currentMonth }));
-}
-
-function caricaStatoCorrente() {
-    const saved = localStorage.getItem(`contabilita_${currentYear}_${currentMonth}`);
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            saldoIniziale = data.saldoIniziale || 0;
-            primaNota = data.primaNota || [];
-            contanti = data.contanti || [];
-            fattureFornitori = data.fattureFornitori || [];
-            nextFatturaId = data.nextFatturaId || 1;
-            document.getElementById('saldoIniziale').value = saldoIniziale;
-        } catch(e) { console.error(e); }
-    } else {
-        saldoIniziale = 0; primaNota = []; contanti = []; fattureFornitori = []; nextFatturaId = 1;
-        document.getElementById('saldoIniziale').value = 0;
-    }
-    aggiornaTabelle();
-}
-
-function calcolaSaldo() {
-    let totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-    let totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-    let totaleContanti = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-    let saldo = saldoIniziale + totaleAvere - totaleDare;
-    document.getElementById('saldoInfo').innerHTML = `<div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;"><div><strong>📈 Totale Avere (entrate):</strong> ${formatNumber(totaleAvere)} €</div><div><strong>📉 Totale Dare (uscite):</strong> ${formatNumber(totaleDare)} €</div><div><strong>💰 Saldo mese:</strong> ${formatNumber(saldo)} €</div></div>`;
-    document.getElementById('totaleContantiInfo').innerHTML = `<div style="margin-bottom:15px;"><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(totaleContanti)} €</div>`;
-}
-
-function hasSelectedRows() {
-    if (currentScheda === 'primanota') return Array.from(document.querySelectorAll('#primaNotaBody .row-check-prima')).some(c => c.checked);
-    if (currentScheda === 'contanti') return Array.from(document.querySelectorAll('#contantiBody .row-check-contanti')).some(c => c.checked);
-    if (currentScheda === 'fornitori') return Array.from(document.querySelectorAll('#fornitoriBody .row-check-fornitori')).some(c => c.checked);
-    return false;
-}
-
-function getSelectedRows() {
-    let selected = [];
-    if (currentScheda === 'primanota') document.querySelectorAll('#primaNotaBody .row-check-prima').forEach((c, i) => { if (c.checked) selected.push(i); });
-    if (currentScheda === 'contanti') document.querySelectorAll('#contantiBody .row-check-contanti').forEach((c, i) => { if (c.checked) selected.push(i); });
-    if (currentScheda === 'fornitori') document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach((c, i) => { if (c.checked) selected.push(i); });
-    return selected;
-}
-
-function aggiornaPulsantiAzione() {
-    const hasSel = hasSelectedRows();
-    if (currentScheda === 'primanota') document.getElementById('primaNotaActionButtons').style.display = hasSel ? 'flex' : 'none';
-    if (currentScheda === 'contanti') document.getElementById('contantiActionButtons').style.display = hasSel ? 'flex' : 'none';
-    if (currentScheda === 'fornitori') document.getElementById('fornitoriActionButtons').style.display = hasSel ? 'flex' : 'none';
-}
-
-function applicaModifiche() {
-    let hasError = false;
-    for (let key in pendingChanges) {
-        let parts = key.split('|'), scheda = parts[0], rowIdx = parseInt(parts[1]), field = parts[2], newVal = pendingChanges[key];
-        if (scheda === 'primanota' && primaNota[rowIdx]) {
-            let oldAvere = primaNota[rowIdx].avere, oldDare = primaNota[rowIdx].dare;
-            let newAvere = field === 'avere' ? parseNumber(newVal) : oldAvere;
-            let newDare = field === 'dare' ? parseNumber(newVal) : oldDare;
-            if (newAvere > 0 && newDare > 0) { alert(`Errore: Avere e Dare non possono essere entrambi maggiori di zero (riga ${rowIdx+1})`); hasError = true; break; }
+    // --------------------------------------------------------------
+    // CONFIGURAZIONE INIZIALE - VERSIONE 2.03
+    // --------------------------------------------------------------
+    let ADMIN_PASSWORD = "insapa2026";
+    let savedPwd = localStorage.getItem('admin_password');
+    if (savedPwd) ADMIN_PASSWORD = savedPwd;
+    
+    let currentUser = null;
+    let isContabilitaSbloccata = false;
+    let currentYear = 2026;
+    let currentMonth = 4;
+    let backupPreCaricamento = null;
+    let currentScheda = 'primanota';
+    
+    // Dati contabilità
+    let primaNota = [];
+    let contanti = [];
+    let fattureFornitori = [];
+    let saldoIniziale = 0;
+    let nextFatturaId = 1;
+    
+    // Memorizza le modifiche in sospeso per cella
+    let pendingChanges = {};
+    
+    // Gestione Logo
+    let pressTimerLogo = null;
+    
+    // Carica logo salvato
+    function caricaLogoSalvato() {
+        const logoSalvato = localStorage.getItem('logo_azienda');
+        if (logoSalvato) {
+            const img = document.getElementById('logoImmagine');
+            const placeholder = document.getElementById('logoPlaceholder');
+            img.src = logoSalvato;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
         }
     }
-    if (hasError) return;
-    for (let key in pendingChanges) {
-        let parts = key.split('|'), scheda = parts[0], rowIdx = parseInt(parts[1]), field = parts[2], newVal = pendingChanges[key];
-        if (scheda === 'primanota' && primaNota[rowIdx]) { primaNota[rowIdx][field] = newVal; if (field === 'avere' && parseNumber(newVal) > 0) primaNota[rowIdx].dare = 0; if (field === 'dare' && parseNumber(newVal) > 0) primaNota[rowIdx].avere = 0; }
-        else if (scheda === 'contanti' && contanti[rowIdx]) contanti[rowIdx][field] = newVal;
-        else if (scheda === 'fornitori' && fattureFornitori[rowIdx]) fattureFornitori[rowIdx][field] = newVal;
+    
+    // Salva logo
+    function salvaLogo(url) {
+        localStorage.setItem('logo_azienda', url);
     }
-    pendingChanges = {}; aggiornaTabelle(); salvaStatoCorrente(); alert("Modifiche salvate con successo.");
-}
-
-function makeEditableCellPrimaNota(value, rowIdx, field, isRowSelected) {
-    if (field === 'verificato') {
-        let chk = document.createElement('input'); chk.type = 'checkbox'; chk.checked = value === true; chk.style.cursor = 'pointer';
-        chk.onchange = (function(r) { return function(e) { primaNota[r].verificato = e.target.checked; aggiornaTabelle(); salvaStatoCorrente(); }; })(rowIdx);
-        return chk;
-    } else {
+    
+    // Formatta numero
+    function formatNumber(n) {
+        if (n === null || n === undefined || n === '') return '';
+        let num = parseFloat(n);
+        if (isNaN(num)) return '';
+        return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function parseNumber(s) {
+        if (!s || s === '') return 0;
+        let clean = s.toString().replace(/\./g, '').replace(',', '.');
+        let num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
+    }
+    
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        let d = new Date(dateStr);
+        return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+    }
+    
+    // Salva stato in localStorage
+    function salvaStatoCorrente() {
+        const stato = {
+            anno: currentYear,
+            mese: currentMonth,
+            saldoIniziale: saldoIniziale,
+            primaNota: primaNota,
+            contanti: contanti,
+            fattureFornitori: fattureFornitori,
+            nextFatturaId: nextFatturaId
+        };
+        localStorage.setItem(`contabilita_${currentYear}_${currentMonth}`, JSON.stringify(stato));
+        localStorage.setItem('ultimoMeseLavorato', JSON.stringify({ anno: currentYear, mese: currentMonth }));
+    }
+    
+    function caricaStatoCorrente() {
+        const saved = localStorage.getItem(`contabilita_${currentYear}_${currentMonth}`);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                saldoIniziale = data.saldoIniziale || 0;
+                primaNota = data.primaNota || [];
+                contanti = data.contanti || [];
+                fattureFornitori = data.fattureFornitori || [];
+                nextFatturaId = data.nextFatturaId || 1;
+                document.getElementById('saldoIniziale').value = saldoIniziale;
+            } catch(e) { console.error(e); }
+        } else {
+            saldoIniziale = 0;
+            primaNota = [];
+            contanti = [];
+            fattureFornitori = [];
+            nextFatturaId = 1;
+            document.getElementById('saldoIniziale').value = 0;
+        }
+        aggiornaTabelle();
+    }
+    
+    // Calcoli automatici
+    function calcolaSaldo() {
+        let totaleAvere = primaNota.reduce((sum, r) => sum + (parseNumber(r.avere) || 0), 0);
+        let totaleDare = primaNota.reduce((sum, r) => sum + (parseNumber(r.dare) || 0), 0);
+        let totaleContanti = contanti.reduce((sum, r) => sum + (parseNumber(r.importo) || 0), 0);
+        let saldo = saldoIniziale + totaleAvere - totaleDare;
+        document.getElementById('saldoInfo').innerHTML = `
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
+                <div><strong>📈 Totale Avere (entrate):</strong> ${formatNumber(totaleAvere)} €</div>
+                <div><strong>📉 Totale Dare (uscite):</strong> ${formatNumber(totaleDare)} €</div>
+                <div><strong>💰 Saldo mese:</strong> ${formatNumber(saldo)} €</div>
+            </div>
+        `;
+        document.getElementById('totaleContantiInfo').innerHTML = `
+            <div style="margin-bottom:15px;">
+                <strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(totaleContanti)} €
+            </div>
+        `;
+    }
+    
+    // Verifica se ci sono righe selezionate
+    function hasSelectedRows() {
+        if (currentScheda === 'primanota') {
+            const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            return Array.from(checks).some(chk => chk.checked);
+        } else if (currentScheda === 'contanti') {
+            const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            return Array.from(checks).some(chk => chk.checked);
+        } else if (currentScheda === 'fornitori') {
+            const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            return Array.from(checks).some(chk => chk.checked);
+        }
+        return false;
+    }
+    
+    // Ottiene l'array delle righe selezionate con i loro indici
+    function getSelectedRows() {
+        let selected = [];
+        if (currentScheda === 'primanota') {
+            const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            checks.forEach((chk, idx) => {
+                if (chk.checked) selected.push(idx);
+            });
+        } else if (currentScheda === 'contanti') {
+            const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            checks.forEach((chk, idx) => {
+                if (chk.checked) selected.push(idx);
+            });
+        } else if (currentScheda === 'fornitori') {
+            const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            checks.forEach((chk, idx) => {
+                if (chk.checked) selected.push(idx);
+            });
+        }
+        return selected;
+    }
+    
+    // Abilita/disabilita celle editabili in base alla selezione
+    function aggiornaEditabilita() {
+        aggiornaTabelle();
+    }
+    
+    // Applica tutte le modifiche in sospeso con validazione
+    function applicaModifiche() {
+        let hasError = false;
+        
+        for (let key in pendingChanges) {
+            let parts = key.split('|');
+            let scheda = parts[0];
+            let rowIdx = parseInt(parts[1]);
+            let field = parts[2];
+            let newValue = pendingChanges[key];
+            
+            if (scheda === 'primanota' && primaNota[rowIdx]) {
+                let oldAvere = primaNota[rowIdx].avere;
+                let oldDare = primaNota[rowIdx].dare;
+                let newAvere = field === 'avere' ? parseNumber(newValue) : oldAvere;
+                let newDare = field === 'dare' ? parseNumber(newValue) : oldDare;
+                if (newAvere > 0 && newDare > 0) {
+                    alert(`Errore: Avere e Dare non possono essere entrambi maggiori di zero (riga ${rowIdx+1})`);
+                    hasError = true;
+                    break;
+                }
+            }
+        }
+        
+        if (hasError) return;
+        
+        for (let key in pendingChanges) {
+            let parts = key.split('|');
+            let scheda = parts[0];
+            let rowIdx = parseInt(parts[1]);
+            let field = parts[2];
+            let newValue = pendingChanges[key];
+            
+            if (scheda === 'primanota' && primaNota[rowIdx]) {
+                primaNota[rowIdx][field] = newValue;
+                if (field === 'avere' && parseNumber(newValue) > 0) {
+                    primaNota[rowIdx].dare = 0;
+                } else if (field === 'dare' && parseNumber(newValue) > 0) {
+                    primaNota[rowIdx].avere = 0;
+                }
+            } else if (scheda === 'contanti' && contanti[rowIdx]) {
+                contanti[rowIdx][field] = newValue;
+            } else if (scheda === 'fornitori' && fattureFornitori[rowIdx]) {
+                fattureFornitori[rowIdx][field] = newValue;
+            }
+        }
+        pendingChanges = {};
+        aggiornaTabelle();
+        salvaStatoCorrente();
+        alert("Modifiche salvate con successo.");
+    }
+    
+    // Aggiorna visibilità pulsanti azione
+    function aggiornaPulsantiAzione() {
+        const hasSelection = hasSelectedRows();
+        if (currentScheda === 'primanota') {
+            const btns = document.getElementById('primaNotaActionButtons');
+            if (btns) btns.style.display = hasSelection ? 'flex' : 'none';
+        } else if (currentScheda === 'contanti') {
+            const btns = document.getElementById('contantiActionButtons');
+            if (btns) btns.style.display = hasSelection ? 'flex' : 'none';
+        } else if (currentScheda === 'fornitori') {
+            const btns = document.getElementById('fornitoriActionButtons');
+            if (btns) btns.style.display = hasSelection ? 'flex' : 'none';
+        }
+    }
+    
+    // Celle editabili per Prima Nota
+    function makeEditableCellPrimaNota(value, rowIdx, field, isRowSelected) {
+        if (field === 'verificato') {
+            let chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = value === true;
+            chk.style.cursor = 'pointer';
+            chk.onchange = (function(r) { return function(e) { 
+                primaNota[r].verificato = e.target.checked;
+                aggiornaTabelle();
+                salvaStatoCorrente();
+            }; })(rowIdx);
+            return chk;
+        } else {
+            let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
+            let span = document.createElement('span');
+            span.textContent = displayValue || '';
+            span.className = 'editable-cell';
+            if (!isRowSelected) {
+                span.classList.add('editable-disabled');
+                span.style.cursor = 'not-allowed';
+            } else {
+                span.style.cursor = 'pointer';
+                span.onclick = (function(r, f, currentValue) { return function() {
+                    let input = document.createElement('input');
+                    input.className = 'cell-input';
+                    if (f === 'data') {
+                        let dateVal = '';
+                        if (currentValue) {
+                            let parts = currentValue.split('/');
+                            if (parts.length === 3) {
+                                dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                        }
+                        input.type = 'date';
+                        input.value = dateVal;
+                    } else if (f === 'descrizione') {
+                        input.type = 'text';
+                        input.value = currentValue || '';
+                    } else {
+                        input.type = 'text';
+                        input.value = formatNumber(currentValue) || '';
+                    }
+                    span.style.display = 'none';
+                    span.parentNode.insertBefore(input, span);
+                    input.focus();
+                    input.onblur = function() {
+                        let newValue;
+                        if (f === 'data') {
+                            newValue = input.value ? formatDate(input.value) : '';
+                        } else if (f === 'descrizione') {
+                            newValue = input.value;
+                        } else {
+                            newValue = parseNumber(input.value);
+                        }
+                        let key = `primanota|${r}|${f}`;
+                        pendingChanges[key] = newValue;
+                        input.remove();
+                        span.style.display = 'inline';
+                        if (f === 'data' || f === 'descrizione') {
+                            span.textContent = newValue || '';
+                        } else {
+                            span.textContent = formatNumber(newValue) || '';
+                        }
+                    };
+                    input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+                }; })(rowIdx, field, primaNota[rowIdx][field]);
+            }
+            return span;
+        }
+    }
+    
+    // Celle editabili per Contanti
+    function makeEditableCellContanti(value, rowIdx, field, isRowSelected) {
         let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
-        let span = document.createElement('span'); span.textContent = displayValue || ''; span.className = 'editable-cell';
-        if (!isRowSelected) { span.classList.add('editable-disabled'); span.style.cursor = 'not-allowed'; }
-        else {
+        let span = document.createElement('span');
+        span.textContent = displayValue || '';
+        span.className = 'editable-cell';
+        if (!isRowSelected) {
+            span.classList.add('editable-disabled');
+            span.style.cursor = 'not-allowed';
+        } else {
             span.style.cursor = 'pointer';
             span.onclick = (function(r, f, currentValue) { return function() {
-                let input = document.createElement('input'); input.className = 'cell-input';
-                if (f === 'data') { let dateVal = ''; if (currentValue) { let parts = currentValue.split('/'); if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; } input.type = 'date'; input.value = dateVal; }
-                else if (f === 'descrizione') { input.type = 'text'; input.value = currentValue || ''; }
-                else { input.type = 'text'; input.value = formatNumber(currentValue) || ''; }
-                span.style.display = 'none'; span.parentNode.insertBefore(input, span); input.focus();
+                let input = document.createElement('input');
+                input.className = 'cell-input';
+                if (f === 'data') {
+                    let dateVal = '';
+                    if (currentValue) {
+                        let parts = currentValue.split('/');
+                        if (parts.length === 3) {
+                            dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                        }
+                    }
+                    input.type = 'date';
+                    input.value = dateVal;
+                } else if (f === 'descrizione') {
+                    input.type = 'text';
+                    input.value = currentValue || '';
+                } else {
+                    input.type = 'text';
+                    input.value = formatNumber(currentValue) || '';
+                }
+                span.style.display = 'none';
+                span.parentNode.insertBefore(input, span);
+                input.focus();
                 input.onblur = function() {
-                    let newValue; if (f === 'data') newValue = input.value ? formatDate(input.value) : ''; else if (f === 'descrizione') newValue = input.value; else newValue = parseNumber(input.value);
-                    pendingChanges[`primanota|${r}|${f}`] = newValue; input.remove(); span.style.display = 'inline';
-                    if (f === 'data' || f === 'descrizione') span.textContent = newValue || ''; else span.textContent = formatNumber(newValue) || '';
+                    let newValue;
+                    if (f === 'data') {
+                        newValue = input.value ? formatDate(input.value) : '';
+                    } else if (f === 'descrizione') {
+                        newValue = input.value;
+                    } else {
+                        newValue = parseNumber(input.value);
+                    }
+                    let key = `contanti|${r}|${f}`;
+                    pendingChanges[key] = newValue;
+                    input.remove();
+                    span.style.display = 'inline';
+                    if (f === 'data' || f === 'descrizione') {
+                        span.textContent = newValue || '';
+                    } else {
+                        span.textContent = formatNumber(newValue) || '';
+                    }
                 };
                 input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
-            }; })(rowIdx, field, primaNota[rowIdx][field]);
+            }; })(rowIdx, field, contanti[rowIdx][field]);
         }
         return span;
     }
-}
-
-function makeEditableCellContanti(value, rowIdx, field, isRowSelected) {
-    let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
-    let span = document.createElement('span'); span.textContent = displayValue || ''; span.className = 'editable-cell';
-    if (!isRowSelected) { span.classList.add('editable-disabled'); span.style.cursor = 'not-allowed'; }
-    else {
-        span.style.cursor = 'pointer';
-        span.onclick = (function(r, f, currentValue) { return function() {
-            let input = document.createElement('input'); input.className = 'cell-input';
-            if (f === 'data') { let dateVal = ''; if (currentValue) { let parts = currentValue.split('/'); if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; } input.type = 'date'; input.value = dateVal; }
-            else if (f === 'descrizione') { input.type = 'text'; input.value = currentValue || ''; }
-            else { input.type = 'text'; input.value = formatNumber(currentValue) || ''; }
-            span.style.display = 'none'; span.parentNode.insertBefore(input, span); input.focus();
-            input.onblur = function() {
-                let newValue; if (f === 'data') newValue = input.value ? formatDate(input.value) : ''; else if (f === 'descrizione') newValue = input.value; else newValue = parseNumber(input.value);
-                pendingChanges[`contanti|${r}|${f}`] = newValue; input.remove(); span.style.display = 'inline';
-                if (f === 'data' || f === 'descrizione') span.textContent = newValue || ''; else span.textContent = formatNumber(newValue) || '';
-            };
-            input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
-        }; })(rowIdx, field, contanti[rowIdx][field]);
+    
+    // Celle editabili per Fornitori
+    function makeEditableCellFornitori(value, rowIdx, field, isRowSelected) {
+        let displayValue = value || '';
+        let span = document.createElement('span');
+        span.textContent = displayValue;
+        span.className = 'editable-cell';
+        if (!isRowSelected) {
+            span.classList.add('editable-disabled');
+            span.style.cursor = 'not-allowed';
+        } else {
+            span.style.cursor = 'pointer';
+            span.onclick = (function(r, f, currentValue) { return function() {
+                let input = document.createElement('input');
+                input.className = 'cell-input';
+                if (f === 'data') {
+                    let dateVal = '';
+                    if (currentValue) {
+                        let parts = currentValue.split('/');
+                        if (parts.length === 3) {
+                            dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                        }
+                    }
+                    input.type = 'date';
+                    input.value = dateVal;
+                } else {
+                    input.type = 'text';
+                    input.value = currentValue || '';
+                }
+                span.style.display = 'none';
+                span.parentNode.insertBefore(input, span);
+                input.focus();
+                input.onblur = function() {
+                    let newValue;
+                    if (f === 'data') {
+                        newValue = input.value ? formatDate(input.value) : '';
+                    } else {
+                        newValue = input.value;
+                    }
+                    let key = `fornitori|${r}|${f}`;
+                    pendingChanges[key] = newValue;
+                    input.remove();
+                    span.style.display = 'inline';
+                    span.textContent = newValue || '';
+                };
+                input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+            }; })(rowIdx, field, fattureFornitori[rowIdx][field]);
+        }
+        return span;
     }
-    return span;
-}
-
-function makeEditableCellFornitori(value, rowIdx, field, isRowSelected) {
-    let displayValue = value || '';
-    let span = document.createElement('span'); span.textContent = displayValue; span.className = 'editable-cell';
-    if (!isRowSelected) { span.classList.add('editable-disabled'); span.style.cursor = 'not-allowed'; }
-    else {
-        span.style.cursor = 'pointer';
-        span.onclick = (function(r, f, currentValue) { return function() {
-            let input = document.createElement('input'); input.className = 'cell-input';
-            if (f === 'data') { let dateVal = ''; if (currentValue) { let parts = currentValue.split('/'); if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; } input.type = 'date'; input.value = dateVal; }
-            else { input.type = 'text'; input.value = currentValue || ''; }
-            span.style.display = 'none'; span.parentNode.insertBefore(input, span); input.focus();
-            input.onblur = function() {
-                let newValue; if (f === 'data') newValue = input.value ? formatDate(input.value) : ''; else newValue = input.value;
-                pendingChanges[`fornitori|${r}|${f}`] = newValue; input.remove(); span.style.display = 'inline'; span.textContent = newValue || '';
-            };
-            input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
-        }; })(rowIdx, field, fattureFornitori[rowIdx][field]);
+    
+    function aggiornaTabelle() {
+        const selectedRows = getSelectedRows();
+        
+        // PRIMA NOTA
+        let tbody = document.getElementById('primaNotaBody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            primaNota.forEach((riga, idx) => {
+                let row = tbody.insertRow();
+                let checkCell = row.insertCell(0);
+                let chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.className = 'row-check-prima';
+                chk.checked = selectedRows.includes(idx);
+                chk.onchange = function() { 
+                    aggiornaEditabilita();
+                    aggiornaPulsantiAzione();
+                };
+                checkCell.appendChild(chk);
+                row.insertCell(1).innerText = idx+1;
+                let isSelected = chk.checked;
+                row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', isSelected));
+                row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', isSelected));
+                row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', isSelected));
+                row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', isSelected));
+                row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', isSelected));
+            });
+        }
+        
+        // CONTANTI
+        let contantiBody = document.getElementById('contantiBody');
+        if (contantiBody) {
+            contantiBody.innerHTML = '';
+            contanti.forEach((riga, idx) => {
+                let row = contantiBody.insertRow();
+                let checkCell = row.insertCell(0);
+                let chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.className = 'row-check-contanti';
+                chk.checked = selectedRows.includes(idx);
+                chk.onchange = function() { 
+                    aggiornaEditabilita();
+                    aggiornaPulsantiAzione();
+                };
+                checkCell.appendChild(chk);
+                row.insertCell(1).innerText = idx+1;
+                let isSelected = chk.checked;
+                row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', isSelected));
+                row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', isSelected));
+                row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', isSelected));
+            });
+        }
+        
+        // FORNITORI
+        let fornitoriBody = document.getElementById('fornitoriBody');
+        if (fornitoriBody) {
+            fornitoriBody.innerHTML = '';
+            fattureFornitori.forEach((fatt, idx) => {
+                let row = fornitoriBody.insertRow();
+                let checkCell = row.insertCell(0);
+                let chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.className = 'row-check-fornitori';
+                chk.checked = selectedRows.includes(idx);
+                chk.onchange = function() { 
+                    aggiornaEditabilita();
+                    aggiornaPulsantiAzione();
+                };
+                checkCell.appendChild(chk);
+                row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
+                let isSelected = chk.checked;
+                row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', isSelected));
+                row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', isSelected));
+                row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', isSelected));
+            });
+        }
+        
+        calcolaSaldo();
+        salvaStatoCorrente();
+        
+        document.getElementById('annoSelect').value = currentYear;
+        document.getElementById('meseSelect').value = currentMonth;
+        document.getElementById('saldoIniziale').value = saldoIniziale;
+        
+        aggiornaPulsantiAzione();
+        
+        const selectAllId = currentScheda === 'primanota' ? 'selectAllPrimaNota' : (currentScheda === 'contanti' ? 'selectAllContanti' : 'selectAllFornitori');
+        const selectAll = document.getElementById(selectAllId);
+        if (selectAll) {
+            const allChecks = document.querySelectorAll(`#${currentScheda === 'primanota' ? 'primaNotaBody' : (currentScheda === 'contanti' ? 'contantiBody' : 'fornitoriBody')} .${currentScheda === 'primanota' ? 'row-check-prima' : (currentScheda === 'contanti' ? 'row-check-contanti' : 'row-check-fornitori')}`);
+            const allChecked = allChecks.length > 0 && Array.from(allChecks).every(chk => chk.checked);
+            selectAll.checked = allChecked;
+        }
     }
-    return span;
-}
-
-function aggiornaTabelle() {
-    const selectedRows = getSelectedRows();
-    let tbody = document.getElementById('primaNotaBody');
-    if (tbody) {
-        tbody.innerHTML = '';
-        primaNota.forEach((riga, idx) => {
-            let row = tbody.insertRow();
-            let checkCell = row.insertCell(0);
-            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-prima'; chk.checked = selectedRows.includes(idx);
-            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
-            checkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx+1;
-            let isSelected = chk.checked;
-            row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', isSelected));
-            row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', isSelected));
-            row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', isSelected));
-            row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', isSelected));
-            row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', isSelected));
-        });
+    
+    // Cambia scheda
+    function setScheda(scheda) {
+        currentScheda = scheda;
+        document.getElementById('tabellaPrimaNotaContainer').style.display = scheda === 'primanota' ? 'block' : 'none';
+        document.getElementById('tabellaContantiContainer').style.display = scheda === 'contanti' ? 'block' : 'none';
+        document.getElementById('tabellaFornitoriContainer').style.display = scheda === 'fornitori' ? 'block' : 'none';
+        
+        document.getElementById('btnPrimaNota').classList.toggle('active-scheda', scheda === 'primanota');
+        document.getElementById('btnContanti').classList.toggle('active-scheda', scheda === 'contanti');
+        document.getElementById('btnFornitori').classList.toggle('active-scheda', scheda === 'fornitori');
+        
+        aggiornaForm();
+        pendingChanges = {};
+        aggiornaTabelle();
+        aggiornaPulsantiAzione();
     }
-    let contantiBody = document.getElementById('contantiBody');
-    if (contantiBody) {
-        contantiBody.innerHTML = '';
-        contanti.forEach((riga, idx) => {
-            let row = contantiBody.insertRow();
-            let checkCell = row.insertCell(0);
-            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-contanti'; chk.checked = selectedRows.includes(idx);
-            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
-            checkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx+1;
-            let isSelected = chk.checked;
-            row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', isSelected));
-            row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', isSelected));
-            row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', isSelected));
-        });
+    
+    function aggiornaForm() {
+        const formArea = document.getElementById('formArea');
+        if (currentScheda === 'primanota') {
+            formArea.innerHTML = `
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota" value=""></div>
+                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>
+                <div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div>
+                <div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>
+            `;
+        } else if (currentScheda === 'contanti') {
+            formArea.innerHTML = `
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti" value=""></div>
+                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>
+                <div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>
+            `;
+        } else if (currentScheda === 'fornitori') {
+            formArea.innerHTML = `
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori" value=""></div>
+                <div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div>
+                <div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>
+            `;
+        }
+        pulisciForm();
     }
-    let fornitoriBody = document.getElementById('fornitoriBody');
-    if (fornitoriBody) {
-        fornitoriBody.innerHTML = '';
-        fattureFornitori.forEach((fatt, idx) => {
-            let row = fornitoriBody.insertRow();
-            let checkCell = row.insertCell(0);
-            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-fornitori'; chk.checked = selectedRows.includes(idx);
-            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
-            checkCell.appendChild(chk);
-            row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
-            let isSelected = chk.checked;
-            row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', isSelected));
-            row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', isSelected));
-            row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', isSelected));
-        });
+    
+    function pulisciForm() {
+        let oggi = new Date();
+        let dataDefault = oggi.toISOString().slice(0,10);
+        if (currentScheda === 'primanota') {
+            const dataField = document.getElementById('formDataPrimaNota');
+            if (dataField) dataField.value = dataDefault;
+            const descField = document.getElementById('formDescrizionePrimaNota');
+            if (descField) descField.value = '';
+            const avereField = document.getElementById('formAvere');
+            if (avereField) avereField.value = 0;
+            const dareField = document.getElementById('formDare');
+            if (dareField) dareField.value = 0;
+        } else if (currentScheda === 'contanti') {
+            const dataField = document.getElementById('formDataContanti');
+            if (dataField) dataField.value = dataDefault;
+            const descField = document.getElementById('formDescrizioneContanti');
+            if (descField) descField.value = '';
+            const importoField = document.getElementById('formImportoContanti');
+            if (importoField) importoField.value = 0;
+        } else if (currentScheda === 'fornitori') {
+            const dataField = document.getElementById('formDataFornitori');
+            if (dataField) dataField.value = dataDefault;
+            const fornitoreField = document.getElementById('formFornitore');
+            if (fornitoreField) fornitoreField.value = '';
+            const numFatturaField = document.getElementById('formNumeroFattura');
+            if (numFatturaField) numFatturaField.value = '';
+        }
     }
-    calcolaSaldo(); salvaStatoCorrente();
-    document.getElementById('annoSelect').value = currentYear;
-    document.getElementById('meseSelect').value = currentMonth;
-    document.getElementById('saldoIniziale').value = saldoIniziale;
-    aggiornaPulsantiAzione();
-    const selectAllId = currentScheda === 'primanota' ? 'selectAllPrimaNota' : (currentScheda === 'contanti' ? 'selectAllContanti' : 'selectAllFornitori');
-    const selectAll = document.getElementById(selectAllId);
-    if (selectAll) {
-        const selector = currentScheda === 'primanota' ? '#primaNotaBody .row-check-prima' : (currentScheda === 'contanti' ? '#contantiBody .row-check-contanti' : '#fornitoriBody .row-check-fornitori');
-        const allChecks = document.querySelectorAll(selector);
-        selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+    
+    function memorizzaNuovo() {
+        if (currentScheda === 'primanota') {
+            let data = document.getElementById('formDataPrimaNota')?.value;
+            let descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
+            let avere = parseFloat(document.getElementById('formAvere')?.value) || 0;
+            let dare = parseFloat(document.getElementById('formDare')?.value) || 0;
+            if (!descrizione) { alert("Inserisci una descrizione"); return; }
+            if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return; }
+            if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo"); return; }
+            primaNota.push({
+                data: formatDate(data),
+                descrizione: descrizione,
+                avere: avere || null,
+                dare: dare || null,
+                verificato: false
+            });
+        } else if (currentScheda === 'contanti') {
+            let data = document.getElementById('formDataContanti')?.value;
+            let descrizione = document.getElementById('formDescrizioneContanti')?.value;
+            let importo = parseFloat(document.getElementById('formImportoContanti')?.value) || 0;
+            if (!descrizione) { alert("Inserisci una descrizione"); return; }
+            if (importo <= 0) { alert("Inserisci un importo valido"); return; }
+            contanti.push({
+                data: formatDate(data),
+                descrizione: descrizione,
+                importo: importo
+            });
+        } else if (currentScheda === 'fornitori') {
+            let data = document.getElementById('formDataFornitori')?.value;
+            let fornitore = document.getElementById('formFornitore')?.value.trim();
+            let numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
+            if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
+            fattureFornitori.push({
+                data: formatDate(data),
+                fornitore: fornitore,
+                numeroFattura: numeroFattura
+            });
+            nextFatturaId++;
+        }
+        aggiornaTabelle();
+        pulisciForm();
     }
-}
-
-function setScheda(scheda) {
-    currentScheda = scheda;
-    document.getElementById('tabellaPrimaNotaContainer').style.display = scheda === 'primanota' ? 'block' : 'none';
-    document.getElementById('tabellaContantiContainer').style.display = scheda === 'contanti' ? 'block' : 'none';
-    document.getElementById('tabellaFornitoriContainer').style.display = scheda === 'fornitori' ? 'block' : 'none';
-    document.getElementById('btnPrimaNota').classList.toggle('active-scheda', scheda === 'primanota');
-    document.getElementById('btnContanti').classList.toggle('active-scheda', scheda === 'contanti');
-    document.getElementById('btnFornitori').classList.toggle('active-scheda', scheda === 'fornitori');
-    aggiornaForm(); pendingChanges = {}; aggiornaTabelle(); aggiornaPulsantiAzione();
-}
-
-function aggiornaForm() {
-    const formArea = document.getElementById('formArea');
-    if (currentScheda === 'primanota') formArea.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota" value=""></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div><div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div><div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>`;
-    else if (currentScheda === 'contanti') formArea.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti" value=""></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div><div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`;
-    else if (currentScheda === 'fornitori') formArea.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori" value=""></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
-    pulisciForm();
-}
-
-function pulisciForm() {
-    let oggi = new Date().toISOString().slice(0,10);
-    if (currentScheda === 'primanota') { if(document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi; if(document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = ''; if(document.getElementById('formAvere')) document.getElementById('formAvere').value = 0; if(document.getElementById('formDare')) document.getElementById('formDare').value = 0; }
-    else if (currentScheda === 'contanti') { if(document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi; if(document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = ''; if(document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = 0; }
-    else if (currentScheda === 'fornitori') { if(document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi; if(document.getElementById('formFornitore')) document.getElementById('formFornitore').value = ''; if(document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = ''; }
-}
-
-function memorizzaNuovo() {
-    if (currentScheda === 'primanota') {
-        let data = document.getElementById('formDataPrimaNota')?.value, desc = document.getElementById('formDescrizionePrimaNota')?.value, avere = parseFloat(document.getElementById('formAvere')?.value)||0, dare = parseFloat(document.getElementById('formDare')?.value)||0;
-        if (!desc) { alert("Inserisci una descrizione"); return; }
-        if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return; }
-        if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo"); return; }
-        primaNota.push({ data: formatDate(data), descrizione: desc, avere: avere||null, dare: dare||null, verificato: false });
-    } else if (currentScheda === 'contanti') {
-        let data = document.getElementById('formDataContanti')?.value, desc = document.getElementById('formDescrizioneContanti')?.value, imp = parseFloat(document.getElementById('formImportoContanti')?.value)||0;
-        if (!desc) { alert("Inserisci una descrizione"); return; }
-        if (imp <= 0) { alert("Inserisci un importo valido"); return; }
-        contanti.push({ data: formatDate(data), descrizione: desc, importo: imp });
-    } else if (currentScheda === 'fornitori') {
-        let data = document.getElementById('formDataFornitori')?.value, forn = document.getElementById('formFornitore')?.value.trim(), num = document.getElementById('formNumeroFattura')?.value.trim();
-        if (!forn || !num) { alert("Compila tutti i campi"); return; }
-        fattureFornitori.push({ data: formatDate(data), fornitore: forn, numeroFattura: num });
-        nextFatturaId++;
+    
+    function eliminaSelezionati(scheda) {
+        if (scheda === 'primanota') {
+            let checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            let nuovi = [];
+            for (let i = 0; i < checks.length; i++) {
+                if (!checks[i].checked) {
+                    nuovi.push(primaNota[i]);
+                }
+            }
+            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
+                primaNota = nuovi;
+            }
+            const selectAll = document.getElementById('selectAllPrimaNota');
+            if (selectAll) selectAll.checked = false;
+        } else if (scheda === 'contanti') {
+            let checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            let nuovi = [];
+            for (let i = 0; i < checks.length; i++) {
+                if (!checks[i].checked) {
+                    nuovi.push(contanti[i]);
+                }
+            }
+            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
+                contanti = nuovi;
+            }
+            const selectAll = document.getElementById('selectAllContanti');
+            if (selectAll) selectAll.checked = false;
+        } else if (scheda === 'fornitori') {
+            let checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            let nuovi = [];
+            for (let i = 0; i < checks.length; i++) {
+                if (!checks[i].checked) {
+                    nuovi.push(fattureFornitori[i]);
+                }
+            }
+            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
+                fattureFornitori = nuovi;
+            }
+            const selectAll = document.getElementById('selectAllFornitori');
+            if (selectAll) selectAll.checked = false;
+        }
+        pendingChanges = {};
+        aggiornaTabelle();
     }
-    aggiornaTabelle(); pulisciForm();
-}
-
-function eliminaSelezionati(scheda) {
-    if (scheda === 'primanota') { let checks = document.querySelectorAll('#primaNotaBody .row-check-prima'); let nuovi = []; for(let i=0;i<checks.length;i++) if(!checks[i].checked) nuovi.push(primaNota[i]); if(confirm(`Eliminare ${checks.length-nuovi.length} righe selezionate?`)) primaNota = nuovi; document.getElementById('selectAllPrimaNota').checked = false; }
-    if (scheda === 'contanti') { let checks = document.querySelectorAll('#contantiBody .row-check-contanti'); let nuovi = []; for(let i=0;i<checks.length;i++) if(!checks[i].checked) nuovi.push(contanti[i]); if(confirm(`Eliminare ${checks.length-nuovi.length} righe selezionate?`)) contanti = nuovi; document.getElementById('selectAllContanti').checked = false; }
-    if (scheda === 'fornitori') { let checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); let nuovi = []; for(let i=0;i<checks.length;i++) if(!checks[i].checked) nuovi.push(fattureFornitori[i]); if(confirm(`Eliminare ${checks.length-nuovi.length} righe selezionate?`)) fattureFornitori = nuovi; document.getElementById('selectAllFornitori').checked = false; }
-    pendingChanges = {}; aggiornaTabelle();
-}
-
-function cambiaMese() { currentYear = parseInt(document.getElementById('annoSelect').value); currentMonth = parseInt(document.getElementById('meseSelect').value); caricaStatoCorrente(); pendingChanges = {}; }
-
-function caricaDaFile(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const data = JSON.parse(e.target.result);
-            backupPreCaricamento = { anno: currentYear, mese: currentMonth, saldoIniziale, primaNota: JSON.parse(JSON.stringify(primaNota)), contanti: JSON.parse(JSON.stringify(contanti)), fattureFornitori: JSON.parse(JSON.stringify(fattureFornitori)), nextFatturaId };
-            currentYear = data.anno; currentMonth = data.mese; saldoIniziale = data.saldoIniziale || 0; primaNota = data.primaNota || []; contanti = data.contanti || []; fattureFornitori = data.fattureFornitori || []; nextFatturaId = data.nextFatturaId || 1;
-            document.getElementById('annoSelect').value = currentYear; document.getElementById('meseSelect').value = currentMonth; document.getElementById('saldoIniziale').value = saldoIniziale;
+    
+    function cambiaMese() {
+        currentYear = parseInt(document.getElementById('annoSelect').value);
+        currentMonth = parseInt(document.getElementById('meseSelect').value);
+        caricaStatoCorrente();
+        pendingChanges = {};
+    }
+    
+    function salvaSuFile() {
+        const data = {
+            anno: currentYear,
+            mese: currentMonth,
+            saldoIniziale: saldoIniziale,
+            primaNota: primaNota,
+            contanti: contanti,
+            fattureFornitori: fattureFornitori,
+            nextFatturaId: nextFatturaId
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    function caricaDaFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                backupPreCaricamento = {
+                    anno: currentYear,
+                    mese: currentMonth,
+                    saldoIniziale: saldoIniziale,
+                    primaNota: JSON.parse(JSON.stringify(primaNota)),
+                    contanti: JSON.parse(JSON.stringify(contanti)),
+                    fattureFornitori: JSON.parse(JSON.stringify(fattureFornitori)),
+                    nextFatturaId: nextFatturaId
+                };
+                currentYear = data.anno;
+                currentMonth = data.mese;
+                saldoIniziale = data.saldoIniziale || 0;
+                primaNota = data.primaNota || [];
+                contanti = data.contanti || [];
+                fattureFornitori = data.fattureFornitori || [];
+                nextFatturaId = data.nextFatturaId || 1;
+                document.getElementById('annoSelect').value = currentYear;
+                document.getElementById('meseSelect').value = currentMonth;
+                document.getElementById('saldoIniziale').value = saldoIniziale;
+                aggiornaTabelle();
+                alert(`File caricato: ${currentYear} - ${['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][currentMonth]}`);
+            } catch(err) {
+                alert("Errore nel caricamento del file: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+    
+    function riprendiMeseCorrente() {
+        if (backupPreCaricamento) {
+            currentYear = backupPreCaricamento.anno;
+            currentMonth = backupPreCaricamento.mese;
+            saldoIniziale = backupPreCaricamento.saldoIniziale;
+            primaNota = backupPreCaricamento.primaNota;
+            contanti = backupPreCaricamento.contanti;
+            fattureFornitori = backupPreCaricamento.fattureFornitori;
+            nextFatturaId = backupPreCaricamento.nextFatturaId;
+            document.getElementById('annoSelect').value = currentYear;
+            document.getElementById('meseSelect').value = currentMonth;
+            document.getElementById('saldoIniziale').value = saldoIniziale;
             aggiornaTabelle();
-            alert(`File caricato: ${currentYear} - ${['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][currentMonth]}`);
-        } catch(err) { alert("Errore nel caricamento del file: " + err.message); }
-    };
-    reader.readAsText(file);
-}
-
-function riprendiMeseCorrente() {
-    if (backupPreCaricamento) {
-        currentYear = backupPreCaricamento.anno; currentMonth = backupPreCaricamento.mese; saldoIniziale = backupPreCaricamento.saldoIniziale; primaNota = backupPreCaricamento.primaNota; contanti = backupPreCaricamento.contanti; fattureFornitori = backupPreCaricamento.fattureFornitori; nextFatturaId = backupPreCaricamento.nextFatturaId;
-        document.getElementById('annoSelect').value = currentYear; document.getElementById('meseSelect').value = currentMonth; document.getElementById('saldoIniziale').value = saldoIniziale;
-        aggiornaTabelle(); backupPreCaricamento = null; alert("Ripristinato il mese precedente al caricamento.");
-    } else {
-        const ultimo = localStorage.getItem('ultimoMeseLavorato');
-        if (ultimo) { const { anno, mese } = JSON.parse(ultimo); currentYear = anno; currentMonth = mese; caricaStatoCorrente(); alert(`Ripristinato mese: ${anno} - ${['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][mese]}`); }
-        else alert("Nessun mese precedente trovato.");
-    }
-    pendingChanges = {};
-}
-
-function esportaCSV(perAnno) {
-    let csvRows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]];
-    let dataExport = [];
-    if (perAnno) {
-        for (let m = 0; m < 12; m++) {
-            const saved = localStorage.getItem(`contabilita_${currentYear}_${m}`);
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    for (let riga of (data.primaNota || [])) dataExport.push(riga);
-                    for (let riga of (data.contanti || [])) dataExport.push({ data: riga.data, descrizione: riga.descrizione, avere: '', dare: '', incassoContanti: riga.importo, verificato: '' });
-                } catch(e) {}
+            backupPreCaricamento = null;
+            alert("Ripristinato il mese precedente al caricamento.");
+        } else {
+            const ultimo = localStorage.getItem('ultimoMeseLavorato');
+            if (ultimo) {
+                const { anno, mese } = JSON.parse(ultimo);
+                currentYear = anno;
+                currentMonth = mese;
+                caricaStatoCorrente();
+                alert(`Ripristinato mese: ${anno} - ${['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][mese]}`);
+            } else {
+                alert("Nessun mese precedente trovato.");
             }
         }
-    } else {
-        for (let riga of primaNota) dataExport.push(riga);
-        for (let riga of contanti) dataExport.push({ data: riga.data, descrizione: riga.descrizione, avere: '', dare: '', incassoContanti: riga.importo, verificato: '' });
+        pendingChanges = {};
     }
-    for (let riga of dataExport) csvRows.push([riga.data||'', riga.descrizione||'', riga.avere?riga.avere.toString().replace('.',','):'', riga.dare?riga.dare.toString().replace('.',','):'', riga.incassoContanti?riga.incassoContanti.toString().replace('.',','):'', riga.verificato?"Sì":"No"]);
-    const csvContent = csvRows.map(r=>r.join(";")).join("\n");
-    const blob = new Blob(["\uFEFF"+csvContent], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(url);
-}
-
-// ==================== PARSER AGENTI ====================
-function parseORD(text) {
-    const lines = text.split(/\r?\n/); const clienti = new Map(); let currentCliente = null;
-    const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/; const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
-    for (let line of lines) {
-        line = line.trimEnd(); if (line === "") continue;
-        let mCliente = line.match(reCliente);
-        if (mCliente) { currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] }; clienti.set(currentCliente.codice, currentCliente); continue; }
-        if (!currentCliente) continue;
-        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
-        let coppie = [], match; while ((match = reCoppia.exec(line)) !== null) coppie.push({ qta: parseFloat(match[1].replace(',', '.')), data: match[2], start: match.index, end: match.index + match[0].length });
-        if (coppie.length === 0) continue;
-        let firstCoppiaStart = coppie[0].start, descrizioneRaw = line.substring(0, firstCoppiaStart).trim(), tokens = descrizioneRaw.split(/\s+/), codice = tokens[0], descrizione = tokens.slice(1).join(" ");
-        let lastCoppiaEnd = coppie[coppie.length-1].end, afterCoppie = line.substring(lastCoppiaEnd).trim(), numTokens = afterCoppie.split(/\s+/);
-        let prezzo = 0, sconto1 = 0; if (numTokens.length >= 2) { prezzo = parseFloat(numTokens[0].replace(',', '.')); sconto1 = parseFloat(numTokens[1].replace(',', '.')); }
-        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
-        currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
+    
+    function esportaCSV(perAnno) {
+        let csvRows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]];
+        let dataExport = [];
+        if (perAnno) {
+            for (let m = 0; m < 12; m++) {
+                const saved = localStorage.getItem(`contabilita_${currentYear}_${m}`);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        for (let riga of (data.primaNota || [])) {
+                            dataExport.push(riga);
+                        }
+                        for (let riga of (data.contanti || [])) {
+                            dataExport.push({
+                                data: riga.data,
+                                descrizione: riga.descrizione,
+                                avere: '',
+                                dare: '',
+                                incassoContanti: riga.importo,
+                                verificato: ''
+                            });
+                        }
+                    } catch(e) {}
+                }
+            }
+        } else {
+            for (let riga of primaNota) {
+                dataExport.push(riga);
+            }
+            for (let riga of contanti) {
+                dataExport.push({
+                    data: riga.data,
+                    descrizione: riga.descrizione,
+                    avere: '',
+                    dare: '',
+                    incassoContanti: riga.importo,
+                    verificato: ''
+                });
+            }
+        }
+        for (let riga of dataExport) {
+            csvRows.push([
+                riga.data || '',
+                riga.descrizione || '',
+                riga.avere ? riga.avere.toString().replace('.',',') : '',
+                riga.dare ? riga.dare.toString().replace('.',',') : '',
+                riga.incassoContanti ? riga.incassoContanti.toString().replace('.',',') : '',
+                riga.verificato ? "Sì" : "No"
+            ]);
+        }
+        const csvContent = csvRows.map(row => row.join(";")).join("\n");
+        const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
-    return Array.from(clienti.values());
-}
-
-function parseSCA(text) {
-    const lines = text.split(/\r?\n/); const clienti = new Map(); let currentCliente = null;
-    const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/; const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
-    for (let line of lines) {
-        line = line.trim(); if (line === "") continue;
-        let mCliente = line.match(reCliente);
-        if (mCliente) { currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] }; clienti.set(currentCliente.codice, currentCliente); continue; }
-        if (currentCliente) { let mScad = line.match(reScadenza); if (mScad) { currentCliente.scadenze.push({ scadenza: mScad[1], numDoc: mScad[2], dataDoc: mScad[3], importo: parseFloat(mScad[4].replace(/\./g, '').replace(',', '.')) }); } }
+    
+    // --------------------------------------------------------------
+    // PARSER AGENTI
+    // --------------------------------------------------------------
+    function parseORD(text) {
+        const lines = text.split(/\r?\n/);
+        const clienti = new Map();
+        let currentCliente = null;
+        const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
+        const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
+        for (let line of lines) {
+            line = line.trimEnd();
+            if (line === "") continue;
+            let mCliente = line.match(reCliente);
+            if (mCliente) {
+                currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] };
+                clienti.set(currentCliente.codice, currentCliente);
+                continue;
+            }
+            if (!currentCliente) continue;
+            if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
+            let coppie = [];
+            let match;
+            while ((match = reCoppia.exec(line)) !== null) {
+                let qta = parseFloat(match[1].replace(',', '.'));
+                let data = match[2];
+                coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
+            }
+            if (coppie.length === 0) continue;
+            let firstCoppiaStart = coppie[0].start;
+            let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
+            let tokens = descrizioneRaw.split(/\s+/);
+            let codice = tokens[0];
+            let descrizione = tokens.slice(1).join(" ");
+            let lastCoppiaEnd = coppie[coppie.length-1].end;
+            let afterCoppie = line.substring(lastCoppiaEnd).trim();
+            let numTokens = afterCoppie.split(/\s+/);
+            let prezzo = 0, sconto1 = 0;
+            if (numTokens.length >= 2) {
+                prezzo = parseFloat(numTokens[0].replace(',', '.'));
+                sconto1 = parseFloat(numTokens[1].replace(',', '.'));
+            }
+            coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+            currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
+        }
+        return Array.from(clienti.values());
     }
-    return Array.from(clienti.values());
-}
-
-let datiAgenti = { ord: [], sca: [] }; let clientiUniciAgenti = []; let clientiFiltrati = [];
-function aggiornaClientiUniciAgenti() {
-    const mappa = new Map();
-    for (let c of datiAgenti.ord) { let key = `${c.codice}|${c.ragione}`; if (!mappa.has(key)) mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true }); else mappa.get(key).hasOrdini = true; }
-    for (let c of datiAgenti.sca) { let key = `${c.codice}|${c.ragione}`; if (!mappa.has(key)) mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false }); if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) { let cli = mappa.get(key); if (cli) cli.hasScadenze = true; } }
-    clientiUniciAgenti = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
-    clientiFiltrati = [...clientiUniciAgenti]; aggiornaTendinaClienti();
-}
-function aggiornaTendinaClienti() {
-    const select = document.getElementById('selectClienteAgenti'); const searchText = document.getElementById('cercaCliente').value.toLowerCase();
-    clientiFiltrati = clientiUniciAgenti.filter(cli => cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText));
-    select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-    for (let cli of clientiFiltrati) { const option = document.createElement('option'); option.value = `${cli.codice}|${cli.ragione}`; option.textContent = `${cli.codice} - ${cli.ragione}`; if (cli.hasScadenze) { option.style.color = '#c0392b'; option.style.fontWeight = 'bold'; } select.appendChild(option); }
-    select.disabled = (clientiFiltrati.length === 0);
-}
-function mostraScadenzeAgenti() {
-    const clienteKey = document.getElementById('selectClienteAgenti').value; const container = document.getElementById('scadenzeAgenti');
-    if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
-    const [codice, ragione] = clienteKey.split('|'); const clienteSCA = datiAgenti.sca.find(c => c.codice === codice && c.ragione === ragione);
-    if (!clienteSCA || clienteSCA.scadenze.length === 0) { container.innerHTML = `<div class="info-messaggio">Nessuna scadenza (SCA) per ${ragione}</div>`; return; }
-    let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3><table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
-    for (let s of clienteSCA.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
-    html += `</tbody></table></div>`; container.innerHTML = html;
-}
-let articoliFiltratiGlobali = [];
-function mostraDettaglioAgenti() {
-    const clienteKey = document.getElementById('selectClienteAgenti').value; const container = document.getElementById('dettaglioAgenti');
-    if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
-    const [codice, ragione] = clienteKey.split('|'); let clienteORD = datiAgenti.ord.find(c => c.codice === codice && c.ragione === ragione);
-    if (!clienteORD) clienteORD = datiAgenti.ord.find(c => c.codice === codice);
-    if (!clienteORD || clienteORD.articoli.length === 0) { container.innerHTML = `<div class="info-messaggio">Nessun ordine (ORD) per il cliente ${codice}</div>`; document.getElementById('ricercaArticoloContainer').innerHTML = ''; return; }
-    document.getElementById('ricercaArticoloContainer').innerHTML = `<div class="search-box"><label>🔍 Cerca articolo</label><input type="text" id="cercaArticolo" placeholder="Digita codice o descrizione articolo..."></div>`;
-    articoliFiltratiGlobali = [...clienteORD.articoli];
-    const searchInput = document.getElementById('cercaArticolo'); if (searchInput) { searchInput.removeEventListener('input', filtraArticoli); searchInput.addEventListener('input', filtraArticoli); }
-    filtraArticoli();
-}
-function filtraArticoli() {
-    const searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || ''; const articoliFiltrati = articoliFiltratiGlobali.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
-    const container = document.getElementById('dettaglioAgenti'); const clienteKey = document.getElementById('selectClienteAgenti').value;
-    if (!clienteKey) return; const [codice, ragione] = clienteKey.split('|');
-    let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
-    for (let art of articoliFiltrati) html += `<div class="articolo-item"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div class="articolo-prezzo"><strong>€. ${formatNumber(art.prezzo)}     Sc.% ${formatNumber(art.sconto1)}</strong></div></div>`;
-    if (articoliFiltrati.length === 0) html += `<div class="info-messaggio">Nessun articolo trovato.</div>`;
-    container.innerHTML = html;
-}
-
-function mostraPasswordOverlay(callback) {
-    const overlay = document.createElement('div'); overlay.className = 'password-overlay';
-    overlay.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Contabilità</h3><p>Inserisci la password per accedere</p><input type="password" id="pwdInput" placeholder="Password" style="width:100%; margin:10px 0;"><div class="btn-group" style="justify-content:center;"><button id="pwdOkBtn">OK</button><button id="pwdCancelBtn">ANNULLA</button></div></div>`;
-    document.body.appendChild(overlay);
-    document.getElementById('pwdOkBtn').onclick = () => { const pwd = document.getElementById('pwdInput').value; if (pwd === ADMIN_PASSWORD) { overlay.remove(); callback(true); } else { alert("Password errata!"); overlay.remove(); callback(false); } };
-    document.getElementById('pwdCancelBtn').onclick = () => { overlay.remove(); callback(false); };
-}
-
-// ==================== EVENTI ====================
-document.getElementById('btnPrimaNota').onclick = () => setScheda('primanota');
-document.getElementById('btnContanti').onclick = () => setScheda('contanti');
-document.getElementById('btnFornitori').onclick = () => setScheda('fornitori');
-document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
-document.getElementById('btnSalvaModificaPrima').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica in sospeso."); };
-document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
-document.getElementById('btnSalvaModificaContanti').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica in sospeso."); };
-document.getElementById('btnEliminaSelezionatiContanti').onclick = () => eliminaSelezionati('contanti');
-document.getElementById('btnSalvaModificaFornitori').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica in sospeso."); };
-document.getElementById('btnEliminaSelezionatiFornitori').onclick = () => eliminaSelezionati('fornitori');
-document.getElementById('btnCaricaMese').onclick = () => document.getElementById('fileCaricaMese').click();
-document.getElementById('fileCaricaMese').onchange = (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); };
-document.getElementById('btnRiprendiCorrente').onclick = riprendiMeseCorrente;
-document.getElementById('btnEsportaCSVAnno').onclick = () => esportaCSV(true);
-document.getElementById('btnEsportaCSVMese').onclick = () => esportaCSV(false);
-document.getElementById('saldoIniziale').onchange = (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaTabelle(); };
-document.getElementById('annoSelect').onchange = cambiaMese;
-document.getElementById('meseSelect').onchange = cambiaMese;
-document.getElementById('btnSalvaPassword').onclick = () => { let nuova = document.getElementById('nuovaPassword').value; let conferma = document.getElementById('confermaPassword').value; if (!nuova) { alert("Inserisci una nuova password"); return; } if (nuova !== conferma) { alert("Le password non coincidono"); return; } ADMIN_PASSWORD = nuova; localStorage.setItem('admin_password', nuova); alert("Password cambiata con successo!"); document.getElementById('nuovaPassword').value = ''; document.getElementById('confermaPassword').value = ''; };
-
-function setupSelectAll(btnId, containerId, className) {
-    const selectAll = document.getElementById(btnId);
-    if (selectAll) selectAll.onchange = (e) => { document.querySelectorAll(`#${containerId} .${className}`).forEach(c => c.checked = e.target.checked); aggiornaTabelle(); aggiornaPulsantiAzione(); };
-}
-setupSelectAll('selectAllPrimaNota', 'primaNotaBody', 'row-check-prima');
-setupSelectAll('selectAllContanti', 'contantiBody', 'row-check-contanti');
-setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
-
-// ==================== LOGIN ====================
-document.getElementById('btnContabilitaLogin').onclick = () => { mostraPasswordOverlay((success) => { if (success) { currentUser = 'admin'; isContabilitaSbloccata = true; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; document.getElementById('appVersion').innerText = 'v2.01 - Amministrazione'; mostraSezione('contabilita'); caricaStatoCorrente(); setScheda('primanota'); } }); };
-document.getElementById('btnAgenti').onclick = () => { currentUser = 'agenti'; isContabilitaSbloccata = false; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; document.getElementById('appVersion').innerText = 'v2.01 - Agenti'; mostraSezione('agenti'); };
-document.getElementById('navContabilita').onclick = () => { if (currentUser === 'admin') mostraSezione('contabilita'); else if (currentUser === 'agenti') { if (isContabilitaSbloccata) mostraSezione('contabilita'); else mostraPasswordOverlay((success) => { if (success) { isContabilitaSbloccata = true; mostraSezione('contabilita'); caricaStatoCorrente(); setScheda('primanota'); } }); } };
-document.getElementById('navAgenti').onclick = () => { mostraSezione('agenti'); if (currentUser === 'agenti') isContabilitaSbloccata = false; };
-document.getElementById('navChangePwd').onclick = () => { if (currentUser === 'admin') mostraSezione('changePwd'); else if (currentUser === 'agenti') mostraPasswordOverlay((success) => { if (success) { isContabilitaSbloccata = true; mostraSezione('changePwd'); } }); };
-document.getElementById('navLogout').onclick = () => { currentUser = null; isContabilitaSbloccata = false; document.getElementById('appContainer').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; };
-
-function mostraSezione(sezione) {
-    document.getElementById('contabilitaContainer').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
-    document.getElementById('agentiContainer').style.display = sezione === 'agenti' ? 'block' : 'none';
-    document.getElementById('changePwdContainer').style.display = sezione === 'changePwd' ? 'block' : 'none';
-    document.getElementById('sidebarContabilita').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
-    document.getElementById('sidebarAgenti').style.display = sezione === 'agenti' ? 'block' : 'none';
-    document.getElementById('navContabilita').classList.toggle('active', sezione === 'contabilita');
-    document.getElementById('navAgenti').classList.toggle('active', sezione === 'agenti');
-    document.getElementById('navChangePwd').classList.toggle('active', sezione === 'changePwd');
-    if (sezione === 'agenti') {
-        if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) { document.getElementById('scadenzeAgenti').innerHTML = '<div class="info-messaggio">Carica i file ORD e SCA per iniziare.</div>'; document.getElementById('dettaglioAgenti').innerHTML = ''; document.getElementById('ricercaArticoloContainer').innerHTML = ''; }
-        else { aggiornaClientiUniciAgenti(); if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value; mostraScadenzeAgenti(); mostraDettaglioAgenti(); }
-    } else if (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) caricaStatoCorrente();
-}
-
-document.getElementById('cercaCliente')?.addEventListener('input', () => aggiornaTendinaClienti());
-document.getElementById('btnCaricaFileAgenti').onclick = () => document.getElementById('fileInputMultiAgenti').click();
-document.getElementById('fileInputMultiAgenti').onchange = (e) => {
-    const files = Array.from(e.target.files); if (files.length === 0) return;
-    let loaded = 0; let ordText = null, scaText = null;
-    for (let file of files) {
-        const reader = new FileReader();
-        reader.onload = (ev) => { const content = ev.target.result; const nome = file.name.toLowerCase(); if (nome.includes('ord')) ordText = content; else if (nome.includes('sca')) scaText = content; loaded++; if (loaded === files.length) { if (ordText) datiAgenti.ord = parseORD(ordText); if (scaText) datiAgenti.sca = parseSCA(scaText); aggiornaClientiUniciAgenti(); document.getElementById('fileStatusAgenti').innerHTML = `✅ Caricati: ORD (${datiAgenti.ord.length} clienti), SCA (${datiAgenti.sca.length} clienti)`; if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value; mostraScadenzeAgenti(); mostraDettaglioAgenti(); } };
-        reader.readAsText(file, "UTF-8");
+    
+    function parseSCA(text) {
+        const lines = text.split(/\r?\n/);
+        const clienti = new Map();
+        let currentCliente = null;
+        const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/;
+        const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
+        for (let line of lines) {
+            line = line.trim();
+            if (line === "") continue;
+            let mCliente = line.match(reCliente);
+            if (mCliente) {
+                currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] };
+                clienti.set(currentCliente.codice, currentCliente);
+                continue;
+            }
+            if (currentCliente) {
+                let mScad = line.match(reScadenza);
+                if (mScad) {
+                    let scadenza = mScad[1];
+                    let numDoc = mScad[2];
+                    let dataDoc = mScad[3];
+                    let importoStr = mScad[4].replace(/\./g, '').replace(',', '.');
+                    let importo = parseFloat(importoStr);
+                    currentCliente.scadenze.push({ scadenza, numDoc, dataDoc, importo });
+                }
+            }
+        }
+        return Array.from(clienti.values());
     }
-    e.target.value = '';
-};
-document.getElementById('selectClienteAgenti').onchange = () => { mostraScadenzeAgenti(); mostraDettaglioAgenti(); };
-
-// ==================== LOGO ====================
-const btnLogo = document.getElementById('btnCaricaLogo');
-const imgLogo = document.getElementById('logoImmagine');
-let pressTimer = null;
-btnLogo.onclick = () => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { imgLogo.src = ev.target.result; imgLogo.style.display = 'block'; btnLogo.style.display = 'none'; }; reader.readAsDataURL(file); } }; input.click(); };
-imgLogo.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { imgLogo.src = ev.target.result; }; reader.readAsDataURL(file); } }; input.click(); pressTimer = null; }, 3000); });
-imgLogo.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-imgLogo.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+    
+    // --------------------------------------------------------------
+    // GESTIONE AGENTI
+    // --------------------------------------------------------------
+    let datiAgenti = { ord: [], sca: [] };
+    let clientiUniciAgenti = [];
+    let clientiFiltrati = [];
+    
+    function aggiornaClientiUniciAgenti() {
+        const mappa = new Map();
+        for (let c of datiAgenti.ord) {
+            let key = `${c.codice}|${c.ragione}`;
+            if (!mappa.has(key)) {
+                mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true });
+            } else {
+                let cli = mappa.get(key);
+                cli.hasOrdini = true;
+            }
+        }
+        for (let c of datiAgenti.sca) {
+            let key = `${c.codice}|${c.ragione}`;
+            if (!mappa.has(key)) {
+                mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false });
+            }
+            if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
+                let cli = mappa.get(key);
+                if (cli) cli.hasScadenze = true;
+            }
+        }
+        clientiUniciAgenti = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+        clientiFiltrati = [...clientiUniciAgenti];
+        aggiornaTendinaClienti();
+    }
+    
+    function aggiornaTendinaClienti() {
+        const select = document.getElementById('selectClienteAgenti');
+        const searchText = document.getElementById('cercaCliente').value.toLowerCase();
+        clientiFiltrati = clientiUniciAgenti.filter(cli => 
+            cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText)
+        );
+        select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
+        for (let cli of clientiFiltrati) {
+            const option = document.createElement('option');
+            option.value = `${cli.codice}|${cli.ragione}`;
+            option.textContent = `${cli.codice} - ${cli.ragione}`;
+            if (cli.hasScadenze) {
+                option.style.color = '#c0392b';
+                option.style.fontWeight = 'bold';
+            }
+            select.appendChild(option);
+        }
+        select.disabled = (clientiFiltrati.length === 0);
+    }
+    
+    function mostraScadenzeAgenti() {
+        const clienteKey = document.getElementById('selectClienteAgenti').value;
+        const container = document.getElementById('scadenzeAgenti');
+        if (!clienteKey) {
+            container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
+            return;
+        }
+        const [codice, ragione] = clienteKey.split('|');
+        const clienteSCA = datiAgenti.sca.find(c => c.codice === codice && c.ragione === ragione);
+        if (!clienteSCA || clienteSCA.scadenze.length === 0) {
+            container.innerHTML = `<div class="info-messaggio">Nessuna scadenza (SCA) per ${ragione}</div>`;
+            return;
+        }
+        let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
+                    <table class="tabella"><thead><tr>
+<th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th>
+</table></thead><tbody>`;
+        for (let s of clienteSCA.scadenze) {
+            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
+        }
+        html += `</tbody></table></div>`;
+        container.innerHTML = html;
+    }
+    
+    let articoliFiltratiGlobali = [];
+    
+    function mostraDettaglioAgenti() {
+        const clienteKey = document.getElementById('selectClienteAgenti').value;
+        const container = document.getElementById('dettaglioAgenti');
+        if (!clienteKey) {
+            container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
+            return;
+        }
+        const [codice, ragione] = clienteKey.split('|');
+        let clienteORD = datiAgenti.ord.find(c => c.codice === codice && c.ragione === ragione);
+        if (!clienteORD) clienteORD = datiAgenti.ord.find(c => c.codice === codice);
+        if (!clienteORD || clienteORD.articoli.length === 0) {
+            container.innerHTML = `<div class="info-messaggio">Nessun ordine (ORD) per il cliente ${codice}</div>`;
+            document.getElementById('ricercaArticoloContainer').innerHTML = '';
+            return;
+        }
+        document.getElementById('ricercaArticoloContainer').innerHTML = `
+            <div class="search-box">
+                <label>🔍 Cerca articolo</label>
+                <input type="text" id="cercaArticolo" placeholder="Digita codice o descrizione articolo...">
+            </div>
+        `;
+        articoliFiltratiGlobali = [...clienteORD.articoli];
+        const searchInput = document.getElementById('cercaArticolo');
+        if (searchInput) {
+            searchInput.removeEventListener('input', filtraArticoli);
+            searchInput.addEventListener('input', filtraArticoli);
+        }
+        filtraArticoli();
+    }
+    
+    function filtraArticoli() {
+        const searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || '';
+        const articoliFiltrati = articoliFiltratiGlobali.filter(art => 
+            art.codice.toLowerCase().includes(searchText) || 
+            art.descrizione.toLowerCase().includes(searchText)
+        );
+        const container = document.getElementById('dettaglioAgenti');
+        const clienteKey = document.getElementById('selectClienteAgenti').value;
+        if (!clienteKey) return;
+        const [codice, ragione] = clienteKey.split('|');
+        let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
+        for (let art of articoliFiltrati) {
+            html += `<div class="articolo-item">
+                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
+                        <div class="articolo-prezzo"><strong>€. ${formatNumber(art.prezzo)}     Sc.% ${formatNumber(art.sconto1)}</strong></div>
+                    </div>`;
+        }
+        if (articoliFiltrati.length === 0) html += `<div class="info-messaggio">Nessun articolo trovato.</div>`;
+        container.innerHTML = html;
+    }
+    
+    // --------------------------------------------------------------
+    // GESTIONE PASSWORD PER CONTABILITÀ
+    // --------------------------------------------------------------
+    function mostraPasswordOverlay(callback) {
+        const overlay = document.createElement('div');
+        overlay.className = 'password-overlay';
+        overlay.innerHTML = `
+            <div class="password-modal">
+                <h3>🔐 Accesso Contabilità</h3>
+                <p>Inserisci la password per accedere</p>
+                <input type="password" id="pwdInput" placeholder="Password" style="width:100%; margin:10px 0;">
+                <div class="btn-group" style="justify-content:center;">
+                    <button id="pwdOkBtn">OK</button>
+                    <button id="pwdCancelBtn">ANNULLA</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        document.getElementById('pwdOkBtn').onclick = () => {
+            const pwd = document.getElementById('pwdInput').value;
+            if (pwd === ADMIN_PASSWORD) {
+                overlay.remove();
+                callback(true);
+            } else {
+                alert("Password errata!");
+                overlay.remove();
+                callback(false);
+            }
+        };
+        document.getElementById('pwdCancelBtn').onclick = () => {
+            overlay.remove();
+            callback(false);
+        };
+    }
+    
+    // --------------------------------------------------------------
+    // EVENTI
+    // --------------------------------------------------------------
+    document.getElementById('btnPrimaNota').addEventListener('click', () => setScheda('primanota'));
+    document.getElementById('btnContanti').addEventListener('click', () => setScheda('contanti'));
+    document.getElementById('btnFornitori').addEventListener('click', () => setScheda('fornitori'));
+    
+    document.getElementById('btnMemorizza').addEventListener('click', memorizzaNuovo);
+    
+    document.getElementById('btnSalvaModificaPrima').addEventListener('click', () => {
+        if (Object.keys(pendingChanges).length > 0) {
+            applicaModifiche();
+        } else {
+            alert("Nessuna modifica in sospeso.");
+        }
+    });
+    document.getElementById('btnEliminaSelezionatiPrima').addEventListener('click', () => eliminaSelezionati('primanota'));
+    
+    document.getElementById('btnSalvaModificaContanti').addEventListener('click', () => {
+        if (Object.keys(pendingChanges).length > 0) {
+            applicaModifiche();
+        } else {
+            alert("Nessuna modifica in sospeso.");
+        }
+    });
+    document.getElementById('btnEliminaSelezionatiContanti').addEventListener('click', () => eliminaSelezionati('contanti'));
+    
+    document.getElementById('btnSalvaModificaFornitori').addEventListener('click', () => {
+        if (Object.keys(pendingChanges).length > 0) {
+            applicaModifiche();
+        } else {
+            alert("Nessuna modifica in sospeso.");
+        }
+    });
+    document.getElementById('btnEliminaSelezionatiFornitori').addEventListener('click', () => eliminaSelezionati('fornitori'));
+    
+    document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
+    document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
+    document.getElementById('btnRiprendiCorrente').addEventListener('click', riprendiMeseCorrente);
+    document.getElementById('btnEsportaCSVAnno').addEventListener('click', () => esportaCSV(true));
+    document.getElementById('btnEsportaCSVMese').addEventListener('click', () => esportaCSV(false));
+    
+    document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaTabelle(); });
+    document.getElementById('annoSelect').addEventListener('change', () => cambiaMese());
+    document.getElementById('meseSelect').addEventListener('change', () => cambiaMese());
+    
+    document.getElementById('btnSalvaPassword').addEventListener('click', () => {
+        let nuova = document.getElementById('nuovaPassword').value;
+        let conferma = document.getElementById('confermaPassword').value;
+        if (!nuova) { alert("Inserisci una nuova password"); return; }
+        if (nuova !== conferma) { alert("Le password non coincidono"); return; }
+        ADMIN_PASSWORD = nuova;
+        localStorage.setItem('admin_password', nuova);
+        alert("Password cambiata con successo!");
+        document.getElementById('nuovaPassword').value = '';
+        document.getElementById('confermaPassword').value = '';
+    });
+    
+    function setupSelectAll(btnId, containerId, className) {
+        const selectAll = document.getElementById(btnId);
+        if (selectAll) {
+            selectAll.addEventListener('change', (e) => {
+                const checks = document.querySelectorAll(`#${containerId} .${className}`);
+                checks.forEach(chk => chk.checked = e.target.checked);
+                aggiornaEditabilita();
+                aggiornaPulsantiAzione();
+            });
+        }
+    }
+    setupSelectAll('selectAllPrimaNota', 'primaNotaBody', 'row-check-prima');
+    setupSelectAll('selectAllContanti', 'contantiBody', 'row-check-contanti');
+    setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
+    
+    // --------------------------------------------------------------
+    // GESTIONE LOGO - Prima volta e cambio con pressione 3 secondi
+    // --------------------------------------------------------------
+    const logoRettangolo = document.getElementById('logoRettangolo');
+    const imgLogo = document.getElementById('logoImmagine');
+    const placeholderLogo = document.getElementById('logoPlaceholder');
+    const btnCaricaLogoPrimo = document.getElementById('btnCaricaLogoPrimo');
+    
+    // Funzione per caricare logo da file
+    function caricaLogoDaFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const logoUrl = ev.target.result;
+                    imgLogo.src = logoUrl;
+                    imgLogo.style.display = 'block';
+                    placeholderLogo.style.display = 'none';
+                    salvaLogo(logoUrl);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    }
+    
+    // Pulsante prima volta
+    btnCaricaLogoPrimo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        caricaLogoDaFile();
+    });
+    
+    // Tenere premuto 3 secondi sul logo per cambiarlo
+    logoRettangolo.addEventListener('mousedown', () => {
+        pressTimerLogo = setTimeout(() => {
+            if (imgLogo.style.display === 'block') {
+                caricaLogoDaFile();
+            }
+            pressTimerLogo = null;
+        }, 3000);
+    });
+    
+    logoRettangolo.addEventListener('mouseup', () => {
+        if (pressTimerLogo) {
+            clearTimeout(pressTimerLogo);
+            pressTimerLogo = null;
+        }
+    });
+    
+    logoRettangolo.addEventListener('mouseleave', () => {
+        if (pressTimerLogo) {
+            clearTimeout(pressTimerLogo);
+            pressTimerLogo = null;
+        }
+    });
+    
+    // Carica logo salvato all'avvio
+    caricaLogoSalvato();
+    
+    // --------------------------------------------------------------
+    // LOGIN E NAVIGAZIONE
+    // --------------------------------------------------------------
+    document.getElementById('btnContabilitaLogin').addEventListener('click', () => {
+        mostraPasswordOverlay((success) => {
+            if (success) {
+                currentUser = 'admin';
+                isContabilitaSbloccata = true;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('appVersion').innerText = 'v2.03 - Amministrazione';
+                mostraSezione('contabilita');
+                caricaStatoCorrente();
+                setScheda('primanota');
+            }
+        });
+    });
+    
+    document.getElementById('btnAgenti').addEventListener('click', () => {
+        currentUser = 'agenti';
+        isContabilitaSbloccata = false;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('appVersion').innerText = 'v2.03 - Agenti';
+        mostraSezione('agenti');
+    });
+    
+    document.getElementById('navContabilita').addEventListener('click', () => {
+        if (currentUser === 'admin') {
+            mostraSezione('contabilita');
+        } else if (currentUser === 'agenti') {
+            if (isContabilitaSbloccata) {
+                mostraSezione('contabilita');
+            } else {
+                mostraPasswordOverlay((success) => {
+                    if (success) {
+                        isContabilitaSbloccata = true;
+                        mostraSezione('contabilita');
+                        caricaStatoCorrente();
+                        setScheda('primanota');
+                    }
+                });
+            }
+        }
+    });
+    
+    document.getElementById('navAgenti').addEventListener('click', () => {
+        mostraSezione('agenti');
+        if (currentUser === 'agenti') {
+            isContabilitaSbloccata = false;
+        }
+    });
+    
+    document.getElementById('navChangePwd').addEventListener('click', () => {
+        if (currentUser === 'admin') {
+            mostraSezione('changePwd');
+        } else if (currentUser === 'agenti') {
+            mostraPasswordOverlay((success) => {
+                if (success) {
+                    isContabilitaSbloccata = true;
+                    mostraSezione('changePwd');
+                }
+            });
+        }
+    });
+    
+    document.getElementById('navLogout').addEventListener('click', () => {
+        currentUser = null;
+        isContabilitaSbloccata = false;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+    });
+    
+    function mostraSezione(sezione) {
+        document.getElementById('contabilitaContainer').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
+        document.getElementById('agentiContainer').style.display = sezione === 'agenti' ? 'block' : 'none';
+        document.getElementById('changePwdContainer').style.display = sezione === 'changePwd' ? 'block' : 'none';
+        document.getElementById('sidebarContabilita').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
+        document.getElementById('sidebarAgenti').style.display = sezione === 'agenti' ? 'block' : 'none';
+        document.getElementById('navContabilita').classList.toggle('active', sezione === 'contabilita');
+        document.getElementById('navAgenti').classList.toggle('active', sezione === 'agenti');
+        document.getElementById('navChangePwd').classList.toggle('active', sezione === 'changePwd');
+        if (sezione === 'agenti') {
+            if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) {
+                document.getElementById('scadenzeAgenti').innerHTML = '<div class="info-messaggio">Carica i file ORD e SCA per iniziare.</div>';
+                document.getElementById('dettaglioAgenti').innerHTML = '';
+                document.getElementById('ricercaArticoloContainer').innerHTML = '';
+            } else {
+                aggiornaClientiUniciAgenti();
+                if (document.getElementById('selectClienteAgenti').options.length > 1) {
+                    document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value;
+                }
+                mostraScadenzeAgenti();
+                mostraDettaglioAgenti();
+            }
+        } else if (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) {
+            caricaStatoCorrente();
+        }
+    }
+    
+    document.getElementById('cercaCliente')?.addEventListener('input', () => { aggiornaTendinaClienti(); });
+    
+    document.getElementById('btnCaricaFileAgenti').addEventListener('click', () => document.getElementById('fileInputMultiAgenti').click());
+    document.getElementById('fileInputMultiAgenti').addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        let loaded = 0;
+        let ordText = null, scaText = null;
+        for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const content = ev.target.result;
+                const nome = file.name.toLowerCase();
+                if (nome.includes('ord')) ordText = content;
+                else if (nome.includes('sca')) scaText = content;
+                loaded++;
+                if (loaded === files.length) {
+                    if (ordText) datiAgenti.ord = parseORD(ordText);
+                    if (scaText) datiAgenti.sca = parseSCA(scaText);
+                    aggiornaClientiUniciAgenti();
+                    document.getElementById('fileStatusAgenti').innerHTML = `✅ Caricati: ORD (${datiAgenti.ord.length} clienti), SCA (${datiAgenti.sca.length} clienti)`;
+                    if (document.getElementById('selectClienteAgenti').options.length > 1) {
+                        document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value;
+                    }
+                    mostraScadenzeAgenti();
+                    mostraDettaglioAgenti();
+                }
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+        e.target.value = '';
+    });
+    document.getElementById('selectClienteAgenti').addEventListener('change', () => {
+        mostraScadenzeAgenti();
+        mostraDettaglioAgenti();
+    });
 </script>
 </body>
 </html>
