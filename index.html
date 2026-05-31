@@ -138,33 +138,44 @@
             cursor: pointer;
             font-size: 0.85rem;
             margin: 5px 0;
+            width: 100%;
+            font-weight: bold;
         }
         button:hover {
-            background: #2c3e50;
+            opacity: 0.85;
         }
         .btn-danger {
             background: #e74c3c;
         }
-        .btn-danger:hover {
-            background: #c0392b;
-        }
         .btn-success {
             background: #27ae60;
         }
-        .btn-success:hover {
-            background: #1e8449;
-        }
         .btn-warning {
             background: #f39c12;
+            color: #2c3e50;
         }
-        .btn-warning:hover {
-            background: #e67e22;
+        .btn-warning strong {
+            color: black;
+        }
+        .btn-blue {
+            background: #2980b9;
+        }
+        .btn-yellow {
+            background: #f1c40f;
+            color: black;
+        }
+        .btn-yellow strong {
+            color: black;
         }
         .btn-group {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             margin: 10px 0;
+        }
+        .btn-group button {
+            width: auto;
+            flex: 1;
         }
         .tabella {
             width: 100%;
@@ -248,6 +259,10 @@
             outline: 1px solid #3498db;
             background: white;
         }
+        .editable-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
         .search-box {
             margin-bottom: 15px;
         }
@@ -267,7 +282,8 @@
         }
         .scheda-btn {
             background: #ecf0f1;
-            color: #2c3e50;
+            color: black;
+            font-weight: bold;
             border: 1px solid #bdc3c7;
         }
         .scheda-btn.active-scheda {
@@ -293,6 +309,10 @@
             flex-wrap: wrap;
             margin-top: 10px;
             margin-bottom: 10px;
+        }
+        .action-buttons button {
+            width: auto;
+            flex: 1;
         }
         .password-overlay {
             position: fixed;
@@ -332,6 +352,9 @@
             margin: 0;
             text-align: center;
             justify-content: center;
+        }
+        .btn-memorizza {
+            width: 100%;
         }
         @media (max-width: 768px) {
             .main-container {
@@ -417,16 +440,16 @@
             <div id="formArea">
                 <!-- Form dinamico in base alla scheda selezionata -->
             </div>
-            <div class="btn-group">
-                <button id="btnMemorizza" class="btn-success">💾 MEMORIZZA</button>
+            <div class="form-group">
+                <button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button>
             </div>
             <hr>
             <div class="archive-box">
                 <div class="btn-group">
-                    <button id="btnCaricaMese" class="btn">📂 CARICA MESE</button>
-                    <button id="btnRiprendiCorrente" class="btn-warning">📅 RIPRENDI MESE CORRENTE</button>
-                    <button id="btnEsportaCSVAnno" class="btn">📎 ESPORTA CSV PER ANNO</button>
-                    <button id="btnEsportaCSVMese" class="btn">📎 ESPORTA CSV PER MESE</button>
+                    <button id="btnCaricaMese" class="btn-blue">📂 CARICA MESE</button>
+                    <button id="btnRiprendiCorrente" class="btn-success">📅 RIPRENDI MESE CORRENTE</button>
+                    <button id="btnEsportaCSVAnno" class="btn-yellow"><strong>📎 ESPORTA CSV PER ANNO</strong></button>
+                    <button id="btnEsportaCSVMese" class="btn-yellow"><strong>📎 ESPORTA CSV PER MESE</strong></button>
                 </div>
             </div>
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
@@ -469,7 +492,6 @@
                         <tbody id="primaNotaBody"></tbody>
                     </table>
                     <div id="primaNotaActionButtons" class="action-buttons">
-                        <button id="btnModificaPrima" class="btn-warning">✏️ MODIFICA</button>
                         <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
                     </div>
@@ -483,12 +505,11 @@
                         <thead>
                             <tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th>
                             <th>#</th><th>Data</th><th>Descrizione</th><th>Incasso Contanti (€)</th>
-                        </tr>
+                        </table>
                         </thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiActionButtons" class="action-buttons">
-                        <button id="btnModificaContanti" class="btn-warning">✏️ MODIFICA</button>
                         <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
                     </div>
@@ -506,7 +527,6 @@
                         <tbody id="fornitoriBody"></tbody>
                     </table>
                     <div id="fornitoriActionButtons" class="action-buttons">
-                        <button id="btnModificaFornitori" class="btn-warning">✏️ MODIFICA</button>
                         <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
                     </div>
@@ -533,7 +553,7 @@
             </div>
         </div>
     </div>
-    <footer>Premere 3 secondi sul logo per cambiarlo. Clicca sulle celle per modificarle (usa SALVA per confermare).</footer>
+    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona un rigo per modificare le celle.</footer>
 </div>
 
 <script>
@@ -640,8 +660,58 @@
         `;
     }
     
-    // Applica tutte le modifiche in sospeso
+    // Verifica se ci sono righe selezionate
+    function hasSelectedRows() {
+        if (currentScheda === 'primanota') {
+            const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            return Array.from(checks).some(chk => chk.checked);
+        } else if (currentScheda === 'contanti') {
+            const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            return Array.from(checks).some(chk => chk.checked);
+        } else if (currentScheda === 'fornitori') {
+            const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            return Array.from(checks).some(chk => chk.checked);
+        }
+        return false;
+    }
+    
+    // Abilita/disabilita celle editabili in base alla selezione
+    function aggiornaEditabilita() {
+        const hasSelection = hasSelectedRows();
+        // Rende le celle editabili solo se c'è una riga selezionata
+        // Le celle sono già state create, ma possiamo gestire l'editabilità al momento del click
+        // Per semplicità, ricreiamo la tabella ogni volta che cambia la selezione
+        aggiornaTabelle();
+    }
+    
+    // Applica tutte le modifiche in sospeso con validazione
     function applicaModifiche() {
+        let hasError = false;
+        
+        // Verifica che non ci siano righe con Avere e Dare entrambi > 0
+        for (let key in pendingChanges) {
+            let parts = key.split('|');
+            let scheda = parts[0];
+            let rowIdx = parseInt(parts[1]);
+            let field = parts[2];
+            let newValue = pendingChanges[key];
+            
+            if (scheda === 'primanota' && primaNota[rowIdx]) {
+                // Simula la modifica per controllare la validazione
+                let oldAvere = primaNota[rowIdx].avere;
+                let oldDare = primaNota[rowIdx].dare;
+                let newAvere = field === 'avere' ? parseNumber(newValue) : oldAvere;
+                let newDare = field === 'dare' ? parseNumber(newValue) : oldDare;
+                if (newAvere > 0 && newDare > 0) {
+                    alert(`Errore: Avere e Dare non possono essere entrambi maggiori di zero (riga ${rowIdx+1})`);
+                    hasError = true;
+                    break;
+                }
+            }
+        }
+        
+        if (hasError) return;
+        
         for (let key in pendingChanges) {
             let parts = key.split('|');
             let scheda = parts[0];
@@ -665,27 +735,23 @@
         pendingChanges = {};
         aggiornaTabelle();
         salvaStatoCorrente();
+        alert("Modifiche salvate con successo.");
     }
     
-    // Verifica se ci sono righe selezionate e mostra/nasconde pulsanti azione
+    // Aggiorna visibilità pulsanti azione
     function aggiornaPulsantiAzione() {
+        const hasSelection = hasSelectedRows();
         if (currentScheda === 'primanota') {
-            const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-            const hasChecked = Array.from(checks).some(chk => chk.checked);
-            document.getElementById('primaNotaActionButtons').style.display = hasChecked ? 'flex' : 'none';
+            document.getElementById('primaNotaActionButtons').style.display = hasSelection ? 'flex' : 'none';
         } else if (currentScheda === 'contanti') {
-            const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
-            const hasChecked = Array.from(checks).some(chk => chk.checked);
-            document.getElementById('contantiActionButtons').style.display = hasChecked ? 'flex' : 'none';
+            document.getElementById('contantiActionButtons').style.display = hasSelection ? 'flex' : 'none';
         } else if (currentScheda === 'fornitori') {
-            const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-            const hasChecked = Array.from(checks).some(chk => chk.checked);
-            document.getElementById('fornitoriActionButtons').style.display = hasChecked ? 'flex' : 'none';
+            document.getElementById('fornitoriActionButtons').style.display = hasSelection ? 'flex' : 'none';
         }
     }
     
-    // Celle editabili per Prima Nota
-    function makeEditableCellPrimaNota(value, rowIdx, field) {
+    // Celle editabili per Prima Nota (solo se riga selezionata)
+    function makeEditableCellPrimaNota(value, rowIdx, field, isRowSelected) {
         if (field === 'verificato') {
             let chk = document.createElement('input');
             chk.type = 'checkbox';
@@ -702,9 +768,72 @@
             let span = document.createElement('span');
             span.textContent = displayValue || '';
             span.className = 'editable-cell';
+            if (!isRowSelected) {
+                span.classList.add('editable-disabled');
+                span.style.cursor = 'not-allowed';
+            } else {
+                span.style.cursor = 'pointer';
+                span.onclick = (function(r, f, currentValue) { return function() {
+                    let input = document.createElement('input');
+                    input.className = 'cell-input';
+                    if (f === 'data') {
+                        let dateVal = '';
+                        if (currentValue) {
+                            let parts = currentValue.split('/');
+                            if (parts.length === 3) {
+                                dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                        }
+                        input.type = 'date';
+                        input.value = dateVal;
+                    } else if (f === 'descrizione') {
+                        input.type = 'text';
+                        input.value = currentValue || '';
+                    } else {
+                        input.type = 'text';
+                        input.value = formatNumber(currentValue) || '';
+                    }
+                    span.style.display = 'none';
+                    span.parentNode.insertBefore(input, span);
+                    input.focus();
+                    input.onblur = function() {
+                        let newValue;
+                        if (f === 'data') {
+                            newValue = input.value ? formatDate(input.value) : '';
+                        } else if (f === 'descrizione') {
+                            newValue = input.value;
+                        } else {
+                            newValue = parseNumber(input.value);
+                        }
+                        let key = `primanota|${r}|${f}`;
+                        pendingChanges[key] = newValue;
+                        input.remove();
+                        span.style.display = 'inline';
+                        if (f === 'data' || f === 'descrizione') {
+                            span.textContent = newValue || '';
+                        } else {
+                            span.textContent = formatNumber(newValue) || '';
+                        }
+                    };
+                    input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+                }; })(rowIdx, field, primaNota[rowIdx][field]);
+            }
+            return span;
+        }
+    }
+    
+    // Celle editabili per Contanti
+    function makeEditableCellContanti(value, rowIdx, field, isRowSelected) {
+        let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
+        let span = document.createElement('span');
+        span.textContent = displayValue || '';
+        span.className = 'editable-cell';
+        if (!isRowSelected) {
+            span.classList.add('editable-disabled');
+            span.style.cursor = 'not-allowed';
+        } else {
             span.style.cursor = 'pointer';
             span.onclick = (function(r, f, currentValue) { return function() {
-                // Non deselezionare il checkbox! Mantieni lo stato.
                 let input = document.createElement('input');
                 input.className = 'cell-input';
                 if (f === 'data') {
@@ -736,12 +865,10 @@
                     } else {
                         newValue = parseNumber(input.value);
                     }
-                    // Salva la modifica in pendingChanges
-                    let key = `primanota|${r}|${f}`;
+                    let key = `contanti|${r}|${f}`;
                     pendingChanges[key] = newValue;
                     input.remove();
                     span.style.display = 'inline';
-                    // Aggiorna la visualizzazione con il nuovo valore (in pending)
                     if (f === 'data' || f === 'descrizione') {
                         span.textContent = newValue || '';
                     } else {
@@ -749,111 +876,64 @@
                     }
                 };
                 input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
-            }; })(rowIdx, field, primaNota[rowIdx][field]);
-            return span;
+            }; })(rowIdx, field, contanti[rowIdx][field]);
         }
-    }
-    
-    // Celle editabili per Contanti
-    function makeEditableCellContanti(value, rowIdx, field) {
-        let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
-        let span = document.createElement('span');
-        span.textContent = displayValue || '';
-        span.className = 'editable-cell';
-        span.style.cursor = 'pointer';
-        span.onclick = (function(r, f, currentValue) { return function() {
-            let input = document.createElement('input');
-            input.className = 'cell-input';
-            if (f === 'data') {
-                let dateVal = '';
-                if (currentValue) {
-                    let parts = currentValue.split('/');
-                    if (parts.length === 3) {
-                        dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                    }
-                }
-                input.type = 'date';
-                input.value = dateVal;
-            } else if (f === 'descrizione') {
-                input.type = 'text';
-                input.value = currentValue || '';
-            } else {
-                input.type = 'text';
-                input.value = formatNumber(currentValue) || '';
-            }
-            span.style.display = 'none';
-            span.parentNode.insertBefore(input, span);
-            input.focus();
-            input.onblur = function() {
-                let newValue;
-                if (f === 'data') {
-                    newValue = input.value ? formatDate(input.value) : '';
-                } else if (f === 'descrizione') {
-                    newValue = input.value;
-                } else {
-                    newValue = parseNumber(input.value);
-                }
-                let key = `contanti|${r}|${f}`;
-                pendingChanges[key] = newValue;
-                input.remove();
-                span.style.display = 'inline';
-                if (f === 'data' || f === 'descrizione') {
-                    span.textContent = newValue || '';
-                } else {
-                    span.textContent = formatNumber(newValue) || '';
-                }
-            };
-            input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
-        }; })(rowIdx, field, contanti[rowIdx][field]);
         return span;
     }
     
     // Celle editabili per Fornitori
-    function makeEditableCellFornitori(value, rowIdx, field) {
+    function makeEditableCellFornitori(value, rowIdx, field, isRowSelected) {
         let displayValue = value || '';
         let span = document.createElement('span');
         span.textContent = displayValue;
         span.className = 'editable-cell';
-        span.style.cursor = 'pointer';
-        span.onclick = (function(r, f, currentValue) { return function() {
-            let input = document.createElement('input');
-            input.className = 'cell-input';
-            if (f === 'data') {
-                let dateVal = '';
-                if (currentValue) {
-                    let parts = currentValue.split('/');
-                    if (parts.length === 3) {
-                        dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                    }
-                }
-                input.type = 'date';
-                input.value = dateVal;
-            } else {
-                input.type = 'text';
-                input.value = currentValue || '';
-            }
-            span.style.display = 'none';
-            span.parentNode.insertBefore(input, span);
-            input.focus();
-            input.onblur = function() {
-                let newValue;
+        if (!isRowSelected) {
+            span.classList.add('editable-disabled');
+            span.style.cursor = 'not-allowed';
+        } else {
+            span.style.cursor = 'pointer';
+            span.onclick = (function(r, f, currentValue) { return function() {
+                let input = document.createElement('input');
+                input.className = 'cell-input';
                 if (f === 'data') {
-                    newValue = input.value ? formatDate(input.value) : '';
+                    let dateVal = '';
+                    if (currentValue) {
+                        let parts = currentValue.split('/');
+                        if (parts.length === 3) {
+                            dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                        }
+                    }
+                    input.type = 'date';
+                    input.value = dateVal;
                 } else {
-                    newValue = input.value;
+                    input.type = 'text';
+                    input.value = currentValue || '';
                 }
-                let key = `fornitori|${r}|${f}`;
-                pendingChanges[key] = newValue;
-                input.remove();
-                span.style.display = 'inline';
-                span.textContent = newValue || '';
-            };
-            input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
-        }; })(rowIdx, field, fattureFornitori[rowIdx][field]);
+                span.style.display = 'none';
+                span.parentNode.insertBefore(input, span);
+                input.focus();
+                input.onblur = function() {
+                    let newValue;
+                    if (f === 'data') {
+                        newValue = input.value ? formatDate(input.value) : '';
+                    } else {
+                        newValue = input.value;
+                    }
+                    let key = `fornitori|${r}|${f}`;
+                    pendingChanges[key] = newValue;
+                    input.remove();
+                    span.style.display = 'inline';
+                    span.textContent = newValue || '';
+                };
+                input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+            }; })(rowIdx, field, fattureFornitori[rowIdx][field]);
+        }
         return span;
     }
     
     function aggiornaTabelle() {
+        const hasSelection = hasSelectedRows();
+        
         // PRIMA NOTA
         let tbody = document.getElementById('primaNotaBody');
         tbody.innerHTML = '';
@@ -863,14 +943,17 @@
             let chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-prima';
-            chk.onchange = function() { aggiornaPulsantiAzione(); };
+            chk.onchange = function() { 
+                aggiornaEditabilita();
+                aggiornaPulsantiAzione();
+            };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = idx+1;
-            row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data'));
-            row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione'));
-            row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere'));
-            row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare'));
-            row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato'));
+            row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', hasSelection));
+            row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', hasSelection));
+            row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', hasSelection));
+            row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', hasSelection));
+            row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', hasSelection));
         });
         
         // CONTANTI
@@ -882,12 +965,15 @@
             let chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-contanti';
-            chk.onchange = function() { aggiornaPulsantiAzione(); };
+            chk.onchange = function() { 
+                aggiornaEditabilita();
+                aggiornaPulsantiAzione();
+            };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = idx+1;
-            row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data'));
-            row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione'));
-            row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo'));
+            row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', hasSelection));
+            row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', hasSelection));
+            row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', hasSelection));
         });
         
         // FORNITORI
@@ -899,12 +985,15 @@
             let chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-fornitori';
-            chk.onchange = function() { aggiornaPulsantiAzione(); };
+            chk.onchange = function() { 
+                aggiornaEditabilita();
+                aggiornaPulsantiAzione();
+            };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
-            row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data'));
-            row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore'));
-            row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura'));
+            row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', hasSelection));
+            row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', hasSelection));
+            row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', hasSelection));
         });
         
         calcolaSaldo();
@@ -929,6 +1018,8 @@
         document.getElementById('btnFornitori').classList.toggle('active-scheda', scheda === 'fornitori');
         
         aggiornaForm();
+        pendingChanges = {};
+        aggiornaTabelle();
         aggiornaPulsantiAzione();
     }
     
@@ -1060,6 +1151,7 @@
             const selectAll = document.getElementById('selectAllFornitori');
             if (selectAll) selectAll.checked = false;
         }
+        pendingChanges = {};
         aggiornaTabelle();
     }
     
@@ -1068,6 +1160,7 @@
         currentYear = parseInt(document.getElementById('annoSelect').value);
         currentMonth = parseInt(document.getElementById('meseSelect').value);
         caricaStatoCorrente();
+        pendingChanges = {};
     }
     
     // Salva su file
@@ -1150,6 +1243,7 @@
                 alert("Nessun mese precedente trovato.");
             }
         }
+        pendingChanges = {};
     }
     
     // Esporta CSV
@@ -1465,22 +1559,10 @@
     
     document.getElementById('btnMemorizza').addEventListener('click', memorizzaNuovo);
     
-    // PRIMA NOTA - pulsanti azione
-    document.getElementById('btnModificaPrima').addEventListener('click', () => {
-        // La modifica avviene tramite le celle editabili, questo pulsante serve solo per applicare le modifiche?
-        // In realtà le modifiche sono già in pendingChanges, questo pulsante non serve più.
-        // Ma lo teniamo per compatibilità: applica le modifiche in sospeso
-        if (Object.keys(pendingChanges).length > 0) {
-            applicaModifiche();
-            alert("Modifiche salvate.");
-        } else {
-            alert("Seleziona una cella da modificare e modificala, poi premi SALVA.");
-        }
-    });
+    // PRIMA NOTA
     document.getElementById('btnSalvaModificaPrima').addEventListener('click', () => {
         if (Object.keys(pendingChanges).length > 0) {
             applicaModifiche();
-            alert("Modifiche salvate.");
         } else {
             alert("Nessuna modifica in sospeso.");
         }
@@ -1488,18 +1570,9 @@
     document.getElementById('btnEliminaSelezionatiPrima').addEventListener('click', () => eliminaSelezionati('primanota'));
     
     // CONTANTI
-    document.getElementById('btnModificaContanti').addEventListener('click', () => {
-        if (Object.keys(pendingChanges).length > 0) {
-            applicaModifiche();
-            alert("Modifiche salvate.");
-        } else {
-            alert("Seleziona una cella da modificare e modificala, poi premi SALVA.");
-        }
-    });
     document.getElementById('btnSalvaModificaContanti').addEventListener('click', () => {
         if (Object.keys(pendingChanges).length > 0) {
             applicaModifiche();
-            alert("Modifiche salvate.");
         } else {
             alert("Nessuna modifica in sospeso.");
         }
@@ -1507,18 +1580,9 @@
     document.getElementById('btnEliminaSelezionatiContanti').addEventListener('click', () => eliminaSelezionati('contanti'));
     
     // FORNITORI
-    document.getElementById('btnModificaFornitori').addEventListener('click', () => {
-        if (Object.keys(pendingChanges).length > 0) {
-            applicaModifiche();
-            alert("Modifiche salvate.");
-        } else {
-            alert("Seleziona una cella da modificare e modificala, poi premi SALVA.");
-        }
-    });
     document.getElementById('btnSalvaModificaFornitori').addEventListener('click', () => {
         if (Object.keys(pendingChanges).length > 0) {
             applicaModifiche();
-            alert("Modifiche salvate.");
         } else {
             alert("Nessuna modifica in sospeso.");
         }
@@ -1554,6 +1618,7 @@
             selectAll.addEventListener('change', (e) => {
                 const checks = document.querySelectorAll(`#${containerId} .${className}`);
                 checks.forEach(chk => chk.checked = e.target.checked);
+                aggiornaEditabilita();
                 aggiornaPulsantiAzione();
             });
         }
