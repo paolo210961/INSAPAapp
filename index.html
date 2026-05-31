@@ -16,77 +16,113 @@
         }
         .header {
             background: white;
-            padding: 12px 20px;
+            padding: 15px 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 20px;
+        }
+        /* LOGO A SINISTRA - Area rettangolare */
+        .logo-area-sx {
+            flex-shrink: 0;
+        }
+        .logo-rettangolo {
+            width: 160px;
+            height: 90px;
+            background: #f5f5f5;
+            border: 2px dashed #bdc3c7;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+        .logo-rettangolo:hover {
+            border-color: #3498db;
+            background: #ecf0f1;
+        }
+        .logo-rettangolo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .logo-placeholder {
+            text-align: center;
+            padding: 10px;
+        }
+        .logo-placeholder span {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .btn-carica-logo-primo {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .btn-carica-logo-primo:hover {
+            background: #2980b9;
+        }
+        /* BOX PULSANTI A DESTRA - Forma proporzionata */
+        .nav-box {
+            background: #2c3e50;
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, auto);
+            gap: 10px 20px;
+        }
+        .nav-btn {
+            background: transparent;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .nav-btn:hover {
+            background: #1a252f;
+            transform: translateY(-1px);
+        }
+        .nav-btn.active {
+            background: #3498db;
         }
         .title-area {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #2c3e50;
+            display: none;
         }
         .version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
             background: #3498db;
             color: white;
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.7rem;
             font-weight: bold;
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .logo-img {
-            max-height: 50px;
-            max-width: 150px;
-            cursor: pointer;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 4px;
-            background: white;
-        }
-        .btn-logo {
-            background: #ecf0f1;
-            border: 1px solid #bdc3c7;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
-        .nav-bar {
-            background: #2c3e50;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            padding: 8px 20px;
-        }
-        .nav-btn {
-            background: transparent;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-        .nav-btn:hover {
-            background: #1a252f;
-        }
-        .nav-btn.active {
-            background: #3498db;
+            z-index: 100;
         }
         .main-container {
             display: flex;
@@ -371,6 +407,23 @@
             .archive-box .btn-group {
                 grid-template-columns: 1fr;
             }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-box {
+                width: 100%;
+            }
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .nav-btn {
+                text-align: center;
+            }
+            .logo-rettangolo {
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
@@ -391,22 +444,29 @@
 <!-- App principale -->
 <div id="appContainer" style="display: none;">
     <div class="header">
-        <div class="title-area">
-            <h1>inSAPA</h1>
-            <span class="version" id="appVersion">v2.01 - Contabilità</span>
+        <!-- LOGO A SINISTRA - Area rettangolare -->
+        <div class="logo-area-sx">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <div id="logoPlaceholder" class="logo-placeholder">
+                    <span>🏢 LOGO AZIENDA</span>
+                    <button id="btnCaricaLogoPrimo" class="btn-carica-logo-primo">📁 CARICA LOGO</button>
+                </div>
+                <img id="logoImmagine" style="display: none; width: 100%; height: 100%; object-fit: contain;" alt="Logo">
+            </div>
         </div>
-        <div class="logo-area" id="logoArea">
-            <button id="btnCaricaLogo" class="btn-logo">📁 Carica logo</button>
-            <img id="logoImmagine" class="logo-img" style="display: none;" alt="Logo azienda">
+
+        <!-- BOX PULSANTI A DESTRA -->
+        <div class="nav-box">
+            <div class="nav-grid">
+                <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
+                <button id="navAgenti" class="nav-btn">👥 AGENTI</button>
+                <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                <button id="navLogout" class="nav-btn">🚪 ESCI</button>
+            </div>
         </div>
     </div>
 
-    <div class="nav-bar" id="navBar">
-        <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
-        <button id="navAgenti" class="nav-btn">👥 AGENTI</button>
-        <button id="navChangePwd" class="nav-btn">🔑 Cambia Password</button>
-        <button id="navLogout" class="nav-btn">🚪 Esci</button>
-    </div>
+    <div class="version" id="appVersion">v2.02 - Contabilità</div>
 
     <div class="main-container">
         <!-- Sidebar Contabilità -->
@@ -554,12 +614,12 @@
             </div>
         </div>
     </div>
-    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona il checkbox della riga per modificare le celle.</footer>
+    <footer>Logo: clicca su CARICA LOGO la prima volta. Per cambiarlo, tieni premuto 3 secondi sul logo.</footer>
 </div>
 
 <script>
     // --------------------------------------------------------------
-    // CONFIGURAZIONE INIZIALE - VERSIONE 2.01
+    // CONFIGURAZIONE INIZIALE - VERSIONE 2.02
     // --------------------------------------------------------------
     let ADMIN_PASSWORD = "insapa2026";
     let savedPwd = localStorage.getItem('admin_password');
@@ -580,7 +640,27 @@
     let nextFatturaId = 1;
     
     // Memorizza le modifiche in sospeso per cella
-    let pendingChanges = {}; // { "scheda|rowIdx|field": newValue }
+    let pendingChanges = {};
+    
+    // Gestione Logo
+    let pressTimerLogo = null;
+    
+    // Carica logo salvato
+    function caricaLogoSalvato() {
+        const logoSalvato = localStorage.getItem('logo_azienda');
+        if (logoSalvato) {
+            const img = document.getElementById('logoImmagine');
+            const placeholder = document.getElementById('logoPlaceholder');
+            img.src = logoSalvato;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+    }
+    
+    // Salva logo
+    function salvaLogo(url) {
+        localStorage.setItem('logo_azienda', url);
+    }
     
     // Formatta numero
     function formatNumber(n) {
@@ -707,7 +787,6 @@
     function applicaModifiche() {
         let hasError = false;
         
-        // Verifica che non ci siano righe con Avere e Dare entrambi > 0
         for (let key in pendingChanges) {
             let parts = key.split('|');
             let scheda = parts[0];
@@ -760,15 +839,18 @@
     function aggiornaPulsantiAzione() {
         const hasSelection = hasSelectedRows();
         if (currentScheda === 'primanota') {
-            document.getElementById('primaNotaActionButtons').style.display = hasSelection ? 'flex' : 'none';
+            const btns = document.getElementById('primaNotaActionButtons');
+            if (btns) btns.style.display = hasSelection ? 'flex' : 'none';
         } else if (currentScheda === 'contanti') {
-            document.getElementById('contantiActionButtons').style.display = hasSelection ? 'flex' : 'none';
+            const btns = document.getElementById('contantiActionButtons');
+            if (btns) btns.style.display = hasSelection ? 'flex' : 'none';
         } else if (currentScheda === 'fornitori') {
-            document.getElementById('fornitoriActionButtons').style.display = hasSelection ? 'flex' : 'none';
+            const btns = document.getElementById('fornitoriActionButtons');
+            if (btns) btns.style.display = hasSelection ? 'flex' : 'none';
         }
     }
     
-    // Celle editabili per Prima Nota (solo se riga selezionata)
+    // Celle editabili per Prima Nota
     function makeEditableCellPrimaNota(value, rowIdx, field, isRowSelected) {
         if (field === 'verificato') {
             let chk = document.createElement('input');
@@ -1035,7 +1117,6 @@
         
         aggiornaPulsantiAzione();
         
-        // Aggiorna anche il checkbox "Seleziona tutti" in base allo stato
         const selectAllId = currentScheda === 'primanota' ? 'selectAllPrimaNota' : (currentScheda === 'contanti' ? 'selectAllContanti' : 'selectAllFornitori');
         const selectAll = document.getElementById(selectAllId);
         if (selectAll) {
@@ -1204,7 +1285,6 @@
         aggiornaTabelle();
     }
     
-    // Cambia mese/anno
     function cambiaMese() {
         currentYear = parseInt(document.getElementById('annoSelect').value);
         currentMonth = parseInt(document.getElementById('meseSelect').value);
@@ -1212,7 +1292,6 @@
         pendingChanges = {};
     }
     
-    // Salva su file
     function salvaSuFile() {
         const data = {
             anno: currentYear,
@@ -1295,7 +1374,6 @@
         pendingChanges = {};
     }
     
-    // Esporta CSV
     function esportaCSV(perAnno) {
         let csvRows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]];
         let dataExport = [];
@@ -1500,13 +1578,13 @@
             return;
         }
         let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
-                    <table class="tabella"><thead>——
+                    <table class="tabella"><thead><tr>
 <th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th>
-</thead><tbody>`;
+</tr></thead><tbody>`;
         for (let s of clienteSCA.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
         }
-        html += `</tbody>}</div>`;
+        html += `</tbody></table></div>`;
         container.innerHTML = html;
     }
     
@@ -1564,7 +1642,7 @@
     }
     
     // --------------------------------------------------------------
-    // GESTIONE PASSWORD PER CONTABILITÀ (per agenti)
+    // GESTIONE PASSWORD PER CONTABILITÀ
     // --------------------------------------------------------------
     function mostraPasswordOverlay(callback) {
         const overlay = document.createElement('div');
@@ -1608,7 +1686,6 @@
     
     document.getElementById('btnMemorizza').addEventListener('click', memorizzaNuovo);
     
-    // PRIMA NOTA
     document.getElementById('btnSalvaModificaPrima').addEventListener('click', () => {
         if (Object.keys(pendingChanges).length > 0) {
             applicaModifiche();
@@ -1618,7 +1695,6 @@
     });
     document.getElementById('btnEliminaSelezionatiPrima').addEventListener('click', () => eliminaSelezionati('primanota'));
     
-    // CONTANTI
     document.getElementById('btnSalvaModificaContanti').addEventListener('click', () => {
         if (Object.keys(pendingChanges).length > 0) {
             applicaModifiche();
@@ -1628,7 +1704,6 @@
     });
     document.getElementById('btnEliminaSelezionatiContanti').addEventListener('click', () => eliminaSelezionati('contanti'));
     
-    // FORNITORI
     document.getElementById('btnSalvaModificaFornitori').addEventListener('click', () => {
         if (Object.keys(pendingChanges).length > 0) {
             applicaModifiche();
@@ -1660,7 +1735,6 @@
         document.getElementById('confermaPassword').value = '';
     });
     
-    // Seleziona tutti checkbox
     function setupSelectAll(btnId, containerId, className) {
         const selectAll = document.getElementById(btnId);
         if (selectAll) {
@@ -1677,6 +1751,69 @@
     setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
     
     // --------------------------------------------------------------
+    // GESTIONE LOGO - Prima volta e cambio con pressione 3 secondi
+    // --------------------------------------------------------------
+    const logoRettangolo = document.getElementById('logoRettangolo');
+    const imgLogo = document.getElementById('logoImmagine');
+    const placeholderLogo = document.getElementById('logoPlaceholder');
+    const btnCaricaLogoPrimo = document.getElementById('btnCaricaLogoPrimo');
+    
+    // Funzione per caricare logo da file
+    function caricaLogoDaFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const logoUrl = ev.target.result;
+                    imgLogo.src = logoUrl;
+                    imgLogo.style.display = 'block';
+                    placeholderLogo.style.display = 'none';
+                    salvaLogo(logoUrl);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    }
+    
+    // Pulsante prima volta
+    btnCaricaLogoPrimo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        caricaLogoDaFile();
+    });
+    
+    // Tenere premuto 3 secondi sul logo per cambiarlo
+    logoRettangolo.addEventListener('mousedown', () => {
+        pressTimerLogo = setTimeout(() => {
+            if (imgLogo.style.display === 'block') {
+                caricaLogoDaFile();
+            }
+            pressTimerLogo = null;
+        }, 3000);
+    });
+    
+    logoRettangolo.addEventListener('mouseup', () => {
+        if (pressTimerLogo) {
+            clearTimeout(pressTimerLogo);
+            pressTimerLogo = null;
+        }
+    });
+    
+    logoRettangolo.addEventListener('mouseleave', () => {
+        if (pressTimerLogo) {
+            clearTimeout(pressTimerLogo);
+            pressTimerLogo = null;
+        }
+    });
+    
+    // Carica logo salvato all'avvio
+    caricaLogoSalvato();
+    
+    // --------------------------------------------------------------
     // LOGIN E NAVIGAZIONE
     // --------------------------------------------------------------
     document.getElementById('btnContabilitaLogin').addEventListener('click', () => {
@@ -1686,7 +1823,7 @@
                 isContabilitaSbloccata = true;
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('appVersion').innerText = 'v2.01 - Amministrazione';
+                document.getElementById('appVersion').innerText = 'v2.02 - Amministrazione';
                 mostraSezione('contabilita');
                 caricaStatoCorrente();
                 setScheda('primanota');
@@ -1699,7 +1836,7 @@
         isContabilitaSbloccata = false;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'block';
-        document.getElementById('appVersion').innerText = 'v2.01 - Agenti';
+        document.getElementById('appVersion').innerText = 'v2.02 - Agenti';
         mostraSezione('agenti');
     });
     
@@ -1778,7 +1915,6 @@
     
     document.getElementById('cercaCliente')?.addEventListener('input', () => { aggiornaTendinaClienti(); });
     
-    // Caricamento file agenti
     document.getElementById('btnCaricaFileAgenti').addEventListener('click', () => document.getElementById('fileInputMultiAgenti').click());
     document.getElementById('fileInputMultiAgenti').addEventListener('change', (e) => {
         const files = Array.from(e.target.files);
@@ -1813,48 +1949,6 @@
         mostraScadenzeAgenti();
         mostraDettaglioAgenti();
     });
-    
-    // Logo
-    const btnLogo = document.getElementById('btnCaricaLogo');
-    const imgLogo = document.getElementById('logoImmagine');
-    let pressTimer = null;
-    btnLogo.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    imgLogo.src = ev.target.result;
-                    imgLogo.style.display = 'block';
-                    btnLogo.style.display = 'none';
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-        input.click();
-    });
-    imgLogo.addEventListener('mousedown', () => {
-        pressTimer = setTimeout(() => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => { imgLogo.src = ev.target.result; };
-                    reader.readAsDataURL(file);
-                }
-            };
-            input.click();
-            pressTimer = null;
-        }, 3000);
-    });
-    imgLogo.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-    imgLogo.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
 </script>
 </body>
 </html>
