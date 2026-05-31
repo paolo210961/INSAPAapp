@@ -262,6 +262,10 @@
         .editable-disabled {
             cursor: not-allowed;
             opacity: 0.6;
+            background-color: #f5f5f5;
+        }
+        .editable-disabled:hover {
+            background-color: #f5f5f5;
         }
         .search-box {
             margin-bottom: 15px;
@@ -389,7 +393,7 @@
     <div class="header">
         <div class="title-area">
             <h1>inSAPA</h1>
-            <span class="version" id="appVersion">v1.0 - Contabilità</span>
+            <span class="version" id="appVersion">v2.01 - Contabilità</span>
         </div>
         <div class="logo-area" id="logoArea">
             <button id="btnCaricaLogo" class="btn-logo">📁 Carica logo</button>
@@ -550,12 +554,12 @@
             </div>
         </div>
     </div>
-    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona una riga per modificare le celle.</footer>
+    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona il checkbox della riga per modificare le celle.</footer>
 </div>
 
 <script>
     // --------------------------------------------------------------
-    // CONFIGURAZIONE INIZIALE
+    // CONFIGURAZIONE INIZIALE - VERSIONE 2.01
     // --------------------------------------------------------------
     let ADMIN_PASSWORD = "insapa2026";
     let savedPwd = localStorage.getItem('admin_password');
@@ -670,6 +674,28 @@
             return Array.from(checks).some(chk => chk.checked);
         }
         return false;
+    }
+    
+    // Ottiene l'array delle righe selezionate con i loro indici
+    function getSelectedRows() {
+        let selected = [];
+        if (currentScheda === 'primanota') {
+            const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            checks.forEach((chk, idx) => {
+                if (chk.checked) selected.push(idx);
+            });
+        } else if (currentScheda === 'contanti') {
+            const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            checks.forEach((chk, idx) => {
+                if (chk.checked) selected.push(idx);
+            });
+        } else if (currentScheda === 'fornitori') {
+            const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            checks.forEach((chk, idx) => {
+                if (chk.checked) selected.push(idx);
+            });
+        }
+        return selected;
     }
     
     // Abilita/disabilita celle editabili in base alla selezione
@@ -924,7 +950,7 @@
     }
     
     function aggiornaTabelle() {
-        const hasSelection = hasSelectedRows();
+        const selectedRows = getSelectedRows();
         
         // PRIMA NOTA
         let tbody = document.getElementById('primaNotaBody');
@@ -936,17 +962,19 @@
                 let chk = document.createElement('input');
                 chk.type = 'checkbox';
                 chk.className = 'row-check-prima';
+                chk.checked = selectedRows.includes(idx);
                 chk.onchange = function() { 
                     aggiornaEditabilita();
                     aggiornaPulsantiAzione();
                 };
                 checkCell.appendChild(chk);
                 row.insertCell(1).innerText = idx+1;
-                row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', hasSelection && chk.checked));
-                row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', hasSelection && chk.checked));
-                row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', hasSelection && chk.checked));
-                row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', hasSelection && chk.checked));
-                row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', hasSelection && chk.checked));
+                let isSelected = chk.checked;
+                row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', isSelected));
+                row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', isSelected));
+                row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', isSelected));
+                row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', isSelected));
+                row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', isSelected));
             });
         }
         
@@ -960,15 +988,17 @@
                 let chk = document.createElement('input');
                 chk.type = 'checkbox';
                 chk.className = 'row-check-contanti';
+                chk.checked = selectedRows.includes(idx);
                 chk.onchange = function() { 
                     aggiornaEditabilita();
                     aggiornaPulsantiAzione();
                 };
                 checkCell.appendChild(chk);
                 row.insertCell(1).innerText = idx+1;
-                row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', hasSelection && chk.checked));
-                row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', hasSelection && chk.checked));
-                row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', hasSelection && chk.checked));
+                let isSelected = chk.checked;
+                row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', isSelected));
+                row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', isSelected));
+                row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', isSelected));
             });
         }
         
@@ -982,15 +1012,17 @@
                 let chk = document.createElement('input');
                 chk.type = 'checkbox';
                 chk.className = 'row-check-fornitori';
+                chk.checked = selectedRows.includes(idx);
                 chk.onchange = function() { 
                     aggiornaEditabilita();
                     aggiornaPulsantiAzione();
                 };
                 checkCell.appendChild(chk);
                 row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
-                row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', hasSelection && chk.checked));
-                row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', hasSelection && chk.checked));
-                row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', hasSelection && chk.checked));
+                let isSelected = chk.checked;
+                row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', isSelected));
+                row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', isSelected));
+                row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', isSelected));
             });
         }
         
@@ -1002,6 +1034,15 @@
         document.getElementById('saldoIniziale').value = saldoIniziale;
         
         aggiornaPulsantiAzione();
+        
+        // Aggiorna anche il checkbox "Seleziona tutti" in base allo stato
+        const selectAllId = currentScheda === 'primanota' ? 'selectAllPrimaNota' : (currentScheda === 'contanti' ? 'selectAllContanti' : 'selectAllFornitori');
+        const selectAll = document.getElementById(selectAllId);
+        if (selectAll) {
+            const allChecks = document.querySelectorAll(`#${currentScheda === 'primanota' ? 'primaNotaBody' : (currentScheda === 'contanti' ? 'contantiBody' : 'fornitoriBody')} .${currentScheda === 'primanota' ? 'row-check-prima' : (currentScheda === 'contanti' ? 'row-check-contanti' : 'row-check-fornitori')}`);
+            const allChecked = allChecks.length > 0 && Array.from(allChecks).every(chk => chk.checked);
+            selectAll.checked = allChecked;
+        }
     }
     
     // Cambia scheda
@@ -1645,7 +1686,7 @@
                 isContabilitaSbloccata = true;
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('appVersion').innerText = 'v1.0 - Amministrazione';
+                document.getElementById('appVersion').innerText = 'v2.01 - Amministrazione';
                 mostraSezione('contabilita');
                 caricaStatoCorrente();
                 setScheda('primanota');
@@ -1658,7 +1699,7 @@
         isContabilitaSbloccata = false;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'block';
-        document.getElementById('appVersion').innerText = 'v1.0 - Agenti';
+        document.getElementById('appVersion').innerText = 'v2.01 - Agenti';
         mostraSezione('agenti');
     });
     
