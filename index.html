@@ -487,7 +487,6 @@
                         <thead>
                             <tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th>
                             <th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)<br>entrate</th><th>Dare (€)<br>uscite</th><th>✅</th>
-                        </tr>
                         </thead>
                         <tbody id="primaNotaBody"></tbody>
                     </table>
@@ -505,7 +504,6 @@
                         <thead>
                             <tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th>
                             <th>#</th><th>Data</th><th>Descrizione</th><th>Incasso Contanti (€)</th>
-                        </table>
                         </thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
@@ -522,7 +520,6 @@
                         <thead>
                             <tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th>
                             <th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th>
-                        </tr>
                         </thead>
                         <tbody id="fornitoriBody"></tbody>
                     </table>
@@ -553,7 +550,7 @@
             </div>
         </div>
     </div>
-    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona un rigo per modificare le celle.</footer>
+    <footer>Premere 3 secondi sul logo per cambiarlo. Seleziona una riga per modificare le celle.</footer>
 </div>
 
 <script>
@@ -677,10 +674,6 @@
     
     // Abilita/disabilita celle editabili in base alla selezione
     function aggiornaEditabilita() {
-        const hasSelection = hasSelectedRows();
-        // Rende le celle editabili solo se c'è una riga selezionata
-        // Le celle sono già state create, ma possiamo gestire l'editabilità al momento del click
-        // Per semplicità, ricreiamo la tabella ogni volta che cambia la selezione
         aggiornaTabelle();
     }
     
@@ -697,7 +690,6 @@
             let newValue = pendingChanges[key];
             
             if (scheda === 'primanota' && primaNota[rowIdx]) {
-                // Simula la modifica per controllare la validazione
                 let oldAvere = primaNota[rowIdx].avere;
                 let oldDare = primaNota[rowIdx].dare;
                 let newAvere = field === 'avere' ? parseNumber(newValue) : oldAvere;
@@ -936,65 +928,71 @@
         
         // PRIMA NOTA
         let tbody = document.getElementById('primaNotaBody');
-        tbody.innerHTML = '';
-        primaNota.forEach((riga, idx) => {
-            let row = tbody.insertRow();
-            let checkCell = row.insertCell(0);
-            let chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-prima';
-            chk.onchange = function() { 
-                aggiornaEditabilita();
-                aggiornaPulsantiAzione();
-            };
-            checkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx+1;
-            row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', hasSelection));
-            row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', hasSelection));
-            row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', hasSelection));
-            row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', hasSelection));
-            row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', hasSelection));
-        });
+        if (tbody) {
+            tbody.innerHTML = '';
+            primaNota.forEach((riga, idx) => {
+                let row = tbody.insertRow();
+                let checkCell = row.insertCell(0);
+                let chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.className = 'row-check-prima';
+                chk.onchange = function() { 
+                    aggiornaEditabilita();
+                    aggiornaPulsantiAzione();
+                };
+                checkCell.appendChild(chk);
+                row.insertCell(1).innerText = idx+1;
+                row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', hasSelection && chk.checked));
+                row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', hasSelection && chk.checked));
+                row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', hasSelection && chk.checked));
+                row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', hasSelection && chk.checked));
+                row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', hasSelection && chk.checked));
+            });
+        }
         
         // CONTANTI
         let contantiBody = document.getElementById('contantiBody');
-        contantiBody.innerHTML = '';
-        contanti.forEach((riga, idx) => {
-            let row = contantiBody.insertRow();
-            let checkCell = row.insertCell(0);
-            let chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-contanti';
-            chk.onchange = function() { 
-                aggiornaEditabilita();
-                aggiornaPulsantiAzione();
-            };
-            checkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx+1;
-            row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', hasSelection));
-            row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', hasSelection));
-            row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', hasSelection));
-        });
+        if (contantiBody) {
+            contantiBody.innerHTML = '';
+            contanti.forEach((riga, idx) => {
+                let row = contantiBody.insertRow();
+                let checkCell = row.insertCell(0);
+                let chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.className = 'row-check-contanti';
+                chk.onchange = function() { 
+                    aggiornaEditabilita();
+                    aggiornaPulsantiAzione();
+                };
+                checkCell.appendChild(chk);
+                row.insertCell(1).innerText = idx+1;
+                row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', hasSelection && chk.checked));
+                row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', hasSelection && chk.checked));
+                row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', hasSelection && chk.checked));
+            });
+        }
         
         // FORNITORI
         let fornitoriBody = document.getElementById('fornitoriBody');
-        fornitoriBody.innerHTML = '';
-        fattureFornitori.forEach((fatt, idx) => {
-            let row = fornitoriBody.insertRow();
-            let checkCell = row.insertCell(0);
-            let chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-fornitori';
-            chk.onchange = function() { 
-                aggiornaEditabilita();
-                aggiornaPulsantiAzione();
-            };
-            checkCell.appendChild(chk);
-            row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
-            row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', hasSelection));
-            row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', hasSelection));
-            row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', hasSelection));
-        });
+        if (fornitoriBody) {
+            fornitoriBody.innerHTML = '';
+            fattureFornitori.forEach((fatt, idx) => {
+                let row = fornitoriBody.insertRow();
+                let checkCell = row.insertCell(0);
+                let chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.className = 'row-check-fornitori';
+                chk.onchange = function() { 
+                    aggiornaEditabilita();
+                    aggiornaPulsantiAzione();
+                };
+                checkCell.appendChild(chk);
+                row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
+                row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', hasSelection && chk.checked));
+                row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', hasSelection && chk.checked));
+                row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', hasSelection && chk.checked));
+            });
+        }
         
         calcolaSaldo();
         salvaStatoCorrente();
@@ -1027,20 +1025,20 @@
         const formArea = document.getElementById('formArea');
         if (currentScheda === 'primanota') {
             formArea.innerHTML = `
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formData" value=""></div>
-                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizione" placeholder="Descrizione"></div>
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota" value=""></div>
+                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>
                 <div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div>
                 <div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>
             `;
         } else if (currentScheda === 'contanti') {
             formArea.innerHTML = `
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formData" value=""></div>
-                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizione" placeholder="Descrizione"></div>
-                <div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImporto" step="0.01" value="0"></div>
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti" value=""></div>
+                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>
+                <div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>
             `;
         } else if (currentScheda === 'fornitori') {
             formArea.innerHTML = `
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formData" value=""></div>
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori" value=""></div>
                 <div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div>
                 <div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>
             `;
@@ -1052,27 +1050,37 @@
         let oggi = new Date();
         let dataDefault = oggi.toISOString().slice(0,10);
         if (currentScheda === 'primanota') {
-            document.getElementById('formData').value = dataDefault;
-            if (document.getElementById('formDescrizione')) document.getElementById('formDescrizione').value = '';
-            if (document.getElementById('formAvere')) document.getElementById('formAvere').value = 0;
-            if (document.getElementById('formDare')) document.getElementById('formDare').value = 0;
+            const dataField = document.getElementById('formDataPrimaNota');
+            if (dataField) dataField.value = dataDefault;
+            const descField = document.getElementById('formDescrizionePrimaNota');
+            if (descField) descField.value = '';
+            const avereField = document.getElementById('formAvere');
+            if (avereField) avereField.value = 0;
+            const dareField = document.getElementById('formDare');
+            if (dareField) dareField.value = 0;
         } else if (currentScheda === 'contanti') {
-            document.getElementById('formData').value = dataDefault;
-            if (document.getElementById('formDescrizione')) document.getElementById('formDescrizione').value = '';
-            if (document.getElementById('formImporto')) document.getElementById('formImporto').value = 0;
+            const dataField = document.getElementById('formDataContanti');
+            if (dataField) dataField.value = dataDefault;
+            const descField = document.getElementById('formDescrizioneContanti');
+            if (descField) descField.value = '';
+            const importoField = document.getElementById('formImportoContanti');
+            if (importoField) importoField.value = 0;
         } else if (currentScheda === 'fornitori') {
-            document.getElementById('formData').value = dataDefault;
-            if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
-            if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
+            const dataField = document.getElementById('formDataFornitori');
+            if (dataField) dataField.value = dataDefault;
+            const fornitoreField = document.getElementById('formFornitore');
+            if (fornitoreField) fornitoreField.value = '';
+            const numFatturaField = document.getElementById('formNumeroFattura');
+            if (numFatturaField) numFatturaField.value = '';
         }
     }
     
     function memorizzaNuovo() {
         if (currentScheda === 'primanota') {
-            let data = document.getElementById('formData').value;
-            let descrizione = document.getElementById('formDescrizione').value;
-            let avere = parseFloat(document.getElementById('formAvere').value) || 0;
-            let dare = parseFloat(document.getElementById('formDare').value) || 0;
+            let data = document.getElementById('formDataPrimaNota')?.value;
+            let descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
+            let avere = parseFloat(document.getElementById('formAvere')?.value) || 0;
+            let dare = parseFloat(document.getElementById('formDare')?.value) || 0;
             if (!descrizione) { alert("Inserisci una descrizione"); return; }
             if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return; }
             if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo"); return; }
@@ -1084,9 +1092,9 @@
                 verificato: false
             });
         } else if (currentScheda === 'contanti') {
-            let data = document.getElementById('formData').value;
-            let descrizione = document.getElementById('formDescrizione').value;
-            let importo = parseFloat(document.getElementById('formImporto').value) || 0;
+            let data = document.getElementById('formDataContanti')?.value;
+            let descrizione = document.getElementById('formDescrizioneContanti')?.value;
+            let importo = parseFloat(document.getElementById('formImportoContanti')?.value) || 0;
             if (!descrizione) { alert("Inserisci una descrizione"); return; }
             if (importo <= 0) { alert("Inserisci un importo valido"); return; }
             contanti.push({
@@ -1095,9 +1103,9 @@
                 importo: importo
             });
         } else if (currentScheda === 'fornitori') {
-            let data = document.getElementById('formData').value;
-            let fornitore = document.getElementById('formFornitore').value.trim();
-            let numeroFattura = document.getElementById('formNumeroFattura').value.trim();
+            let data = document.getElementById('formDataFornitori')?.value;
+            let fornitore = document.getElementById('formFornitore')?.value.trim();
+            let numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
             if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
             fattureFornitori.push({
                 data: formatDate(data),
