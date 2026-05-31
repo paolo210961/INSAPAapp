@@ -292,6 +292,26 @@
             margin-top: 10px;
             margin-bottom: 10px;
         }
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .password-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -311,14 +331,8 @@
         <h2>🏢 inSAPA s.a.s.</h2>
         <p>Seleziona il tuo profilo</p>
         <div class="profile-buttons">
-            <button id="btnAdmin" class="profile-btn">🔐 AMMINISTRAZIONE</button>
+            <button id="btnContabilitaLogin" class="profile-btn">📊 CONTABILITÀ</button>
             <button id="btnAgenti" class="profile-btn">👥 AGENTI</button>
-        </div>
-        <div id="adminPasswordDiv" style="display: none; margin-top: 20px;">
-            <label>Password Amministratore</label>
-            <input type="password" id="adminPassword" placeholder="Inserisci password">
-            <button id="btnVerifyAdmin" style="margin-top: 10px;">Accedi</button>
-            <p style="font-size: 0.7rem; margin-top: 10px;">Password di default: <strong>insapa2026</strong></p>
         </div>
     </div>
 </div>
@@ -337,8 +351,8 @@
     </div>
 
     <div class="nav-bar" id="navBar">
-        <button id="navContabilita" class="nav-btn active">📊 Contabilità</button>
-        <button id="navAgenti" class="nav-btn">👥 Agenti</button>
+        <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
+        <button id="navAgenti" class="nav-btn">👥 AGENTI</button>
         <button id="navChangePwd" class="nav-btn">🔑 Cambia Password</button>
         <button id="navLogout" class="nav-btn">🚪 Esci</button>
     </div>
@@ -381,11 +395,6 @@
             </div>
             <div class="btn-group">
                 <button id="btnMemorizza" class="btn-success">💾 MEMORIZZA</button>
-            </div>
-            <div id="actionButtons" class="action-buttons">
-                <button id="btnModifica" class="btn-warning">✏️ MODIFICA</button>
-                <button id="btnSalvaModifica" class="btn-success">✅ SALVA</button>
-                <button id="btnEliminaSelezionati" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
             </div>
             <hr>
             <div class="btn-group">
@@ -435,6 +444,11 @@
                         </thead>
                         <tbody id="primaNotaBody"></tbody>
                     </table>
+                    <div id="primaNotaActionButtons" class="action-buttons">
+                        <button id="btnModificaPrima" class="btn-warning">✏️ MODIFICA</button>
+                        <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
+                    </div>
                 </div>
                 
                 <!-- CONTANTI -->
@@ -449,6 +463,11 @@
                         </thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
+                    <div id="contantiActionButtons" class="action-buttons">
+                        <button id="btnModificaContanti" class="btn-warning">✏️ MODIFICA</button>
+                        <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
+                    </div>
                 </div>
                 
                 <!-- FORNITORI -->
@@ -462,6 +481,11 @@
                         </thead>
                         <tbody id="fornitoriBody"></tbody>
                     </table>
+                    <div id="fornitoriActionButtons" class="action-buttons">
+                        <button id="btnModificaFornitori" class="btn-warning">✏️ MODIFICA</button>
+                        <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA SELEZIONATI</button>
+                    </div>
                 </div>
             </div>
             <div id="agentiContainer" style="display: none;">
@@ -496,7 +520,8 @@
     let savedPwd = localStorage.getItem('admin_password');
     if (savedPwd) ADMIN_PASSWORD = savedPwd;
     
-    let currentUser = null;
+    let currentUser = null;        // 'admin', 'agenti'
+    let isContabilitaSbloccata = false;  // per agenti che hanno inserito password
     let currentYear = 2026;
     let currentMonth = 4;
     let backupPreCaricamento = null;
@@ -591,23 +616,18 @@
     
     // Verifica se ci sono righe selezionate e mostra/nasconde pulsanti azione
     function aggiornaPulsantiAzione() {
-        let hasChecked = false;
         if (currentScheda === 'primanota') {
             const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-            hasChecked = Array.from(checks).some(chk => chk.checked);
+            const hasChecked = Array.from(checks).some(chk => chk.checked);
+            document.getElementById('primaNotaActionButtons').style.display = hasChecked ? 'flex' : 'none';
         } else if (currentScheda === 'contanti') {
             const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
-            hasChecked = Array.from(checks).some(chk => chk.checked);
+            const hasChecked = Array.from(checks).some(chk => chk.checked);
+            document.getElementById('contantiActionButtons').style.display = hasChecked ? 'flex' : 'none';
         } else if (currentScheda === 'fornitori') {
             const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-            hasChecked = Array.from(checks).some(chk => chk.checked);
-        }
-        const actionDiv = document.getElementById('actionButtons');
-        if (actionDiv) {
-            actionDiv.style.display = hasChecked ? 'flex' : 'none';
-        }
-        if (!hasChecked) {
-            rigaSelezionata = null;
+            const hasChecked = Array.from(checks).some(chk => chk.checked);
+            document.getElementById('fornitoriActionButtons').style.display = hasChecked ? 'flex' : 'none';
         }
     }
     
@@ -899,41 +919,10 @@
         }
     }
     
-    function caricaDatiPerModifica() {
-        if (rigaSelezionata === null) {
-            // Trova la prima riga selezionata
-            if (currentScheda === 'primanota') {
-                const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-                for (let i = 0; i < checks.length; i++) {
-                    if (checks[i].checked) {
-                        rigaSelezionata = i;
-                        break;
-                    }
-                }
-            } else if (currentScheda === 'contanti') {
-                const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
-                for (let i = 0; i < checks.length; i++) {
-                    if (checks[i].checked) {
-                        rigaSelezionata = i;
-                        break;
-                    }
-                }
-            } else if (currentScheda === 'fornitori') {
-                const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-                for (let i = 0; i < checks.length; i++) {
-                    if (checks[i].checked) {
-                        rigaSelezionata = i;
-                        break;
-                    }
-                }
-            }
-        }
-        if (rigaSelezionata === null) {
-            alert("Seleziona una riga dalla tabella prima di modificare.");
-            return false;
-        }
-        if (currentScheda === 'primanota' && primaNota[rigaSelezionata]) {
-            let riga = primaNota[rigaSelezionata];
+    function caricaDatiPerModifica(scheda, idx) {
+        if (idx === null) return false;
+        if (scheda === 'primanota' && primaNota[idx]) {
+            let riga = primaNota[idx];
             let dataForForm = '';
             if (riga.data) {
                 let parts = riga.data.split('/');
@@ -944,8 +933,8 @@
             document.getElementById('formAvere').value = riga.avere || 0;
             document.getElementById('formDare').value = riga.dare || 0;
             return true;
-        } else if (currentScheda === 'contanti' && contanti[rigaSelezionata]) {
-            let riga = contanti[rigaSelezionata];
+        } else if (scheda === 'contanti' && contanti[idx]) {
+            let riga = contanti[idx];
             let dataForForm = '';
             if (riga.data) {
                 let parts = riga.data.split('/');
@@ -955,8 +944,8 @@
             document.getElementById('formDescrizione').value = riga.descrizione || '';
             document.getElementById('formImporto').value = riga.importo || 0;
             return true;
-        } else if (currentScheda === 'fornitori' && fattureFornitori[rigaSelezionata]) {
-            let riga = fattureFornitori[rigaSelezionata];
+        } else if (scheda === 'fornitori' && fattureFornitori[idx]) {
+            let riga = fattureFornitori[idx];
             let dataForForm = '';
             if (riga.data) {
                 let parts = riga.data.split('/');
@@ -967,69 +956,53 @@
             document.getElementById('formNumeroFattura').value = riga.numeroFattura || '';
             return true;
         }
-        alert("Riga non trovata.");
         return false;
     }
     
-    function salvaModifica() {
-        if (rigaSelezionata === null) {
-            alert("Seleziona prima una riga da modificare.");
-            return;
+    function salvaModifica(scheda, idx) {
+        if (idx === null) {
+            alert("Seleziona una riga da modificare.");
+            return false;
         }
-        if (currentScheda === 'primanota') {
+        if (scheda === 'primanota') {
             let data = document.getElementById('formData').value;
             let descrizione = document.getElementById('formDescrizione').value;
             let avere = parseFloat(document.getElementById('formAvere').value) || 0;
             let dare = parseFloat(document.getElementById('formDare').value) || 0;
-            if (!descrizione) { alert("Inserisci una descrizione"); return; }
-            if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return; }
-            primaNota[rigaSelezionata] = {
+            if (!descrizione) { alert("Inserisci una descrizione"); return false; }
+            if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return false; }
+            primaNota[idx] = {
                 data: formatDate(data),
                 descrizione: descrizione,
                 avere: avere || null,
                 dare: dare || null,
-                verificato: primaNota[rigaSelezionata].verificato || false
+                verificato: primaNota[idx].verificato || false
             };
-        } else if (currentScheda === 'contanti') {
+        } else if (scheda === 'contanti') {
             let data = document.getElementById('formData').value;
             let descrizione = document.getElementById('formDescrizione').value;
             let importo = parseFloat(document.getElementById('formImporto').value) || 0;
-            if (!descrizione) { alert("Inserisci una descrizione"); return; }
-            if (importo <= 0) { alert("Inserisci un importo valido"); return; }
-            contanti[rigaSelezionata] = {
+            if (!descrizione) { alert("Inserisci una descrizione"); return false; }
+            if (importo <= 0) { alert("Inserisci un importo valido"); return false; }
+            contanti[idx] = {
                 data: formatDate(data),
                 descrizione: descrizione,
                 importo: importo
             };
-        } else if (currentScheda === 'fornitori') {
+        } else if (scheda === 'fornitori') {
             let data = document.getElementById('formData').value;
             let fornitore = document.getElementById('formFornitore').value.trim();
             let numeroFattura = document.getElementById('formNumeroFattura').value.trim();
-            if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
-            fattureFornitori[rigaSelezionata] = {
+            if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return false; }
+            fattureFornitori[idx] = {
                 data: formatDate(data),
                 fornitore: fornitore,
                 numeroFattura: numeroFattura
             };
         }
-        rigaSelezionata = null;
         aggiornaTabelle();
         pulisciForm();
-        // Deseleziona tutti i checkbox
-        if (currentScheda === 'primanota') {
-            document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(chk => chk.checked = false);
-            const selectAll = document.getElementById('selectAllPrimaNota');
-            if (selectAll) selectAll.checked = false;
-        } else if (currentScheda === 'contanti') {
-            document.querySelectorAll('#contantiBody .row-check-contanti').forEach(chk => chk.checked = false);
-            const selectAll = document.getElementById('selectAllContanti');
-            if (selectAll) selectAll.checked = false;
-        } else if (currentScheda === 'fornitori') {
-            document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(chk => chk.checked = false);
-            const selectAll = document.getElementById('selectAllFornitori');
-            if (selectAll) selectAll.checked = false;
-        }
-        aggiornaPulsantiAzione();
+        return true;
     }
     
     function memorizzaNuovo() {
@@ -1075,8 +1048,8 @@
         pulisciForm();
     }
     
-    function eliminaSelezionati() {
-        if (currentScheda === 'primanota') {
+    function eliminaSelezionati(scheda) {
+        if (scheda === 'primanota') {
             let checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
             let nuovi = [];
             for (let i = 0; i < checks.length; i++) {
@@ -1087,7 +1060,10 @@
             if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
                 primaNota = nuovi;
             }
-        } else if (currentScheda === 'contanti') {
+            // Deseleziona tutti
+            const selectAll = document.getElementById('selectAllPrimaNota');
+            if (selectAll) selectAll.checked = false;
+        } else if (scheda === 'contanti') {
             let checks = document.querySelectorAll('#contantiBody .row-check-contanti');
             let nuovi = [];
             for (let i = 0; i < checks.length; i++) {
@@ -1098,7 +1074,9 @@
             if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
                 contanti = nuovi;
             }
-        } else if (currentScheda === 'fornitori') {
+            const selectAll = document.getElementById('selectAllContanti');
+            if (selectAll) selectAll.checked = false;
+        } else if (scheda === 'fornitori') {
             let checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
             let nuovi = [];
             for (let i = 0; i < checks.length; i++) {
@@ -1109,15 +1087,6 @@
             if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
                 fattureFornitori = nuovi;
             }
-        }
-        // Deseleziona tutti i checkbox
-        if (currentScheda === 'primanota') {
-            const selectAll = document.getElementById('selectAllPrimaNota');
-            if (selectAll) selectAll.checked = false;
-        } else if (currentScheda === 'contanti') {
-            const selectAll = document.getElementById('selectAllContanti');
-            if (selectAll) selectAll.checked = false;
-        } else if (currentScheda === 'fornitori') {
             const selectAll = document.getElementById('selectAllFornitori');
             if (selectAll) selectAll.checked = false;
         }
@@ -1424,7 +1393,7 @@
         for (let s of clienteSCA.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
         }
-        html += `</tbody>}</div>`;
+        html += `</tbody></table></div>`;
         container.innerHTML = html;
     }
     
@@ -1482,6 +1451,42 @@
     }
     
     // --------------------------------------------------------------
+    // GESTIONE PASSWORD PER CONTABILITÀ (per agenti)
+    // --------------------------------------------------------------
+    function mostraPasswordOverlay(callback) {
+        const overlay = document.createElement('div');
+        overlay.className = 'password-overlay';
+        overlay.innerHTML = `
+            <div class="password-modal">
+                <h3>🔐 Accesso Contabilità</h3>
+                <p>Inserisci la password per accedere</p>
+                <input type="password" id="pwdInput" placeholder="Password" style="width:100%; margin:10px 0;">
+                <div class="btn-group" style="justify-content:center;">
+                    <button id="pwdOkBtn">OK</button>
+                    <button id="pwdCancelBtn">ANNULLA</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        document.getElementById('pwdOkBtn').onclick = () => {
+            const pwd = document.getElementById('pwdInput').value;
+            if (pwd === ADMIN_PASSWORD) {
+                overlay.remove();
+                callback(true);
+            } else {
+                alert("Password errata!");
+                overlay.remove();
+                callback(false);
+            }
+        };
+        document.getElementById('pwdCancelBtn').onclick = () => {
+            overlay.remove();
+            callback(false);
+        };
+    }
+    
+    // --------------------------------------------------------------
     // EVENTI
     // --------------------------------------------------------------
     document.getElementById('btnPrimaNota').addEventListener('click', () => setScheda('primanota'));
@@ -1489,9 +1494,121 @@
     document.getElementById('btnFornitori').addEventListener('click', () => setScheda('fornitori'));
     
     document.getElementById('btnMemorizza').addEventListener('click', memorizzaNuovo);
-    document.getElementById('btnModifica').addEventListener('click', () => caricaDatiPerModifica());
-    document.getElementById('btnSalvaModifica').addEventListener('click', salvaModifica);
-    document.getElementById('btnEliminaSelezionati').addEventListener('click', eliminaSelezionati);
+    
+    // PRIMA NOTA - pulsanti azione
+    document.getElementById('btnModificaPrima').addEventListener('click', () => {
+        const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+        let selectedIdx = -1;
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedIdx = i;
+                break;
+            }
+        }
+        if (selectedIdx !== -1) {
+            caricaDatiPerModifica('primanota', selectedIdx);
+        } else {
+            alert("Seleziona una riga da modificare.");
+        }
+    });
+    document.getElementById('btnSalvaModificaPrima').addEventListener('click', () => {
+        const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+        let selectedIdx = -1;
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedIdx = i;
+                break;
+            }
+        }
+        if (selectedIdx !== -1) {
+            if (salvaModifica('primanota', selectedIdx)) {
+                // Deseleziona tutti
+                checks.forEach(chk => chk.checked = false);
+                const selectAll = document.getElementById('selectAllPrimaNota');
+                if (selectAll) selectAll.checked = false;
+                aggiornaPulsantiAzione();
+            }
+        } else {
+            alert("Seleziona una riga da salvare.");
+        }
+    });
+    document.getElementById('btnEliminaSelezionatiPrima').addEventListener('click', () => eliminaSelezionati('primanota'));
+    
+    // CONTANTI - pulsanti azione
+    document.getElementById('btnModificaContanti').addEventListener('click', () => {
+        const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+        let selectedIdx = -1;
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedIdx = i;
+                break;
+            }
+        }
+        if (selectedIdx !== -1) {
+            caricaDatiPerModifica('contanti', selectedIdx);
+        } else {
+            alert("Seleziona una riga da modificare.");
+        }
+    });
+    document.getElementById('btnSalvaModificaContanti').addEventListener('click', () => {
+        const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
+        let selectedIdx = -1;
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedIdx = i;
+                break;
+            }
+        }
+        if (selectedIdx !== -1) {
+            if (salvaModifica('contanti', selectedIdx)) {
+                checks.forEach(chk => chk.checked = false);
+                const selectAll = document.getElementById('selectAllContanti');
+                if (selectAll) selectAll.checked = false;
+                aggiornaPulsantiAzione();
+            }
+        } else {
+            alert("Seleziona una riga da salvare.");
+        }
+    });
+    document.getElementById('btnEliminaSelezionatiContanti').addEventListener('click', () => eliminaSelezionati('contanti'));
+    
+    // FORNITORI - pulsanti azione
+    document.getElementById('btnModificaFornitori').addEventListener('click', () => {
+        const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+        let selectedIdx = -1;
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedIdx = i;
+                break;
+            }
+        }
+        if (selectedIdx !== -1) {
+            caricaDatiPerModifica('fornitori', selectedIdx);
+        } else {
+            alert("Seleziona una riga da modificare.");
+        }
+    });
+    document.getElementById('btnSalvaModificaFornitori').addEventListener('click', () => {
+        const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+        let selectedIdx = -1;
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedIdx = i;
+                break;
+            }
+        }
+        if (selectedIdx !== -1) {
+            if (salvaModifica('fornitori', selectedIdx)) {
+                checks.forEach(chk => chk.checked = false);
+                const selectAll = document.getElementById('selectAllFornitori');
+                if (selectAll) selectAll.checked = false;
+                aggiornaPulsantiAzione();
+            }
+        } else {
+            alert("Seleziona una riga da salvare.");
+        }
+    });
+    document.getElementById('btnEliminaSelezionatiFornitori').addEventListener('click', () => eliminaSelezionati('fornitori'));
     
     document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
     document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
@@ -1533,36 +1650,83 @@
     // --------------------------------------------------------------
     // LOGIN E NAVIGAZIONE
     // --------------------------------------------------------------
-    document.getElementById('btnAdmin').addEventListener('click', () => {
-        document.getElementById('adminPasswordDiv').style.display = 'block';
+    // Login iniziale
+    document.getElementById('btnContabilitaLogin').addEventListener('click', () => {
+        mostraPasswordOverlay((success) => {
+            if (success) {
+                currentUser = 'admin';
+                isContabilitaSbloccata = true;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('appVersion').innerText = 'v1.0 - Amministrazione';
+                mostraSezione('contabilita');
+                caricaStatoCorrente();
+                setScheda('primanota');
+            }
+        });
     });
-    document.getElementById('btnVerifyAdmin').addEventListener('click', () => {
-        let pwd = document.getElementById('adminPassword').value;
-        if (pwd === ADMIN_PASSWORD) {
-            currentUser = 'admin';
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'block';
-            document.getElementById('appVersion').innerText = 'v1.0 - Amministrazione';
-            mostraSezione('contabilita');
-            caricaStatoCorrente();
-            setScheda('primanota');
-        } else {
-            alert("Password errata!");
-        }
-    });
+    
     document.getElementById('btnAgenti').addEventListener('click', () => {
         currentUser = 'agenti';
+        isContabilitaSbloccata = false;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'block';
         document.getElementById('appVersion').innerText = 'v1.0 - Agenti';
         mostraSezione('agenti');
     });
     
+    // Navigazione interna per CONTABILITÀ (protetta da password per agenti)
+    document.getElementById('navContabilita').addEventListener('click', () => {
+        if (currentUser === 'admin') {
+            mostraSezione('contabilita');
+        } else if (currentUser === 'agenti') {
+            if (isContabilitaSbloccata) {
+                mostraSezione('contabilita');
+            } else {
+                mostraPasswordOverlay((success) => {
+                    if (success) {
+                        isContabilitaSbloccata = true;
+                        mostraSezione('contabilita');
+                        caricaStatoCorrente();
+                        setScheda('primanota');
+                    }
+                });
+            }
+        }
+    });
+    
+    document.getElementById('navAgenti').addEventListener('click', () => {
+        mostraSezione('agenti');
+        if (currentUser === 'agenti') {
+            isContabilitaSbloccata = false;
+        }
+    });
+    
+    document.getElementById('navChangePwd').addEventListener('click', () => {
+        if (currentUser === 'admin') {
+            mostraSezione('changePwd');
+        } else if (currentUser === 'agenti') {
+            mostraPasswordOverlay((success) => {
+                if (success) {
+                    isContabilitaSbloccata = true;
+                    mostraSezione('changePwd');
+                }
+            });
+        }
+    });
+    
+    document.getElementById('navLogout').addEventListener('click', () => {
+        currentUser = null;
+        isContabilitaSbloccata = false;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+    });
+    
     function mostraSezione(sezione) {
-        document.getElementById('contabilitaContainer').style.display = sezione === 'contabilita' ? 'block' : 'none';
+        document.getElementById('contabilitaContainer').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
         document.getElementById('agentiContainer').style.display = sezione === 'agenti' ? 'block' : 'none';
         document.getElementById('changePwdContainer').style.display = sezione === 'changePwd' ? 'block' : 'none';
-        document.getElementById('sidebarContabilita').style.display = sezione === 'contabilita' ? 'block' : 'none';
+        document.getElementById('sidebarContabilita').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
         document.getElementById('sidebarAgenti').style.display = sezione === 'agenti' ? 'block' : 'none';
         document.getElementById('navContabilita').classList.toggle('active', sezione === 'contabilita');
         document.getElementById('navAgenti').classList.toggle('active', sezione === 'agenti');
@@ -1580,19 +1744,10 @@
                 mostraScadenzeAgenti();
                 mostraDettaglioAgenti();
             }
+        } else if (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) {
+            caricaStatoCorrente();
         }
     }
-    
-    document.getElementById('navContabilita').addEventListener('click', () => { if(currentUser === 'admin') mostraSezione('contabilita'); });
-    document.getElementById('navAgenti').addEventListener('click', () => { mostraSezione('agenti'); });
-    document.getElementById('navChangePwd').addEventListener('click', () => { if(currentUser === 'admin') mostraSezione('changePwd'); });
-    document.getElementById('navLogout').addEventListener('click', () => {
-        currentUser = null;
-        document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('adminPasswordDiv').style.display = 'none';
-        document.getElementById('adminPassword').value = '';
-    });
     
     document.getElementById('cercaCliente')?.addEventListener('input', () => { aggiornaTendinaClienti(); });
     
