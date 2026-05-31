@@ -14,7 +14,6 @@
             background: #eef2f5;
             min-height: 100vh;
         }
-        /* HEADER FISSATO IN ALTO */
         .header {
             background: white;
             padding: 15px 25px;
@@ -28,7 +27,6 @@
             top: 0;
             z-index: 1000;
         }
-        /* LOGO A SINISTRA - Area rettangolare */
         .logo-area-sx {
             flex-shrink: 0;
         }
@@ -43,7 +41,6 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: all 0.2s;
             overflow: hidden;
             position: relative;
         }
@@ -77,7 +74,6 @@
         .btn-carica-logo-primo:hover {
             background: #2980b9;
         }
-        /* BOX PULSANTI A DESTRA */
         .nav-box {
             background: #2c3e50;
             border-radius: 16px;
@@ -432,7 +428,6 @@
 </head>
 <body>
 
-<!-- Schermata di selezione profilo -->
 <div id="loginScreen" class="login-screen">
     <div class="login-card">
         <h2>🏢 inSAPA s.a.s.</h2>
@@ -444,10 +439,8 @@
     </div>
 </div>
 
-<!-- App principale -->
 <div id="appContainer" style="display: none;">
     <div class="header">
-        <!-- LOGO A SINISTRA - Area rettangolare -->
         <div class="logo-area-sx">
             <div id="logoRettangolo" class="logo-rettangolo">
                 <div id="logoPlaceholder" class="logo-placeholder">
@@ -457,8 +450,6 @@
                 <img id="logoImmagine" style="display: none; width: 100%; height: 100%; object-fit: contain;" alt="Logo">
             </div>
         </div>
-
-        <!-- BOX PULSANTI A DESTRA -->
         <div class="nav-box">
             <div class="nav-grid">
                 <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
@@ -469,10 +460,9 @@
         </div>
     </div>
 
-    <div class="version" id="appVersion">v2.04 - Contabilità</div>
+    <div class="version" id="appVersion">v2.05 - Contabilità</div>
 
     <div class="main-container">
-        <!-- Sidebar Contabilità -->
         <div id="sidebarContabilita" class="sidebar">
             <div class="form-group">
                 <label>📅 Anno</label>
@@ -504,9 +494,7 @@
                 <button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button>
             </div>
             <hr>
-            <div id="formArea">
-                <!-- Form dinamico in base alla scheda selezionata -->
-            </div>
+            <div id="formArea"></div>
             <div class="form-group">
                 <button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button>
             </div>
@@ -523,19 +511,16 @@
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
         </div>
 
-        <!-- Sidebar Agenti -->
         <div id="sidebarAgenti" class="sidebar" style="display: none;">
             <div class="upload-group">
                 <button id="btnCaricaFileAgenti" class="btn-success" style="width:100%">📂 Carica ORD + SCA</button>
                 <div id="fileStatusAgenti" class="file-status"></div>
             </div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
-            
             <div class="search-box">
                 <label>🔍 Cerca cliente</label>
                 <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
             </div>
-            
             <div class="filter-group" style="margin-top:15px;">
                 <label>👥 Cliente</label>
                 <select id="selectClienteAgenti" disabled size="10" style="height: auto; min-height: 150px;">
@@ -544,10 +529,8 @@
             </div>
         </div>
 
-        <!-- Area contenuti -->
         <div class="content-area">
             <div id="contabilitaContainer">
-                <!-- PRIMA NOTA -->
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <div id="saldoInfo"></div>
@@ -564,7 +547,6 @@
                     </div>
                 </div>
                 
-                <!-- CONTANTI -->
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <div id="totaleContantiInfo"></div>
@@ -581,7 +563,6 @@
                     </div>
                 </div>
                 
-                <!-- FORNITORI -->
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3>📄 FATTURE FORNITORI (numerazione interna annuale)</h3>
                     <table class="tabella" id="tabellaFornitori">
@@ -623,7 +604,7 @@
 
 <script>
     // --------------------------------------------------------------
-    // CONFIGURAZIONE INIZIALE - VERSIONE 2.04
+    // CONFIGURAZIONE INIZIALE - VERSIONE 2.05
     // --------------------------------------------------------------
     let ADMIN_PASSWORD = "insapa2026";
     let savedPwd = localStorage.getItem('admin_password');
@@ -636,37 +617,16 @@
     let backupPreCaricamento = null;
     let currentScheda = 'primanota';
     
-    // Dati contabilità
     let primaNota = [];
     let contanti = [];
     let fattureFornitori = [];
     let saldoIniziale = 0;
     let nextFatturaId = 1;
-    
-    // Memorizza le modifiche in sospeso per cella
     let pendingChanges = {};
-    
-    // Gestione Logo
     let pressTimerLogo = null;
     
-    // Carica logo salvato
-    function caricaLogoSalvato() {
-        const logoSalvato = localStorage.getItem('logo_azienda');
-        if (logoSalvato) {
-            const img = document.getElementById('logoImmagine');
-            const placeholder = document.getElementById('logoPlaceholder');
-            img.src = logoSalvato;
-            img.style.display = 'block';
-            placeholder.style.display = 'none';
-        }
-    }
+    const mesiLista = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     
-    // Salva logo
-    function salvaLogo(url) {
-        localStorage.setItem('logo_azienda', url);
-    }
-    
-    // Formatta numero
     function formatNumber(n) {
         if (n === null || n === undefined || n === '') return '';
         let num = parseFloat(n);
@@ -687,7 +647,21 @@
         return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
     }
     
-    // Salva stato in localStorage
+    function caricaLogoSalvato() {
+        const logoSalvato = localStorage.getItem('logo_azienda');
+        if (logoSalvato) {
+            const img = document.getElementById('logoImmagine');
+            const placeholder = document.getElementById('logoPlaceholder');
+            img.src = logoSalvato;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+    }
+    
+    function salvaLogo(url) {
+        localStorage.setItem('logo_azienda', url);
+    }
+    
     function salvaStatoCorrente() {
         const stato = {
             anno: currentYear,
@@ -725,8 +699,7 @@
         aggiornaTabelle();
     }
     
-    // Calcoli automatici
-    function calcolaSaldo() {
+    function calcolaTotali() {
         let totaleAvere = primaNota.reduce((sum, r) => sum + (parseNumber(r.avere) || 0), 0);
         let totaleDare = primaNota.reduce((sum, r) => sum + (parseNumber(r.dare) || 0), 0);
         let totaleContanti = contanti.reduce((sum, r) => sum + (parseNumber(r.importo) || 0), 0);
@@ -735,7 +708,7 @@
     }
     
     function aggiornaRiepilogo() {
-        const { totaleAvere, totaleDare, totaleContanti, saldo } = calcolaSaldo();
+        const { totaleAvere, totaleDare, totaleContanti, saldo } = calcolaTotali();
         document.getElementById('saldoInfo').innerHTML = `
             <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
                 <div><strong>📈 Totale Avere (entrate):</strong> ${formatNumber(totaleAvere)} €</div>
@@ -750,7 +723,6 @@
         `;
     }
     
-    // Verifica se ci sono righe selezionate
     function hasSelectedRows() {
         if (currentScheda === 'primanota') {
             const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
@@ -765,44 +737,33 @@
         return false;
     }
     
-    // Ottiene l'array delle righe selezionate con i loro indici
     function getSelectedRows() {
         let selected = [];
         if (currentScheda === 'primanota') {
             const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-            checks.forEach((chk, idx) => {
-                if (chk.checked) selected.push(idx);
-            });
+            checks.forEach((chk, idx) => { if (chk.checked) selected.push(idx); });
         } else if (currentScheda === 'contanti') {
             const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
-            checks.forEach((chk, idx) => {
-                if (chk.checked) selected.push(idx);
-            });
+            checks.forEach((chk, idx) => { if (chk.checked) selected.push(idx); });
         } else if (currentScheda === 'fornitori') {
             const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-            checks.forEach((chk, idx) => {
-                if (chk.checked) selected.push(idx);
-            });
+            checks.forEach((chk, idx) => { if (chk.checked) selected.push(idx); });
         }
         return selected;
     }
     
-    // Abilita/disabilita celle editabili in base alla selezione
     function aggiornaEditabilita() {
         aggiornaTabelle();
     }
     
-    // Applica tutte le modifiche in sospeso con validazione
     function applicaModifiche() {
         let hasError = false;
-        
         for (let key in pendingChanges) {
             let parts = key.split('|');
             let scheda = parts[0];
             let rowIdx = parseInt(parts[1]);
             let field = parts[2];
             let newValue = pendingChanges[key];
-            
             if (scheda === 'primanota' && primaNota[rowIdx]) {
                 let oldAvere = primaNota[rowIdx].avere;
                 let oldDare = primaNota[rowIdx].dare;
@@ -815,23 +776,17 @@
                 }
             }
         }
-        
         if (hasError) return;
-        
         for (let key in pendingChanges) {
             let parts = key.split('|');
             let scheda = parts[0];
             let rowIdx = parseInt(parts[1]);
             let field = parts[2];
             let newValue = pendingChanges[key];
-            
             if (scheda === 'primanota' && primaNota[rowIdx]) {
                 primaNota[rowIdx][field] = newValue;
-                if (field === 'avere' && parseNumber(newValue) > 0) {
-                    primaNota[rowIdx].dare = 0;
-                } else if (field === 'dare' && parseNumber(newValue) > 0) {
-                    primaNota[rowIdx].avere = 0;
-                }
+                if (field === 'avere' && parseNumber(newValue) > 0) primaNota[rowIdx].dare = 0;
+                else if (field === 'dare' && parseNumber(newValue) > 0) primaNota[rowIdx].avere = 0;
             } else if (scheda === 'contanti' && contanti[rowIdx]) {
                 contanti[rowIdx][field] = newValue;
             } else if (scheda === 'fornitori' && fattureFornitori[rowIdx]) {
@@ -844,7 +799,6 @@
         alert("Modifiche salvate con successo.");
     }
     
-    // Aggiorna visibilità pulsanti azione
     function aggiornaPulsantiAzione() {
         const hasSelection = hasSelectedRows();
         if (currentScheda === 'primanota') {
@@ -859,7 +813,6 @@
         }
     }
     
-    // Celle editabili per Prima Nota
     function makeEditableCellPrimaNota(value, rowIdx, field, isRowSelected) {
         if (field === 'verificato') {
             let chk = document.createElement('input');
@@ -889,9 +842,7 @@
                         let dateVal = '';
                         if (currentValue) {
                             let parts = currentValue.split('/');
-                            if (parts.length === 3) {
-                                dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                            }
+                            if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
                         }
                         input.type = 'date';
                         input.value = dateVal;
@@ -907,22 +858,14 @@
                     input.focus();
                     input.onblur = function() {
                         let newValue;
-                        if (f === 'data') {
-                            newValue = input.value ? formatDate(input.value) : '';
-                        } else if (f === 'descrizione') {
-                            newValue = input.value;
-                        } else {
-                            newValue = parseNumber(input.value);
-                        }
-                        let key = `primanota|${r}|${f}`;
-                        pendingChanges[key] = newValue;
+                        if (f === 'data') newValue = input.value ? formatDate(input.value) : '';
+                        else if (f === 'descrizione') newValue = input.value;
+                        else newValue = parseNumber(input.value);
+                        pendingChanges[`primanota|${r}|${f}`] = newValue;
                         input.remove();
                         span.style.display = 'inline';
-                        if (f === 'data' || f === 'descrizione') {
-                            span.textContent = newValue || '';
-                        } else {
-                            span.textContent = formatNumber(newValue) || '';
-                        }
+                        if (f === 'data' || f === 'descrizione') span.textContent = newValue || '';
+                        else span.textContent = formatNumber(newValue) || '';
                     };
                     input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
                 }; })(rowIdx, field, primaNota[rowIdx][field]);
@@ -931,7 +874,6 @@
         }
     }
     
-    // Celle editabili per Contanti
     function makeEditableCellContanti(value, rowIdx, field, isRowSelected) {
         let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
         let span = document.createElement('span');
@@ -949,9 +891,7 @@
                     let dateVal = '';
                     if (currentValue) {
                         let parts = currentValue.split('/');
-                        if (parts.length === 3) {
-                            dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                        }
+                        if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
                     }
                     input.type = 'date';
                     input.value = dateVal;
@@ -967,22 +907,14 @@
                 input.focus();
                 input.onblur = function() {
                     let newValue;
-                    if (f === 'data') {
-                        newValue = input.value ? formatDate(input.value) : '';
-                    } else if (f === 'descrizione') {
-                        newValue = input.value;
-                    } else {
-                        newValue = parseNumber(input.value);
-                    }
-                    let key = `contanti|${r}|${f}`;
-                    pendingChanges[key] = newValue;
+                    if (f === 'data') newValue = input.value ? formatDate(input.value) : '';
+                    else if (f === 'descrizione') newValue = input.value;
+                    else newValue = parseNumber(input.value);
+                    pendingChanges[`contanti|${r}|${f}`] = newValue;
                     input.remove();
                     span.style.display = 'inline';
-                    if (f === 'data' || f === 'descrizione') {
-                        span.textContent = newValue || '';
-                    } else {
-                        span.textContent = formatNumber(newValue) || '';
-                    }
+                    if (f === 'data' || f === 'descrizione') span.textContent = newValue || '';
+                    else span.textContent = formatNumber(newValue) || '';
                 };
                 input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
             }; })(rowIdx, field, contanti[rowIdx][field]);
@@ -990,7 +922,6 @@
         return span;
     }
     
-    // Celle editabili per Fornitori
     function makeEditableCellFornitori(value, rowIdx, field, isRowSelected) {
         let displayValue = value || '';
         let span = document.createElement('span');
@@ -1008,9 +939,7 @@
                     let dateVal = '';
                     if (currentValue) {
                         let parts = currentValue.split('/');
-                        if (parts.length === 3) {
-                            dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                        }
+                        if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
                     }
                     input.type = 'date';
                     input.value = dateVal;
@@ -1023,13 +952,9 @@
                 input.focus();
                 input.onblur = function() {
                     let newValue;
-                    if (f === 'data') {
-                        newValue = input.value ? formatDate(input.value) : '';
-                    } else {
-                        newValue = input.value;
-                    }
-                    let key = `fornitori|${r}|${f}`;
-                    pendingChanges[key] = newValue;
+                    if (f === 'data') newValue = input.value ? formatDate(input.value) : '';
+                    else newValue = input.value;
+                    pendingChanges[`fornitori|${r}|${f}`] = newValue;
                     input.remove();
                     span.style.display = 'inline';
                     span.textContent = newValue || '';
@@ -1043,7 +968,6 @@
     function aggiornaTabelle() {
         const selectedRows = getSelectedRows();
         
-        // PRIMA NOTA
         let tbody = document.getElementById('primaNotaBody');
         if (tbody) {
             tbody.innerHTML = '';
@@ -1054,10 +978,7 @@
                 chk.type = 'checkbox';
                 chk.className = 'row-check-prima';
                 chk.checked = selectedRows.includes(idx);
-                chk.onchange = function() { 
-                    aggiornaEditabilita();
-                    aggiornaPulsantiAzione();
-                };
+                chk.onchange = function() { aggiornaEditabilita(); aggiornaPulsantiAzione(); };
                 checkCell.appendChild(chk);
                 row.insertCell(1).innerText = idx+1;
                 let isSelected = chk.checked;
@@ -1069,7 +990,6 @@
             });
         }
         
-        // CONTANTI
         let contantiBody = document.getElementById('contantiBody');
         if (contantiBody) {
             contantiBody.innerHTML = '';
@@ -1080,10 +1000,7 @@
                 chk.type = 'checkbox';
                 chk.className = 'row-check-contanti';
                 chk.checked = selectedRows.includes(idx);
-                chk.onchange = function() { 
-                    aggiornaEditabilita();
-                    aggiornaPulsantiAzione();
-                };
+                chk.onchange = function() { aggiornaEditabilita(); aggiornaPulsantiAzione(); };
                 checkCell.appendChild(chk);
                 row.insertCell(1).innerText = idx+1;
                 let isSelected = chk.checked;
@@ -1093,7 +1010,6 @@
             });
         }
         
-        // FORNITORI
         let fornitoriBody = document.getElementById('fornitoriBody');
         if (fornitoriBody) {
             fornitoriBody.innerHTML = '';
@@ -1104,10 +1020,7 @@
                 chk.type = 'checkbox';
                 chk.className = 'row-check-fornitori';
                 chk.checked = selectedRows.includes(idx);
-                chk.onchange = function() { 
-                    aggiornaEditabilita();
-                    aggiornaPulsantiAzione();
-                };
+                chk.onchange = function() { aggiornaEditabilita(); aggiornaPulsantiAzione(); };
                 checkCell.appendChild(chk);
                 row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
                 let isSelected = chk.checked;
@@ -1119,33 +1032,29 @@
         
         aggiornaRiepilogo();
         salvaStatoCorrente();
-        
         document.getElementById('annoSelect').value = currentYear;
         document.getElementById('meseSelect').value = currentMonth;
         document.getElementById('saldoIniziale').value = saldoIniziale;
-        
         aggiornaPulsantiAzione();
         
         const selectAllId = currentScheda === 'primanota' ? 'selectAllPrimaNota' : (currentScheda === 'contanti' ? 'selectAllContanti' : 'selectAllFornitori');
         const selectAll = document.getElementById(selectAllId);
         if (selectAll) {
-            const allChecks = document.querySelectorAll(`#${currentScheda === 'primanota' ? 'primaNotaBody' : (currentScheda === 'contanti' ? 'contantiBody' : 'fornitoriBody')} .${currentScheda === 'primanota' ? 'row-check-prima' : (currentScheda === 'contanti' ? 'row-check-contanti' : 'row-check-fornitori')}`);
+            const selector = currentScheda === 'primanota' ? '#primaNotaBody .row-check-prima' : (currentScheda === 'contanti' ? '#contantiBody .row-check-contanti' : '#fornitoriBody .row-check-fornitori');
+            const allChecks = document.querySelectorAll(selector);
             const allChecked = allChecks.length > 0 && Array.from(allChecks).every(chk => chk.checked);
             selectAll.checked = allChecked;
         }
     }
     
-    // Cambia scheda
     function setScheda(scheda) {
         currentScheda = scheda;
         document.getElementById('tabellaPrimaNotaContainer').style.display = scheda === 'primanota' ? 'block' : 'none';
         document.getElementById('tabellaContantiContainer').style.display = scheda === 'contanti' ? 'block' : 'none';
         document.getElementById('tabellaFornitoriContainer').style.display = scheda === 'fornitori' ? 'block' : 'none';
-        
         document.getElementById('btnPrimaNota').classList.toggle('active-scheda', scheda === 'primanota');
         document.getElementById('btnContanti').classList.toggle('active-scheda', scheda === 'contanti');
         document.getElementById('btnFornitori').classList.toggle('active-scheda', scheda === 'fornitori');
-        
         aggiornaForm();
         pendingChanges = {};
         aggiornaTabelle();
@@ -1215,34 +1124,20 @@
             if (!descrizione) { alert("Inserisci una descrizione"); return; }
             if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return; }
             if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo"); return; }
-            primaNota.push({
-                data: formatDate(data),
-                descrizione: descrizione,
-                avere: avere || null,
-                dare: dare || null,
-                verificato: false
-            });
+            primaNota.push({ data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false });
         } else if (currentScheda === 'contanti') {
             let data = document.getElementById('formDataContanti')?.value;
             let descrizione = document.getElementById('formDescrizioneContanti')?.value;
             let importo = parseFloat(document.getElementById('formImportoContanti')?.value) || 0;
             if (!descrizione) { alert("Inserisci una descrizione"); return; }
             if (importo <= 0) { alert("Inserisci un importo valido"); return; }
-            contanti.push({
-                data: formatDate(data),
-                descrizione: descrizione,
-                importo: importo
-            });
+            contanti.push({ data: formatDate(data), descrizione: descrizione, importo: importo });
         } else if (currentScheda === 'fornitori') {
             let data = document.getElementById('formDataFornitori')?.value;
             let fornitore = document.getElementById('formFornitore')?.value.trim();
             let numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
             if (!fornitore || !numeroFattura) { alert("Compila tutti i campi"); return; }
-            fattureFornitori.push({
-                data: formatDate(data),
-                fornitore: fornitore,
-                numeroFattura: numeroFattura
-            });
+            fattureFornitori.push({ data: formatDate(data), fornitore: fornitore, numeroFattura: numeroFattura });
             nextFatturaId++;
         }
         aggiornaTabelle();
@@ -1253,40 +1148,22 @@
         if (scheda === 'primanota') {
             let checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
             let nuovi = [];
-            for (let i = 0; i < checks.length; i++) {
-                if (!checks[i].checked) {
-                    nuovi.push(primaNota[i]);
-                }
-            }
-            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
-                primaNota = nuovi;
-            }
+            for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(primaNota[i]);
+            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) primaNota = nuovi;
             const selectAll = document.getElementById('selectAllPrimaNota');
             if (selectAll) selectAll.checked = false;
         } else if (scheda === 'contanti') {
             let checks = document.querySelectorAll('#contantiBody .row-check-contanti');
             let nuovi = [];
-            for (let i = 0; i < checks.length; i++) {
-                if (!checks[i].checked) {
-                    nuovi.push(contanti[i]);
-                }
-            }
-            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
-                contanti = nuovi;
-            }
+            for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(contanti[i]);
+            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) contanti = nuovi;
             const selectAll = document.getElementById('selectAllContanti');
             if (selectAll) selectAll.checked = false;
         } else if (scheda === 'fornitori') {
             let checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
             let nuovi = [];
-            for (let i = 0; i < checks.length; i++) {
-                if (!checks[i].checked) {
-                    nuovi.push(fattureFornitori[i]);
-                }
-            }
-            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) {
-                fattureFornitori = nuovi;
-            }
+            for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(fattureFornitori[i]);
+            if (confirm(`Eliminare ${checks.length - nuovi.length} righe selezionate?`)) fattureFornitori = nuovi;
             const selectAll = document.getElementById('selectAllFornitori');
             if (selectAll) selectAll.checked = false;
         }
@@ -1301,34 +1178,13 @@
         pendingChanges = {};
     }
     
-    function salvaSuFile() {
-        const data = {
-            anno: currentYear,
-            mese: currentMonth,
-            saldoIniziale: saldoIniziale,
-            primaNota: primaNota,
-            contanti: contanti,
-            fattureFornitori: fattureFornitori,
-            nextFatturaId: nextFatturaId
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-    
     function caricaDaFile(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const data = JSON.parse(e.target.result);
                 backupPreCaricamento = {
-                    anno: currentYear,
-                    mese: currentMonth,
-                    saldoIniziale: saldoIniziale,
+                    anno: currentYear, mese: currentMonth, saldoIniziale: saldoIniziale,
                     primaNota: JSON.parse(JSON.stringify(primaNota)),
                     contanti: JSON.parse(JSON.stringify(contanti)),
                     fattureFornitori: JSON.parse(JSON.stringify(fattureFornitori)),
@@ -1345,10 +1201,8 @@
                 document.getElementById('meseSelect').value = currentMonth;
                 document.getElementById('saldoIniziale').value = saldoIniziale;
                 aggiornaTabelle();
-                alert(`File caricato: ${currentYear} - ${['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][currentMonth]}`);
-            } catch(err) {
-                alert("Errore nel caricamento del file: " + err.message);
-            }
+                alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`);
+            } catch(err) { alert("Errore nel caricamento del file: " + err.message); }
         };
         reader.readAsText(file);
     }
@@ -1375,329 +1229,90 @@
                 currentYear = anno;
                 currentMonth = mese;
                 caricaStatoCorrente();
-                alert(`Ripristinato mese: ${anno} - ${['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][mese]}`);
-            } else {
-                alert("Nessun mese precedente trovato.");
-            }
+                alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`);
+            } else { alert("Nessun mese precedente trovato."); }
         }
         pendingChanges = {};
     }
     
-    // ESPORTA PDF STAMPABILE - NUOVA FUNZIONE
     function esportaPDFMese() {
-        const mesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-        const meseNome = mesi[currentMonth];
-        
-        const { totaleAvere, totaleDare, totaleContanti, saldo } = calcolaSaldo();
-        
-        // Ottieni il logo salvato
+        const meseNome = mesiLista[currentMonth];
+        const { totaleAvere, totaleDare, totaleContanti, saldo } = calcolaTotali();
         const logoSaved = localStorage.getItem('logo_azienda');
         
-        // Crea il contenuto HTML per il report
-        const reportHtml = `
-        <!DOCTYPE html>
+        const reportHtml = `<!DOCTYPE html>
         <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Report Contabilità ${meseNome} ${currentYear}</title>
-            <style>
-                * {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
-                body {
-                    font-family: 'Segoe UI', 'Georgia', 'Times New Roman', serif;
-                    background: white;
-                    padding: 40px;
-                    color: #2c3e50;
-                }
-                .report-container {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    background: white;
-                }
-                /* Intestazione */
-                .header-report {
-                    text-align: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 20px;
-                    border-bottom: 3px solid #3498db;
-                }
-                .logo-report {
-                    max-width: 300px;
-                    max-height: 100px;
-                    margin-bottom: 15px;
-                    object-fit: contain;
-                }
-                .company-name {
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #2c3e50;
-                    letter-spacing: 2px;
-                }
-                .report-title {
-                    font-size: 28px;
-                    font-weight: bold;
-                    color: #3498db;
-                    margin-top: 10px;
-                }
-                .periodo {
-                    font-size: 18px;
-                    color: #7f8c8d;
-                    margin-top: 5px;
-                }
-                /* Riepilogo */
-                .summary-box {
-                    background: #ecf0f1;
-                    padding: 20px;
-                    border-radius: 12px;
-                    margin-bottom: 30px;
-                    display: flex;
-                    justify-content: space-around;
-                    flex-wrap: wrap;
-                    gap: 20px;
-                }
-                .summary-item {
-                    text-align: center;
-                    flex: 1;
-                    min-width: 150px;
-                }
-                .summary-label {
-                    font-size: 14px;
-                    color: #7f8c8d;
-                    margin-bottom: 5px;
-                }
-                .summary-value {
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #2c3e50;
-                }
-                .summary-value.positive {
-                    color: #27ae60;
-                }
-                .summary-value.negative {
-                    color: #e74c3c;
-                }
-                /* Tabella Prima Nota */
-                .section-title {
-                    font-size: 20px;
-                    font-weight: bold;
-                    margin: 25px 0 15px 0;
-                    padding-left: 10px;
-                    border-left: 4px solid #3498db;
-                }
-                .data-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 30px;
-                    font-size: 13px;
-                }
-                .data-table th {
-                    background: #3498db;
-                    color: white;
-                    padding: 12px 8px;
-                    text-align: left;
-                    font-weight: bold;
-                }
-                .data-table td {
-                    border: 1px solid #ddd;
-                    padding: 10px 8px;
-                    vertical-align: top;
-                }
-                .data-table tr:nth-child(even) {
-                    background: #f9f9f9;
-                }
-                .data-table .total-row {
-                    background: #ecf0f1;
-                    font-weight: bold;
-                }
-                .text-right {
-                    text-align: right;
-                }
-                /* Tabella Contanti */
-                .contanti-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 30px;
-                    font-size: 13px;
-                }
-                .contanti-table th {
-                    background: #27ae60;
-                    color: white;
-                    padding: 12px 8px;
-                    text-align: left;
-                }
-                .contanti-table td {
-                    border: 1px solid #ddd;
-                    padding: 10px 8px;
-                }
-                .contanti-table tr:nth-child(even) {
-                    background: #f9f9f9;
-                }
-                /* Tabella Fornitori */
-                .fornitori-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 30px;
-                    font-size: 13px;
-                }
-                .fornitori-table th {
-                    background: #e67e22;
-                    color: white;
-                    padding: 12px 8px;
-                    text-align: left;
-                }
-                .fornitori-table td {
-                    border: 1px solid #ddd;
-                    padding: 10px 8px;
-                }
-                .fornitori-table tr:nth-child(even) {
-                    background: #f9f9f9;
-                }
-                /* Footer */
-                .footer-report {
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    text-align: center;
-                    font-size: 11px;
-                    color: #95a5a6;
-                    border-top: 1px solid #ddd;
-                }
-                .signature {
-                    margin-top: 30px;
-                    text-align: right;
-                    font-style: italic;
-                }
-                @media print {
-                    body {
-                        padding: 20px;
-                    }
-                    .no-print {
-                        display: none;
-                    }
-                }
-            </style>
+        <head><meta charset="UTF-8"><title>Report Contabilità ${meseNome} ${currentYear}</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', 'Georgia', serif; background: white; padding: 40px; color: #2c3e50; }
+            .report-container { max-width: 1200px; margin: 0 auto; background: white; }
+            .header-report { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #3498db; }
+            .logo-report { max-width: 300px; max-height: 100px; margin-bottom: 15px; object-fit: contain; }
+            .company-name { font-size: 24px; font-weight: bold; color: #2c3e50; }
+            .report-title { font-size: 28px; font-weight: bold; color: #3498db; margin-top: 10px; }
+            .periodo { font-size: 18px; color: #7f8c8d; margin-top: 5px; }
+            .summary-box { background: #ecf0f1; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+            .summary-item { text-align: center; flex: 1; min-width: 150px; }
+            .summary-label { font-size: 14px; color: #7f8c8d; margin-bottom: 5px; }
+            .summary-value { font-size: 24px; font-weight: bold; }
+            .summary-value.positive { color: #27ae60; }
+            .summary-value.negative { color: #e74c3c; }
+            .section-title { font-size: 20px; font-weight: bold; margin: 25px 0 15px 0; padding-left: 10px; border-left: 4px solid #3498db; }
+            .data-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
+            .data-table th { background: #3498db; color: white; padding: 12px 8px; text-align: left; }
+            .data-table td { border: 1px solid #ddd; padding: 10px 8px; vertical-align: top; }
+            .data-table tr:nth-child(even) { background: #f9f9f9; }
+            .data-table .total-row { background: #ecf0f1; font-weight: bold; }
+            .contanti-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
+            .contanti-table th { background: #27ae60; color: white; padding: 12px 8px; text-align: left; }
+            .contanti-table td { border: 1px solid #ddd; padding: 10px 8px; }
+            .contanti-table tr:nth-child(even) { background: #f9f9f9; }
+            .fornitori-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
+            .fornitori-table th { background: #e67e22; color: white; padding: 12px 8px; text-align: left; }
+            .fornitori-table td { border: 1px solid #ddd; padding: 10px 8px; }
+            .fornitori-table tr:nth-child(even) { background: #f9f9f9; }
+            .footer-report { margin-top: 40px; padding-top: 20px; text-align: center; font-size: 11px; color: #95a5a6; border-top: 1px solid #ddd; }
+            .signature { margin-top: 30px; text-align: right; font-style: italic; }
+            .text-right { text-align: right; }
+            @media print { body { padding: 20px; } }
+        </style>
         </head>
         <body>
             <div class="report-container">
-                <!-- Intestazione -->
                 <div class="header-report">
                     ${logoSaved ? `<img src="${logoSaved}" class="logo-report" alt="Logo Azienda">` : '<div style="font-size: 48px;">🏢</div>'}
                     <div class="company-name">inSAPA s.a.s.</div>
                     <div class="report-title">REPORT CONTABILITÀ</div>
                     <div class="periodo">${meseNome} ${currentYear}</div>
                 </div>
-                
-                <!-- Riepilogo generale -->
                 <div class="summary-box">
-                    <div class="summary-item">
-                        <div class="summary-label">📈 Totale Entrate (Avere)</div>
-                        <div class="summary-value positive">${formatNumber(totaleAvere)} €</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">📉 Totale Uscite (Dare)</div>
-                        <div class="summary-value negative">${formatNumber(totaleDare)} €</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">💵 Incasso Contanti</div>
-                        <div class="summary-value positive">${formatNumber(totaleContanti)} €</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">💰 Saldo Mese</div>
-                        <div class="summary-value ${saldo >= 0 ? 'positive' : 'negative'}">${formatNumber(saldo)} €</div>
-                    </div>
+                    <div class="summary-item"><div class="summary-label">📈 Totale Entrate (Avere)</div><div class="summary-value positive">${formatNumber(totaleAvere)} €</div></div>
+                    <div class="summary-item"><div class="summary-label">📉 Totale Uscite (Dare)</div><div class="summary-value negative">${formatNumber(totaleDare)} €</div></div>
+                    <div class="summary-item"><div class="summary-label">💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(totaleContanti)} €</div></div>
+                    <div class="summary-item"><div class="summary-label">💰 Saldo Mese</div><div class="summary-value ${saldo >= 0 ? 'positive' : 'negative'}">${formatNumber(saldo)} €</div></div>
                 </div>
-                
-                <!-- Prima Nota -->
                 <div class="section-title">📋 PRIMA NOTA - Movimenti del periodo</div>
-                <table class="data-table">
-                    <thead>
-                        <tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>Verificato</th></tr>
-                    </thead>
-                    <tbody>
-                        ${primaNota.map((riga, idx) => `
-                            <tr>
-                                <td>${idx+1}</td>
-                                <td>${riga.data || ''}</td>
-                                <td>${riga.descrizione || ''}</td>
-                                <td class="text-right">${riga.avere ? formatNumber(riga.avere) : '-'}</td>
-                                <td class="text-right">${riga.dare ? formatNumber(riga.dare) : '-'}</td>
-                                <td>${riga.verificato ? '✅' : '⬜'}</td>
-                            </tr>
-                        `).join('')}
-                        ${primaNota.length === 0 ? '<tr><td colspan="6" style="text-align:center;">Nessun movimento registrato</td></tr>' : ''}
-                        <tr class="total-row">
-                            <td colspan="3"><strong>TOTALI</strong></td>
-                            <td class="text-right"><strong>${formatNumber(totaleAvere)} €</strong></td>
-                            <td class="text-right"><strong>${formatNumber(totaleDare)} €</strong></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <!-- Incassi Contanti -->
+                <table class="data-table"><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>Verificato</th></tr></thead>
+                <tbody>${primaNota.map((riga, idx) => `<tr><td>${idx+1}</td><td>${riga.data || ''}</td><td>${riga.descrizione || ''}</td><td class="text-right">${riga.avere ? formatNumber(riga.avere) : '-'}</td><td class="text-right">${riga.dare ? formatNumber(riga.dare) : '-'}</td><td>${riga.verificato ? '✅' : '⬜'}</td></tr>`).join('')}${primaNota.length === 0 ? '<tr><td colspan="6" style="text-align:center;">Nessun movimento registrato</td></tr>' : ''}
+                <tr class="total-row"><td colspan="3"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(totaleAvere)} €</strong></td><td class="text-right"><strong>${formatNumber(totaleDare)} €</strong></td><td></td></tr>
+                </tbody></table>
                 <div class="section-title">💵 INCASSO CONTANTI</div>
-                <table class="contanti-table">
-                    <thead>
-                        <tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo (€)</th></tr>
-                    </thead>
-                    <tbody>
-                        ${contanti.map((riga, idx) => `
-                            <tr>
-                                <td>${idx+1}</td>
-                                <td>${riga.data || ''}</td>
-                                <td>${riga.descrizione || ''}</td>
-                                <td class="text-right">${formatNumber(riga.importo)} €</td>
-                            </tr>
-                        `).join('')}
-                        ${contanti.length === 0 ? '<tr><td colspan="4" style="text-align:center;">Nessun incasso contanti registrato</td></tr>' : ''}
-                        <tr class="total-row">
-                            <td colspan="3"><strong>TOTALE INCASSI</strong></td>
-                            <td class="text-right"><strong>${formatNumber(totaleContanti)} €</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <!-- Fatture Fornitori -->
+                <table class="contanti-table"><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo (€)</th></tr></thead>
+                <tbody>${contanti.map((riga, idx) => `<tr><td>${idx+1}</td><td>${riga.data || ''}</td><td>${riga.descrizione || ''}</td><td class="text-right">${formatNumber(riga.importo)} €</td></tr>`).join('')}${contanti.length === 0 ? '<tr><td colspan="4" style="text-align:center;">Nessun incasso contanti registrato</td></tr>' : ''}
+                <tr class="total-row"><td colspan="3"><strong>TOTALE INCASSI</strong></td><td class="text-right"><strong>${formatNumber(totaleContanti)} €</strong></td></tr>
+                </tbody></table>
                 <div class="section-title">📄 FATTURE FORNITORI</div>
-                <table class="fornitori-table">
-                    <thead>
-                        <tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr>
-                    </thead>
-                    <tbody>
-                        ${fattureFornitori.map((fatt, idx) => `
-                            <tr>
-                                <td>${nextFatturaId - fattureFornitori.length + idx}/${currentYear}</td>
-                                <td>${fatt.data || ''}</td>
-                                <td>${fatt.fornitore || ''}</td>
-                                <td>${fatt.numeroFattura || ''}</td>
-                            </tr>
-                        `).join('')}
-                        ${fattureFornitori.length === 0 ? '<tr><td colspan="4" style="text-align:center;">Nessuna fattura fornitore registrata</td></tr>' : ''}
-                    </tbody>
-                </table>
-                
-                <!-- Footer -->
-                <div class="footer-report">
-                    <div>Documento generato da inSAPA s.a.s. - Sistema di Contabilità e Agenti</div>
-                    <div>Data generazione: ${new Date().toLocaleDateString('it-IT')}</div>
-                </div>
-                <div class="signature">
-                    Il Responsabile Amministrativo<br>
-                    _________________________
-                </div>
+                <table class="fornitori-table"><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
+                <tbody>${fattureFornitori.map((fatt, idx) => `<tr><td>${nextFatturaId - fattureFornitori.length + idx}/${currentYear}</td><td>${fatt.data || ''}</td><td>${fatt.fornitore || ''}</td><td>${fatt.numeroFattura || ''}</td></tr>`).join('')}${fattureFornitori.length === 0 ? '<tr><td colspan="4" style="text-align:center;">Nessuna fattura fornitore registrata</td></tr>' : ''}
+                </tbody></table>
+                <div class="footer-report"><div>Documento generato da inSAPA s.a.s. - Sistema di Contabilità e Agenti</div><div>Data generazione: ${new Date().toLocaleDateString('it-IT')}</div></div>
+                <div class="signature">Il Responsabile Amministrativo<br>_________________________</div>
             </div>
-            <script>
-                window.onload = function() {
-                    window.print();
-                };
-            </script>
+            <script>window.onload = function() { window.print(); };</script>
         </body>
-        </html>
-        `;
+        </html>`;
         
-        // Apri in una nuova finestra per la stampa/PDF
         const win = window.open();
         win.document.write(reportHtml);
         win.document.close();
@@ -1712,46 +1327,17 @@
                 if (saved) {
                     try {
                         const data = JSON.parse(saved);
-                        for (let riga of (data.primaNota || [])) {
-                            dataExport.push(riga);
-                        }
-                        for (let riga of (data.contanti || [])) {
-                            dataExport.push({
-                                data: riga.data,
-                                descrizione: riga.descrizione,
-                                avere: '',
-                                dare: '',
-                                incassoContanti: riga.importo,
-                                verificato: ''
-                            });
-                        }
+                        for (let riga of (data.primaNota || [])) dataExport.push(riga);
+                        for (let riga of (data.contanti || [])) dataExport.push({ data: riga.data, descrizione: riga.descrizione, avere: '', dare: '', incassoContanti: riga.importo, verificato: '' });
                     } catch(e) {}
                 }
             }
         } else {
-            for (let riga of primaNota) {
-                dataExport.push(riga);
-            }
-            for (let riga of contanti) {
-                dataExport.push({
-                    data: riga.data,
-                    descrizione: riga.descrizione,
-                    avere: '',
-                    dare: '',
-                    incassoContanti: riga.importo,
-                    verificato: ''
-                });
-            }
+            for (let riga of primaNota) dataExport.push(riga);
+            for (let riga of contanti) dataExport.push({ data: riga.data, descrizione: riga.descrizione, avere: '', dare: '', incassoContanti: riga.importo, verificato: '' });
         }
         for (let riga of dataExport) {
-            csvRows.push([
-                riga.data || '',
-                riga.descrizione || '',
-                riga.avere ? riga.avere.toString().replace('.',',') : '',
-                riga.dare ? riga.dare.toString().replace('.',',') : '',
-                riga.incassoContanti ? riga.incassoContanti.toString().replace('.',',') : '',
-                riga.verificato ? "Sì" : "No"
-            ]);
+            csvRows.push([riga.data || '', riga.descrizione || '', riga.avere ? riga.avere.toString().replace('.',',') : '', riga.dare ? riga.dare.toString().replace('.',',') : '', riga.incassoContanti ? riga.incassoContanti.toString().replace('.',',') : '', riga.verificato ? "Sì" : "No"]);
         }
         const csvContent = csvRows.map(row => row.join(";")).join("\n");
         const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
@@ -1763,9 +1349,7 @@
         URL.revokeObjectURL(url);
     }
     
-    // --------------------------------------------------------------
     // PARSER AGENTI
-    // --------------------------------------------------------------
     function parseORD(text) {
         const lines = text.split(/\r?\n/);
         const clienti = new Map();
@@ -1840,9 +1424,6 @@
         return Array.from(clienti.values());
     }
     
-    // --------------------------------------------------------------
-    // GESTIONE AGENTI
-    // --------------------------------------------------------------
     let datiAgenti = { ord: [], sca: [] };
     let clientiUniciAgenti = [];
     let clientiFiltrati = [];
@@ -1851,18 +1432,12 @@
         const mappa = new Map();
         for (let c of datiAgenti.ord) {
             let key = `${c.codice}|${c.ragione}`;
-            if (!mappa.has(key)) {
-                mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true });
-            } else {
-                let cli = mappa.get(key);
-                cli.hasOrdini = true;
-            }
+            if (!mappa.has(key)) mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true });
+            else mappa.get(key).hasOrdini = true;
         }
         for (let c of datiAgenti.sca) {
             let key = `${c.codice}|${c.ragione}`;
-            if (!mappa.has(key)) {
-                mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false });
-            }
+            if (!mappa.has(key)) mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false });
             if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) {
                 let cli = mappa.get(key);
                 if (cli) cli.hasScadenze = true;
@@ -1876,18 +1451,13 @@
     function aggiornaTendinaClienti() {
         const select = document.getElementById('selectClienteAgenti');
         const searchText = document.getElementById('cercaCliente').value.toLowerCase();
-        clientiFiltrati = clientiUniciAgenti.filter(cli => 
-            cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText)
-        );
+        clientiFiltrati = clientiUniciAgenti.filter(cli => cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText));
         select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
         for (let cli of clientiFiltrati) {
             const option = document.createElement('option');
             option.value = `${cli.codice}|${cli.ragione}`;
             option.textContent = `${cli.codice} - ${cli.ragione}`;
-            if (cli.hasScadenze) {
-                option.style.color = '#c0392b';
-                option.style.fontWeight = 'bold';
-            }
+            if (cli.hasScadenze) { option.style.color = '#c0392b'; option.style.fontWeight = 'bold'; }
             select.appendChild(option);
         }
         select.disabled = (clientiFiltrati.length === 0);
@@ -1896,24 +1466,13 @@
     function mostraScadenzeAgenti() {
         const clienteKey = document.getElementById('selectClienteAgenti').value;
         const container = document.getElementById('scadenzeAgenti');
-        if (!clienteKey) {
-            container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-            return;
-        }
+        if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
         const [codice, ragione] = clienteKey.split('|');
         const clienteSCA = datiAgenti.sca.find(c => c.codice === codice && c.ragione === ragione);
-        if (!clienteSCA || clienteSCA.scadenze.length === 0) {
-            container.innerHTML = `<div class="info-messaggio">Nessuna scadenza (SCA) per ${ragione}</div>`;
-            return;
-        }
-        let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
-                    <table class="tabella"><thead><tr>
-<th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th>
-</tr></thead><tbody>`;
-        for (let s of clienteSCA.scadenze) {
-            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
-        }
-        html += `</tbody>}</div>`;
+        if (!clienteSCA || clienteSCA.scadenze.length === 0) { container.innerHTML = `<div class="info-messaggio">Nessuna scadenza (SCA) per ${ragione}</div>`; return; }
+        let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3><table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
+        for (let s of clienteSCA.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
+        html += `</tbody></table></div>`;
         container.innerHTML = html;
     }
     
@@ -1922,167 +1481,71 @@
     function mostraDettaglioAgenti() {
         const clienteKey = document.getElementById('selectClienteAgenti').value;
         const container = document.getElementById('dettaglioAgenti');
-        if (!clienteKey) {
-            container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>';
-            return;
-        }
+        if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
         const [codice, ragione] = clienteKey.split('|');
         let clienteORD = datiAgenti.ord.find(c => c.codice === codice && c.ragione === ragione);
         if (!clienteORD) clienteORD = datiAgenti.ord.find(c => c.codice === codice);
-        if (!clienteORD || clienteORD.articoli.length === 0) {
-            container.innerHTML = `<div class="info-messaggio">Nessun ordine (ORD) per il cliente ${codice}</div>`;
-            document.getElementById('ricercaArticoloContainer').innerHTML = '';
-            return;
-        }
-        document.getElementById('ricercaArticoloContainer').innerHTML = `
-            <div class="search-box">
-                <label>🔍 Cerca articolo</label>
-                <input type="text" id="cercaArticolo" placeholder="Digita codice o descrizione articolo...">
-            </div>
-        `;
+        if (!clienteORD || clienteORD.articoli.length === 0) { container.innerHTML = `<div class="info-messaggio">Nessun ordine (ORD) per il cliente ${codice}</div>`; document.getElementById('ricercaArticoloContainer').innerHTML = ''; return; }
+        document.getElementById('ricercaArticoloContainer').innerHTML = `<div class="search-box"><label>🔍 Cerca articolo</label><input type="text" id="cercaArticolo" placeholder="Digita codice o descrizione articolo..."></div>`;
         articoliFiltratiGlobali = [...clienteORD.articoli];
         const searchInput = document.getElementById('cercaArticolo');
-        if (searchInput) {
-            searchInput.removeEventListener('input', filtraArticoli);
-            searchInput.addEventListener('input', filtraArticoli);
-        }
+        if (searchInput) { searchInput.removeEventListener('input', filtraArticoli); searchInput.addEventListener('input', filtraArticoli); }
         filtraArticoli();
     }
     
     function filtraArticoli() {
         const searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || '';
-        const articoliFiltrati = articoliFiltratiGlobali.filter(art => 
-            art.codice.toLowerCase().includes(searchText) || 
-            art.descrizione.toLowerCase().includes(searchText)
-        );
+        const articoliFiltrati = articoliFiltratiGlobali.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
         const container = document.getElementById('dettaglioAgenti');
         const clienteKey = document.getElementById('selectClienteAgenti').value;
         if (!clienteKey) return;
         const [codice, ragione] = clienteKey.split('|');
         let html = `<h3>📋 ORD - ${codice} ${ragione}</h3>`;
-        for (let art of articoliFiltrati) {
-            html += `<div class="articolo-item">
-                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
-                        <div class="articolo-prezzo"><strong>€. ${formatNumber(art.prezzo)}     Sc.% ${formatNumber(art.sconto1)}</strong></div>
-                    </div>`;
-        }
+        for (let art of articoliFiltrati) html += `<div class="articolo-item"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div class="articolo-prezzo"><strong>€. ${formatNumber(art.prezzo)}     Sc.% ${formatNumber(art.sconto1)}</strong></div></div>`;
         if (articoliFiltrati.length === 0) html += `<div class="info-messaggio">Nessun articolo trovato.</div>`;
         container.innerHTML = html;
     }
     
-    // --------------------------------------------------------------
-    // GESTIONE PASSWORD PER CONTABILITÀ
-    // --------------------------------------------------------------
     function mostraPasswordOverlay(callback) {
         const overlay = document.createElement('div');
         overlay.className = 'password-overlay';
-        overlay.innerHTML = `
-            <div class="password-modal">
-                <h3>🔐 Accesso Contabilità</h3>
-                <p>Inserisci la password per accedere</p>
-                <input type="password" id="pwdInput" placeholder="Password" style="width:100%; margin:10px 0;">
-                <div class="btn-group" style="justify-content:center;">
-                    <button id="pwdOkBtn">OK</button>
-                    <button id="pwdCancelBtn">ANNULLA</button>
-                </div>
-            </div>
-        `;
+        overlay.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Contabilità</h3><p>Inserisci la password per accedere</p><input type="password" id="pwdInput" placeholder="Password" style="width:100%; margin:10px 0;"><div class="btn-group" style="justify-content:center;"><button id="pwdOkBtn">OK</button><button id="pwdCancelBtn">ANNULLA</button></div></div>`;
         document.body.appendChild(overlay);
-        
-        document.getElementById('pwdOkBtn').onclick = () => {
-            const pwd = document.getElementById('pwdInput').value;
-            if (pwd === ADMIN_PASSWORD) {
-                overlay.remove();
-                callback(true);
-            } else {
-                alert("Password errata!");
-                overlay.remove();
-                callback(false);
-            }
-        };
-        document.getElementById('pwdCancelBtn').onclick = () => {
-            overlay.remove();
-            callback(false);
-        };
+        document.getElementById('pwdOkBtn').onclick = () => { const pwd = document.getElementById('pwdInput').value; if (pwd === ADMIN_PASSWORD) { overlay.remove(); callback(true); } else { alert("Password errata!"); overlay.remove(); callback(false); } };
+        document.getElementById('pwdCancelBtn').onclick = () => { overlay.remove(); callback(false); };
     }
     
-    // --------------------------------------------------------------
     // EVENTI
-    // --------------------------------------------------------------
     document.getElementById('btnPrimaNota').addEventListener('click', () => setScheda('primanota'));
     document.getElementById('btnContanti').addEventListener('click', () => setScheda('contanti'));
     document.getElementById('btnFornitori').addEventListener('click', () => setScheda('fornitori'));
-    
     document.getElementById('btnMemorizza').addEventListener('click', memorizzaNuovo);
-    
-    document.getElementById('btnSalvaModificaPrima').addEventListener('click', () => {
-        if (Object.keys(pendingChanges).length > 0) {
-            applicaModifiche();
-        } else {
-            alert("Nessuna modifica in sospeso.");
-        }
-    });
+    document.getElementById('btnSalvaModificaPrima').addEventListener('click', () => { if (Object.keys(pendingChanges).length > 0) applicaModifiche(); else alert("Nessuna modifica in sospeso."); });
     document.getElementById('btnEliminaSelezionatiPrima').addEventListener('click', () => eliminaSelezionati('primanota'));
-    
-    document.getElementById('btnSalvaModificaContanti').addEventListener('click', () => {
-        if (Object.keys(pendingChanges).length > 0) {
-            applicaModifiche();
-        } else {
-            alert("Nessuna modifica in sospeso.");
-        }
-    });
+    document.getElementById('btnSalvaModificaContanti').addEventListener('click', () => { if (Object.keys(pendingChanges).length > 0) applicaModifiche(); else alert("Nessuna modifica in sospeso."); });
     document.getElementById('btnEliminaSelezionatiContanti').addEventListener('click', () => eliminaSelezionati('contanti'));
-    
-    document.getElementById('btnSalvaModificaFornitori').addEventListener('click', () => {
-        if (Object.keys(pendingChanges).length > 0) {
-            applicaModifiche();
-        } else {
-            alert("Nessuna modifica in sospeso.");
-        }
-    });
+    document.getElementById('btnSalvaModificaFornitori').addEventListener('click', () => { if (Object.keys(pendingChanges).length > 0) applicaModifiche(); else alert("Nessuna modifica in sospeso."); });
     document.getElementById('btnEliminaSelezionatiFornitori').addEventListener('click', () => eliminaSelezionati('fornitori'));
-    
     document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
     document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
     document.getElementById('btnRiprendiCorrente').addEventListener('click', riprendiMeseCorrente);
     document.getElementById('btnEsportaPDFMese').addEventListener('click', esportaPDFMese);
     document.getElementById('btnEsportaCSVAnno').addEventListener('click', () => esportaCSV(true));
     document.getElementById('btnEsportaCSVMese').addEventListener('click', () => esportaCSV(false));
-    
     document.getElementById('saldoIniziale').addEventListener('change', (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaTabelle(); });
     document.getElementById('annoSelect').addEventListener('change', () => cambiaMese());
     document.getElementById('meseSelect').addEventListener('change', () => cambiaMese());
-    
-    document.getElementById('btnSalvaPassword').addEventListener('click', () => {
-        let nuova = document.getElementById('nuovaPassword').value;
-        let conferma = document.getElementById('confermaPassword').value;
-        if (!nuova) { alert("Inserisci una nuova password"); return; }
-        if (nuova !== conferma) { alert("Le password non coincidono"); return; }
-        ADMIN_PASSWORD = nuova;
-        localStorage.setItem('admin_password', nuova);
-        alert("Password cambiata con successo!");
-        document.getElementById('nuovaPassword').value = '';
-        document.getElementById('confermaPassword').value = '';
-    });
+    document.getElementById('btnSalvaPassword').addEventListener('click', () => { let nuova = document.getElementById('nuovaPassword').value; let conferma = document.getElementById('confermaPassword').value; if (!nuova) { alert("Inserisci una nuova password"); return; } if (nuova !== conferma) { alert("Le password non coincidono"); return; } ADMIN_PASSWORD = nuova; localStorage.setItem('admin_password', nuova); alert("Password cambiata con successo!"); document.getElementById('nuovaPassword').value = ''; document.getElementById('confermaPassword').value = ''; });
     
     function setupSelectAll(btnId, containerId, className) {
         const selectAll = document.getElementById(btnId);
-        if (selectAll) {
-            selectAll.addEventListener('change', (e) => {
-                const checks = document.querySelectorAll(`#${containerId} .${className}`);
-                checks.forEach(chk => chk.checked = e.target.checked);
-                aggiornaEditabilita();
-                aggiornaPulsantiAzione();
-            });
-        }
+        if (selectAll) selectAll.addEventListener('change', (e) => { document.querySelectorAll(`#${containerId} .${className}`).forEach(chk => chk.checked = e.target.checked); aggiornaEditabilita(); aggiornaPulsantiAzione(); });
     }
     setupSelectAll('selectAllPrimaNota', 'primaNotaBody', 'row-check-prima');
     setupSelectAll('selectAllContanti', 'contantiBody', 'row-check-contanti');
     setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
     
-    // --------------------------------------------------------------
-    // GESTIONE LOGO
-    // --------------------------------------------------------------
+    // LOGO
     const logoRettangolo = document.getElementById('logoRettangolo');
     const imgLogo = document.getElementById('logoImmagine');
     const placeholderLogo = document.getElementById('logoPlaceholder');
@@ -2096,121 +1559,26 @@
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const logoUrl = ev.target.result;
-                    imgLogo.src = logoUrl;
-                    imgLogo.style.display = 'block';
-                    placeholderLogo.style.display = 'none';
-                    salvaLogo(logoUrl);
-                };
+                reader.onload = (ev) => { const logoUrl = ev.target.result; imgLogo.src = logoUrl; imgLogo.style.display = 'block'; placeholderLogo.style.display = 'none'; salvaLogo(logoUrl); };
                 reader.readAsDataURL(file);
             }
         };
         input.click();
     }
     
-    btnCaricaLogoPrimo.addEventListener('click', (e) => {
-        e.stopPropagation();
-        caricaLogoDaFile();
-    });
-    
-    logoRettangolo.addEventListener('mousedown', () => {
-        pressTimerLogo = setTimeout(() => {
-            if (imgLogo.style.display === 'block') {
-                caricaLogoDaFile();
-            }
-            pressTimerLogo = null;
-        }, 3000);
-    });
-    
-    logoRettangolo.addEventListener('mouseup', () => {
-        if (pressTimerLogo) {
-            clearTimeout(pressTimerLogo);
-            pressTimerLogo = null;
-        }
-    });
-    
-    logoRettangolo.addEventListener('mouseleave', () => {
-        if (pressTimerLogo) {
-            clearTimeout(pressTimerLogo);
-            pressTimerLogo = null;
-        }
-    });
-    
+    btnCaricaLogoPrimo.addEventListener('click', (e) => { e.stopPropagation(); caricaLogoDaFile(); });
+    logoRettangolo.addEventListener('mousedown', () => { pressTimerLogo = setTimeout(() => { if (imgLogo.style.display === 'block') caricaLogoDaFile(); pressTimerLogo = null; }, 3000); });
+    logoRettangolo.addEventListener('mouseup', () => { if (pressTimerLogo) { clearTimeout(pressTimerLogo); pressTimerLogo = null; } });
+    logoRettangolo.addEventListener('mouseleave', () => { if (pressTimerLogo) { clearTimeout(pressTimerLogo); pressTimerLogo = null; } });
     caricaLogoSalvato();
     
-    // --------------------------------------------------------------
-    // LOGIN E NAVIGAZIONE
-    // --------------------------------------------------------------
-    document.getElementById('btnContabilitaLogin').addEventListener('click', () => {
-        mostraPasswordOverlay((success) => {
-            if (success) {
-                currentUser = 'admin';
-                isContabilitaSbloccata = true;
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('appVersion').innerText = 'v2.04 - Amministrazione';
-                mostraSezione('contabilita');
-                caricaStatoCorrente();
-                setScheda('primanota');
-            }
-        });
-    });
-    
-    document.getElementById('btnAgenti').addEventListener('click', () => {
-        currentUser = 'agenti';
-        isContabilitaSbloccata = false;
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'block';
-        document.getElementById('appVersion').innerText = 'v2.04 - Agenti';
-        mostraSezione('agenti');
-    });
-    
-    document.getElementById('navContabilita').addEventListener('click', () => {
-        if (currentUser === 'admin') {
-            mostraSezione('contabilita');
-        } else if (currentUser === 'agenti') {
-            if (isContabilitaSbloccata) {
-                mostraSezione('contabilita');
-            } else {
-                mostraPasswordOverlay((success) => {
-                    if (success) {
-                        isContabilitaSbloccata = true;
-                        mostraSezione('contabilita');
-                        caricaStatoCorrente();
-                        setScheda('primanota');
-                    }
-                });
-            }
-        }
-    });
-    
-    document.getElementById('navAgenti').addEventListener('click', () => {
-        mostraSezione('agenti');
-        if (currentUser === 'agenti') {
-            isContabilitaSbloccata = false;
-        }
-    });
-    
-    document.getElementById('navChangePwd').addEventListener('click', () => {
-        if (currentUser === 'admin') {
-            mostraSezione('changePwd');
-        } else if (currentUser === 'agenti') {
-            mostraPasswordOverlay((success) => {
-                if (success) {
-                    isContabilitaSbloccata = true;
-                    mostraSezione('changePwd');
-                }
-            });
-        }
-    });
-    
-    document.getElementById('navLogout').addEventListener('click', () => {
-        currentUser = null;
-        isContabilitaSbloccata = false;
-        document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-    });
+    // LOGIN
+    document.getElementById('btnContabilitaLogin').addEventListener('click', () => { mostraPasswordOverlay((success) => { if (success) { currentUser = 'admin'; isContabilitaSbloccata = true; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; document.getElementById('appVersion').innerText = 'v2.05 - Amministrazione'; mostraSezione('contabilita'); caricaStatoCorrente(); setScheda('primanota'); } }); });
+    document.getElementById('btnAgenti').addEventListener('click', () => { currentUser = 'agenti'; isContabilitaSbloccata = false; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; document.getElementById('appVersion').innerText = 'v2.05 - Agenti'; mostraSezione('agenti'); });
+    document.getElementById('navContabilita').addEventListener('click', () => { if (currentUser === 'admin') mostraSezione('contabilita'); else if (currentUser === 'agenti') { if (isContabilitaSbloccata) mostraSezione('contabilita'); else mostraPasswordOverlay((success) => { if (success) { isContabilitaSbloccata = true; mostraSezione('contabilita'); caricaStatoCorrente(); setScheda('primanota'); } }); } });
+    document.getElementById('navAgenti').addEventListener('click', () => { mostraSezione('agenti'); if (currentUser === 'agenti') isContabilitaSbloccata = false; });
+    document.getElementById('navChangePwd').addEventListener('click', () => { if (currentUser === 'admin') mostraSezione('changePwd'); else if (currentUser === 'agenti') mostraPasswordOverlay((success) => { if (success) { isContabilitaSbloccata = true; mostraSezione('changePwd'); } }); });
+    document.getElementById('navLogout').addEventListener('click', () => { currentUser = null; isContabilitaSbloccata = false; document.getElementById('appContainer').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; });
     
     function mostraSezione(sezione) {
         document.getElementById('contabilitaContainer').style.display = (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) ? 'block' : 'none';
@@ -2222,25 +1590,12 @@
         document.getElementById('navAgenti').classList.toggle('active', sezione === 'agenti');
         document.getElementById('navChangePwd').classList.toggle('active', sezione === 'changePwd');
         if (sezione === 'agenti') {
-            if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) {
-                document.getElementById('scadenzeAgenti').innerHTML = '<div class="info-messaggio">Carica i file ORD e SCA per iniziare.</div>';
-                document.getElementById('dettaglioAgenti').innerHTML = '';
-                document.getElementById('ricercaArticoloContainer').innerHTML = '';
-            } else {
-                aggiornaClientiUniciAgenti();
-                if (document.getElementById('selectClienteAgenti').options.length > 1) {
-                    document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value;
-                }
-                mostraScadenzeAgenti();
-                mostraDettaglioAgenti();
-            }
-        } else if (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) {
-            caricaStatoCorrente();
-        }
+            if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) { document.getElementById('scadenzeAgenti').innerHTML = '<div class="info-messaggio">Carica i file ORD e SCA per iniziare.</div>'; document.getElementById('dettaglioAgenti').innerHTML = ''; document.getElementById('ricercaArticoloContainer').innerHTML = ''; }
+            else { aggiornaClientiUniciAgenti(); if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value; mostraScadenzeAgenti(); mostraDettaglioAgenti(); }
+        } else if (sezione === 'contabilita' && (currentUser === 'admin' || isContabilitaSbloccata)) caricaStatoCorrente();
     }
     
-    document.getElementById('cercaCliente')?.addEventListener('input', () => { aggiornaTendinaClienti(); });
-    
+    document.getElementById('cercaCliente')?.addEventListener('input', () => aggiornaTendinaClienti());
     document.getElementById('btnCaricaFileAgenti').addEventListener('click', () => document.getElementById('fileInputMultiAgenti').click());
     document.getElementById('fileInputMultiAgenti').addEventListener('change', (e) => {
         const files = Array.from(e.target.files);
@@ -2260,9 +1615,7 @@
                     if (scaText) datiAgenti.sca = parseSCA(scaText);
                     aggiornaClientiUniciAgenti();
                     document.getElementById('fileStatusAgenti').innerHTML = `✅ Caricati: ORD (${datiAgenti.ord.length} clienti), SCA (${datiAgenti.sca.length} clienti)`;
-                    if (document.getElementById('selectClienteAgenti').options.length > 1) {
-                        document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value;
-                    }
+                    if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value;
                     mostraScadenzeAgenti();
                     mostraDettaglioAgenti();
                 }
@@ -2271,10 +1624,7 @@
         }
         e.target.value = '';
     });
-    document.getElementById('selectClienteAgenti').addEventListener('change', () => {
-        mostraScadenzeAgenti();
-        mostraDettaglioAgenti();
-    });
+    document.getElementById('selectClienteAgenti').addEventListener('change', () => { mostraScadenzeAgenti(); mostraDettaglioAgenti(); });
 </script>
 </body>
 </html>
