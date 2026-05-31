@@ -28,7 +28,7 @@
             top: 0;
             z-index: 1000;
         }
-        /* LOGO A SINISTRA - Area rettangolare raddoppiata */
+        /* LOGO A SINISTRA - Area rettangolare */
         .logo-area-sx {
             flex-shrink: 0;
         }
@@ -77,7 +77,7 @@
         .btn-carica-logo-primo:hover {
             background: #2980b9;
         }
-        /* BOX PULSANTI A DESTRA - proporzionato al logo */
+        /* BOX PULSANTI A DESTRA */
         .nav-box {
             background: #2c3e50;
             border-radius: 16px;
@@ -111,13 +111,6 @@
         }
         .nav-btn.active {
             background: #3498db;
-        }
-        /* CONTENUTO PRINCIPALE CON MARGINE SUPERIORE PER HEADER FISSO */
-        .main-content {
-            padding-top: 0;
-        }
-        .title-area {
-            display: none;
         }
         .version {
             position: fixed;
@@ -454,7 +447,7 @@
 <!-- App principale -->
 <div id="appContainer" style="display: none;">
     <div class="header">
-        <!-- LOGO A SINISTRA - Area rettangolare raddoppiata senza sfondo -->
+        <!-- LOGO A SINISTRA - Area rettangolare -->
         <div class="logo-area-sx">
             <div id="logoRettangolo" class="logo-rettangolo">
                 <div id="logoPlaceholder" class="logo-placeholder">
@@ -465,7 +458,7 @@
             </div>
         </div>
 
-        <!-- BOX PULSANTI A DESTRA proporzionato -->
+        <!-- BOX PULSANTI A DESTRA -->
         <div class="nav-box">
             <div class="nav-grid">
                 <button id="navContabilita" class="nav-btn active">📊 CONTABILITÀ</button>
@@ -476,7 +469,7 @@
         </div>
     </div>
 
-    <div class="version" id="appVersion">v2.03 - Contabilità</div>
+    <div class="version" id="appVersion">v2.04 - Contabilità</div>
 
     <div class="main-container">
         <!-- Sidebar Contabilità -->
@@ -522,6 +515,7 @@
                 <div class="btn-group">
                     <button id="btnCaricaMese" class="btn-blue">📂 CARICA MESE</button>
                     <button id="btnRiprendiCorrente" class="btn-success">📅 RIPRENDI MESE CORRENTE</button>
+                    <button id="btnEsportaPDFMese" class="btn-yellow"><strong>📄 ESPORTA REPORT MESE (PDF)</strong></button>
                     <button id="btnEsportaCSVAnno" class="btn-yellow"><strong>📎 ESPORTA CSV PER ANNO</strong></button>
                     <button id="btnEsportaCSVMese" class="btn-yellow"><strong>📎 ESPORTA CSV PER MESE</strong></button>
                 </div>
@@ -629,7 +623,7 @@
 
 <script>
     // --------------------------------------------------------------
-    // CONFIGURAZIONE INIZIALE - VERSIONE 2.03
+    // CONFIGURAZIONE INIZIALE - VERSIONE 2.04
     // --------------------------------------------------------------
     let ADMIN_PASSWORD = "insapa2026";
     let savedPwd = localStorage.getItem('admin_password');
@@ -737,6 +731,11 @@
         let totaleDare = primaNota.reduce((sum, r) => sum + (parseNumber(r.dare) || 0), 0);
         let totaleContanti = contanti.reduce((sum, r) => sum + (parseNumber(r.importo) || 0), 0);
         let saldo = saldoIniziale + totaleAvere - totaleDare;
+        return { totaleAvere, totaleDare, totaleContanti, saldo };
+    }
+    
+    function aggiornaRiepilogo() {
+        const { totaleAvere, totaleDare, totaleContanti, saldo } = calcolaSaldo();
         document.getElementById('saldoInfo').innerHTML = `
             <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
                 <div><strong>📈 Totale Avere (entrate):</strong> ${formatNumber(totaleAvere)} €</div>
@@ -1118,7 +1117,7 @@
             });
         }
         
-        calcolaSaldo();
+        aggiornaRiepilogo();
         salvaStatoCorrente();
         
         document.getElementById('annoSelect').value = currentYear;
@@ -1384,6 +1383,326 @@
         pendingChanges = {};
     }
     
+    // ESPORTA PDF STAMPABILE - NUOVA FUNZIONE
+    function esportaPDFMese() {
+        const mesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+        const meseNome = mesi[currentMonth];
+        
+        const { totaleAvere, totaleDare, totaleContanti, saldo } = calcolaSaldo();
+        
+        // Ottieni il logo salvato
+        const logoSaved = localStorage.getItem('logo_azienda');
+        
+        // Crea il contenuto HTML per il report
+        const reportHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Report Contabilità ${meseNome} ${currentYear}</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: 'Segoe UI', 'Georgia', 'Times New Roman', serif;
+                    background: white;
+                    padding: 40px;
+                    color: #2c3e50;
+                }
+                .report-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    background: white;
+                }
+                /* Intestazione */
+                .header-report {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    padding-bottom: 20px;
+                    border-bottom: 3px solid #3498db;
+                }
+                .logo-report {
+                    max-width: 300px;
+                    max-height: 100px;
+                    margin-bottom: 15px;
+                    object-fit: contain;
+                }
+                .company-name {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #2c3e50;
+                    letter-spacing: 2px;
+                }
+                .report-title {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #3498db;
+                    margin-top: 10px;
+                }
+                .periodo {
+                    font-size: 18px;
+                    color: #7f8c8d;
+                    margin-top: 5px;
+                }
+                /* Riepilogo */
+                .summary-box {
+                    background: #ecf0f1;
+                    padding: 20px;
+                    border-radius: 12px;
+                    margin-bottom: 30px;
+                    display: flex;
+                    justify-content: space-around;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                }
+                .summary-item {
+                    text-align: center;
+                    flex: 1;
+                    min-width: 150px;
+                }
+                .summary-label {
+                    font-size: 14px;
+                    color: #7f8c8d;
+                    margin-bottom: 5px;
+                }
+                .summary-value {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #2c3e50;
+                }
+                .summary-value.positive {
+                    color: #27ae60;
+                }
+                .summary-value.negative {
+                    color: #e74c3c;
+                }
+                /* Tabella Prima Nota */
+                .section-title {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin: 25px 0 15px 0;
+                    padding-left: 10px;
+                    border-left: 4px solid #3498db;
+                }
+                .data-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 30px;
+                    font-size: 13px;
+                }
+                .data-table th {
+                    background: #3498db;
+                    color: white;
+                    padding: 12px 8px;
+                    text-align: left;
+                    font-weight: bold;
+                }
+                .data-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px 8px;
+                    vertical-align: top;
+                }
+                .data-table tr:nth-child(even) {
+                    background: #f9f9f9;
+                }
+                .data-table .total-row {
+                    background: #ecf0f1;
+                    font-weight: bold;
+                }
+                .text-right {
+                    text-align: right;
+                }
+                /* Tabella Contanti */
+                .contanti-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 30px;
+                    font-size: 13px;
+                }
+                .contanti-table th {
+                    background: #27ae60;
+                    color: white;
+                    padding: 12px 8px;
+                    text-align: left;
+                }
+                .contanti-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px 8px;
+                }
+                .contanti-table tr:nth-child(even) {
+                    background: #f9f9f9;
+                }
+                /* Tabella Fornitori */
+                .fornitori-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 30px;
+                    font-size: 13px;
+                }
+                .fornitori-table th {
+                    background: #e67e22;
+                    color: white;
+                    padding: 12px 8px;
+                    text-align: left;
+                }
+                .fornitori-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px 8px;
+                }
+                .fornitori-table tr:nth-child(even) {
+                    background: #f9f9f9;
+                }
+                /* Footer */
+                .footer-report {
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    text-align: center;
+                    font-size: 11px;
+                    color: #95a5a6;
+                    border-top: 1px solid #ddd;
+                }
+                .signature {
+                    margin-top: 30px;
+                    text-align: right;
+                    font-style: italic;
+                }
+                @media print {
+                    body {
+                        padding: 20px;
+                    }
+                    .no-print {
+                        display: none;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="report-container">
+                <!-- Intestazione -->
+                <div class="header-report">
+                    ${logoSaved ? `<img src="${logoSaved}" class="logo-report" alt="Logo Azienda">` : '<div style="font-size: 48px;">🏢</div>'}
+                    <div class="company-name">inSAPA s.a.s.</div>
+                    <div class="report-title">REPORT CONTABILITÀ</div>
+                    <div class="periodo">${meseNome} ${currentYear}</div>
+                </div>
+                
+                <!-- Riepilogo generale -->
+                <div class="summary-box">
+                    <div class="summary-item">
+                        <div class="summary-label">📈 Totale Entrate (Avere)</div>
+                        <div class="summary-value positive">${formatNumber(totaleAvere)} €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">📉 Totale Uscite (Dare)</div>
+                        <div class="summary-value negative">${formatNumber(totaleDare)} €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💵 Incasso Contanti</div>
+                        <div class="summary-value positive">${formatNumber(totaleContanti)} €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💰 Saldo Mese</div>
+                        <div class="summary-value ${saldo >= 0 ? 'positive' : 'negative'}">${formatNumber(saldo)} €</div>
+                    </div>
+                </div>
+                
+                <!-- Prima Nota -->
+                <div class="section-title">📋 PRIMA NOTA - Movimenti del periodo</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>Verificato</th></tr>
+                    </thead>
+                    <tbody>
+                        ${primaNota.map((riga, idx) => `
+                            <tr>
+                                <td>${idx+1}</td>
+                                <td>${riga.data || ''}</td>
+                                <td>${riga.descrizione || ''}</td>
+                                <td class="text-right">${riga.avere ? formatNumber(riga.avere) : '-'}</td>
+                                <td class="text-right">${riga.dare ? formatNumber(riga.dare) : '-'}</td>
+                                <td>${riga.verificato ? '✅' : '⬜'}</td>
+                            </tr>
+                        `).join('')}
+                        ${primaNota.length === 0 ? '<tr><td colspan="6" style="text-align:center;">Nessun movimento registrato</td></tr>' : ''}
+                        <tr class="total-row">
+                            <td colspan="3"><strong>TOTALI</strong></td>
+                            <td class="text-right"><strong>${formatNumber(totaleAvere)} €</strong></td>
+                            <td class="text-right"><strong>${formatNumber(totaleDare)} €</strong></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Incassi Contanti -->
+                <div class="section-title">💵 INCASSO CONTANTI</div>
+                <table class="contanti-table">
+                    <thead>
+                        <tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo (€)</th></tr>
+                    </thead>
+                    <tbody>
+                        ${contanti.map((riga, idx) => `
+                            <tr>
+                                <td>${idx+1}</td>
+                                <td>${riga.data || ''}</td>
+                                <td>${riga.descrizione || ''}</td>
+                                <td class="text-right">${formatNumber(riga.importo)} €</td>
+                            </tr>
+                        `).join('')}
+                        ${contanti.length === 0 ? '<tr><td colspan="4" style="text-align:center;">Nessun incasso contanti registrato</td></tr>' : ''}
+                        <tr class="total-row">
+                            <td colspan="3"><strong>TOTALE INCASSI</strong></td>
+                            <td class="text-right"><strong>${formatNumber(totaleContanti)} €</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Fatture Fornitori -->
+                <div class="section-title">📄 FATTURE FORNITORI</div>
+                <table class="fornitori-table">
+                    <thead>
+                        <tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr>
+                    </thead>
+                    <tbody>
+                        ${fattureFornitori.map((fatt, idx) => `
+                            <tr>
+                                <td>${nextFatturaId - fattureFornitori.length + idx}/${currentYear}</td>
+                                <td>${fatt.data || ''}</td>
+                                <td>${fatt.fornitore || ''}</td>
+                                <td>${fatt.numeroFattura || ''}</td>
+                            </tr>
+                        `).join('')}
+                        ${fattureFornitori.length === 0 ? '<tr><td colspan="4" style="text-align:center;">Nessuna fattura fornitore registrata</td></tr>' : ''}
+                    </tbody>
+                </table>
+                
+                <!-- Footer -->
+                <div class="footer-report">
+                    <div>Documento generato da inSAPA s.a.s. - Sistema di Contabilità e Agenti</div>
+                    <div>Data generazione: ${new Date().toLocaleDateString('it-IT')}</div>
+                </div>
+                <div class="signature">
+                    Il Responsabile Amministrativo<br>
+                    _________________________
+                </div>
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            </script>
+        </body>
+        </html>
+        `;
+        
+        // Apri in una nuova finestra per la stampa/PDF
+        const win = window.open();
+        win.document.write(reportHtml);
+        win.document.close();
+    }
+    
     function esportaCSV(perAnno) {
         let csvRows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]];
         let dataExport = [];
@@ -1590,11 +1909,11 @@
         let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
                     <table class="tabella"><thead><tr>
 <th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th>
-</table></thead><tbody>`;
+</tr></thead><tbody>`;
         for (let s of clienteSCA.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
         }
-        html += `</tbody></table></div>`;
+        html += `</tbody>}</div>`;
         container.innerHTML = html;
     }
     
@@ -1726,6 +2045,7 @@
     document.getElementById('btnCaricaMese').addEventListener('click', () => document.getElementById('fileCaricaMese').click());
     document.getElementById('fileCaricaMese').addEventListener('change', (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); });
     document.getElementById('btnRiprendiCorrente').addEventListener('click', riprendiMeseCorrente);
+    document.getElementById('btnEsportaPDFMese').addEventListener('click', esportaPDFMese);
     document.getElementById('btnEsportaCSVAnno').addEventListener('click', () => esportaCSV(true));
     document.getElementById('btnEsportaCSVMese').addEventListener('click', () => esportaCSV(false));
     
@@ -1761,14 +2081,13 @@
     setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
     
     // --------------------------------------------------------------
-    // GESTIONE LOGO - Prima volta e cambio con pressione 3 secondi
+    // GESTIONE LOGO
     // --------------------------------------------------------------
     const logoRettangolo = document.getElementById('logoRettangolo');
     const imgLogo = document.getElementById('logoImmagine');
     const placeholderLogo = document.getElementById('logoPlaceholder');
     const btnCaricaLogoPrimo = document.getElementById('btnCaricaLogoPrimo');
     
-    // Funzione per caricare logo da file
     function caricaLogoDaFile() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -1790,13 +2109,11 @@
         input.click();
     }
     
-    // Pulsante prima volta
     btnCaricaLogoPrimo.addEventListener('click', (e) => {
         e.stopPropagation();
         caricaLogoDaFile();
     });
     
-    // Tenere premuto 3 secondi sul logo per cambiarlo
     logoRettangolo.addEventListener('mousedown', () => {
         pressTimerLogo = setTimeout(() => {
             if (imgLogo.style.display === 'block') {
@@ -1820,7 +2137,6 @@
         }
     });
     
-    // Carica logo salvato all'avvio
     caricaLogoSalvato();
     
     // --------------------------------------------------------------
@@ -1833,7 +2149,7 @@
                 isContabilitaSbloccata = true;
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('appVersion').innerText = 'v2.03 - Amministrazione';
+                document.getElementById('appVersion').innerText = 'v2.04 - Amministrazione';
                 mostraSezione('contabilita');
                 caricaStatoCorrente();
                 setScheda('primanota');
@@ -1846,7 +2162,7 @@
         isContabilitaSbloccata = false;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'block';
-        document.getElementById('appVersion').innerText = 'v2.03 - Agenti';
+        document.getElementById('appVersion').innerText = 'v2.04 - Agenti';
         mostraSezione('agenti');
     });
     
