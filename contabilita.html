@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>inSAPA - Contabilità</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: #eef2f5;
+            min-height: 100vh;
+        }
+        .header {
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .logo-area-sx { flex-shrink: 0; }
+        .logo-rettangolo {
+            width: 320px;
+            height: 100px;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        .logo-rettangolo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .logo-placeholder { text-align: center; padding: 10px; }
+        .logo-placeholder span { font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 8px; }
+        .btn-carica-logo { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
+        .nav-box { background: #2c3e50; border-radius: 16px; padding: 12px 20px; display: inline-block; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .nav-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+        .nav-btn {
+            background: #34495e; color: white; border: none; padding: 8px 18px;
+            border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: #1a252f; transform: translateY(-1px); }
+        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; }
+        .sidebar {
+            width: 340px; background: white; border-radius: 16px; padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 120px;
+        }
+        .content-area {
+            flex: 1; background: white; border-radius: 16px; padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
+        input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; }
+        button {
+            background: #3498db; color: white; border: none; padding: 8px 12px;
+            border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0;
+            font-weight: bold;
+        }
+        button:hover { opacity: 0.85; }
+        .btn-danger { background: #e74c3c; }
+        .btn-success { background: #27ae60; }
+        .btn-yellow { background: #f1c40f; color: black; }
+        .btn-yellow strong { color: black; }
+        .btn-blue { background: #2980b9; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+        .btn-group button { width: auto; flex: 1; }
+        .tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 15px; }
+        .tabella th, .tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        .tabella th { background: #e9ecef; }
+        .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
+        .info-messaggio { color: #7f8c8d; font-style: italic; padding: 15px; text-align: center; }
+        .editable-cell { cursor: pointer; min-width: 80px; display: inline-block; width: 100%; }
+        .editable-cell:hover { background-color: #fff3cd; }
+        .cell-input { width: 100%; border: none; background: transparent; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
+        .cell-input:focus { outline: 1px solid #3498db; background: white; }
+        .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
+        .scheda-btn { background: #ecf0f1; color: black; font-weight: bold; border: 1px solid #bdc3c7; }
+        .scheda-btn.active-scheda { background: #3498db; color: white; border-color: #3498db; }
+        .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .archive-box { background: #f0f4f8; border: 1px solid #d0d7de; border-radius: 12px; padding: 15px; margin-top: 15px; }
+        .archive-box .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+        .archive-box button { width: 100%; margin: 0; }
+        .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
+        footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
+        .password-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; position: static; }
+            .archive-box .btn-group { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: stretch; }
+            .nav-box { width: 100%; }
+            .nav-grid { justify-content: center; }
+            .logo-rettangolo { width: 100%; margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="appContainer">
+    <div class="header">
+        <div class="logo-area-sx">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <div id="logoPlaceholder" class="logo-placeholder">
+                    <span>🏢 LOGO AZIENDA</span>
+                    <button id="btnCaricaLogo" class="btn-carica-logo">📁 CARICA LOGO</button>
+                </div>
+                <img id="logoImmagine" style="display: none;" alt="Logo">
+            </div>
+        </div>
+        <div class="nav-box">
+            <div class="nav-grid">
+                <button id="btnTornaHome" class="nav-btn">🏠 HOME</button>
+                <button id="btnVaiAgenti" class="nav-btn">👥 AGENTI</button>
+                <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                <button id="navLogout" class="nav-btn">🚪 ESCI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="version" id="appVersion">v2.03 - Contabilità</div>
+
+    <div class="main-container">
+        <div id="sidebarContabilita" class="sidebar">
+            <div class="form-group"><label>📅 Anno</label><select id="annoSelect"><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
+            <div class="form-group"><label>📆 Mese</label><select id="meseSelect"><option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option><option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option><option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option><option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option></select></div>
+            <div class="form-group"><label>💰 Saldo iniziale (€)</label><input type="number" id="saldoIniziale" step="0.01" value="0"></div>
+            <hr>
+            <div class="btn-group"><button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button><button id="btnContanti" class="scheda-btn">💵 CONTANTI</button><button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button></div>
+            <hr>
+            <div id="formArea"></div>
+            <div class="form-group"><button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button></div>
+            <hr>
+            <div class="archive-box"><div class="btn-group"><button id="btnCaricaMese" class="btn-blue">📂 CARICA MESE</button><button id="btnRiprendiCorrente" class="btn-success">📅 RIPRENDI MESE CORRENTE</button><button id="btnEsportaPDFMese" class="btn-yellow"><strong>📄 ESPORTA REPORT MESE</strong></button><button id="btnEsportaCSVAnno" class="btn-yellow"><strong>📎 ESPORTA CSV ANNO</strong></button><button id="btnEsportaCSVMese" class="btn-yellow"><strong>📎 ESPORTA CSV MESE</strong></button></div></div>
+            <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
+        </div>
+
+        <div class="content-area">
+            <div id="contabilitaContainer">
+                <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><div id="saldoInfo"></div><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th><th>✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
+            </div>
+            <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button></div></div>
+        </div>
+    </div>
+    <footer>Logo: clicca CARICA LOGO la prima volta. Per cambiarlo, tieni premuto 3 secondi sul logo.</footer>
+</div>
+
+<script>
+// ==================== CONTABILITÀ - v2.03 ====================
+let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
+let currentYear = 2026;
+let currentMonth = 4;
+let backupPreCaricamento = null;
+let currentScheda = 'primanota';
+
+let primaNota = [];
+let contanti = [];
+let fattureFornitori = [];
+let saldoIniziale = 0;
+let nextFatturaId = 1;
+let pendingChanges = {};
+
+const mesiLista = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+
+function formatNumber(n) { if (n === null || n === undefined || n === '') return ''; let num = parseFloat(n); if (isNaN(num)) return ''; return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function parseNumber(s) { if (!s || s === '') return 0; let clean = s.toString().replace(/\./g, '').replace(',', '.'); let num = parseFloat(clean); return isNaN(num) ? 0 : num; }
+function formatDate(dateStr) { if (!dateStr) return ""; let d = new Date(dateStr); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; }
+
+function salvaStatoCorrente() {
+    const stato = { anno: currentYear, mese: currentMonth, saldoIniziale, primaNota, contanti, fattureFornitori, nextFatturaId };
+    localStorage.setItem(`contabilita_${currentYear}_${currentMonth}`, JSON.stringify(stato));
+    localStorage.setItem('ultimoMeseLavorato', JSON.stringify({ anno: currentYear, mese: currentMonth }));
+}
+
+function caricaStatoCorrente() {
+    const saved = localStorage.getItem(`contabilita_${currentYear}_${currentMonth}`);
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            saldoIniziale = data.saldoIniziale || 0;
+            primaNota = data.primaNota || [];
+            contanti = data.contanti || [];
+            fattureFornitori = data.fattureFornitori || [];
+            nextFatturaId = data.nextFatturaId || 1;
+            document.getElementById('saldoIniziale').value = saldoIniziale;
+        } catch(e) { console.error(e); }
+    } else {
+        saldoIniziale = 0; primaNota = []; contanti = []; fattureFornitori = []; nextFatturaId = 1;
+        document.getElementById('saldoIniziale').value = 0;
+    }
+    aggiornaTabelle();
+}
+
+function calcolaSaldo() {
+    let totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    let totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    let totaleContanti = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    let saldo = saldoIniziale + totaleAvere - totaleDare;
+    document.getElementById('saldoInfo').innerHTML = `<div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;"><div><strong>📈 Totale Avere (entrate):</strong> ${formatNumber(totaleAvere)} €</div><div><strong>📉 Totale Dare (uscite):</strong> ${formatNumber(totaleDare)} €</div><div><strong>💰 Saldo mese:</strong> ${formatNumber(saldo)} €</div></div>`;
+    document.getElementById('totaleContantiInfo').innerHTML = `<div style="margin-bottom:15px;"><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(totaleContanti)} €</div>`;
+}
+
+function hasSelectedRows() {
+    if (currentScheda === 'primanota') return Array.from(document.querySelectorAll('#primaNotaBody .row-check-prima')).some(c => c.checked);
+    if (currentScheda === 'contanti') return Array.from(document.querySelectorAll('#contantiBody .row-check-contanti')).some(c => c.checked);
+    if (currentScheda === 'fornitori') return Array.from(document.querySelectorAll('#fornitoriBody .row-check-fornitori')).some(c => c.checked);
+    return false;
+}
+
+function getSelectedRows() {
+    let selected = [];
+    if (currentScheda === 'primanota') document.querySelectorAll('#primaNotaBody .row-check-prima').forEach((c, i) => { if (c.checked) selected.push(i); });
+    if (currentScheda === 'contanti') document.querySelectorAll('#contantiBody .row-check-contanti').forEach((c, i) => { if (c.checked) selected.push(i); });
+    if (currentScheda === 'fornitori') document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach((c, i) => { if (c.checked) selected.push(i); });
+    return selected;
+}
+
+function aggiornaPulsantiAzione() {
+    const hasSel = hasSelectedRows();
+    if (currentScheda === 'primanota') document.getElementById('primaNotaActionButtons').style.display = hasSel ? 'flex' : 'none';
+    if (currentScheda === 'contanti') document.getElementById('contantiActionButtons').style.display = hasSel ? 'flex' : 'none';
+    if (currentScheda === 'fornitori') document.getElementById('fornitoriActionButtons').style.display = hasSel ? 'flex' : 'none';
+}
+
+function applicaModifiche() {
+    let hasError = false;
+    for (let key in pendingChanges) {
+        let parts = key.split('|'), scheda = parts[0], rowIdx = parseInt(parts[1]), field = parts[2], newVal = pendingChanges[key];
+        if (scheda === 'primanota' && primaNota[rowIdx]) {
+            let oldAvere = primaNota[rowIdx].avere, oldDare = primaNota[rowIdx].dare;
+            let newAvere = field === 'avere' ? parseNumber(newVal) : oldAvere;
+            let newDare = field === 'dare' ? parseNumber(newVal) : oldDare;
+            if (newAvere > 0 && newDare > 0) { alert(`Errore: Avere e Dare non possono essere entrambi maggiori di zero (riga ${rowIdx+1})`); hasError = true; break; }
+        }
+    }
+    if (hasError) return;
+    for (let key in pendingChanges) {
+        let parts = key.split('|'), scheda = parts[0], rowIdx = parseInt(parts[1]), field = parts[2], newVal = pendingChanges[key];
+        if (scheda === 'primanota' && primaNota[rowIdx]) { primaNota[rowIdx][field] = newVal; if (field === 'avere' && parseNumber(newVal) > 0) primaNota[rowIdx].dare = 0; if (field === 'dare' && parseNumber(newVal) > 0) primaNota[rowIdx].avere = 0; }
+        else if (scheda === 'contanti' && contanti[rowIdx]) contanti[rowIdx][field] = newVal;
+        else if (scheda === 'fornitori' && fattureFornitori[rowIdx]) fattureFornitori[rowIdx][field] = newVal;
+    }
+    pendingChanges = {}; aggiornaTabelle(); salvaStatoCorrente(); alert("Modifiche salvate con successo.");
+}
+
+function makeEditableCellPrimaNota(value, rowIdx, field, isRowSelected) {
+    if (field === 'verificato') {
+        let chk = document.createElement('input'); chk.type = 'checkbox'; chk.checked = value === true; chk.style.cursor = 'pointer';
+        chk.onchange = (function(r) { return function(e) { primaNota[r].verificato = e.target.checked; aggiornaTabelle(); salvaStatoCorrente(); }; })(rowIdx);
+        return chk;
+    } else {
+        let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
+        let span = document.createElement('span'); span.textContent = displayValue || ''; span.className = 'editable-cell';
+        if (!isRowSelected) { span.classList.add('editable-disabled'); span.style.cursor = 'not-allowed'; }
+        else {
+            span.style.cursor = 'pointer';
+            span.onclick = (function(r, f, currentValue) { return function() {
+                let input = document.createElement('input'); input.className = 'cell-input';
+                if (f === 'data') { let dateVal = ''; if (currentValue) { let parts = currentValue.split('/'); if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; } input.type = 'date'; input.value = dateVal; }
+                else if (f === 'descrizione') { input.type = 'text'; input.value = currentValue || ''; }
+                else { input.type = 'text'; input.value = formatNumber(currentValue) || ''; }
+                span.style.display = 'none'; span.parentNode.insertBefore(input, span); input.focus();
+                input.onblur = function() {
+                    let newValue; if (f === 'data') newValue = input.value ? formatDate(input.value) : ''; else if (f === 'descrizione') newValue = input.value; else newValue = parseNumber(input.value);
+                    pendingChanges[`primanota|${r}|${f}`] = newValue; input.remove(); span.style.display = 'inline';
+                    if (f === 'data' || f === 'descrizione') span.textContent = newValue || ''; else span.textContent = formatNumber(newValue) || '';
+                };
+                input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+            }; })(rowIdx, field, primaNota[rowIdx][field]);
+        }
+        return span;
+    }
+}
+
+function makeEditableCellContanti(value, rowIdx, field, isRowSelected) {
+    let displayValue = (field === 'data' || field === 'descrizione') ? (value || '') : formatNumber(value);
+    let span = document.createElement('span'); span.textContent = displayValue || ''; span.className = 'editable-cell';
+    if (!isRowSelected) { span.classList.add('editable-disabled'); span.style.cursor = 'not-allowed'; }
+    else {
+        span.style.cursor = 'pointer';
+        span.onclick = (function(r, f, currentValue) { return function() {
+            let input = document.createElement('input'); input.className = 'cell-input';
+            if (f === 'data') { let dateVal = ''; if (currentValue) { let parts = currentValue.split('/'); if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; } input.type = 'date'; input.value = dateVal; }
+            else if (f === 'descrizione') { input.type = 'text'; input.value = currentValue || ''; }
+            else { input.type = 'text'; input.value = formatNumber(currentValue) || ''; }
+            span.style.display = 'none'; span.parentNode.insertBefore(input, span); input.focus();
+            input.onblur = function() {
+                let newValue; if (f === 'data') newValue = input.value ? formatDate(input.value) : ''; else if (f === 'descrizione') newValue = input.value; else newValue = parseNumber(input.value);
+                pendingChanges[`contanti|${r}|${f}`] = newValue; input.remove(); span.style.display = 'inline';
+                if (f === 'data' || f === 'descrizione') span.textContent = newValue || ''; else span.textContent = formatNumber(newValue) || '';
+            };
+            input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+        }; })(rowIdx, field, contanti[rowIdx][field]);
+    }
+    return span;
+}
+
+function makeEditableCellFornitori(value, rowIdx, field, isRowSelected) {
+    let displayValue = value || '';
+    let span = document.createElement('span'); span.textContent = displayValue; span.className = 'editable-cell';
+    if (!isRowSelected) { span.classList.add('editable-disabled'); span.style.cursor = 'not-allowed'; }
+    else {
+        span.style.cursor = 'pointer';
+        span.onclick = (function(r, f, currentValue) { return function() {
+            let input = document.createElement('input'); input.className = 'cell-input';
+            if (f === 'data') { let dateVal = ''; if (currentValue) { let parts = currentValue.split('/'); if (parts.length === 3) dateVal = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; } input.type = 'date'; input.value = dateVal; }
+            else { input.type = 'text'; input.value = currentValue || ''; }
+            span.style.display = 'none'; span.parentNode.insertBefore(input, span); input.focus();
+            input.onblur = function() {
+                let newValue; if (f === 'data') newValue = input.value ? formatDate(input.value) : ''; else newValue = input.value;
+                pendingChanges[`fornitori|${r}|${f}`] = newValue; input.remove(); span.style.display = 'inline'; span.textContent = newValue || '';
+            };
+            input.onkeypress = function(e) { if (e.key === 'Enter') input.blur(); };
+        }; })(rowIdx, field, fattureFornitori[rowIdx][field]);
+    }
+    return span;
+}
+
+function aggiornaTabelle() {
+    const selectedRows = getSelectedRows();
+    let tbody = document.getElementById('primaNotaBody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        primaNota.forEach((riga, idx) => {
+            let row = tbody.insertRow();
+            let checkCell = row.insertCell(0);
+            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-prima'; chk.checked = selectedRows.includes(idx);
+            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
+            checkCell.appendChild(chk);
+            row.insertCell(1).innerText = idx+1;
+            let isSelected = chk.checked;
+            row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', isSelected));
+            row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', isSelected));
+            row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', isSelected));
+            row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', isSelected));
+            row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', isSelected));
+        });
+    }
+    let contantiBody = document.getElementById('contantiBody');
+    if (contantiBody) {
+        contantiBody.innerHTML = '';
+        contanti.forEach((riga, idx) => {
+            let row = contantiBody.insertRow();
+            let checkCell = row.insertCell(0);
+            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-contanti'; chk.checked = selectedRows.includes(idx);
+            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
+            checkCell.appendChild(chk);
+            row.insertCell(1).innerText = idx+1;
+            let isSelected = chk.checked;
+            row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', isSelected));
+            row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', isSelected));
+            row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', isSelected));
+        });
+    }
+    let fornitoriBody = document.getElementById('fornitoriBody');
+    if (fornitoriBody) {
+        fornitoriBody.innerHTML = '';
+        fattureFornitori.forEach((fatt, idx) => {
+            let row = fornitoriBody.insertRow();
+            let checkCell = row.insertCell(0);
+            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-fornitori'; chk.checked = selectedRows.includes(idx);
+            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
+            checkCell.appendChild(chk);
+            row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
+            let isSelected = chk.checked;
+            row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', isSelected));
+            row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', isSelected));
+            row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', isSelected));
+        });
+    }
+    calcolaSaldo(); salvaStatoCorrente();
+    document.getElementById('annoSelect').value = currentYear;
+    document.getElementById('meseSelect').value = currentMonth;
+    document.getElementById('saldoIniziale').value = saldoIniziale;
+    aggiornaPulsantiAzione();
+    const selectAllId = currentScheda === 'primanota' ? 'selectAllPrimaNota' : (currentScheda === 'contanti' ? 'selectAllContanti' : 'selectAllFornitori');
+    const selectAll = document.getElementById(selectAllId);
+    if (selectAll) {
+        const selector = currentScheda === 'primanota' ? '#primaNotaBody .row-check-prima' : (currentScheda === 'contanti' ? '#contantiBody .row-check-contanti' : '#fornitoriBody .row-check-fornitori');
+        const allChecks = document.querySelectorAll(selector);
+        selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+    }
+}
+
+function setScheda(scheda) {
+    currentScheda = scheda;
+    document.getElementById('tabellaPrimaNotaContainer').style.display = scheda === 'primanota' ? 'block' : 'none';
+    document.getElementById('tabellaContantiContainer').style.display = scheda === 'contanti' ? 'block' : 'none';
+    document.getElementById('tabellaFornitoriContainer').style.display = scheda === 'fornitori' ? 'block' : 'none';
+    document.getElementById('btnPrimaNota').classList.toggle('active-scheda', scheda === 'primanota');
+    document.getElementById('btnContanti').classList.toggle('active-scheda', scheda === 'contanti');
+    document.getElementById('btnFornitori').classList.toggle('active-scheda', scheda === 'fornitori');
+    aggiornaForm(); pendingChanges = {}; aggiornaTabelle(); aggiornaPulsantiAzione();
+}
+
+function aggiornaForm() {
+    const formArea = document.getElementById('formArea');
+    if (currentScheda === 'primanota') formArea.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota" value=""></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div><div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div><div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>`;
+    else if (currentScheda === 'contanti') formArea.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti" value=""></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div><div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`;
+    else if (currentScheda === 'fornitori') formArea.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori" value=""></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
+    pulisciForm();
+}
+
+function pulisciForm() {
+    let oggi = new Date().toISOString().slice(0,10);
+    if (currentScheda === 'primanota') { if(document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi; if(document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = ''; if(document.getElementById('formAvere')) document.getElementById('formAvere').value = 0; if(document.getElementById('formDare')) document.getElementById('formDare').value = 0; }
+    else if (currentScheda === 'contanti') { if(document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi; if(document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = ''; if(document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = 0; }
+    else if (currentScheda === 'fornitori') { if(document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi; if(document.getElementById('formFornitore')) document.getElementById('formFornitore').value = ''; if(document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = ''; }
+}
+
+function memorizzaNuovo() {
+    if (currentScheda === 'primanota') {
+        let data = document.getElementById('formDataPrimaNota')?.value, desc = document.getElementById('formDescrizionePrimaNota')?.value, avere = parseFloat(document.getElementById('formAvere')?.value)||0, dare = parseFloat(document.getElementById('formDare')?.value)||0;
+        if (!desc) { alert("Inserisci una descrizione"); return; }
+        if (avere > 0 && dare > 0) { alert("Non puoi inserire sia Avere che Dare"); return; }
+        if (avere === 0 && dare === 0) { alert("Inserisci almeno un importo"); return; }
+        primaNota.push({ data: formatDate(data), descrizione: desc, avere: avere||null, dare: dare||null, verificato: false });
+    } else if (currentScheda === 'contanti') {
+        let data = document.getElementById('formDataContanti')?.value, desc = document.getElementById('formDescrizioneContanti')?.value, imp = parseFloat(document.getElementById('formImportoContanti')?.value)||0;
+        if (!desc) { alert("Inserisci una descrizione"); return; }
+        if (imp <= 0) { alert("Inserisci un importo valido"); return; }
+        contanti.push({ data: formatDate(data), descrizione: desc, importo: imp });
+    } else if (currentScheda === 'fornitori') {
+        let data = document.getElementById('formDataFornitori')?.value, forn = document.getElementById('formFornitore')?.value.trim(), num = document.getElementById('formNumeroFattura')?.value.trim();
+        if (!forn || !num) { alert("Compila tutti i campi"); return; }
+        fattureFornitori.push({ data: formatDate(data), fornitore: forn, numeroFattura: num });
+        nextFatturaId++;
+    }
+    aggiornaTabelle(); pulisciForm();
+}
+
+function eliminaSelezionati(scheda) {
+    if (scheda === 'primanota') { let checks = document.querySelectorAll('#primaNotaBody .row-check-prima'); let nuovi = []; for(let i=0;i<checks.length;i++) if(!checks[i].checked) nuovi.push(primaNota[i]); if(confirm(`Eliminare ${checks.length-nuovi.length} righe selezionate?`)) primaNota = nuovi; document.getElementById('selectAllPrimaNota').checked = false; }
+    if (scheda === 'contanti') { let checks = document.querySelectorAll('#contantiBody .row-check-contanti'); let nuovi = []; for(let i=0;i<checks.length;i++) if(!checks[i].checked) nuovi.push(contanti[i]); if(confirm(`Eliminare ${checks.length-nuovi.length} righe selezionate?`)) contanti = nuovi; document.getElementById('selectAllContanti').checked = false; }
+    if (scheda === 'fornitori') { let checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); let nuovi = []; for(let i=0;i<checks.length;i++) if(!checks[i].checked) nuovi.push(fattureFornitori[i]); if(confirm(`Eliminare ${checks.length-nuovi.length} righe selezionate?`)) fattureFornitori = nuovi; document.getElementById('selectAllFornitori').checked = false; }
+    pendingChanges = {}; aggiornaTabelle();
+}
+
+function cambiaMese() { currentYear = parseInt(document.getElementById('annoSelect').value); currentMonth = parseInt(document.getElementById('meseSelect').value); caricaStatoCorrente(); pendingChanges = {}; }
+
+function caricaDaFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            backupPreCaricamento = { anno: currentYear, mese: currentMonth, saldoIniziale, primaNota: JSON.parse(JSON.stringify(primaNota)), contanti: JSON.parse(JSON.stringify(contanti)), fattureFornitori: JSON.parse(JSON.stringify(fattureFornitori)), nextFatturaId };
+            currentYear = data.anno; currentMonth = data.mese; saldoIniziale = data.saldoIniziale || 0; primaNota = data.primaNota || []; contanti = data.contanti || []; fattureFornitori = data.fattureFornitori || []; nextFatturaId = data.nextFatturaId || 1;
+            document.getElementById('annoSelect').value = currentYear; document.getElementById('meseSelect').value = currentMonth; document.getElementById('saldoIniziale').value = saldoIniziale;
+            aggiornaTabelle();
+            alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`);
+        } catch(err) { alert("Errore nel caricamento del file: " + err.message); }
+    };
+    reader.readAsText(file);
+}
+
+function riprendiMeseCorrente() {
+    if (backupPreCaricamento) {
+        currentYear = backupPreCaricamento.anno; currentMonth = backupPreCaricamento.mese; saldoIniziale = backupPreCaricamento.saldoIniziale; primaNota = backupPreCaricamento.primaNota; contanti = backupPreCaricamento.contanti; fattureFornitori = backupPreCaricamento.fattureFornitori; nextFatturaId = backupPreCaricamento.nextFatturaId;
+        document.getElementById('annoSelect').value = currentYear; document.getElementById('meseSelect').value = currentMonth; document.getElementById('saldoIniziale').value = saldoIniziale;
+        aggiornaTabelle(); backupPreCaricamento = null; alert("Ripristinato il mese precedente al caricamento.");
+    } else {
+        const ultimo = localStorage.getItem('ultimoMeseLavorato');
+        if (ultimo) { const { anno, mese } = JSON.parse(ultimo); currentYear = anno; currentMonth = mese; caricaStatoCorrente(); alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`); }
+        else alert("Nessun mese precedente trovato.");
+    }
+    pendingChanges = {};
+}
+
+function esportaPDFMese() {
+    let meseNome = mesiLista[currentMonth];
+    let totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    let totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    let totaleContanti = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    let saldo = saldoIniziale + totaleAvere - totaleDare;
+    let logoSaved = localStorage.getItem('logo_azienda');
+    let win = window.open();
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${meseNome} ${currentYear}</title><style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 40px; }
+        .header { text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { max-width: 300px; max-height: 100px; }
+        .title { font-size: 28px; font-weight: bold; color: #3498db; }
+        .periodo { font-size: 18px; color: #666; }
+        .summary { background: #ecf0f1; padding: 20px; border-radius: 12px; display: flex; justify-content: space-around; margin-bottom: 30px; flex-wrap: wrap; }
+        .summary-item { text-align: center; }
+        .summary-value { font-size: 24px; font-weight: bold; }
+        .positive { color: #27ae60; } .negative { color: #e74c3c; }
+        .section-title { font-size: 20px; font-weight: bold; margin: 25px 0 15px; border-left: 4px solid #3498db; padding-left: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background: #3498db; color: white; padding: 10px; text-align: left; }
+        td { border: 1px solid #ddd; padding: 8px; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 11px; color: #999; }
+        .signature { text-align: right; margin-top: 30px; font-style: italic; }
+        .text-right { text-align: right; }
+        @media print { body { padding: 20px; } }
+    </style></head><body>
+    <div class="header">${logoSaved ? `<img src="${logoSaved}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${meseNome} ${currentYear}</div></div>
+    <div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(totaleAvere)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(totaleDare)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(totaleContanti)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${saldo>=0?'positive':'negative'}">${formatNumber(saldo)} €</div></div></div>
+    <div class="section-title">📋 PRIMA NOTA</div> <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td></tr>':''}<tr style="background:#ecf0f1; font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(totaleAvere)} €</td><td class="text-right">${formatNumber(totaleDare)} €</td><td></td></tr></tbody></table>
+    <div class="section-title">💵 INCASSO CONTANTI</div> <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1; font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(totaleContanti)} €</td></tr></tbody></table>
+    <div class="section-title">📄 FATTURE FORNITORI</div> <table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId - fattureFornitori.length + i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
+    <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Responsabile Amministrativo<br>_________________________</div>
+    <script>window.onload=()=>window.print();<\/script></body></html>`);
+    win.document.close();
+}
+
+function esportaCSV(perAnno) {
+    let csvRows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]];
+    let dataExport = [];
+    if (perAnno) {
+        for (let m = 0; m < 12; m++) {
+            const saved = localStorage.getItem(`contabilita_${currentYear}_${m}`);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    for (let riga of (data.primaNota || [])) dataExport.push(riga);
+                    for (let riga of (data.contanti || [])) dataExport.push({ data: riga.data, descrizione: riga.descrizione, avere: '', dare: '', incassoContanti: riga.importo, verificato: '' });
+                } catch(e) {}
+            }
+        }
+    } else {
+        for (let riga of primaNota) dataExport.push(riga);
+        for (let riga of contanti) dataExport.push({ data: riga.data, descrizione: riga.descrizione, avere: '', dare: '', incassoContanti: riga.importo, verificato: '' });
+    }
+    for (let riga of dataExport) csvRows.push([riga.data||'', riga.descrizione||'', riga.avere?riga.avere.toString().replace('.',','):'', riga.dare?riga.dare.toString().replace('.',','):'', riga.incassoContanti?riga.incassoContanti.toString().replace('.',','):'', riga.verificato?"Sì":"No"]);
+    const csvContent = csvRows.map(r=>r.join(";")).join("\n");
+    const blob = new Blob(["\uFEFF"+csvContent], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(url);
+}
+
+function mostraPasswordOverlay(callback) {
+    const overlay = document.createElement('div'); overlay.className = 'password-overlay';
+    overlay.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Agenti</h3><p>Inserisci la password amministratore</p><input type="password" id="pwdInput" style="width:100%; margin:10px 0;"><div class="btn-group"><button id="pwdOkBtn" class="btn-success">OK</button><button id="pwdCancelBtn" class="btn-danger">ANNULLA</button></div></div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('pwdOkBtn').onclick = () => { const pwd = document.getElementById('pwdInput').value; if (pwd === ADMIN_PASSWORD) { overlay.remove(); callback(true); } else { alert("Password errata!"); overlay.remove(); callback(false); } };
+    document.getElementById('pwdCancelBtn').onclick = () => { overlay.remove(); callback(false); };
+}
+
+// ==================== GESTIONE LOGO ====================
+function caricaLogoSalvato() {
+    const logoSalvato = localStorage.getItem('logo_azienda');
+    if (logoSalvato) {
+        document.getElementById('logoImmagine').src = logoSalvato;
+        document.getElementById('logoImmagine').style.display = 'block';
+        document.getElementById('logoPlaceholder').style.display = 'none';
+    }
+}
+
+function salvaLogo(url) { localStorage.setItem('logo_azienda', url); }
+
+function caricaLogoDaFile() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const logoUrl = ev.target.result;
+                document.getElementById('logoImmagine').src = logoUrl;
+                document.getElementById('logoImmagine').style.display = 'block';
+                document.getElementById('logoPlaceholder').style.display = 'none';
+                salvaLogo(logoUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    input.click();
+}
+
+document.getElementById('btnCaricaLogo').onclick = (e) => { e.stopPropagation(); caricaLogoDaFile(); };
+let pressTimer = null;
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { if (document.getElementById('logoImmagine').style.display === 'block') caricaLogoDaFile(); pressTimer = null; }, 3000); });
+logoDiv.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+logoDiv.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+caricaLogoSalvato();
+
+// ==================== EVENTI ====================
+document.getElementById('btnPrimaNota').onclick = () => setScheda('primanota');
+document.getElementById('btnContanti').onclick = () => setScheda('contanti');
+document.getElementById('btnFornitori').onclick = () => setScheda('fornitori');
+document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
+document.getElementById('btnSalvaModificaPrima').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica in sospeso."); };
+document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
+document.getElementById('btnSalvaModificaContanti').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica in sospeso."); };
+document.getElementById('btnEliminaSelezionatiContanti').onclick = () => eliminaSelezionati('contanti');
+document.getElementById('btnSalvaModificaFornitori').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica in sospeso."); };
+document.getElementById('btnEliminaSelezionatiFornitori').onclick = () => eliminaSelezionati('fornitori');
+document.getElementById('btnCaricaMese').onclick = () => document.getElementById('fileCaricaMese').click();
+document.getElementById('fileCaricaMese').onchange = (e) => { if(e.target.files[0]) caricaDaFile(e.target.files[0]); };
+document.getElementById('btnRiprendiCorrente').onclick = riprendiMeseCorrente;
+document.getElementById('btnEsportaPDFMese').onclick = esportaPDFMese;
+document.getElementById('btnEsportaCSVAnno').onclick = () => esportaCSV(true);
+document.getElementById('btnEsportaCSVMese').onclick = () => esportaCSV(false);
+document.getElementById('saldoIniziale').onchange = (e) => { saldoIniziale = parseNumber(e.target.value); aggiornaTabelle(); };
+document.getElementById('annoSelect').onchange = cambiaMese;
+document.getElementById('meseSelect').onchange = cambiaMese;
+
+function setupSelectAll(btnId, containerId, className) {
+    const selectAll = document.getElementById(btnId);
+    if (selectAll) selectAll.onchange = (e) => { document.querySelectorAll(`#${containerId} .${className}`).forEach(c => c.checked = e.target.checked); aggiornaTabelle(); aggiornaPulsantiAzione(); };
+}
+setupSelectAll('selectAllPrimaNota', 'primaNotaBody', 'row-check-prima');
+setupSelectAll('selectAllContanti', 'contantiBody', 'row-check-contanti');
+setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
+
+// ==================== NAVIGAZIONE ====================
+document.getElementById('btnTornaHome').onclick = () => { window.location.href = 'index.html'; };
+document.getElementById('btnVaiAgenti').onclick = () => {
+    mostraPasswordOverlay((success) => {
+        if (success) { window.location.href = 'agenti.html'; }
+    });
+};
+document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
+
+// Cambio Password
+let changePwdVisible = false;
+document.getElementById('navChangePwd').onclick = () => {
+    if (!changePwdVisible) {
+        document.getElementById('contabilitaContainer').style.display = 'none';
+        document.getElementById('changePwdContainer').style.display = 'block';
+        changePwdVisible = true;
+    }
+};
+document.getElementById('btnAnnullaPassword').onclick = () => {
+    document.getElementById('contabilitaContainer').style.display = 'block';
+    document.getElementById('changePwdContainer').style.display = 'none';
+    changePwdVisible = false;
+};
+document.getElementById('btnSalvaPassword').onclick = () => {
+    let nuova = document.getElementById('nuovaPassword').value;
+    let conferma = document.getElementById('confermaPassword').value;
+    if (!nuova) { alert("Inserisci una nuova password"); return; }
+    if (nuova !== conferma) { alert("Le password non coincidono"); return; }
+    ADMIN_PASSWORD = nuova;
+    localStorage.setItem('admin_password', nuova);
+    alert("Password cambiata con successo!");
+    document.getElementById('nuovaPassword').value = '';
+    document.getElementById('confermaPassword').value = '';
+    document.getElementById('contabilitaContainer').style.display = 'block';
+    document.getElementById('changePwdContainer').style.display = 'none';
+    changePwdVisible = false;
+};
+
+caricaStatoCorrente();
+setScheda('primanota');
+</script>
+</body>
+</html>
