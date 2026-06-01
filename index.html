@@ -84,6 +84,7 @@
             height: 80px;
             margin: 0 auto;
             background: transparent;
+            border: none;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -240,12 +241,12 @@ logoDiv.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pr
 caricaLogoSalvato();
 
 // ==================== PASSWORD OVERLAY ====================
-function mostraPasswordOverlay(callback, destinazione) {
+function mostraPasswordOverlay(callback) {
     const overlay = document.createElement('div');
     overlay.className = 'password-overlay';
     overlay.innerHTML = `
         <div class="password-modal">
-            <h3>🔐 Accesso ${destinazione === 'contabilita' ? 'Contabilità' : 'Agenti'}</h3>
+            <h3>🔐 Accesso Contabilità</h3>
             <p>Inserisci la password amministratore</p>
             <input type="password" id="pwdInput" placeholder="Password">
             <div class="btn-group">
@@ -274,14 +275,16 @@ function mostraPasswordOverlay(callback, destinazione) {
 }
 
 // ==================== NAVIGAZIONE ====================
+// Contabilità → chiede password
 document.getElementById('btnContabilita').onclick = () => {
     mostraPasswordOverlay((success) => {
         if (success) {
             window.location.href = 'contabilita.html';
         }
-    }, 'contabilita');
+    });
 };
 
+// Agenti → NON chiede password
 document.getElementById('btnAgenti').onclick = () => {
     window.location.href = 'agenti.html';
 };
