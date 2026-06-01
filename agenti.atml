@@ -51,6 +51,15 @@
             transition: all 0.2s;
         }
         .nav-btn:hover { background: #1a252f; transform: translateY(-1px); }
+        .nav-btn.disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .nav-btn.disabled:hover {
+            background: #7f8c8d;
+            transform: none;
+        }
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; }
         .sidebar {
             width: 340px; background: white; border-radius: 16px; padding: 20px;
@@ -112,8 +121,8 @@
         </div>
         <div class="nav-box">
             <div class="nav-grid">
-                <button id="btnTornaHome" class="nav-btn">🏠 HOME</button>
                 <button id="btnVaiContabilita" class="nav-btn">📊 CONTABILITÀ</button>
+                <button id="btnAgenti" class="nav-btn disabled" disabled>👥 AGENTI</button>
                 <button id="navLogout" class="nav-btn">🚪 ESCI</button>
             </div>
         </div>
@@ -142,7 +151,7 @@
 </div>
 
 <script>
-// ==================== AGENTI - v2.03 ====================
+// ==================== AGENTI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let datiAgenti = { ord: [], sca: [] };
 let clientiUniciAgenti = [];
@@ -297,13 +306,14 @@ document.getElementById('cercaCliente').oninput = () => aggiornaTendinaClienti()
 document.getElementById('selectClienteAgenti').onchange = () => { mostraScadenzeAgenti(); mostraDettaglioAgenti(); };
 
 // ==================== NAVIGAZIONE ====================
-document.getElementById('btnTornaHome').onclick = () => { window.location.href = 'index.html'; };
 document.getElementById('btnVaiContabilita').onclick = () => {
     mostraPasswordOverlay((success) => {
         if (success) { window.location.href = 'contabilita.html'; }
     });
 };
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
+document.getElementById('btnAgenti').disabled = true;
+document.getElementById('btnAgenti').classList.add('disabled');
 
 // Inizializza
 aggiornaClientiUniciAgenti();
