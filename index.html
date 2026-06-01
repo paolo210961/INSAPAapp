@@ -255,7 +255,7 @@ function mostraPasswordOverlay(callback, destinazione) {
         </div>
     `;
     document.body.appendChild(overlay);
-
+    
     document.getElementById('pwdOkBtn').onclick = () => {
         const pwd = document.getElementById('pwdInput').value;
         if (pwd === ADMIN_PASSWORD) {
