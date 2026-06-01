@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>inSAPA - Agenti</title>
     <style>
         * { box-sizing: border-box; }
@@ -50,7 +50,14 @@
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; }
-        @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { width: 100%; position: static; } .header { flex-direction: column; align-items: stretch; } .nav-box { width: 100%; } .logo-rettangolo { width: 100%; margin: 0 auto; } }
+        @media (max-width: 768px) { 
+            .main-container { flex-direction: column; } 
+            .sidebar { width: 100%; position: static; } 
+            .header { flex-direction: column; align-items: stretch; } 
+            .nav-box { width: 100%; } 
+            .logo-rettangolo { width: 100%; margin: 0 auto; }
+            .content-area { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -70,7 +77,7 @@
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v2.07 - Agenti (debug)</div>
+    <div class="version" id="appVersion">v2.08 - Agenti (fix cellulare)</div>
     <div class="main-container">
         <div id="sidebarAgenti" class="sidebar">
             <div class="agente-selector">
@@ -83,8 +90,17 @@
             <button id="btnCaricaFileAgenti" class="btn-success" style="width:100%">📂 Carica ORD + SCA</button>
             <div id="fileStatusAgenti" class="file-status"></div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
+            
+            <!-- PULSANTE FORZA VISUALIZZAZIONE -->
+            <button id="btnForzaVisualizza" style="background:#f39c12; color:#2c3e50; margin-top:10px;">🔍 FORZA VISUALIZZAZIONE DATI</button>
+            
             <div class="search-box" style="margin-top:15px;"><label>🔍 Cerca cliente</label><input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente..."></div>
-            <div class="filter-group" style="margin-top:15px;"><label>👥 Cliente</label><select id="selectClienteAgenti" disabled size="10" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select></div>
+            <div class="filter-group" style="margin-top:15px;">
+                <label>👥 Cliente</label>
+                <select id="selectClienteAgenti" size="10" style="height: auto; min-height: 150px; width:100%; padding:8px; border-radius:8px;">
+                    <option value="">-- Seleziona cliente --</option>
+                </select>
+            </div>
             <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
         </div>
         <div class="content-area">
@@ -98,7 +114,7 @@
     <footer>Logo: clicca CARICA LOGO. Per cambiarlo, tieni premuto 3 secondi. Clicca articolo per storico ordini.</footer>
 </div>
 <script>
-// ==================== AGENTI - v2.07 DEBUG ====================
+// ==================== AGENTI - v2.08 FIX CELLULARE ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let agentiLista = [];
 let agenteCorrente = null;
@@ -221,6 +237,7 @@ function aggiornaTendinaClienti() {
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
     for (let cli of clientiFiltrati) { let opt = document.createElement('option'); opt.value = `${cli.codice}|${cli.ragione}`; opt.textContent = `${cli.codice} - ${cli.ragione}`; if (cli.hasScadenze) { opt.style.color = '#c0392b'; opt.style.fontWeight = 'bold'; } select.appendChild(opt); }
     select.disabled = (clientiFiltrati.length === 0);
+    debugLog(`Tendina clienti aggiornata: ${select.options.length} opzioni`);
 }
 function mostraScadenzeAgenti() {
     let clienteKey = document.getElementById('selectClienteAgenti').value, container = document.getElementById('scadenzeAgenti');
@@ -230,6 +247,7 @@ function mostraScadenzeAgenti() {
     let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3><table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
     for (let s of clienteSCA.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
     html += `</tbody></table></div>`; container.innerHTML = html;
+    debugLog(`Mostrate scadenze per ${codice} - ${ragione}`);
 }
 function mostraDettaglioAgenti() {
     let clienteKey = document.getElementById('selectClienteAgenti').value, container = document.getElementById('dettaglioAgenti');
@@ -241,6 +259,7 @@ function mostraDettaglioAgenti() {
     articoliFiltratiGlobali = [...clienteORD.articoli];
     let inp = document.getElementById('cercaArticolo'); if (inp) { inp.removeEventListener('input', filtraArticoli); inp.addEventListener('input', filtraArticoli); }
     filtraArticoli();
+    debugLog(`Mostrato dettaglio per ${codice} - ${ragione} con ${clienteORD.articoli.length} articoli`);
 }
 function filtraArticoli() {
     let searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || '', clienteKey = document.getElementById('selectClienteAgenti').value;
@@ -278,6 +297,20 @@ function mostraPasswordOverlay(callback) {
     document.getElementById('pwdCancelBtn').onclick = () => { ov.remove(); callback(false); };
 }
 
+// ==================== FORZA VISUALIZZAZIONE ====================
+document.getElementById('btnForzaVisualizza').onclick = () => {
+    debugLog("FORZA VISUALIZZAZIONE - Mostro tutti i clienti");
+    let select = document.getElementById('selectClienteAgenti');
+    if (select.options.length > 1) {
+        select.value = select.options[1].value;
+        mostraScadenzeAgenti();
+        mostraDettaglioAgenti();
+        alert(`Visualizzati ${select.options.length-1} clienti`);
+    } else {
+        alert("Nessun cliente trovato! Carica prima i file ORD+SCA");
+    }
+};
+
 // ==================== GESTIONE LOGO ====================
 function caricaLogoSalvato() { let ls = localStorage.getItem('logo_azienda'); if (ls) { document.getElementById('logoImmagine').src = ls; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoPlaceholder').style.display = 'none'; } }
 function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
@@ -305,9 +338,6 @@ document.getElementById('fileInputMultiAgenti').onchange = (e) => {
                 salvaDatiAgente(); 
                 aggiornaClientiUniciAgenti(); 
                 document.getElementById('fileStatusAgenti').innerHTML = `✅ ORD:${datiAgenti.ord.length} clienti | SCA:${datiAgenti.sca.length} clienti`;
-                if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value; 
-                mostraScadenzeAgenti(); 
-                mostraDettaglioAgenti(); 
                 alert(`Caricamento completato! ORD: ${datiAgenti.ord.length} clienti, SCA: ${datiAgenti.sca.length} clienti`);
             } 
         };
@@ -324,7 +354,7 @@ document.getElementById('btnVaiContabilita').onclick = () => { mostraPasswordOve
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 
 caricaAgenti();
-debugLog("App Agenti v2.07 avviata - pronto per debug");
+debugLog("App Agenti v2.08 avviata - fix cellulare");
 </script>
 </body>
 </html>
