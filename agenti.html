@@ -77,7 +77,7 @@
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v2.08 - Agenti (fix cellulare)</div>
+    <div class="version" id="appVersion">v2.09 - Agenti (fix pulsante)</div>
     <div class="main-container">
         <div id="sidebarAgenti" class="sidebar">
             <div class="agente-selector">
@@ -91,7 +91,6 @@
             <div id="fileStatusAgenti" class="file-status"></div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
             
-            <!-- PULSANTE FORZA VISUALIZZAZIONE -->
             <button id="btnForzaVisualizza" style="background:#f39c12; color:#2c3e50; margin-top:10px;">🔍 FORZA VISUALIZZAZIONE DATI</button>
             
             <div class="search-box" style="margin-top:15px;"><label>🔍 Cerca cliente</label><input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente..."></div>
@@ -114,7 +113,7 @@
     <footer>Logo: clicca CARICA LOGO. Per cambiarlo, tieni premuto 3 secondi. Clicca articolo per storico ordini.</footer>
 </div>
 <script>
-// ==================== AGENTI - v2.08 FIX CELLULARE ====================
+// ==================== AGENTI - v2.09 FIX PULSANTE ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let agentiLista = [];
 let agenteCorrente = null;
@@ -297,17 +296,45 @@ function mostraPasswordOverlay(callback) {
     document.getElementById('pwdCancelBtn').onclick = () => { ov.remove(); callback(false); };
 }
 
-// ==================== FORZA VISUALIZZAZIONE ====================
+// ==================== FORZA VISUALIZZAZIONE - CORRETTO ====================
 document.getElementById('btnForzaVisualizza').onclick = () => {
-    debugLog("FORZA VISUALIZZAZIONE - Mostro tutti i clienti");
+    debugLog("FORZA VISUALIZZAZIONE - Ricarico dati dal localStorage");
+    
+    if (!agenteCorrente) {
+        alert("Seleziona prima un agente!");
+        return;
+    }
+    
+    // Forza il ricaricamento dei dati dal localStorage
+    let keyOrd = `ord_${agenteCorrente.codice}`;
+    let keySca = `sca_${agenteCorrente.codice}`;
+    let ordSalvati = localStorage.getItem(keyOrd);
+    let scaSalvati = localStorage.getItem(keySca);
+    
+    datiAgenti.ord = ordSalvati ? JSON.parse(ordSalvati) : [];
+    datiAgenti.sca = scaSalvati ? JSON.parse(scaSalvati) : [];
+    
+    debugLog(`Dati ricaricati: ORD ${datiAgenti.ord.length}, SCA ${datiAgenti.sca.length}`);
+    
+    if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) {
+        alert("Nessun cliente trovato! Carica prima i file ORD+SCA");
+        return;
+    }
+    
+    // Aggiorna i clienti unici
+    aggiornaClientiUniciAgenti();
+    
+    // Seleziona il primo cliente disponibile
     let select = document.getElementById('selectClienteAgenti');
     if (select.options.length > 1) {
         select.value = select.options[1].value;
         mostraScadenzeAgenti();
         mostraDettaglioAgenti();
-        alert(`Visualizzati ${select.options.length-1} clienti`);
+        alert(`✅ Visualizzati ${select.options.length-1} clienti`);
+        debugLog(`Visualizzati ${select.options.length-1} clienti`);
     } else {
-        alert("Nessun cliente trovato! Carica prima i file ORD+SCA");
+        alert("Nessun cliente nella tendina dopo il ricaricamento");
+        debugLog("ERRORE: Nessun cliente nella tendina");
     }
 };
 
@@ -354,7 +381,7 @@ document.getElementById('btnVaiContabilita').onclick = () => { mostraPasswordOve
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 
 caricaAgenti();
-debugLog("App Agenti v2.08 avviata - fix cellulare");
+debugLog("App Agenti v2.09 avviata - pulsante fixato");
 </script>
 </body>
 </html>
