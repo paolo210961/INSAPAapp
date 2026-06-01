@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>inSAPA - Agenti</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
@@ -22,7 +25,6 @@
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; flex-wrap: wrap; }
         .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 120px; }
         .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
-        .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
         input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; }
         button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0; font-weight: bold; width: 100%; }
@@ -50,14 +52,7 @@
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; }
-        @media (max-width: 768px) { 
-            .main-container { flex-direction: column; } 
-            .sidebar { width: 100%; position: static; } 
-            .header { flex-direction: column; align-items: stretch; } 
-            .nav-box { width: 100%; } 
-            .logo-rettangolo { width: 100%; margin: 0 auto; }
-            .content-area { width: 100%; }
-        }
+        @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { width: 100%; position: static; } .header { flex-direction: column; align-items: stretch; } .nav-box { width: 100%; } .logo-rettangolo { width: 100%; margin: 0 auto; } .content-area { width: 100%; } }
     </style>
 </head>
 <body>
@@ -77,7 +72,7 @@
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v2.09 - Agenti (fix pulsante)</div>
+    <div class="version" id="appVersion">v3.00 - Agenti (Firebase)</div>
     <div class="main-container">
         <div id="sidebarAgenti" class="sidebar">
             <div class="agente-selector">
@@ -110,10 +105,24 @@
             </div>
         </div>
     </div>
-    <footer>Logo: clicca CARICA LOGO. Per cambiarlo, tieni premuto 3 secondi. Clicca articolo per storico ordini.</footer>
+    <footer>Logo: clicca CARICA LOGO. Per cambiarlo, tieni premuto 3 secondi. Clicca articolo per storico ordini. Dati su Firebase (condivisi).</footer>
 </div>
 <script>
-// ==================== AGENTI - v2.09 FIX PULSANTE ====================
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
+    authDomain: "insapa-database.firebaseapp.com",
+    projectId: "insapa-database",
+    storageBucket: "insapa-database.firebasestorage.app",
+    messagingSenderId: "331230245928",
+    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d",
+    measurementId: "G-DZJFCRD96M"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ==================== AGENTI - VERSIONE FIREBASE ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let agentiLista = [];
 let agenteCorrente = null;
@@ -124,65 +133,105 @@ let articoliFiltratiGlobali = [];
 
 function debugLog(msg) {
     let consoleDiv = document.getElementById('debugConsole');
-    let time = new Date().toLocaleTimeString();
-    consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
-    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    if(consoleDiv) {
+        let time = new Date().toLocaleTimeString();
+        consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
     console.log(msg);
 }
 
 function formatNumber(n) { if (n === null || n === undefined || n === '') return ''; let num = parseFloat(n); if (isNaN(num)) return ''; return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-// ==================== GESTIONE AGENTI ====================
-function caricaAgenti() {
-    let salvati = localStorage.getItem('agenti_lista');
-    if (salvati) { agentiLista = JSON.parse(salvati); debugLog(`Caricati ${agentiLista.length} agenti`); }
-    else { agentiLista = []; debugLog("Nessun agente trovato"); }
-    aggiornaSelectAgenti();
+// ==================== GESTIONE AGENTI SU FIREBASE ====================
+async function caricaAgenti() {
+    debugLog("Caricamento agenti da Firebase...");
+    try {
+        const snapshot = await db.collection('agenti_lista').get();
+        agentiLista = [];
+        snapshot.forEach(doc => agentiLista.push(doc.data()));
+        agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
+        debugLog(`Caricati ${agentiLista.length} agenti`);
+        aggiornaSelectAgenti();
+    } catch(e) { debugLog("ERRORE caricamento agenti: "+e.message); }
 }
-function salvaAgenti() { localStorage.setItem('agenti_lista', JSON.stringify(agentiLista)); debugLog("Agenti salvati"); }
+
+async function salvaAgenti() {
+    debugLog("Salvataggio agenti su Firebase...");
+    try {
+        const batch = db.batch();
+        const snapshot = await db.collection('agenti_lista').get();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        agentiLista.forEach(a => {
+            const ref = db.collection('agenti_lista').doc(a.codice);
+            batch.set(ref, a);
+        });
+        await batch.commit();
+        debugLog("Agenti salvati");
+    } catch(e) { debugLog("ERRORE salvataggio agenti: "+e.message); }
+}
+
 function aggiornaSelectAgenti() {
     let select = document.getElementById('selectAgente');
     select.innerHTML = '<option value="">-- Seleziona agente --</option>';
-    for (let a of agentiLista) { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = `${a.codice} - ${a.nome}`; select.appendChild(opt); }
+    for (let a of agentiLista) { 
+        let opt = document.createElement('option'); 
+        opt.value = a.codice; 
+        opt.textContent = `${a.codice} - ${a.nome}`; 
+        select.appendChild(opt); 
+    }
     if (agenteCorrente) { select.value = agenteCorrente.codice; }
 }
-function selezionaAgente(codice) {
+
+async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
-    if (agenteCorrente) { debugLog(`Agente selezionato: ${agenteCorrente.codice} - ${agenteCorrente.nome}`); caricaDatiAgente(); }
-    else { datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); document.getElementById('fileStatusAgenti').innerHTML = ''; debugLog("Nessun agente selezionato"); }
-}
-function caricaDatiAgente() {
-    let keyOrd = `ord_${agenteCorrente.codice}`, keySca = `sca_${agenteCorrente.codice}`;
-    let ordSalvati = localStorage.getItem(keyOrd), scaSalvati = localStorage.getItem(keySca);
-    datiAgenti.ord = ordSalvati ? JSON.parse(ordSalvati) : [];
-    datiAgenti.sca = scaSalvati ? JSON.parse(scaSalvati) : [];
-    debugLog(`Dati caricati: ORD ${datiAgenti.ord.length} clienti, SCA ${datiAgenti.sca.length} clienti`);
-    document.getElementById('fileStatusAgenti').innerHTML = `📁 ORD: ${datiAgenti.ord.length} clienti | SCA: ${datiAgenti.sca.length} clienti`;
-    aggiornaClientiUniciAgenti();
-}
-function salvaDatiAgente() {
-    if (agenteCorrente) {
-        localStorage.setItem(`ord_${agenteCorrente.codice}`, JSON.stringify(datiAgenti.ord));
-        localStorage.setItem(`sca_${agenteCorrente.codice}`, JSON.stringify(datiAgenti.sca));
-        debugLog(`Dati salvati per agente ${agenteCorrente.codice}`);
+    if (agenteCorrente) { 
+        debugLog(`Agente selezionato: ${agenteCorrente.codice} - ${agenteCorrente.nome}`); 
+        await caricaDatiAgente(); 
+    } else { 
+        datiAgenti = { ord: [], sca: [] }; 
+        aggiornaClientiUniciAgenti(); 
+        document.getElementById('fileStatusAgenti').innerHTML = ''; 
+        debugLog("Nessun agente selezionato"); 
     }
 }
-function creaAgente(codice, nome) {
-    if (agentiLista.find(a => a.codice === codice)) { alert("Codice agente già esistente!"); return false; }
+
+async function caricaDatiAgente() {
+    debugLog(`Caricamento dati per agente ${agenteCorrente.codice}...`);
+    try {
+        const docOrd = await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).get();
+        const docSca = await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).get();
+        
+        datiAgenti.ord = docOrd.exists ? docOrd.data().dati : [];
+        datiAgenti.sca = docSca.exists ? docSca.data().dati : [];
+        
+        debugLog(`Dati caricati: ORD ${datiAgenti.ord.length} clienti, SCA ${datiAgenti.sca.length} clienti`);
+        document.getElementById('fileStatusAgenti').innerHTML = `📁 ORD: ${datiAgenti.ord.length} clienti | SCA: ${datiAgenti.sca.length} clienti`;
+        aggiornaClientiUniciAgenti();
+    } catch(e) { debugLog("ERRORE caricamento dati agente: "+e.message); }
+}
+
+async function salvaDatiAgente() {
+    if (!agenteCorrente) return;
+    debugLog(`Salvataggio dati per agente ${agenteCorrente.codice}...`);
+    try {
+        await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiAgenti.ord });
+        await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiAgenti.sca });
+        debugLog("Dati salvati su Firebase");
+    } catch(e) { debugLog("ERRORE salvataggio dati agente: "+e.message); }
+}
+
+async function creaAgente(codice, nome) {
+    if (agentiLista.find(a => a.codice === codice)) { 
+        alert("Codice agente già esistente!"); 
+        return false; 
+    }
     agentiLista.push({ codice: codice, nome: nome });
-    salvaAgenti();
+    await salvaAgenti();
     aggiornaSelectAgenti();
     debugLog(`Agente creato: ${codice} - ${nome}`);
     return true;
 }
-document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); else { agenteCorrente = null; datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); } };
-document.getElementById('btnCreaAgente').onclick = () => {
-    let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. A001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('btnConferma').onclick = () => { let cod = document.getElementById('nuovoCodice').value.trim(), nom = document.getElementById('nuovoNome').value.trim(); if (cod && nom) { if (creaAgente(cod, nom)) { alert(`Agente ${cod} - ${nom} creato!`); modal.remove(); } } else alert("Compila tutti i campi!"); };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-};
 
 // ==================== PARSER ORD/SCA ====================
 function parseORD(text) {
@@ -206,6 +255,7 @@ function parseORD(text) {
     debugLog(`ORD parsato: ${clienti.size} clienti`);
     return Array.from(clienti.values());
 }
+
 function parseSCA(text) {
     debugLog(`Parsing SCA: ${text.length} caratteri`);
     const lines = text.split(/\r?\n/); const clienti = new Map(); let currentCliente = null;
@@ -230,6 +280,7 @@ function aggiornaClientiUniciAgenti() {
     aggiornaTendinaClienti();
     debugLog(`Clienti unici: ${clientiUniciAgenti.length}`);
 }
+
 function aggiornaTendinaClienti() {
     let select = document.getElementById('selectClienteAgenti'), searchText = document.getElementById('cercaCliente').value.toLowerCase();
     clientiFiltrati = clientiUniciAgenti.filter(cli => cli.codice.includes(searchText) || cli.ragione.toLowerCase().includes(searchText));
@@ -238,6 +289,7 @@ function aggiornaTendinaClienti() {
     select.disabled = (clientiFiltrati.length === 0);
     debugLog(`Tendina clienti aggiornata: ${select.options.length} opzioni`);
 }
+
 function mostraScadenzeAgenti() {
     let clienteKey = document.getElementById('selectClienteAgenti').value, container = document.getElementById('scadenzeAgenti');
     if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
@@ -245,9 +297,10 @@ function mostraScadenzeAgenti() {
     if (!clienteSCA || clienteSCA.scadenze.length === 0) { container.innerHTML = `<div class="info-messaggio">Nessuna scadenza (SCA) per ${ragione}</div>`; return; }
     let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3><table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
     for (let s of clienteSCA.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
-    html += `</tbody></table></div>`; container.innerHTML = html;
+    html += `</tbody>}</div>`; container.innerHTML = html;
     debugLog(`Mostrate scadenze per ${codice} - ${ragione}`);
 }
+
 function mostraDettaglioAgenti() {
     let clienteKey = document.getElementById('selectClienteAgenti').value, container = document.getElementById('dettaglioAgenti');
     if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
@@ -260,6 +313,7 @@ function mostraDettaglioAgenti() {
     filtraArticoli();
     debugLog(`Mostrato dettaglio per ${codice} - ${ragione} con ${clienteORD.articoli.length} articoli`);
 }
+
 function filtraArticoli() {
     let searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || '', clienteKey = document.getElementById('selectClienteAgenti').value;
     if (!clienteKey) return;
@@ -288,6 +342,7 @@ function filtraArticoli() {
         });
     });
 }
+
 function mostraPasswordOverlay(callback) {
     let ov = document.createElement('div'); ov.className = 'password-overlay';
     ov.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Contabilità</h3><p>Inserisci password amministratore</p><input type="password" id="pwdInput" style="width:100%; margin:10px 0;"><div class="btn-group"><button id="pwdOkBtn" class="btn-success">OK</button><button id="pwdCancelBtn" class="btn-danger">ANNULLA</button></div></div>`;
@@ -296,35 +351,22 @@ function mostraPasswordOverlay(callback) {
     document.getElementById('pwdCancelBtn').onclick = () => { ov.remove(); callback(false); };
 }
 
-// ==================== FORZA VISUALIZZAZIONE - CORRETTO ====================
-document.getElementById('btnForzaVisualizza').onclick = () => {
-    debugLog("FORZA VISUALIZZAZIONE - Ricarico dati dal localStorage");
+// ==================== FORZA VISUALIZZAZIONE ====================
+document.getElementById('btnForzaVisualizza').onclick = async () => {
+    debugLog("FORZA VISUALIZZAZIONE - Ricarico dati da Firebase");
     
     if (!agenteCorrente) {
         alert("Seleziona prima un agente!");
         return;
     }
     
-    // Forza il ricaricamento dei dati dal localStorage
-    let keyOrd = `ord_${agenteCorrente.codice}`;
-    let keySca = `sca_${agenteCorrente.codice}`;
-    let ordSalvati = localStorage.getItem(keyOrd);
-    let scaSalvati = localStorage.getItem(keySca);
-    
-    datiAgenti.ord = ordSalvati ? JSON.parse(ordSalvati) : [];
-    datiAgenti.sca = scaSalvati ? JSON.parse(scaSalvati) : [];
-    
-    debugLog(`Dati ricaricati: ORD ${datiAgenti.ord.length}, SCA ${datiAgenti.sca.length}`);
+    await caricaDatiAgente();
     
     if (datiAgenti.ord.length === 0 && datiAgenti.sca.length === 0) {
         alert("Nessun cliente trovato! Carica prima i file ORD+SCA");
         return;
     }
     
-    // Aggiorna i clienti unici
-    aggiornaClientiUniciAgenti();
-    
-    // Seleziona il primo cliente disponibile
     let select = document.getElementById('selectClienteAgenti');
     if (select.options.length > 1) {
         select.value = select.options[1].value;
@@ -334,7 +376,6 @@ document.getElementById('btnForzaVisualizza').onclick = () => {
         debugLog(`Visualizzati ${select.options.length-1} clienti`);
     } else {
         alert("Nessun cliente nella tendina dopo il ricaricamento");
-        debugLog("ERRORE: Nessun cliente nella tendina");
     }
 };
 
@@ -347,13 +388,13 @@ let pt = null; let ld = document.getElementById('logoRettangolo'); ld.addEventLi
 
 // ==================== CARICAMENTO FILE ====================
 document.getElementById('btnCaricaFileAgenti').onclick = () => { if (!agenteCorrente) { alert("Seleziona prima un agente!"); return; } document.getElementById('fileInputMultiAgenti').click(); };
-document.getElementById('fileInputMultiAgenti').onchange = (e) => {
+document.getElementById('fileInputMultiAgenti').onchange = async (e) => {
     let files = Array.from(e.target.files); if (files.length === 0 || !agenteCorrente) return;
     debugLog(`Caricamento di ${files.length} file`);
     let loaded = 0, ordText = null, scaText = null;
     for (let file of files) {
         let reader = new FileReader();
-        reader.onload = (ev) => { 
+        reader.onload = async (ev) => { 
             let content = ev.target.result, nome = file.name.toLowerCase(); 
             debugLog(`Letto file: ${nome}, ${content.length} caratteri`);
             if (nome.includes('ord')) ordText = content; 
@@ -362,10 +403,10 @@ document.getElementById('fileInputMultiAgenti').onchange = (e) => {
             if (loaded === files.length) { 
                 if (ordText) { datiAgenti.ord = parseORD(ordText); debugLog(`ORD caricato: ${datiAgenti.ord.length} clienti`); }
                 if (scaText) { datiAgenti.sca = parseSCA(scaText); debugLog(`SCA caricato: ${datiAgenti.sca.length} clienti`); }
-                salvaDatiAgente(); 
+                await salvaDatiAgente(); 
                 aggiornaClientiUniciAgenti(); 
                 document.getElementById('fileStatusAgenti').innerHTML = `✅ ORD:${datiAgenti.ord.length} clienti | SCA:${datiAgenti.sca.length} clienti`;
-                alert(`Caricamento completato! ORD: ${datiAgenti.ord.length} clienti, SCA: ${datiAgenti.sca.length} clienti`);
+                alert(`Caricamento completato e salvato su Firebase! ORD: ${datiAgenti.ord.length} clienti, SCA: ${datiAgenti.sca.length} clienti`);
             } 
         };
         reader.onerror = (err) => { debugLog(`ERRORE lettura file: ${file.name}`); loaded++; };
@@ -373,15 +414,26 @@ document.getElementById('fileInputMultiAgenti').onchange = (e) => {
     }
     e.target.value = '';
 };
+
+// ==================== EVENTI UI ====================
+document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); else { agenteCorrente = null; datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); } };
 document.getElementById('cercaCliente').oninput = () => aggiornaTendinaClienti();
 document.getElementById('selectClienteAgenti').onchange = () => { mostraScadenzeAgenti(); mostraDettaglioAgenti(); };
+document.getElementById('btnCreaAgente').onclick = () => {
+    let modal = document.createElement('div'); modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. A001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnConferma').onclick = async () => { let cod = document.getElementById('nuovoCodice').value.trim(), nom = document.getElementById('nuovoNome').value.trim(); if (cod && nom) { if (await creaAgente(cod, nom)) { alert(`Agente ${cod} - ${nom} creato!`); modal.remove(); } } else alert("Compila tutti i campi!"); };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+};
 
 // ==================== NAVIGAZIONE ====================
 document.getElementById('btnVaiContabilita').onclick = () => { mostraPasswordOverlay((ok) => { if (ok) window.location.href = 'contabilita.html'; }); };
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 
+// Avvio
 caricaAgenti();
-debugLog("App Agenti v2.09 avviata - pulsante fixato");
+debugLog("App Agenti v3.00 avviata con Firebase");
 </script>
 </body>
 </html>
