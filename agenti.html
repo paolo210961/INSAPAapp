@@ -19,7 +19,7 @@
         .nav-btn { background: #34495e; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.2s; }
         .nav-btn:hover { background: #1a252f; transform: translateY(-1px); }
         .nav-btn.disabled { background: #7f8c8d; cursor: not-allowed; opacity: 0.6; }
-        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; }
+        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; flex-wrap: wrap; }
         .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 120px; }
         .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
         .form-group { margin-bottom: 15px; }
@@ -41,20 +41,15 @@
         .articolo-titolo { font-weight: bold; margin-bottom: 5px; }
         .articolo-prezzo { font-weight: bold; font-family: monospace; }
         .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; font-size: 0.75rem; }
-        .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 2px 6px; border-radius: 4px; margin: 2px; }
         .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
+        .debug-console { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 0.7rem; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 150px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
         .agente-selector { background: #f0f4f8; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        .agente-selector select { margin-top: 5px; }
-        .btn-crea-agente { background: #27ae60; margin-top: 10px; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; }
-        .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group button { margin: 0; }
         @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { width: 100%; position: static; } .header { flex-direction: column; align-items: stretch; } .nav-box { width: 100%; } .logo-rettangolo { width: 100%; margin: 0 auto; } }
     </style>
 </head>
@@ -75,7 +70,7 @@
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v2.06 - Agenti</div>
+    <div class="version" id="appVersion">v2.07 - Agenti (debug)</div>
     <div class="main-container">
         <div id="sidebarAgenti" class="sidebar">
             <div class="agente-selector">
@@ -83,13 +78,14 @@
                 <select id="selectAgente" style="width:100%; padding:10px; border-radius:8px;">
                     <option value="">-- Seleziona agente --</option>
                 </select>
-                <button id="btnCreaAgente" class="btn-crea-agente">➕ CREA AGENTE</button>
+                <button id="btnCreaAgente" class="btn-crea-agente" style="background:#27ae60;">➕ CREA AGENTE</button>
             </div>
             <button id="btnCaricaFileAgenti" class="btn-success" style="width:100%">📂 Carica ORD + SCA</button>
             <div id="fileStatusAgenti" class="file-status"></div>
             <input type="file" id="fileInputMultiAgenti" multiple accept=".txt,.csv,.text/plain" style="display: none;">
             <div class="search-box" style="margin-top:15px;"><label>🔍 Cerca cliente</label><input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente..."></div>
             <div class="filter-group" style="margin-top:15px;"><label>👥 Cliente</label><select id="selectClienteAgenti" disabled size="10" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select></div>
+            <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
         </div>
         <div class="content-area">
             <div id="agentiContainer">
@@ -99,10 +95,10 @@
             </div>
         </div>
     </div>
-    <footer>Logo: clicca CARICA LOGO la prima volta. Per cambiarlo, tieni premuto 3 secondi sul logo. Clicca su un articolo per vedere lo storico ordini.</footer>
+    <footer>Logo: clicca CARICA LOGO. Per cambiarlo, tieni premuto 3 secondi. Clicca articolo per storico ordini.</footer>
 </div>
 <script>
-// ==================== AGENTI - v2.06 ====================
+// ==================== AGENTI - v2.07 DEBUG ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let agentiLista = [];
 let agenteCorrente = null;
@@ -111,16 +107,24 @@ let clientiUniciAgenti = [];
 let clientiFiltrati = [];
 let articoliFiltratiGlobali = [];
 
+function debugLog(msg) {
+    let consoleDiv = document.getElementById('debugConsole');
+    let time = new Date().toLocaleTimeString();
+    consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    console.log(msg);
+}
+
 function formatNumber(n) { if (n === null || n === undefined || n === '') return ''; let num = parseFloat(n); if (isNaN(num)) return ''; return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
 // ==================== GESTIONE AGENTI ====================
 function caricaAgenti() {
     let salvati = localStorage.getItem('agenti_lista');
-    if (salvati) { agentiLista = JSON.parse(salvati); }
-    else { agentiLista = []; }
+    if (salvati) { agentiLista = JSON.parse(salvati); debugLog(`Caricati ${agentiLista.length} agenti`); }
+    else { agentiLista = []; debugLog("Nessun agente trovato"); }
     aggiornaSelectAgenti();
 }
-function salvaAgenti() { localStorage.setItem('agenti_lista', JSON.stringify(agentiLista)); }
+function salvaAgenti() { localStorage.setItem('agenti_lista', JSON.stringify(agentiLista)); debugLog("Agenti salvati"); }
 function aggiornaSelectAgenti() {
     let select = document.getElementById('selectAgente');
     select.innerHTML = '<option value="">-- Seleziona agente --</option>';
@@ -129,14 +133,15 @@ function aggiornaSelectAgenti() {
 }
 function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
-    if (agenteCorrente) { caricaDatiAgente(); }
-    else { datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); document.getElementById('fileStatusAgenti').innerHTML = ''; }
+    if (agenteCorrente) { debugLog(`Agente selezionato: ${agenteCorrente.codice} - ${agenteCorrente.nome}`); caricaDatiAgente(); }
+    else { datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); document.getElementById('fileStatusAgenti').innerHTML = ''; debugLog("Nessun agente selezionato"); }
 }
 function caricaDatiAgente() {
     let keyOrd = `ord_${agenteCorrente.codice}`, keySca = `sca_${agenteCorrente.codice}`;
     let ordSalvati = localStorage.getItem(keyOrd), scaSalvati = localStorage.getItem(keySca);
     datiAgenti.ord = ordSalvati ? JSON.parse(ordSalvati) : [];
     datiAgenti.sca = scaSalvati ? JSON.parse(scaSalvati) : [];
+    debugLog(`Dati caricati: ORD ${datiAgenti.ord.length} clienti, SCA ${datiAgenti.sca.length} clienti`);
     document.getElementById('fileStatusAgenti').innerHTML = `📁 ORD: ${datiAgenti.ord.length} clienti | SCA: ${datiAgenti.sca.length} clienti`;
     aggiornaClientiUniciAgenti();
 }
@@ -144,6 +149,7 @@ function salvaDatiAgente() {
     if (agenteCorrente) {
         localStorage.setItem(`ord_${agenteCorrente.codice}`, JSON.stringify(datiAgenti.ord));
         localStorage.setItem(`sca_${agenteCorrente.codice}`, JSON.stringify(datiAgenti.sca));
+        debugLog(`Dati salvati per agente ${agenteCorrente.codice}`);
     }
 }
 function creaAgente(codice, nome) {
@@ -151,6 +157,7 @@ function creaAgente(codice, nome) {
     agentiLista.push({ codice: codice, nome: nome });
     salvaAgenti();
     aggiornaSelectAgenti();
+    debugLog(`Agente creato: ${codice} - ${nome}`);
     return true;
 }
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); else { agenteCorrente = null; datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); } };
@@ -164,6 +171,7 @@ document.getElementById('btnCreaAgente').onclick = () => {
 
 // ==================== PARSER ORD/SCA ====================
 function parseORD(text) {
+    debugLog(`Parsing ORD: ${text.length} caratteri`);
     const lines = text.split(/\r?\n/); const clienti = new Map(); let currentCliente = null;
     const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/; const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
     for (let line of lines) {
@@ -180,9 +188,11 @@ function parseORD(text) {
         coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
         currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
     }
+    debugLog(`ORD parsato: ${clienti.size} clienti`);
     return Array.from(clienti.values());
 }
 function parseSCA(text) {
+    debugLog(`Parsing SCA: ${text.length} caratteri`);
     const lines = text.split(/\r?\n/); const clienti = new Map(); let currentCliente = null;
     const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/; const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
     for (let line of lines) {
@@ -191,6 +201,7 @@ function parseSCA(text) {
         if (mCliente) { currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] }; clienti.set(currentCliente.codice, currentCliente); continue; }
         if (currentCliente) { let mScad = line.match(reScadenza); if (mScad) { currentCliente.scadenze.push({ scadenza: mScad[1], numDoc: mScad[2], dataDoc: mScad[3], importo: parseFloat(mScad[4].replace(/\./g, '').replace(',', '.')) }); } }
     }
+    debugLog(`SCA parsato: ${clienti.size} clienti`);
     return Array.from(clienti.values());
 }
 
@@ -200,7 +211,9 @@ function aggiornaClientiUniciAgenti() {
     for (let c of datiAgenti.ord) { let key = `${c.codice}|${c.ragione}`; if (!mappa.has(key)) mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: true }); else mappa.get(key).hasOrdini = true; }
     for (let c of datiAgenti.sca) { let key = `${c.codice}|${c.ragione}`; if (!mappa.has(key)) mappa.set(key, { codice: c.codice, ragione: c.ragione, hasScadenze: false, hasOrdini: false }); if (c.scadenze.length > 0 && c.scadenze.some(s => s.importo !== 0)) { let cli = mappa.get(key); if (cli) cli.hasScadenze = true; } }
     clientiUniciAgenti = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
-    clientiFiltrati = [...clientiUniciAgenti]; aggiornaTendinaClienti();
+    clientiFiltrati = [...clientiUniciAgenti]; 
+    aggiornaTendinaClienti();
+    debugLog(`Clienti unici: ${clientiUniciAgenti.length}`);
 }
 function aggiornaTendinaClienti() {
     let select = document.getElementById('selectClienteAgenti'), searchText = document.getElementById('cercaCliente').value.toLowerCase();
@@ -229,14 +242,6 @@ function mostraDettaglioAgenti() {
     let inp = document.getElementById('cercaArticolo'); if (inp) { inp.removeEventListener('input', filtraArticoli); inp.addEventListener('input', filtraArticoli); }
     filtraArticoli();
 }
-function mostraStoricoOrdini(articolo) {
-    let storico = articolo.coppie.slice(0, 4);
-    if (storico.length === 0) return '<div class="storico-ordini">📭 Nessun ordine registrato</div>';
-    let html = '<div class="storico-ordini"><strong>📋 ULTIMI ORDINI:</strong><br>';
-    for (let ord of storico) { html += `<span>📅 ${ord.data} → Quantità: ${ord.qta}</span> `; }
-    html += '</div>';
-    return html;
-}
 function filtraArticoli() {
     let searchText = document.getElementById('cercaArticolo')?.value.toLowerCase() || '', clienteKey = document.getElementById('selectClienteAgenti').value;
     if (!clienteKey) return;
@@ -251,7 +256,8 @@ function filtraArticoli() {
     if (filtrati.length === 0) html += `<div class="info-messaggio">Nessun articolo trovato.</div>`;
     document.getElementById('dettaglioAgenti').innerHTML = html;
     document.querySelectorAll('.articolo-item').forEach(el => {
-        el.addEventListener('click', () => {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
             let coppie = JSON.parse(el.dataset.coppie);
             let storicoHtml = '<div class="storico-ordini" style="margin-top:10px; padding-top:10px; border-top:2px solid #3498db;"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>';
             let mostrati = coppie.slice(0, 4);
@@ -283,10 +289,29 @@ let pt = null; let ld = document.getElementById('logoRettangolo'); ld.addEventLi
 document.getElementById('btnCaricaFileAgenti').onclick = () => { if (!agenteCorrente) { alert("Seleziona prima un agente!"); return; } document.getElementById('fileInputMultiAgenti').click(); };
 document.getElementById('fileInputMultiAgenti').onchange = (e) => {
     let files = Array.from(e.target.files); if (files.length === 0 || !agenteCorrente) return;
+    debugLog(`Caricamento di ${files.length} file`);
     let loaded = 0, ordText = null, scaText = null;
     for (let file of files) {
         let reader = new FileReader();
-        reader.onload = (ev) => { let content = ev.target.result, nome = file.name.toLowerCase(); if (nome.includes('ord')) ordText = content; if (nome.includes('sca')) scaText = content; loaded++; if (loaded === files.length) { if (ordText) datiAgenti.ord = parseORD(ordText); if (scaText) datiAgenti.sca = parseSCA(scaText); salvaDatiAgente(); aggiornaClientiUniciAgenti(); document.getElementById('fileStatusAgenti').innerHTML = `✅ ORD:${datiAgenti.ord.length} clienti | SCA:${datiAgenti.sca.length} clienti`; if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value; mostraScadenzeAgenti(); mostraDettaglioAgenti(); } };
+        reader.onload = (ev) => { 
+            let content = ev.target.result, nome = file.name.toLowerCase(); 
+            debugLog(`Letto file: ${nome}, ${content.length} caratteri`);
+            if (nome.includes('ord')) ordText = content; 
+            if (nome.includes('sca')) scaText = content; 
+            loaded++; 
+            if (loaded === files.length) { 
+                if (ordText) { datiAgenti.ord = parseORD(ordText); debugLog(`ORD caricato: ${datiAgenti.ord.length} clienti`); }
+                if (scaText) { datiAgenti.sca = parseSCA(scaText); debugLog(`SCA caricato: ${datiAgenti.sca.length} clienti`); }
+                salvaDatiAgente(); 
+                aggiornaClientiUniciAgenti(); 
+                document.getElementById('fileStatusAgenti').innerHTML = `✅ ORD:${datiAgenti.ord.length} clienti | SCA:${datiAgenti.sca.length} clienti`;
+                if (document.getElementById('selectClienteAgenti').options.length > 1) document.getElementById('selectClienteAgenti').value = document.getElementById('selectClienteAgenti').options[1].value; 
+                mostraScadenzeAgenti(); 
+                mostraDettaglioAgenti(); 
+                alert(`Caricamento completato! ORD: ${datiAgenti.ord.length} clienti, SCA: ${datiAgenti.sca.length} clienti`);
+            } 
+        };
+        reader.onerror = (err) => { debugLog(`ERRORE lettura file: ${file.name}`); loaded++; };
         reader.readAsText(file, "UTF-8");
     }
     e.target.value = '';
@@ -299,6 +324,7 @@ document.getElementById('btnVaiContabilita').onclick = () => { mostraPasswordOve
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 
 caricaAgenti();
+debugLog("App Agenti v2.07 avviata - pronto per debug");
 </script>
 </body>
 </html>
