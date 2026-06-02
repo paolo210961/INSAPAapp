@@ -11,7 +11,7 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
         
-        /* HEADER CON DUE RIGHE - stessi stili di agenti */
+        /* HEADER */
         .header {
             background: white;
             padding: 15px 25px;
@@ -87,6 +87,36 @@
         }
         .nav-btn.disabled:hover { transform: none; background: #ecf0f1; color: #95a5a6; }
         
+        /* SCHEDA CONTAINER - CENTRATA SOPRA LA TABELLA */
+        .scheda-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0 20px 0;
+        }
+        .scheda-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 12px;
+            display: inline-flex;
+        }
+        .scheda-btn {
+            background: #ecf0f1;
+            color: black;
+            font-weight: bold;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .scheda-btn.active-scheda {
+            background: #3498db;
+            color: white;
+        }
+        
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         
         .sidebar {
@@ -130,8 +160,6 @@
         .cell-input { width: 100%; border: none; background: transparent; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
         .cell-input:focus { outline: 1px solid #3498db; background: white; }
         .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
-        .scheda-btn { background: #ecf0f1; color: black; font-weight: bold; border: 1px solid #bdc3c7; }
-        .scheda-btn.active-scheda { background: #3498db; color: white; border-color: #3498db; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .archive-box { background: #f0f4f8; border: 1px solid #d0d7de; border-radius: 12px; padding: 15px; margin-top: 15px; }
         .archive-box .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
@@ -152,6 +180,7 @@
             .logo-rettangolo { width: 100%; margin: 0 auto; }
             .logo-area { justify-content: center; flex-direction: column; }
             .btn-logo-mobile { display: block; }
+            .scheda-wrapper { margin: 10px 0; }
         }
     </style>
 </head>
@@ -177,7 +206,7 @@
         </div>
     </div>
 
-    <div class="version" id="appVersion">v5.08 - Contabilità</div>
+    <div class="version" id="appVersion">v5.21 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -185,22 +214,28 @@
             <div class="form-group"><label>📆 Mese</label><select id="meseSelect"><option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option><option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option><option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option><option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option></select></div>
             <div class="form-group"><label>💰 Saldo iniziale (€)</label><input type="number" id="saldoIniziale" step="0.01" value="0"></div>
             <hr>
-            <div class="btn-group"><button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button><button id="btnContanti" class="scheda-btn">💵 CONTANTI</button><button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button></div>
-            <hr>
-            <div id="formArea"></div>
-            <div class="form-group"><button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button></div>
-            <hr>
             <div class="archive-box"><div class="btn-group"><button id="btnCaricaMese" class="btn-blue">📂 CARICA MESE</button><button id="btnRiprendiCorrente" class="btn-success">📅 RIPRENDI MESE CORRENTE</button><button id="btnEsportaPDFMese" class="btn-yellow"><strong>📄 ESPORTA REPORT MESE</strong></button><button id="btnEsportaCSVAnno" class="btn-yellow"><strong>📎 ESPORTA CSV ANNO</strong></button><button id="btnEsportaCSVMese" class="btn-yellow"><strong>📎 ESPORTA CSV MESE</strong></button></div></div>
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
+            <div class="form-group"><button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button></div>
             <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
         </div>
 
         <div class="content-area">
+            <!-- SCHEDE CENTRATE SOPRA LA TABELLA -->
+            <div class="scheda-wrapper">
+                <div class="scheda-container">
+                    <button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button>
+                    <button id="btnContanti" class="scheda-btn">💵 CONTANTI</button>
+                    <button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button>
+                </div>
+            </div>
+            
             <div id="contabilitaContainer">
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><div id="saldoInfo"></div><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th><th>✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th><tr></thead><tbody id="fornitoriBody"></tbody><table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
             </div>
+            <div id="formArea"></div>
             <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button></div></div>
         </div>
     </div>
@@ -248,14 +283,9 @@ async function salvaStatoFirebase() {
     debugLog(`Salvataggio su Firebase: ${currentYear}/${currentMonth}`);
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
-            anno: currentYear,
-            mese: currentMonth,
-            saldoIniziale: saldoIniziale,
-            primaNota: primaNota,
-            contanti: contanti,
-            fattureFornitori: fattureFornitori,
-            nextFatturaId: nextFatturaId,
-            ultimoAggiornamento: new Date().toISOString()
+            anno: currentYear, mese: currentMonth, saldoIniziale: saldoIniziale,
+            primaNota: primaNota, contanti: contanti, fattureFornitori: fattureFornitori,
+            nextFatturaId: nextFatturaId, ultimoAggiornamento: new Date().toISOString()
         });
         debugLog("Salvataggio completato");
     } catch(e) { debugLog("ERRORE salvataggio: "+e.message); }
@@ -408,8 +438,8 @@ async function eliminaSelezionati(s){ if(s==='primanota'){ let ck=document.query
 async function cambiaMese(){ currentYear=parseInt(document.getElementById('annoSelect').value); currentMonth=parseInt(document.getElementById('meseSelect').value); await caricaStatoFirebase(); pendingChanges={}; }
 async function riprendiMeseCorrente(){ const ultimo=localStorage.getItem('ultimoMeseLavorato'); if(ultimo){ const {anno,mese}=JSON.parse(ultimo); currentYear=anno; currentMonth=mese; await caricaStatoFirebase(); alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`); } else alert("Nessun mese precedente trovato."); pendingChanges={}; }
 function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
-<div class="section-title">💵 INCASSO CONTANTI</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody></table>
-<div class="section-title">📄 FATTURE FORNITORI</div><table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<td><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
+<div class="section-title">💵 INCASSO CONTANTI</div></table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody></table>
+<div class="section-title">📄 FATTURE FORNITORI</div><table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></td>':''}</tbody></table>
 <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Responsabile Amministrativo<br>_________________________</div><script>window.onload=()=>window.print();<\/script></body></html>`); w.document.close(); }
 function esportaCSV(perAnno){ let rows=[["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]], dataE=[]; if(perAnno){ for(let m=0;m<12;m++){ let saved=localStorage.getItem(`contabilita_${currentYear}_${m}`); if(saved){ try{ let d=JSON.parse(saved); for(let r of(d.primaNota||[])) dataE.push(r); for(let r of(d.contanti||[])) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); }catch(e){} } } } else { for(let r of primaNota) dataE.push(r); for(let r of contanti) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); } for(let r of dataE) rows.push([r.data||'',r.descrizione||'',r.avere?r.avere.toString().replace('.',','):'',r.dare?r.dare.toString().replace('.',','):'',r.incassoContanti?r.incassoContanti.toString().replace('.',','):'',r.verificato?"Sì":"No"]); let blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8"}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=perAnno?`contabilita_${currentYear}_anno.csv`:`contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href); }
 
@@ -473,7 +503,6 @@ setupSelectAll('selectAllContanti','contantiBody','row-check-contanti');
 setupSelectAll('selectAllFornitori','fornitoriBody','row-check-fornitori');
 
 // ==================== NAVIGAZIONE ====================
-// Da CONTABILITÀ a AGENTI: NON chiede password (accesso libero)
 document.getElementById('btnVaiAgenti').onclick = () => { window.location.href = 'agenti.html'; };
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 
