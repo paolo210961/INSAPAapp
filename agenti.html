@@ -10,7 +10,8 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; }
         .header { background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: sticky; top: 0; z-index: 1000; }
-        .logo-rettangolo { width: 300px; height: 80px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc; cursor: pointer; }
+        .logo-rettangolo { width: 300px; height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+        .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .nav-box { background: #2c3e50; border-radius: 16px; padding: 10px 20px; }
         .nav-grid { display: flex; gap: 10px; }
         .nav-btn { background: #34495e; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
@@ -36,20 +37,29 @@
 </head>
 <body>
 <div class="header">
-    <div id="logoRettangolo" class="logo-rettangolo" style="display: flex; align-items: center; justify-content: center; overflow: hidden;">
-        <img id="logoImmagine" style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
+    <div id="logoRettangolo" class="logo-rettangolo">
+        <img id="logoImmagine" style="display:none;">
         <span id="logoSpan">🏢 LOGO</span>
     </div>
-    <div class="nav-box"><div class="nav-grid"><button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button><button class="nav-btn disabled" style="background:#7f8c8d">👥 AGENTI</button><button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button></div></div>
+    <div class="nav-box">
+        <div class="nav-grid">
+            <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
+            <button class="nav-btn disabled" style="background:#7f8c8d">👥 AGENTI</button>
+            <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
+        </div>
+    </div>
 </div>
 <div class="main-container">
     <div class="sidebar">
         <h3>👤 Seleziona Agente</h3>
-        <select id="selectAgente"><option value="">-- Seleziona --</option></select>
+        <select id="selectAgente">
+            <option value="">-- Seleziona --</option>
+        </select>
         <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
         <button id="btnCaricaFile">📂 Carica ORD + SCA</button>
         <input type="file" id="fileInput" multiple accept=".txt,.csv">
         <div id="fileStatus" class="file-status"></div>
+        <button id="btnRicarica" style="background:#f39c12; color:#2c3e50;">🔄 RICARICA AGENTI</button>
     </div>
     <div class="content-area">
         <div id="scadenze"></div>
@@ -57,7 +67,7 @@
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v3.20 - Firebase Semplice</div>
+<div class="version">v4.00 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -80,24 +90,15 @@ let datiSca = [];
 
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
-    console.log("📥 Caricamento agenti da Firebase...");
+    console.log("📥 Caricamento agenti...");
     try {
         const snapshot = await db.collection('agenti_lista').get();
         agentiLista = [];
         snapshot.forEach(doc => agentiLista.push(doc.data()));
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
-        console.log(`✅ Trovati ${agentiLista.length} agenti:`, agentiLista.map(a => a.codice));
+        console.log(`✅ Trovati ${agentiLista.length} agenti`);
         aggiornaSelect();
-    } catch(e) { console.error("❌ ERRORE:", e); }
-}
-
-async function salvaAgente(codice, nome) {
-    try {
-        await db.collection('agenti_lista').doc(codice).set({ codice, nome });
-        console.log(`✅ Agente ${codice} - ${nome} salvato`);
-        await caricaAgenti(); // Ricarica la lista
-        return true;
-    } catch(e) { console.error("❌ ERRORE salvataggio:", e); return false; }
+    } catch(e) { console.error("❌ ERRORE:", e); alert("Errore caricamento: " + e.message); }
 }
 
 function aggiornaSelect() {
@@ -112,26 +113,24 @@ function aggiornaSelect() {
     }
     if (oldValue && agentiLista.find(a => a.codice === oldValue)) {
         select.value = oldValue;
-        selezionaAgente(oldValue);
     }
-    console.log(`📋 Select aggiornata: ${select.options.length-1} agenti`);
+    console.log(`📋 Select: ${select.options.length-1} agenti`);
 }
 
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
-    console.log(`👤 Agente selezionato: ${codice}`);
+    console.log(`👤 Selezionato: ${codice}`);
     
-    // Carica i dati dell'agente
     try {
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
         let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
         datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
         datiSca = scaDoc.exists ? scaDoc.data().dati : [];
-        console.log(`📊 Dati: ORD ${datiOrd.length}, SCA ${datiSca.length}`);
+        console.log(`📊 ORD: ${datiOrd.length}, SCA: ${datiSca.length}`);
         document.getElementById('fileStatus').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
         aggiornaClienti();
-    } catch(e) { console.error("❌ ERRORE caricamento dati:", e); }
+    } catch(e) { console.error("ERRORE:", e); }
 }
 
 async function salvaDatiAgente() {
@@ -140,10 +139,21 @@ async function salvaDatiAgente() {
         await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiOrd });
         await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiSca });
         console.log(`💾 Dati salvati per ${agenteCorrente.codice}`);
-    } catch(e) { console.error("❌ ERRORE salvataggio dati:", e); }
+    } catch(e) { console.error("ERRORE salvataggio:", e); }
 }
 
-// ==================== PARSER SEMPLIFICATI ====================
+async function creaAgente(codice, nome) {
+    if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
+    if (agentiLista.find(a => a.codice === codice)) { alert("Codice già esistente!"); return false; }
+    try {
+        await db.collection('agenti_lista').doc(codice).set({ codice, nome });
+        console.log(`✅ Agente ${codice} - ${nome} creato`);
+        await caricaAgenti(); // Ricarica la lista
+        return true;
+    } catch(e) { alert("ERRORE: " + e.message); return false; }
+}
+
+// ==================== PARSER ====================
 function parseORD(text) {
     let clienti = [];
     let lines = text.split(/\r?\n/);
@@ -240,7 +250,7 @@ function mostraScadenze() {
     let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
                 <table style="width:100%; border-collapse:collapse;">
                 <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
-    for (let s of cliente.scadenze) html += `<tr><td>${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
+    for (let s of cliente.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
     html += `</tbody>}</div>`;
     container.innerHTML = html;
 }
@@ -269,24 +279,9 @@ function mostraDettaglio() {
 
 // ==================== EVENTI ====================
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
-
-document.getElementById('btnCreaAgente').onclick = () => {
-    let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('btnConferma').onclick = async () => {
-        let cod = document.getElementById('nuovoCodice').value.trim();
-        let nom = document.getElementById('nuovoNome').value.trim();
-        if (cod && nom) {
-            await salvaAgente(cod, nom);
-            alert(`Agente ${cod} - ${nom} creato!`);
-            modal.remove();
-        } else alert("Compila tutti i campi!");
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-};
-
+document.getElementById('btnRicarica').onclick = () => caricaAgenti();
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
+
 document.getElementById('fileInput').onchange = async (e) => {
     let files = Array.from(e.target.files);
     if (!agenteCorrente) { alert("Seleziona prima un agente!"); return; }
@@ -305,6 +300,24 @@ document.getElementById('fileInput').onchange = async (e) => {
     alert(`Caricato! ORD: ${datiOrd.length}, SCA: ${datiSca.length}`);
 };
 
+// MODALE CREA AGENTE
+document.getElementById('btnCreaAgente').onclick = () => {
+    let modal = document.createElement('div'); modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnConferma').onclick = async () => {
+        let cod = document.getElementById('nuovoCodice').value.trim();
+        let nom = document.getElementById('nuovoNome').value.trim();
+        if (cod && nom) {
+            if (await creaAgente(cod, nom)) {
+                alert(`Agente ${cod} - ${nom} creato!`);
+                modal.remove();
+            }
+        } else alert("Compila tutti i campi!");
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+};
+
 // ==================== LOGO ====================
 function caricaLogo() { let l = localStorage.getItem('logo'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
 function salvaLogo(u) { localStorage.setItem('logo', u); }
@@ -317,7 +330,7 @@ caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v3.20");
+console.log("🚀 App avviata - v4.00");
 </script>
 </body>
 </html>
