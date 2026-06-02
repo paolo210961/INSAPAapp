@@ -8,27 +8,49 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
         .header { background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: sticky; top: 0; z-index: 1000; }
         .logo-rettangolo { width: 300px; height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .nav-box { background: #2c3e50; border-radius: 16px; padding: 10px 20px; }
         .nav-grid { display: flex; gap: 10px; }
         .nav-btn { background: #34495e; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
-        .main-container { display: flex; gap: 20px; padding: 20px; flex-wrap: wrap; }
-        .sidebar { width: 320px; background: white; border-radius: 16px; padding: 20px; }
-        .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; }
+        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
+        .sidebar { 
+            width: 340px; 
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 120px;
+            height: fit-content;
+        }
+        .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
         button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; }
         .btn-success { background: #27ae60; }
         select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
-        .scadenze-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
-        .articolo-item:hover { background: #fff3cd; }
+        .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
+        .articolo-item { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+        }
+        .articolo-item:hover { background-color: #fff3cd; transform: translateX(5px); }
         .articolo-titolo { font-weight: bold; }
-        .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 2px solid #3498db; font-size: 0.8rem; display: none; }
+        .storico-ordini { 
+            margin-top: 10px; 
+            padding-top: 10px; 
+            border-top: 2px solid #3498db; 
+            font-size: 0.75rem; 
+            display: none; 
+        }
         .storico-ordini.visible { display: block; }
         .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 4px 8px; margin: 3px; border-radius: 6px; }
-        .file-status { font-size: 0.7rem; color: green; margin-top: 5px; text-align: center; }
+        .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
         .cliente-rosso { color: #c0392b; font-weight: bold; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
@@ -37,7 +59,10 @@
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
-        @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { width: 100%; } }
+        @media (max-width: 768px) { 
+            .main-container { flex-direction: column; } 
+            .sidebar { width: 100%; position: static; top: 0; } 
+        }
     </style>
 </head>
 <body>
@@ -65,8 +90,11 @@
         <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
         <div id="fileStatus" class="file-status"></div>
         
+        <h3 style="margin-top:20px;">🔍 Cerca Cliente</h3>
+        <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
+        
         <h3 style="margin-top:20px;">👥 Seleziona Cliente</h3>
-        <select id="selectClienteAgenti">
+        <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;">
             <option value="">-- Seleziona cliente --</option>
         </select>
         
@@ -79,7 +107,7 @@
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v5.00 - Agenti (Firebase)</div>
+<div class="version">v5.01 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -100,7 +128,6 @@ let agenteCorrente = null;
 let datiOrd = [];
 let datiSca = [];
 let clientiUnici = [];
-let articoliFiltrati = [];
 
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
@@ -144,8 +171,11 @@ async function selezionaAgente(codice) {
         console.log(`📊 Dati caricati: ORD ${datiOrd.length} clienti, SCA ${datiSca.length} clienti`);
         document.getElementById('fileStatus').innerHTML = `ORD: ${datiOrd.length} clienti | SCA: ${datiSca.length} clienti`;
         aggiornaClienti();
-        // Reset campo ricerca
+        // Reset campi ricerca
+        document.getElementById('cercaCliente').value = '';
         document.getElementById('cercaArticolo').value = '';
+        document.getElementById('scadenzeAgenti').innerHTML = '';
+        document.getElementById('dettaglioAgenti').innerHTML = '';
     } catch(e) { console.error("❌ ERRORE: "+e.message); alert("Errore caricamento dati: "+e.message); }
 }
 
@@ -284,7 +314,6 @@ function parseSCA(text) {
 
 // ==================== GESTIONE CLIENTI ====================
 function aggiornaClienti() {
-    let select = document.getElementById('selectClienteAgenti');
     let mappa = new Map();
     
     for (let c of datiOrd) {
@@ -292,6 +321,7 @@ function aggiornaClienti() {
             codice: c.codice, 
             ragione: c.ragione, 
             hasScadenze: false, 
+            scadenze: [],
             ordini: c.articoli 
         });
     }
@@ -313,25 +343,37 @@ function aggiornaClienti() {
     
     clientiUnici = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
     
-    // Reset select cliente (punto g)
+    // Applica filtro cerca cliente
+    filtraClienti();
+}
+
+function filtraClienti() {
+    let searchText = document.getElementById('cercaCliente').value.toLowerCase();
+    let clientiFiltrati = clientiUnici.filter(c => 
+        c.codice.toLowerCase().includes(searchText) || 
+        c.ragione.toLowerCase().includes(searchText)
+    );
+    
+    let select = document.getElementById('selectClienteAgenti');
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-    for (let c of clientiUnici) {
+    for (let c of clientiFiltrati) {
         let opt = document.createElement('option');
         opt.value = c.codice;
         opt.textContent = `${c.codice} - ${c.ragione}`;
-        if (c.hasScadenze) {
+        if (c.hasScadenze && c.scadenze.length > 0) {
             opt.style.color = '#c0392b';
             opt.style.fontWeight = 'bold';
-            opt.classList.add('cliente-rosso');
         }
         select.appendChild(opt);
     }
     
-    console.log(`📋 Clienti: ${clientiUnici.length} clienti`);
+    console.log(`📋 Clienti filtrati: ${clientiFiltrati.length}/${clientiUnici.length}`);
     
-    // Reset contenuti
-    document.getElementById('scadenzeAgenti').innerHTML = '';
-    document.getElementById('dettaglioAgenti').innerHTML = '';
+    // Reset contenuti quando si filtra
+    if (clientiFiltrati.length === 0) {
+        document.getElementById('scadenzeAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
+        document.getElementById('dettaglioAgenti').innerHTML = '';
+    }
 }
 
 function mostraDettaglioCliente(codice) {
@@ -357,26 +399,63 @@ function mostraDettaglioCliente(codice) {
     }
     
     // Mostra articoli
-    articoliFiltrati = cliente.ordini ? [...cliente.ordini] : [];
-    filtraArticoli();
+    if (cliente.ordini && cliente.ordini.length > 0) {
+        let html = `<div class="scadenze-box">
+                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
+        for (let art of cliente.ordini) {
+            let storicoHtml = '';
+            if (art.coppie && art.coppie.length > 0) {
+                let mostrati = art.coppie.slice(0, 4);
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
+                                <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+                for (let ord of mostrati) {
+                    storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
+                }
+                storicoHtml += `</div>`;
+            } else {
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+            }
+            
+            html += `<div class="articolo-item" data-codice="${art.codice}">
+                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
+                        <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
+                        ${storicoHtml}
+                    </div>`;
+        }
+        html += `</div>`;
+        containerArticoli.innerHTML = html;
+        
+        // Aggiungi eventi click per toggle storico
+        document.querySelectorAll('.articolo-item').forEach(el => {
+            el.onclick = (e) => {
+                e.stopPropagation();
+                let storicoDiv = el.querySelector('.storico-ordini');
+                if (storicoDiv) {
+                    storicoDiv.classList.toggle('visible');
+                }
+            };
+        });
+    } else {
+        containerArticoli.innerHTML = `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
+    }
 }
 
 function filtraArticoli() {
+    let clienteCodice = document.getElementById('selectClienteAgenti').value;
+    if (!clienteCodice) return;
+    
+    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
+    if (!cliente || !cliente.ordini) return;
+    
     let searchText = document.getElementById('cercaArticolo').value.toLowerCase();
-    let clienteSelezionato = clientiUnici.find(c => c.codice === document.getElementById('selectClienteAgenti').value);
-    
-    if (!clienteSelezionato || !clienteSelezionato.ordini) {
-        document.getElementById('dettaglioAgenti').innerHTML = `<div class="scadenze-box">Nessun ordine disponibile</div>`;
-        return;
-    }
-    
-    let filtrati = clienteSelezionato.ordini.filter(art => 
+    let filtrati = cliente.ordini.filter(art => 
         art.codice.toLowerCase().includes(searchText) || 
         art.descrizione.toLowerCase().includes(searchText)
     );
     
+    let container = document.getElementById('dettaglioAgenti');
     let html = `<div class="scadenze-box">
-                <h3>📋 ORD - ${clienteSelezionato.codice} ${clienteSelezionato.ragione} (${filtrati.length} articoli)</h3>`;
+                <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
     
     for (let art of filtrati) {
         let storicoHtml = '';
@@ -399,9 +478,9 @@ function filtraArticoli() {
                 </div>`;
     }
     html += `</div>`;
-    document.getElementById('dettaglioAgenti').innerHTML = html;
+    container.innerHTML = html;
     
-    // Aggiungi eventi click per toggle storico (punto i)
+    // Riapplica eventi click
     document.querySelectorAll('.articolo-item').forEach(el => {
         el.onclick = (e) => {
             e.stopPropagation();
@@ -430,31 +509,35 @@ async function caricaFile(files) {
     let ordText = null, scaText = null;
     
     for (let file of files) {
-        let nome = file.name.toLowerCase();
+        let nome = file.name;
         
-        // Validazione nome file: deve contenere ORD o SCA + codice agente
-        if (nome.includes('ord') && (nome.includes(codAgente.toLowerCase()) || nome.includes(codAgente))) {
+        // Validazione: deve essere ORD + codice oppure SCA + codice
+        // Esempi validi: ORD0001.txt, SCA0001.txt, ORD001.txt, SCA001.txt
+        let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
+        let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
+        
+        if (regexOrd.test(nome)) {
             trovati.ord = true;
             ordText = await file.text();
-            console.log(`✅ File ORD valido: ${file.name}`);
+            console.log(`✅ File ORD valido: ${nome}`);
         } 
-        else if (nome.includes('sca') && (nome.includes(codAgente.toLowerCase()) || nome.includes(codAgente))) {
+        else if (regexSca.test(nome)) {
             trovati.sca = true;
             scaText = await file.text();
-            console.log(`✅ File SCA valido: ${file.name}`);
+            console.log(`✅ File SCA valido: ${nome}`);
         }
         else {
-            alert(`❌ File non valido: ${file.name}\n\nI file devono contenere "${codAgente}" nel nome.\nEsempi validi:\n- ORD${codAgente}.txt\n- SCA${codAgente}.txt\n- ordine_${codAgente}.txt\n- sca-${codAgente}.txt`);
+            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati esattamente:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
             return false;
         }
     }
     
     if (!trovati.ord || !trovati.sca) {
-        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!");
+        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!\n\nEsempio: ORD0001.txt e SCA0001.txt");
         return false;
     }
     
-    // Pulisci i vecchi dati dell'agente (punto c)
+    // Pulisci i vecchi dati dell'agente
     datiOrd = [];
     datiSca = [];
     console.log(`🗑️ Vecchi dati cancellati per agente ${agenteCorrente.codice}`);
@@ -478,12 +561,8 @@ async function caricaFile(files) {
 
 // ==================== EVENTI ====================
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
-document.getElementById('selectClienteAgenti').onchange = (e) => { 
-    if (e.target.value) {
-        mostraDettaglioCliente(e.target.value);
-        document.getElementById('cercaArticolo').value = '';
-    }
-};
+document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
+document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticolo').oninput = () => filtraArticoli();
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('fileInput').onchange = async (e) => {
@@ -521,7 +600,7 @@ caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.00");
+console.log("🚀 App avviata - v5.01");
 </script>
 </body>
 </html>
