@@ -9,13 +9,62 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
-        .header { background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: sticky; top: 0; z-index: 1000; }
-        .logo-rettangolo { width: 300px; height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+        
+        /* HEADER CON DUE RIGHE */
+        .header {
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        /* Prima riga: logo + pulsanti navigazione */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        /* Seconda riga: box gestione agente (giallo) */
+        .header-row-bottom {
+            background: #fff3cd;
+            border: 1px solid #ffecb3;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .logo-rettangolo { 
+            width: 300px; 
+            height: 80px; 
+            background: transparent; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            cursor: pointer; 
+        }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .nav-box { background: #2c3e50; border-radius: 16px; padding: 10px 20px; }
+        .logo-rettangolo span { font-size: 1.5rem; }
+        
+        /* Pulsanti navigazione - sfondo bianco, testo nero grassetto */
+        .nav-box { 
+            background: #f1c40f; 
+            border-radius: 16px; 
+            padding: 10px 20px; 
+        }
         .nav-grid { display: flex; gap: 10px; }
         .nav-btn { 
-            background: #f1c40f; 
+            background: white; 
             color: #2c3e50; 
             border: none; 
             padding: 8px 16px; 
@@ -26,12 +75,38 @@
         }
         .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
         .nav-btn.disabled { 
-            background: #7f8c8d; 
-            color: white; 
+            background: #ecf0f1; 
+            color: #95a5a6; 
             cursor: not-allowed; 
-            opacity: 0.6;
+            opacity: 0.8;
         }
-        .nav-btn.disabled:hover { transform: none; }
+        .nav-btn.disabled:hover { transform: none; background: #ecf0f1; color: #95a5a6; }
+        
+        /* Box gestione agente - elementi inline */
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .action-group label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-right: 5px;
+        }
+        .action-group select, .action-group button {
+            margin: 0;
+            width: auto;
+            padding: 6px 12px;
+        }
+        .action-group select {
+            min-width: 180px;
+        }
+        .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
+        
+        /* Main container */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         
         /* Sidebar fissa durante lo scroll */
@@ -42,30 +117,16 @@
             padding: 20px; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
             position: sticky; 
-            top: 120px;
+            top: 200px;
             height: fit-content;
-            max-height: calc(100vh - 140px);
+            max-height: calc(100vh - 220px);
             overflow-y: auto;
         }
         
-        /* Riquadro azioni in alto */
-        .action-box {
-            background: #ecf0f1;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #d0d7de;
-        }
-        .action-box h3 {
-            margin: 0 0 10px 0;
-            font-size: 0.9rem;
-            color: #2c3e50;
-        }
-        
         .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        
         button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; font-weight: bold; }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
-        .btn-success { background: #27ae60; }
         select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
         .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
         .articolo-item { 
@@ -96,41 +157,53 @@
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
+        
         @media (max-width: 768px) { 
             .main-container { flex-direction: column; } 
-            .sidebar { width: 100%; position: static; top: 0; max-height: none; } 
+            .sidebar { width: 100%; position: static; top: 0; max-height: none; }
+            .header-row { flex-direction: column; align-items: stretch; }
+            .header-row-bottom { flex-direction: column; align-items: stretch; }
+            .action-group { justify-content: space-between; }
         }
     </style>
 </head>
 <body>
 <div class="header">
-    <div id="logoRettangolo" class="logo-rettangolo">
-        <img id="logoImmagine" style="display:none;">
-        <span id="logoSpan">🏢 LOGO</span>
+    <!-- Prima riga: logo + pulsanti navigazione -->
+    <div class="header-row">
+        <div id="logoRettangolo" class="logo-rettangolo">
+            <img id="logoImmagine" style="display:none;">
+            <span id="logoSpan">🏢 LOGO</span>
+        </div>
+        <div class="nav-box">
+            <div class="nav-grid">
+                <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
+                <button class="nav-btn disabled" disabled>👥 AGENTI</button>
+                <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
+            </div>
+        </div>
     </div>
-    <div class="nav-box">
-        <div class="nav-grid">
-            <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
-            <button class="nav-btn disabled" style="background:#f1c40f; color:#2c3e50;" disabled>👥 AGENTI</button>
-            <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
+    
+    <!-- Seconda riga: box gestione agente (giallo) con tutti i controlli -->
+    <div class="header-row-bottom">
+        <div class="action-group">
+            <label>👤 Seleziona Agente:</label>
+            <select id="selectAgente">
+                <option value="">-- Seleziona --</option>
+            </select>
+        </div>
+        <div class="action-group">
+            <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
+            <button id="btnCaricaFile" class="btn-primary">📂 Carica ORD + SCA</button>
+            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
+            <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
     </div>
 </div>
+
 <div class="main-container">
     <div class="sidebar">
-        <!-- Riquadro azioni in alto -->
-        <div class="action-box">
-            <h3>👤 GESTIONE AGENTE</h3>
-            <select id="selectAgente">
-                <option value="">-- Seleziona agente --</option>
-            </select>
-            <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
-            <button id="btnCaricaFile" class="btn-success">📂 Carica ORD + SCA</button>
-            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
-            <div id="fileStatus" class="file-status"></div>
-        </div>
-        
-        <h3 style="margin-top:20px;">🔍 Cerca Cliente</h3>
+        <h3>🔍 Cerca Cliente</h3>
         <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
         
         <h3 style="margin-top:20px;">👥 Seleziona Cliente</h3>
@@ -147,7 +220,7 @@
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v5.02 - Agenti (Firebase)</div>
+<div class="version">v5.03 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -209,7 +282,7 @@ async function selezionaAgente(codice) {
         datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
         datiSca = scaDoc.exists ? scaDoc.data().dati : [];
         console.log(`📊 Dati caricati: ORD ${datiOrd.length} clienti, SCA ${datiSca.length} clienti`);
-        document.getElementById('fileStatus').innerHTML = `ORD: ${datiOrd.length} clienti | SCA: ${datiSca.length} clienti`;
+        document.getElementById('fileStatusInline').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
         aggiornaClienti();
         // Reset campi ricerca
         document.getElementById('cercaCliente').value = '';
@@ -225,6 +298,7 @@ async function salvaDatiAgente() {
         await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiOrd });
         await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiSca });
         console.log(`💾 Dati salvati per ${agenteCorrente.codice}`);
+        document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
     } catch(e) { console.error("❌ ERRORE salvataggio: "+e.message); alert("Errore salvataggio: "+e.message); }
 }
 
@@ -382,8 +456,6 @@ function aggiornaClienti() {
     }
     
     clientiUnici = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
-    
-    // Applica filtro cerca cliente
     filtraClienti();
 }
 
@@ -409,7 +481,6 @@ function filtraClienti() {
     
     console.log(`📋 Clienti filtrati: ${clientiFiltrati.length}/${clientiUnici.length}`);
     
-    // Reset contenuti quando si filtra
     if (clientiFiltrati.length === 0) {
         document.getElementById('scadenzeAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
         document.getElementById('dettaglioAgenti').innerHTML = '';
@@ -432,7 +503,7 @@ function mostraDettaglioCliente(codice) {
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
-        html += `</tbody></table></div>`;
+        html += `</tbody>}</div>`;
         containerScadenze.innerHTML = html;
     } else {
         containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
@@ -465,7 +536,7 @@ function mostraDettaglioCliente(codice) {
         html += `</div>`;
         containerArticoli.innerHTML = html;
         
-        // Aggiungi eventi click per toggle storico
+        // Eventi click per toggle storico
         document.querySelectorAll('.articolo-item').forEach(el => {
             el.onclick = (e) => {
                 e.stopPropagation();
@@ -520,7 +591,6 @@ function filtraArticoli() {
     html += `</div>`;
     container.innerHTML = html;
     
-    // Riapplica eventi click
     document.querySelectorAll('.articolo-item').forEach(el => {
         el.onclick = (e) => {
             e.stopPropagation();
@@ -550,8 +620,6 @@ async function caricaFile(files) {
     
     for (let file of files) {
         let nome = file.name;
-        
-        // Validazione: deve essere ORD + codice oppure SCA + codice
         let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
         let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
         
@@ -566,22 +634,20 @@ async function caricaFile(files) {
             console.log(`✅ File SCA valido: ${nome}`);
         }
         else {
-            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati esattamente:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
+            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
             return false;
         }
     }
     
     if (!trovati.ord || !trovati.sca) {
-        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!\n\nEsempio: ORD0001.txt e SCA0001.txt");
+        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!");
         return false;
     }
     
-    // Pulisci i vecchi dati dell'agente
     datiOrd = [];
     datiSca = [];
     console.log(`🗑️ Vecchi dati cancellati per agente ${agenteCorrente.codice}`);
     
-    // Parsing dei nuovi file
     if (ordText) {
         datiOrd = parseORD(ordText);
         console.log(`✅ ORD caricato: ${datiOrd.length} clienti`);
@@ -593,7 +659,7 @@ async function caricaFile(files) {
     
     await salvaDatiAgente();
     aggiornaClienti();
-    document.getElementById('fileStatus').innerHTML = `✅ ORD: ${datiOrd.length} clienti | SCA: ${datiSca.length} clienti`;
+    document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
     alert(`Caricamento completato!\nORD: ${datiOrd.length} clienti\nSCA: ${datiSca.length} clienti`);
     return true;
 }
@@ -628,18 +694,60 @@ document.getElementById('btnCreaAgente').onclick = () => {
 };
 
 // ==================== LOGO ====================
-function caricaLogo() { let l = localStorage.getItem('logo'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
+function caricaLogo() { 
+    let l = localStorage.getItem('logo'); 
+    if(l) { 
+        document.getElementById('logoImmagine').src = l; 
+        document.getElementById('logoImmagine').style.display = 'block'; 
+        document.getElementById('logoSpan').style.display = 'none'; 
+    } 
+}
 function salvaLogo(u) { localStorage.setItem('logo', u); }
-function caricaLogoFile() { let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if(f){ let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
-let logoDiv = document.getElementById('logoRettangolo'); let timer = null;
-logoDiv.addEventListener('mousedown', () => { timer = setTimeout(() => { caricaLogoFile(); timer = null; }, 3000); });
-logoDiv.addEventListener('mouseup', () => { if(timer) { clearTimeout(timer); timer = null; } });
-logoDiv.addEventListener('mouseleave', () => { if(timer) { clearTimeout(timer); timer = null; } });
+function caricaLogoFile() { 
+    let inp = document.createElement('input'); 
+    inp.type = 'file'; 
+    inp.accept = 'image/*'; 
+    inp.onchange = e => { 
+        let f = e.target.files[0]; 
+        if(f){ 
+            let r = new FileReader(); 
+            r.onload = ev => { 
+                let url = ev.target.result; 
+                document.getElementById('logoImmagine').src = url; 
+                document.getElementById('logoImmagine').style.display = 'block'; 
+                document.getElementById('logoSpan').style.display = 'none'; 
+                salvaLogo(url); 
+            }; 
+            r.readAsDataURL(f); 
+        } 
+    }; 
+    inp.click(); 
+}
+let logoDiv = document.getElementById('logoRettangolo'); 
+let timer = null;
+logoDiv.addEventListener('mousedown', () => { 
+    timer = setTimeout(() => { 
+        caricaLogoFile(); 
+        timer = null; 
+    }, 3000); 
+});
+logoDiv.addEventListener('mouseup', () => { 
+    if(timer) { 
+        clearTimeout(timer); 
+        timer = null; 
+    } 
+});
+logoDiv.addEventListener('mouseleave', () => { 
+    if(timer) { 
+        clearTimeout(timer); 
+        timer = null; 
+    } 
+});
 caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.02");
+console.log("🚀 App avviata - v5.03");
 </script>
 </body>
 </html>
