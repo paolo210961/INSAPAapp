@@ -25,6 +25,7 @@
         .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; }
         .articolo-item:hover { background: #fff3cd; }
         .file-status { font-size: 0.7rem; color: green; margin-top: 5px; text-align: center; }
+        .debug-box { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
@@ -56,10 +57,11 @@
             <option value="">-- Seleziona --</option>
         </select>
         <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
-        <button id="btnCaricaFile">📂 Carica ORD + SCA</button>
+        <button id="btnCaricaFile" class="btn-success">📂 Carica ORD + SCA</button>
         <input type="file" id="fileInput" multiple accept=".txt,.csv">
         <div id="fileStatus" class="file-status"></div>
         <button id="btnRicarica" style="background:#f39c12; color:#2c3e50;">🔄 RICARICA AGENTI</button>
+        <div id="debugBox" class="debug-box">🔍 Console debug:\n</div>
     </div>
     <div class="content-area">
         <div id="scadenze"></div>
@@ -67,9 +69,20 @@
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v4.00 - Agenti (Firebase)</div>
+<div class="version">v4.01 - Agenti (Firebase)</div>
 
 <script>
+function debugLog(msg) {
+    let box = document.getElementById('debugBox');
+    if(box) {
+        let time = new Date().toLocaleTimeString();
+        box.innerHTML += `<div>${time} - ${msg}</div>`;
+        box.scrollTop = box.scrollHeight;
+        if(box.children.length > 50) box.innerHTML = `<div>${time} - Console pulita</div>`;
+    }
+    console.log(msg);
+}
+
 // ==================== FIREBASE ====================
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
@@ -90,15 +103,15 @@ let datiSca = [];
 
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
-    console.log("📥 Caricamento agenti...");
+    debugLog("📥 Caricamento agenti da Firebase...");
     try {
         const snapshot = await db.collection('agenti_lista').get();
         agentiLista = [];
         snapshot.forEach(doc => agentiLista.push(doc.data()));
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
-        console.log(`✅ Trovati ${agentiLista.length} agenti`);
+        debugLog(`✅ Trovati ${agentiLista.length} agenti: ${agentiLista.map(a=>a.codice).join(', ')}`);
         aggiornaSelect();
-    } catch(e) { console.error("❌ ERRORE:", e); alert("Errore caricamento: " + e.message); }
+    } catch(e) { debugLog("❌ ERRORE: "+e.message); }
 }
 
 function aggiornaSelect() {
@@ -114,23 +127,23 @@ function aggiornaSelect() {
     if (oldValue && agentiLista.find(a => a.codice === oldValue)) {
         select.value = oldValue;
     }
-    console.log(`📋 Select: ${select.options.length-1} agenti`);
+    debugLog(`📋 Select: ${select.options.length-1} agenti`);
 }
 
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
-    console.log(`👤 Selezionato: ${codice}`);
+    debugLog(`👤 Selezionato: ${codice} - ${agenteCorrente.nome}`);
     
     try {
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
         let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
         datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
         datiSca = scaDoc.exists ? scaDoc.data().dati : [];
-        console.log(`📊 ORD: ${datiOrd.length}, SCA: ${datiSca.length}`);
-        document.getElementById('fileStatus').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
+        debugLog(`📊 Dati caricati: ORD ${datiOrd.length} clienti, SCA ${datiSca.length} clienti`);
+        document.getElementById('fileStatus').innerHTML = `ORD: ${datiOrd.length} clienti | SCA: ${datiSca.length} clienti`;
         aggiornaClienti();
-    } catch(e) { console.error("ERRORE:", e); }
+    } catch(e) { debugLog("❌ ERRORE caricamento dati: "+e.message); }
 }
 
 async function salvaDatiAgente() {
@@ -138,8 +151,8 @@ async function salvaDatiAgente() {
     try {
         await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiOrd });
         await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiSca });
-        console.log(`💾 Dati salvati per ${agenteCorrente.codice}`);
-    } catch(e) { console.error("ERRORE salvataggio:", e); }
+        debugLog(`💾 Dati salvati per ${agenteCorrente.codice} (ORD:${datiOrd.length}, SCA:${datiSca.length})`);
+    } catch(e) { debugLog("❌ ERRORE salvataggio: "+e.message); }
 }
 
 async function creaAgente(codice, nome) {
@@ -147,26 +160,34 @@ async function creaAgente(codice, nome) {
     if (agentiLista.find(a => a.codice === codice)) { alert("Codice già esistente!"); return false; }
     try {
         await db.collection('agenti_lista').doc(codice).set({ codice, nome });
-        console.log(`✅ Agente ${codice} - ${nome} creato`);
-        await caricaAgenti(); // Ricarica la lista
+        debugLog(`✅ Agente ${codice} - ${nome} creato`);
+        await caricaAgenti();
         return true;
-    } catch(e) { alert("ERRORE: " + e.message); return false; }
+    } catch(e) { alert("ERRORE: "+e.message); return false; }
 }
 
-// ==================== PARSER ====================
+// ==================== PARSER ORD ====================
 function parseORD(text) {
+    debugLog(`📄 Parsing ORD: ${text.length} caratteri`);
     let clienti = [];
     let lines = text.split(/\r?\n/);
     let current = null;
+    let rigaCliente = 0;
+    
     for (let line of lines) {
         line = line.trim();
+        if (line === "") continue;
+        
         if (line.startsWith("Cliente :")) {
+            rigaCliente++;
             let match = line.match(/Cliente\s+:\s+(\d+)\s+(.+)/);
             if (match) {
                 current = { codice: match[1], ragione: match[2].trim(), articoli: [] };
                 clienti.push(current);
+                debugLog(`  Cliente ${rigaCliente}: ${current.codice} - ${current.ragione}`);
             }
-        } else if (current && line && !line.startsWith("Destinaz.") && !line.startsWith("Telefoni")) {
+        } 
+        else if (current && line.length > 0 && !line.startsWith("Destinaz.") && !line.startsWith("Telefoni") && !line.includes("INESISTENTE")) {
             let parts = line.split(/\s+/);
             if (parts.length >= 3) {
                 let codice = parts[0];
@@ -174,44 +195,60 @@ function parseORD(text) {
                 let prezzo = parseFloat(parts[parts.length-2].replace(',', '.'));
                 let sconto = parseFloat(parts[parts.length-1].replace(',', '.'));
                 if (!isNaN(prezzo)) {
-                    current.articoli.push({ codice, descrizione, prezzo, sconto1: sconto, coppie: [] });
+                    current.articoli.push({ 
+                        codice, 
+                        descrizione, 
+                        prezzo: prezzo, 
+                        sconto1: sconto, 
+                        coppie: [] 
+                    });
                 }
             }
         }
     }
-    console.log(`ORD: ${clienti.length} clienti`);
+    debugLog(`✅ ORD parsato: ${clienti.length} clienti, totale articoli: ${clienti.reduce((s,c)=>s+c.articoli.length,0)}`);
     return clienti;
 }
 
+// ==================== PARSER SCA ====================
 function parseSCA(text) {
+    debugLog(`📄 Parsing SCA: ${text.length} caratteri`);
     let clienti = [];
     let lines = text.split(/\r?\n/);
     let current = null;
+    let rigaCliente = 0;
+    
     for (let line of lines) {
         line = line.trim();
+        if (line === "") continue;
+        
         if (line.startsWith("CLIENTE:")) {
+            rigaCliente++;
             let match = line.match(/CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo/);
             if (match) {
                 current = { codice: match[1], ragione: match[2].trim(), scadenze: [] };
                 clienti.push(current);
+                debugLog(`  Cliente ${rigaCliente}: ${current.codice} - ${current.ragione}`);
             }
-        } else if (current && line) {
+        } 
+        else if (current && line.length > 0) {
             let match = line.match(/(\d{2}\/\d{2}\/\d{4}).*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/);
             if (match) {
+                let importo = parseFloat(match[4].replace(/\./g, '').replace(',', '.'));
                 current.scadenze.push({
                     scadenza: match[1],
                     numDoc: match[2],
                     dataDoc: match[3],
-                    importo: parseFloat(match[4].replace(/\./g, '').replace(',', '.'))
+                    importo: importo
                 });
             }
         }
     }
-    console.log(`SCA: ${clienti.length} clienti`);
+    debugLog(`✅ SCA parsato: ${clienti.length} clienti, totale scadenze: ${clienti.reduce((s,c)=>s+c.scadenze.length,0)}`);
     return clienti;
 }
 
-// ==================== VISUALIZZAZIONE ====================
+// ==================== VISUALIZZAZIONE CLIENTI ====================
 function aggiornaClienti() {
     let select = document.getElementById('selectClienteAgenti');
     if (!select) {
@@ -221,20 +258,29 @@ function aggiornaClienti() {
     }
     
     let mappa = new Map();
-    for (let c of datiOrd) mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: false });
-    for (let c of datiSca) {
-        if (mappa.has(c.codice)) mappa.get(c.codice).hasScadenze = c.scadenze.length > 0;
-        else mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: c.scadenze.length > 0 });
+    for (let c of datiOrd) {
+        mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: false, ordini: c.articoli.length });
     }
+    for (let c of datiSca) {
+        if (mappa.has(c.codice)) {
+            mappa.get(c.codice).hasScadenze = c.scadenze.length > 0;
+        } else {
+            mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: c.scadenze.length > 0, ordini: 0 });
+        }
+    }
+    
     let lista = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
     for (let c of lista) {
         let opt = document.createElement('option');
         opt.value = `${c.codice}|${c.ragione}`;
-        opt.textContent = `${c.codice} - ${c.ragione}`;
+        let testo = `${c.codice} - ${c.ragione}`;
+        if (c.ordini > 0) testo += ` [ORD:${c.ordini}]`;
+        opt.textContent = testo;
         if (c.hasScadenze) opt.style.color = '#c0392b';
         select.appendChild(opt);
     }
+    debugLog(`📋 Clienti: ${select.options.length-1} clienti nella tendina`);
 }
 
 function mostraScadenze() {
@@ -251,7 +297,7 @@ function mostraScadenze() {
                 <table style="width:100%; border-collapse:collapse;">
                 <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
     for (let s of cliente.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
-    html += `</tbody>}</div>`;
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
 }
 
@@ -265,7 +311,7 @@ function mostraDettaglio() {
         container.innerHTML = `<div class="scadenze-box">Nessun ordine per ${ragione}</div>`;
         return;
     }
-    let html = `<div class="scadenze-box"><h3>📋 ORD - ${codice} ${ragione}</h3>`;
+    let html = `<div class="scadenze-box"><h3>📋 ORD - ${codice} ${ragione} (${cliente.articoli.length} articoli)</h3>`;
     for (let art of cliente.articoli) {
         html += `<div class="articolo-item" style="border:1px solid #ddd; border-radius:8px; padding:10px; margin-bottom:10px; cursor:pointer;">
                     <strong>${art.codice} ${art.descrizione}</strong><br>
@@ -285,19 +331,40 @@ document.getElementById('btnCaricaFile').onclick = () => document.getElementById
 document.getElementById('fileInput').onchange = async (e) => {
     let files = Array.from(e.target.files);
     if (!agenteCorrente) { alert("Seleziona prima un agente!"); return; }
+    debugLog(`📁 Caricamento di ${files.length} file`);
+    
     let ord = null, sca = null;
     for (let f of files) {
         let text = await f.text();
         let nome = f.name.toLowerCase();
-        if (nome.includes('ord')) ord = parseORD(text);
-        if (nome.includes('sca')) sca = parseSCA(text);
+        debugLog(`📄 File: ${nome} (${text.length} caratteri)`);
+        
+        if (nome.includes('ord') || nome.includes('ordine')) {
+            ord = parseORD(text);
+        }
+        if (nome.includes('sca')) {
+            sca = parseSCA(text);
+        }
     }
-    if (ord) datiOrd = ord;
-    if (sca) datiSca = sca;
+    
+    if (ord) {
+        datiOrd = ord;
+        debugLog(`✅ ORD aggiornato: ${datiOrd.length} clienti`);
+    }
+    if (sca) {
+        datiSca = sca;
+        debugLog(`✅ SCA aggiornato: ${datiSca.length} clienti`);
+    }
+    
+    if (!ord && !sca) {
+        alert("Nessun file ORD o SCA riconosciuto! I file devono contenere 'ord' o 'sca' nel nome.");
+        return;
+    }
+    
     await salvaDatiAgente();
     aggiornaClienti();
-    document.getElementById('fileStatus').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
-    alert(`Caricato! ORD: ${datiOrd.length}, SCA: ${datiSca.length}`);
+    document.getElementById('fileStatus').innerHTML = `✅ ORD: ${datiOrd.length} clienti | SCA: ${datiSca.length} clienti`;
+    alert(`Caricato! ORD: ${datiOrd.length} clienti, SCA: ${datiSca.length} clienti`);
 };
 
 // MODALE CREA AGENTE
@@ -330,7 +397,7 @@ caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v4.00");
+debugLog("🚀 App avviata - v4.01");
 </script>
 </body>
 </html>
