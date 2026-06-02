@@ -52,6 +52,8 @@
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; }
+        .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group-modal button { margin: 0; }
         @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { width: 100%; position: static; } .header { flex-direction: column; align-items: stretch; } .nav-box { width: 100%; } .logo-rettangolo { width: 100%; margin: 0 auto; } .content-area { width: 100%; } }
     </style>
 </head>
@@ -72,7 +74,7 @@
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v3.00 - Agenti (Firebase)</div>
+    <div class="version" id="appVersion">v3.01 - Agenti (fix creazione)</div>
     <div class="main-container">
         <div id="sidebarAgenti" class="sidebar">
             <div class="agente-selector">
@@ -80,7 +82,7 @@
                 <select id="selectAgente" style="width:100%; padding:10px; border-radius:8px;">
                     <option value="">-- Seleziona agente --</option>
                 </select>
-                <button id="btnCreaAgente" class="btn-crea-agente" style="background:#27ae60;">➕ CREA AGENTE</button>
+                <button id="btnCreaAgente" class="btn-success" style="margin-top:10px;">➕ CREA AGENTE</button>
             </div>
             <button id="btnCaricaFileAgenti" class="btn-success" style="width:100%">📂 Carica ORD + SCA</button>
             <div id="fileStatusAgenti" class="file-status"></div>
@@ -137,6 +139,9 @@ function debugLog(msg) {
         let time = new Date().toLocaleTimeString();
         consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        if(consoleDiv.children.length > 50) {
+            consoleDiv.innerHTML = `<div>${time} - Console pulita</div>`;
+        }
     }
     console.log(msg);
 }
@@ -153,7 +158,11 @@ async function caricaAgenti() {
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
         debugLog(`Caricati ${agentiLista.length} agenti`);
         aggiornaSelectAgenti();
-    } catch(e) { debugLog("ERRORE caricamento agenti: "+e.message); }
+        return agentiLista.length;
+    } catch(e) { 
+        debugLog("ERRORE caricamento agenti: "+e.message);
+        return 0;
+    }
 }
 
 async function salvaAgenti() {
@@ -173,6 +182,7 @@ async function salvaAgenti() {
 
 function aggiornaSelectAgenti() {
     let select = document.getElementById('selectAgente');
+    let valoreCorrente = select.value;
     select.innerHTML = '<option value="">-- Seleziona agente --</option>';
     for (let a of agentiLista) { 
         let opt = document.createElement('option'); 
@@ -180,7 +190,12 @@ function aggiornaSelectAgenti() {
         opt.textContent = `${a.codice} - ${a.nome}`; 
         select.appendChild(opt); 
     }
-    if (agenteCorrente) { select.value = agenteCorrente.codice; }
+    if (valoreCorrente && agentiLista.find(a => a.codice === valoreCorrente)) {
+        select.value = valoreCorrente;
+    } else if (agenteCorrente) {
+        select.value = agenteCorrente.codice;
+    }
+    debugLog(`Select aggiornata: ${select.options.length} opzioni`);
 }
 
 async function selezionaAgente(codice) {
@@ -197,6 +212,7 @@ async function selezionaAgente(codice) {
 }
 
 async function caricaDatiAgente() {
+    if (!agenteCorrente) return;
     debugLog(`Caricamento dati per agente ${agenteCorrente.codice}...`);
     try {
         const docOrd = await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).get();
@@ -222,6 +238,10 @@ async function salvaDatiAgente() {
 }
 
 async function creaAgente(codice, nome) {
+    if (!codice || !nome) {
+        alert("Inserisci codice e nome!");
+        return false;
+    }
     if (agentiLista.find(a => a.codice === codice)) { 
         alert("Codice agente già esistente!"); 
         return false; 
@@ -419,12 +439,45 @@ document.getElementById('fileInputMultiAgenti').onchange = async (e) => {
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); else { agenteCorrente = null; datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); } };
 document.getElementById('cercaCliente').oninput = () => aggiornaTendinaClienti();
 document.getElementById('selectClienteAgenti').onchange = () => { mostraScadenzeAgenti(); mostraDettaglioAgenti(); };
+
+// MODALE CREA AGENTE - CORRETTA
 document.getElementById('btnCreaAgente').onclick = () => {
-    let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. A001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
+    debugLog("Apertura modale crea agente");
+    let modal = document.createElement('div'); 
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>➕ NUOVO AGENTE</h3>
+            <label>Codice</label>
+            <input type="text" id="nuovoCodice" placeholder="es. 001" style="width:100%; padding:8px; margin-bottom:15px;">
+            <label>Nome</label>
+            <input type="text" id="nuovoNome" placeholder="es. Mario Rossi" style="width:100%; padding:8px; margin-bottom:15px;">
+            <div class="btn-group-modal">
+                <button id="btnConferma" class="btn-success">CREA</button>
+                <button id="btnAnnulla" class="btn-danger">ANNULLA</button>
+            </div>
+        </div>
+    `;
     document.body.appendChild(modal);
-    document.getElementById('btnConferma').onclick = async () => { let cod = document.getElementById('nuovoCodice').value.trim(), nom = document.getElementById('nuovoNome').value.trim(); if (cod && nom) { if (await creaAgente(cod, nom)) { alert(`Agente ${cod} - ${nom} creato!`); modal.remove(); } } else alert("Compila tutti i campi!"); };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+    
+    document.getElementById('btnConferma').onclick = async () => { 
+        let cod = document.getElementById('nuovoCodice').value.trim(); 
+        let nom = document.getElementById('nuovoNome').value.trim(); 
+        if (cod && nom) { 
+            if (await creaAgente(cod, nom)) { 
+                alert(`Agente ${cod} - ${nom} creato!`);
+                // Ricarica la lista agenti e aggiorna il menù
+                await caricaAgenti();
+                modal.remove(); 
+            } 
+        } else { 
+            alert("Compila tutti i campi!"); 
+        } 
+    };
+    
+    document.getElementById('btnAnnulla').onclick = () => { 
+        modal.remove(); 
+    };
 };
 
 // ==================== NAVIGAZIONE ====================
@@ -433,7 +486,7 @@ document.getElementById('navLogout').onclick = () => { window.location.href = 'i
 
 // Avvio
 caricaAgenti();
-debugLog("App Agenti v3.00 avviata con Firebase");
+debugLog("App Agenti v3.01 avviata con Firebase - fix creazione");
 </script>
 </body>
 </html>
