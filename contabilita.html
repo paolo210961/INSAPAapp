@@ -10,26 +10,110 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
-        .header { background: white; padding: 15px 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: sticky; top: 0; z-index: 1000; }
-        .logo-area-sx { flex-shrink: 0; }
-        .logo-rettangolo { width: 320px; height: 100px; background: transparent; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; overflow: hidden; position: relative; }
-        .logo-rettangolo img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .logo-placeholder { text-align: center; padding: 10px; }
-        .logo-placeholder span { font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 8px; }
-        .btn-carica-logo { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
-        .nav-box { background: #2c3e50; border-radius: 16px; padding: 12px 20px; display: inline-block; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .nav-grid { display: flex; gap: 10px; flex-wrap: wrap; }
-        .nav-btn { background: #34495e; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.2s; }
-        .nav-btn:hover { background: #1a252f; transform: translateY(-1px); }
-        .nav-btn.disabled { background: #7f8c8d; cursor: not-allowed; opacity: 0.6; }
-        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; flex-wrap: wrap; }
-        .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 120px; }
-        .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        
+        /* HEADER CON DUE RIGHE - stessi stili di agenti */
+        .header {
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo-rettangolo { 
+            width: 300px; 
+            height: 80px; 
+            background: transparent; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            cursor: pointer; 
+        }
+        .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .logo-rettangolo span { font-size: 1.5rem; }
+        .btn-logo-mobile {
+            display: none;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        /* Pulsanti navigazione - sfondo giallo, bottoni bianchi */
+        .nav-box { 
+            background: #f1c40f; 
+            border-radius: 16px; 
+            padding: 10px 20px; 
+        }
+        .nav-grid { display: flex; gap: 10px; }
+        .nav-btn { 
+            background: white; 
+            color: #2c3e50; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
+        .nav-btn.disabled { 
+            background: #ecf0f1; 
+            color: #95a5a6; 
+            cursor: not-allowed; 
+            opacity: 0.8;
+        }
+        .nav-btn.disabled:hover { transform: none; background: #ecf0f1; color: #95a5a6; }
+        
+        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
+        
+        .sidebar {
+            width: 340px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 200px;
+        }
+        
+        .content-area {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
         input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; }
         button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0; font-weight: bold; width: 100%; }
-        button:hover { opacity: 0.85; }
+        button:hover { opacity: 0.85; transform: translateY(-1px); }
         .btn-danger { background: #e74c3c; }
         .btn-success { background: #27ae60; }
         .btn-yellow { background: #f1c40f; color: black; }
@@ -57,28 +141,44 @@
         .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
         .debug-console { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 0.7rem; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
-        @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { width: 100%; position: static; } .header { flex-direction: column; align-items: stretch; } .nav-box { width: 100%; } .logo-rettangolo { width: 100%; margin: 0 auto; } }
+        
+        @media (max-width: 768px) { 
+            .main-container { flex-direction: column; } 
+            .sidebar { width: 100%; position: static; top: 0; }
+            .archive-box .btn-group { grid-template-columns: 1fr; }
+            .header-row { flex-direction: column; align-items: stretch; }
+            .nav-box { width: 100%; text-align: center; }
+            .nav-grid { justify-content: center; }
+            .logo-rettangolo { width: 100%; margin: 0 auto; }
+            .logo-area { justify-content: center; flex-direction: column; }
+            .btn-logo-mobile { display: block; }
+        }
     </style>
 </head>
 <body>
 <div id="appContainer">
     <div class="header">
-        <div class="logo-area-sx">
-            <div id="logoRettangolo" class="logo-rettangolo">
-                <div id="logoPlaceholder" class="logo-placeholder"><span>🏢 LOGO AZIENDA</span><button id="btnCaricaLogo" class="btn-carica-logo">📁 CARICA LOGO</button></div>
-                <img id="logoImmagine" style="display: none;" alt="Logo">
+        <div class="header-row">
+            <div class="logo-area">
+                <div id="logoRettangolo" class="logo-rettangolo">
+                    <img id="logoImmagine" style="display:none;">
+                    <span id="logoSpan">🏢 LOGO</span>
+                </div>
+                <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
             </div>
-        </div>
-        <div class="nav-box">
-            <div class="nav-grid">
-                <button id="btnContabilita" class="nav-btn disabled" disabled>📊 CONTABILITÀ</button>
-                <button id="btnVaiAgenti" class="nav-btn">👥 AGENTI</button>
-                <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
-                <button id="navLogout" class="nav-btn">🚪 ESCI</button>
+            <div class="nav-box">
+                <div class="nav-grid">
+                    <button class="nav-btn disabled" disabled>📊 CONTABILITÀ</button>
+                    <button id="btnVaiAgenti" class="nav-btn">👥 AGENTI</button>
+                    <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                    <button id="navLogout" class="nav-btn">🚪 ESCI</button>
+                </div>
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v3.00 - Contabilità (Firebase)</div>
+
+    <div class="version" id="appVersion">v5.08 - Contabilità</div>
+
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
             <div class="form-group"><label>📅 Anno</label><select id="annoSelect"><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
@@ -94,17 +194,19 @@
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
             <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
         </div>
+
         <div class="content-area">
             <div id="contabilitaContainer">
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><div id="saldoInfo"></div><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th><th>✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody><tr><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
             </div>
             <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button></div></div>
         </div>
     </div>
-    <footer>Logo: clicca CARICA LOGO. Per cambiarlo, tieni premuto 3 secondi. I dati sono salvati su Firebase e condivisi tra dispositivi.</footer>
+    <footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
 </div>
+
 <script>
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
@@ -132,6 +234,7 @@ function debugLog(msg) {
         let time = new Date().toLocaleTimeString();
         consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        if(consoleDiv.children.length > 50) consoleDiv.innerHTML = `<div>${time} - Console pulita</div>`;
     }
     console.log(msg);
 }
@@ -191,24 +294,105 @@ async function applicaModifiche() {
     pendingChanges={}; aggiornaTabelle(); await salvaStatoFirebase(); alert("Modifiche salvate con successo su Firebase!");
 }
 
-function makeEditableCellPrimaNota(val,idx,field,isSel){ if(field==='verificato'){ let c=document.createElement('input'); c.type='checkbox'; c.checked=val===true; c.onchange=async()=>{ primaNota[idx].verificato=c.checked; aggiornaTabelle(); await salvaStatoFirebase(); }; return c; } let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val); let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell'; if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; } else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input'; if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; } else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; } else{ inp.type='text'; inp.value=formatNumber(val)||''; } s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus(); inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else if(field==='descrizione') nv=inp.value; else nv=parseNumber(inp.value); pendingChanges[`primanota|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; if(field==='data'||field==='descrizione') s.textContent=nv||''; else s.textContent=formatNumber(nv)||''; }; inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; } return s; }
-function makeEditableCellContanti(val,idx,field,isSel){ let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val); let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell'; if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; } else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input'; if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; } else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; } else{ inp.type='text'; inp.value=formatNumber(val)||''; } s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus(); inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else if(field==='descrizione') nv=inp.value; else nv=parseNumber(inp.value); pendingChanges[`contanti|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; if(field==='data'||field==='descrizione') s.textContent=nv||''; else s.textContent=formatNumber(nv)||''; }; inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; } return s; }
-function makeEditableCellFornitori(val,idx,field,isSel){ let s=document.createElement('span'); s.textContent=val||''; s.className='editable-cell'; if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; } else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input'; if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; } else{ inp.type='text'; inp.value=val||''; } s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus(); inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else nv=inp.value; pendingChanges[`fornitori|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; s.textContent=nv||''; }; inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; } return s; }
+function makeEditableCellPrimaNota(val,idx,field,isSel){
+    if(field==='verificato'){ let c=document.createElement('input'); c.type='checkbox'; c.checked=val===true; c.style.cursor='pointer'; c.onchange=async()=>{ primaNota[idx].verificato=c.checked; aggiornaTabelle(); await salvaStatoFirebase(); }; return c; }
+    let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val);
+    let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell';
+    if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
+    else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
+        if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
+        else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; }
+        else{ inp.type='text'; inp.value=formatNumber(val)||''; }
+        s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
+        inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else if(field==='descrizione') nv=inp.value; else nv=parseNumber(inp.value); pendingChanges[`primanota|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; if(field==='data'||field==='descrizione') s.textContent=nv||''; else s.textContent=formatNumber(nv)||''; };
+        inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; }
+    return s;
+}
+function makeEditableCellContanti(val,idx,field,isSel){
+    let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val);
+    let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell';
+    if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
+    else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
+        if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
+        else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; }
+        else{ inp.type='text'; inp.value=formatNumber(val)||''; }
+        s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
+        inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else if(field==='descrizione') nv=inp.value; else nv=parseNumber(inp.value); pendingChanges[`contanti|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; if(field==='data'||field==='descrizione') s.textContent=nv||''; else s.textContent=formatNumber(nv)||''; };
+        inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; }
+    return s;
+}
+function makeEditableCellFornitori(val,idx,field,isSel){
+    let s=document.createElement('span'); s.textContent=val||''; s.className='editable-cell';
+    if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
+    else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
+        if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
+        else{ inp.type='text'; inp.value=val||''; }
+        s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
+        inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else nv=inp.value; pendingChanges[`fornitori|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; s.textContent=nv||''; };
+        inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; }
+    return s;
+}
 
 async function aggiornaTabelle() {
-    let selRows=getSelectedRows();
-    let tb=document.getElementById('primaNotaBody');
-    if(tb){ tb.innerHTML=''; primaNota.forEach((r,i)=>{ let tr=tb.insertRow(); let chk=document.createElement('input'); chk.type='checkbox'; chk.className='row-check-prima'; chk.checked=selRows.includes(i); chk.onchange=()=>{ aggiornaTabelle(); aggiornaPulsantiAzione(); }; tr.insertCell(0).appendChild(chk); tr.insertCell(1).innerText=i+1; let isSel=chk.checked; tr.insertCell(2).appendChild(makeEditableCellPrimaNota(r.data,i,'data',isSel)); tr.insertCell(3).appendChild(makeEditableCellPrimaNota(r.descrizione,i,'descrizione',isSel)); tr.insertCell(4).appendChild(makeEditableCellPrimaNota(r.avere,i,'avere',isSel)); tr.insertCell(5).appendChild(makeEditableCellPrimaNota(r.dare,i,'dare',isSel)); tr.insertCell(6).appendChild(makeEditableCellPrimaNota(r.verificato,i,'verificato',isSel)); }); }
-    let tbc=document.getElementById('contantiBody');
-    if(tbc){ tbc.innerHTML=''; contanti.forEach((r,i)=>{ let tr=tbc.insertRow(); let chk=document.createElement('input'); chk.type='checkbox'; chk.className='row-check-contanti'; chk.checked=selRows.includes(i); chk.onchange=()=>{ aggiornaTabelle(); aggiornaPulsantiAzione(); }; tr.insertCell(0).appendChild(chk); tr.insertCell(1).innerText=i+1; let isSel=chk.checked; tr.insertCell(2).appendChild(makeEditableCellContanti(r.data,i,'data',isSel)); tr.insertCell(3).appendChild(makeEditableCellContanti(r.descrizione,i,'descrizione',isSel)); tr.insertCell(4).appendChild(makeEditableCellContanti(r.importo,i,'importo',isSel)); }); }
-    let tbf=document.getElementById('fornitoriBody');
-    if(tbf){ tbf.innerHTML=''; fattureFornitori.forEach((f,i)=>{ let tr=tbf.insertRow(); let chk=document.createElement('input'); chk.type='checkbox'; chk.className='row-check-fornitori'; chk.checked=selRows.includes(i); chk.onchange=()=>{ aggiornaTabelle(); aggiornaPulsantiAzione(); }; tr.insertCell(0).appendChild(chk); tr.insertCell(1).innerText=`${nextFatturaId-fattureFornitori.length+i}/${currentYear}`; let isSel=chk.checked; tr.insertCell(2).appendChild(makeEditableCellFornitori(f.data,i,'data',isSel)); tr.insertCell(3).appendChild(makeEditableCellFornitori(f.fornitore,i,'fornitore',isSel)); tr.insertCell(4).appendChild(makeEditableCellFornitori(f.numeroFattura,i,'numeroFattura',isSel)); }); }
+    const selectedRows = getSelectedRows();
+    let tbody = document.getElementById('primaNotaBody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        primaNota.forEach((riga, idx) => {
+            let row = tbody.insertRow();
+            let checkCell = row.insertCell(0);
+            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-prima'; chk.checked = selectedRows.includes(idx);
+            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
+            checkCell.appendChild(chk);
+            row.insertCell(1).innerText = idx+1;
+            let isSelected = chk.checked;
+            row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', isSelected));
+            row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', isSelected));
+            row.insertCell(4).appendChild(makeEditableCellPrimaNota(riga.avere, idx, 'avere', isSelected));
+            row.insertCell(5).appendChild(makeEditableCellPrimaNota(riga.dare, idx, 'dare', isSelected));
+            row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', isSelected));
+        });
+    }
+    let contantiBody = document.getElementById('contantiBody');
+    if (contantiBody) {
+        contantiBody.innerHTML = '';
+        contanti.forEach((riga, idx) => {
+            let row = contantiBody.insertRow();
+            let checkCell = row.insertCell(0);
+            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-contanti'; chk.checked = selectedRows.includes(idx);
+            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
+            checkCell.appendChild(chk);
+            row.insertCell(1).innerText = idx+1;
+            let isSelected = chk.checked;
+            row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', isSelected));
+            row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', isSelected));
+            row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', isSelected));
+        });
+    }
+    let fornitoriBody = document.getElementById('fornitoriBody');
+    if (fornitoriBody) {
+        fornitoriBody.innerHTML = '';
+        fattureFornitori.forEach((fatt, idx) => {
+            let row = fornitoriBody.insertRow();
+            let checkCell = row.insertCell(0);
+            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-fornitori'; chk.checked = selectedRows.includes(idx);
+            chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
+            checkCell.appendChild(chk);
+            row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
+            let isSelected = chk.checked;
+            row.insertCell(2).appendChild(makeEditableCellFornitori(fatt.data, idx, 'data', isSelected));
+            row.insertCell(3).appendChild(makeEditableCellFornitori(fatt.fornitore, idx, 'fornitore', isSelected));
+            row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', isSelected));
+        });
+    }
     calcolaSaldo(); await salvaStatoFirebase();
-    document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale;
+    document.getElementById('annoSelect').value = currentYear;
+    document.getElementById('meseSelect').value = currentMonth;
+    document.getElementById('saldoIniziale').value = saldoIniziale;
     aggiornaPulsantiAzione();
-    let sa=document.getElementById('selectAllPrimaNota'); if(sa){ let all=document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); }
-    sa=document.getElementById('selectAllContanti'); if(sa){ let all=document.querySelectorAll('#contantiBody .row-check-contanti'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); }
-    sa=document.getElementById('selectAllFornitori'); if(sa){ let all=document.querySelectorAll('#fornitoriBody .row-check-fornitori'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); }
+    let sa = document.getElementById('selectAllPrimaNota'); if(sa){ let all = document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
+    sa = document.getElementById('selectAllContanti'); if(sa){ let all = document.querySelectorAll('#contantiBody .row-check-contanti'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
+    sa = document.getElementById('selectAllFornitori'); if(sa){ let all = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
 }
 
 function setScheda(s){ currentScheda=s; document.getElementById('tabellaPrimaNotaContainer').style.display=s==='primanota'?'block':'none'; document.getElementById('tabellaContantiContainer').style.display=s==='contanti'?'block':'none'; document.getElementById('tabellaFornitoriContainer').style.display=s==='fornitori'?'block':'none'; document.getElementById('btnPrimaNota').classList.toggle('active-scheda',s==='primanota'); document.getElementById('btnContanti').classList.toggle('active-scheda',s==='contanti'); document.getElementById('btnFornitori').classList.toggle('active-scheda',s==='fornitori'); aggiornaForm(); pendingChanges={}; aggiornaTabelle(); aggiornaPulsantiAzione(); }
@@ -223,50 +407,105 @@ async function memorizzaNuovo(){
 async function eliminaSelezionati(s){ if(s==='primanota'){ let ck=document.querySelectorAll('#primaNotaBody .row-check-prima'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(primaNota[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) primaNota=n; document.getElementById('selectAllPrimaNota').checked=false; } if(s==='contanti'){ let ck=document.querySelectorAll('#contantiBody .row-check-contanti'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(contanti[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) contanti=n; document.getElementById('selectAllContanti').checked=false; } if(s==='fornitori'){ let ck=document.querySelectorAll('#fornitoriBody .row-check-fornitori'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(fattureFornitori[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) fattureFornitori=n; document.getElementById('selectAllFornitori').checked=false; } pendingChanges={}; aggiornaTabelle(); await salvaStatoFirebase(); }
 async function cambiaMese(){ currentYear=parseInt(document.getElementById('annoSelect').value); currentMonth=parseInt(document.getElementById('meseSelect').value); await caricaStatoFirebase(); pendingChanges={}; }
 async function riprendiMeseCorrente(){ const ultimo=localStorage.getItem('ultimoMeseLavorato'); if(ultimo){ const {anno,mese}=JSON.parse(ultimo); currentYear=anno; currentMonth=mese; await caricaStatoFirebase(); alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`); } else alert("Nessun mese precedente trovato."); pendingChanges={}; }
-function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><tr><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
+function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
 <div class="section-title">💵 INCASSO CONTANTI</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody></table>
-<div class="section-title">📄 FATTURE FORNITORI</div><table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
+<div class="section-title">📄 FATTURE FORNITORI</div><table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<td><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
 <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Responsabile Amministrativo<br>_________________________</div><script>window.onload=()=>window.print();<\/script></body></html>`); w.document.close(); }
-function esportaCSV(perAnno){ let rows=[["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]], dataE=[]; if(perAnno){ for(let m=0;m<12;m++){ let key=`contabilita_${currentYear}_${m}`; let saved=localStorage.getItem(key); if(saved){ try{ let d=JSON.parse(saved); for(let r of(d.primaNota||[])) dataE.push(r); for(let r of(d.contanti||[])) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); }catch(e){} } } } else { for(let r of primaNota) dataE.push(r); for(let r of contanti) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); } for(let r of dataE) rows.push([r.data||'',r.descrizione||'',r.avere?r.avere.toString().replace('.',','):'',r.dare?r.dare.toString().replace('.',','):'',r.incassoContanti?r.incassoContanti.toString().replace('.',','):'',r.verificato?"Sì":"No"]); let blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8"}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=perAnno?`contabilita_${currentYear}_anno.csv`:`contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href); }
+function esportaCSV(perAnno){ let rows=[["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]], dataE=[]; if(perAnno){ for(let m=0;m<12;m++){ let saved=localStorage.getItem(`contabilita_${currentYear}_${m}`); if(saved){ try{ let d=JSON.parse(saved); for(let r of(d.primaNota||[])) dataE.push(r); for(let r of(d.contanti||[])) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); }catch(e){} } } } else { for(let r of primaNota) dataE.push(r); for(let r of contanti) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); } for(let r of dataE) rows.push([r.data||'',r.descrizione||'',r.avere?r.avere.toString().replace('.',','):'',r.dare?r.dare.toString().replace('.',','):'',r.incassoContanti?r.incassoContanti.toString().replace('.',','):'',r.verificato?"Sì":"No"]); let blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8"}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=perAnno?`contabilita_${currentYear}_anno.csv`:`contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href); }
 
-function mostraPasswordOverlay(callback){ let ov=document.createElement('div'); ov.className='password-overlay'; ov.innerHTML=`<div class="password-modal"><h3>🔐 Accesso Agenti</h3><p>Inserisci password amministratore</p><input type="password" id="pwdInput" style="width:100%; margin:10px 0;"><div class="btn-group"><button id="pwdOkBtn" class="btn-success">OK</button><button id="pwdCancelBtn" class="btn-danger">ANNULLA</button></div></div>`; document.body.appendChild(ov); document.getElementById('pwdOkBtn').onclick=()=>{ let pwd=document.getElementById('pwdInput').value; if(pwd===ADMIN_PASSWORD){ ov.remove(); callback(true); }else{ alert("Password errata!"); ov.remove(); callback(false); } }; document.getElementById('pwdCancelBtn').onclick=()=>{ ov.remove(); callback(false); }; }
+function mostraPasswordOverlay(callback) {
+    const overlay = document.createElement('div'); overlay.className = 'password-overlay';
+    overlay.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Contabilità</h3><p>Inserisci la password amministratore</p><input type="password" id="pwdInput" style="width:100%; margin:10px 0;"><div class="btn-group" style="justify-content:center;"><button id="pwdOkBtn" class="btn-success">OK</button><button id="pwdCancelBtn" class="btn-danger">ANNULLA</button></div></div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('pwdOkBtn').onclick = () => { const pwd = document.getElementById('pwdInput').value; if (pwd === ADMIN_PASSWORD) { overlay.remove(); callback(true); } else { alert("Password errata!"); overlay.remove(); callback(false); } };
+    document.getElementById('pwdCancelBtn').onclick = () => { overlay.remove(); callback(false); };
+}
 
-function caricaLogoSalvato(){ let ls=localStorage.getItem('logo_azienda'); if(ls){ document.getElementById('logoImmagine').src=ls; document.getElementById('logoImmagine').style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; } }
-function salvaLogo(u){ localStorage.setItem('logo_azienda',u); }
-function caricaLogoDaFile(){ let inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.onchange=e=>{ let f=e.target.files[0]; if(f){ let r=new FileReader(); r.onload=ev=>{ let url=ev.target.result; document.getElementById('logoImmagine').src=url; document.getElementById('logoImmagine').style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
-document.getElementById('btnCaricaLogo').onclick=e=>{ e.stopPropagation(); caricaLogoDaFile(); };
-let pt=null; let ld=document.getElementById('logoRettangolo'); ld.addEventListener('mousedown',()=>{ pt=setTimeout(()=>{ if(document.getElementById('logoImmagine').style.display==='block') caricaLogoDaFile(); pt=null; },3000); }); ld.addEventListener('mouseup',()=>{ if(pt){ clearTimeout(pt); pt=null; } }); ld.addEventListener('mouseleave',()=>{ if(pt){ clearTimeout(pt); pt=null; } }); caricaLogoSalvato();
+// ==================== GESTIONE LOGO ====================
+function caricaLogo() { let l = localStorage.getItem('logo_azienda'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
+function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
+function caricaLogoFile() { let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if(f){ let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
 
-document.getElementById('btnPrimaNota').onclick=()=>setScheda('primanota');
-document.getElementById('btnContanti').onclick=()=>setScheda('contanti');
-document.getElementById('btnFornitori').onclick=()=>setScheda('fornitori');
-document.getElementById('btnMemorizza').onclick=memorizzaNuovo;
-document.getElementById('btnSalvaModificaPrima').onclick=()=>{ if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
-document.getElementById('btnEliminaSelezionatiPrima').onclick=()=>eliminaSelezionati('primanota');
-document.getElementById('btnSalvaModificaContanti').onclick=()=>{ if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
-document.getElementById('btnEliminaSelezionatiContanti').onclick=()=>eliminaSelezionati('contanti');
-document.getElementById('btnSalvaModificaFornitori').onclick=()=>{ if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
-document.getElementById('btnEliminaSelezionatiFornitori').onclick=()=>eliminaSelezionati('fornitori');
-document.getElementById('btnCaricaMese').onclick=()=>document.getElementById('fileCaricaMese').click();
-document.getElementById('fileCaricaMese').onchange=e=>{ if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); backupPreCaricamento={anno:currentYear,mese:currentMonth,saldoIniziale,primaNota:JSON.parse(JSON.stringify(primaNota)),contanti:JSON.parse(JSON.stringify(contanti)),fattureFornitori:JSON.parse(JSON.stringify(fattureFornitori)),nextFatturaId}; currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato su Firebase: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
-document.getElementById('btnRiprendiCorrente').onclick=riprendiMeseCorrente;
-document.getElementById('btnEsportaPDFMese').onclick=esportaPDFMese;
-document.getElementById('btnEsportaCSVAnno').onclick=()=>esportaCSV(true);
-document.getElementById('btnEsportaCSVMese').onclick=()=>esportaCSV(false);
-document.getElementById('saldoIniziale').onchange=async e=>{ saldoIniziale=parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); };
-document.getElementById('annoSelect').onchange=cambiaMese;
-document.getElementById('meseSelect').onchange=cambiaMese;
+let logoDiv = document.getElementById('logoRettangolo'); let timer = null;
+logoDiv.addEventListener('mousedown', () => { timer = setTimeout(() => { caricaLogoFile(); timer = null; }, 3000); });
+logoDiv.addEventListener('mouseup', () => { if(timer) { clearTimeout(timer); timer = null; } });
+logoDiv.addEventListener('mouseleave', () => { if(timer) { clearTimeout(timer); timer = null; } });
+
+function aggiornaPulsanteLogoMobile() {
+    let logoPresente = localStorage.getItem('logo_azienda') !== null;
+    let btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) {
+        btnMobile.style.display = logoPresente ? 'none' : 'block';
+    }
+}
+
+document.getElementById('btnCaricaLogoMobile').onclick = () => { caricaLogoFile(); };
+
+const observer = new MutationObserver(() => { aggiornaPulsanteLogoMobile(); });
+observer.observe(document.getElementById('logoImmagine'), { attributes: true });
+
+caricaLogo();
+aggiornaPulsanteLogoMobile();
+
+// ==================== EVENTI ====================
+document.getElementById('btnPrimaNota').onclick = () => setScheda('primanota');
+document.getElementById('btnContanti').onclick = () => setScheda('contanti');
+document.getElementById('btnFornitori').onclick = () => setScheda('fornitori');
+document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
+document.getElementById('btnSalvaModificaPrima').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
+document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
+document.getElementById('btnSalvaModificaContanti').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
+document.getElementById('btnEliminaSelezionatiContanti').onclick = () => eliminaSelezionati('contanti');
+document.getElementById('btnSalvaModificaFornitori').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
+document.getElementById('btnEliminaSelezionatiFornitori').onclick = () => eliminaSelezionati('fornitori');
+document.getElementById('btnCaricaMese').onclick = () => document.getElementById('fileCaricaMese').click();
+document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); backupPreCaricamento={anno:currentYear,mese:currentMonth,saldoIniziale,primaNota:JSON.parse(JSON.stringify(primaNota)),contanti:JSON.parse(JSON.stringify(contanti)),fattureFornitori:JSON.parse(JSON.stringify(fattureFornitori)),nextFatturaId}; currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato su Firebase: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
+document.getElementById('btnRiprendiCorrente').onclick = riprendiMeseCorrente;
+document.getElementById('btnEsportaPDFMese').onclick = esportaPDFMese;
+document.getElementById('btnEsportaCSVAnno').onclick = () => esportaCSV(true);
+document.getElementById('btnEsportaCSVMese').onclick = () => esportaCSV(false);
+document.getElementById('saldoIniziale').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); };
+document.getElementById('annoSelect').onchange = cambiaMese;
+document.getElementById('meseSelect').onchange = cambiaMese;
 function setupSelectAll(bid,cid,cls){ let sa=document.getElementById(bid); if(sa) sa.onchange=e=>{ document.querySelectorAll(`#${cid} .${cls}`).forEach(c=>c.checked=e.target.checked); aggiornaTabelle(); aggiornaPulsantiAzione(); }; }
 setupSelectAll('selectAllPrimaNota','primaNotaBody','row-check-prima');
 setupSelectAll('selectAllContanti','contantiBody','row-check-contanti');
 setupSelectAll('selectAllFornitori','fornitoriBody','row-check-fornitori');
 
-document.getElementById('btnVaiAgenti').onclick=()=>{ window.location.href='agenti.html'; };
-document.getElementById('navLogout').onclick=()=>{ window.location.href='index.html'; };
-let cpv=false;
-document.getElementById('navChangePwd').onclick=()=>{ if(!cpv){ document.getElementById('contabilitaContainer').style.display='none'; document.getElementById('changePwdContainer').style.display='block'; cpv=true; } };
-document.getElementById('btnAnnullaPassword').onclick=()=>{ document.getElementById('contabilitaContainer').style.display='block'; document.getElementById('changePwdContainer').style.display='none'; cpv=false; };
-document.getElementById('btnSalvaPassword').onclick=()=>{ let n=document.getElementById('nuovaPassword').value, c=document.getElementById('confermaPassword').value; if(!n){alert("Inserisci nuova password");return;} if(n!==c){alert("Le password non coincidono");return;} ADMIN_PASSWORD=n; localStorage.setItem('admin_password',n); alert("Password cambiata!"); document.getElementById('nuovaPassword').value=''; document.getElementById('confermaPassword').value=''; document.getElementById('contabilitaContainer').style.display='block'; document.getElementById('changePwdContainer').style.display='none'; cpv=false; };
+// ==================== NAVIGAZIONE ====================
+// Da CONTABILITÀ a AGENTI: NON chiede password (accesso libero)
+document.getElementById('btnVaiAgenti').onclick = () => { window.location.href = 'agenti.html'; };
+document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
+
+// Cambio Password
+let changePwdVisible = false;
+document.getElementById('navChangePwd').onclick = () => {
+    if (!changePwdVisible) {
+        document.getElementById('contabilitaContainer').style.display = 'none';
+        document.getElementById('changePwdContainer').style.display = 'block';
+        changePwdVisible = true;
+    }
+};
+document.getElementById('btnAnnullaPassword').onclick = () => {
+    document.getElementById('contabilitaContainer').style.display = 'block';
+    document.getElementById('changePwdContainer').style.display = 'none';
+    changePwdVisible = false;
+};
+document.getElementById('btnSalvaPassword').onclick = () => {
+    let nuova = document.getElementById('nuovaPassword').value;
+    let conferma = document.getElementById('confermaPassword').value;
+    if (!nuova) { alert("Inserisci una nuova password"); return; }
+    if (nuova !== conferma) { alert("Le password non coincidono"); return; }
+    ADMIN_PASSWORD = nuova;
+    localStorage.setItem('admin_password', nuova);
+    alert("Password cambiata con successo!");
+    document.getElementById('nuovaPassword').value = '';
+    document.getElementById('confermaPassword').value = '';
+    document.getElementById('contabilitaContainer').style.display = 'block';
+    document.getElementById('changePwdContainer').style.display = 'none';
+    changePwdVisible = false;
+};
+
 caricaStatoFirebase().then(() => setScheda('primanota'));
 </script>
 </body>
