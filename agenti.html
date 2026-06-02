@@ -14,8 +14,27 @@
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .nav-box { background: #2c3e50; border-radius: 16px; padding: 10px 20px; }
         .nav-grid { display: flex; gap: 10px; }
-        .nav-btn { background: #34495e; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .nav-btn { 
+            background: #f1c40f; 
+            color: #2c3e50; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
+        .nav-btn.disabled { 
+            background: #7f8c8d; 
+            color: white; 
+            cursor: not-allowed; 
+            opacity: 0.6;
+        }
+        .nav-btn.disabled:hover { transform: none; }
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
+        
+        /* Sidebar fissa durante lo scroll */
         .sidebar { 
             width: 340px; 
             background: white; 
@@ -25,9 +44,27 @@
             position: sticky; 
             top: 120px;
             height: fit-content;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
         }
+        
+        /* Riquadro azioni in alto */
+        .action-box {
+            background: #ecf0f1;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #d0d7de;
+        }
+        .action-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        
         .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
-        button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; }
+        button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; font-weight: bold; }
+        button:hover { opacity: 0.85; transform: translateY(-1px); }
         .btn-success { background: #27ae60; }
         select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
         .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
@@ -61,7 +98,7 @@
         .btn-group-modal button { margin: 0; }
         @media (max-width: 768px) { 
             .main-container { flex-direction: column; } 
-            .sidebar { width: 100%; position: static; top: 0; } 
+            .sidebar { width: 100%; position: static; top: 0; max-height: none; } 
         }
     </style>
 </head>
@@ -74,21 +111,24 @@
     <div class="nav-box">
         <div class="nav-grid">
             <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
-            <button class="nav-btn disabled" style="background:#7f8c8d">👥 AGENTI</button>
+            <button class="nav-btn disabled" style="background:#f1c40f; color:#2c3e50;" disabled>👥 AGENTI</button>
             <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
         </div>
     </div>
 </div>
 <div class="main-container">
     <div class="sidebar">
-        <h3>👤 Seleziona Agente</h3>
-        <select id="selectAgente">
-            <option value="">-- Seleziona --</option>
-        </select>
-        <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
-        <button id="btnCaricaFile" class="btn-success">📂 Carica ORD + SCA</button>
-        <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
-        <div id="fileStatus" class="file-status"></div>
+        <!-- Riquadro azioni in alto -->
+        <div class="action-box">
+            <h3>👤 GESTIONE AGENTE</h3>
+            <select id="selectAgente">
+                <option value="">-- Seleziona agente --</option>
+            </select>
+            <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
+            <button id="btnCaricaFile" class="btn-success">📂 Carica ORD + SCA</button>
+            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
+            <div id="fileStatus" class="file-status"></div>
+        </div>
         
         <h3 style="margin-top:20px;">🔍 Cerca Cliente</h3>
         <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
@@ -107,7 +147,7 @@
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v5.01 - Agenti (Firebase)</div>
+<div class="version">v5.02 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -512,7 +552,6 @@ async function caricaFile(files) {
         let nome = file.name;
         
         // Validazione: deve essere ORD + codice oppure SCA + codice
-        // Esempi validi: ORD0001.txt, SCA0001.txt, ORD001.txt, SCA001.txt
         let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
         let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
         
@@ -600,7 +639,7 @@ caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.01");
+console.log("🚀 App avviata - v5.02");
 </script>
 </body>
 </html>
