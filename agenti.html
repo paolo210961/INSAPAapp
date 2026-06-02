@@ -74,7 +74,7 @@
             </div>
         </div>
     </div>
-    <div class="version" id="appVersion">v3.01 - Agenti (fix creazione)</div>
+    <div class="version" id="appVersion">v3.02 - Agenti (fix caricamento)</div>
     <div class="main-container">
         <div id="sidebarAgenti" class="sidebar">
             <div class="agente-selector">
@@ -124,7 +124,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== AGENTI - VERSIONE FIREBASE ====================
+// ==================== AGENTI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let agentiLista = [];
 let agenteCorrente = null;
@@ -139,9 +139,7 @@ function debugLog(msg) {
         let time = new Date().toLocaleTimeString();
         consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
         consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        if(consoleDiv.children.length > 50) {
-            consoleDiv.innerHTML = `<div>${time} - Console pulita</div>`;
-        }
+        if(consoleDiv.children.length > 50) consoleDiv.innerHTML = `<div>${time} - Console pulita</div>`;
     }
     console.log(msg);
 }
@@ -156,7 +154,7 @@ async function caricaAgenti() {
         agentiLista = [];
         snapshot.forEach(doc => agentiLista.push(doc.data()));
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
-        debugLog(`Caricati ${agentiLista.length} agenti`);
+        debugLog(`Caricati ${agentiLista.length} agenti: ${JSON.stringify(agentiLista.map(a=>a.codice))}`);
         aggiornaSelectAgenti();
         return agentiLista.length;
     } catch(e) { 
@@ -190,12 +188,7 @@ function aggiornaSelectAgenti() {
         opt.textContent = `${a.codice} - ${a.nome}`; 
         select.appendChild(opt); 
     }
-    if (valoreCorrente && agentiLista.find(a => a.codice === valoreCorrente)) {
-        select.value = valoreCorrente;
-    } else if (agenteCorrente) {
-        select.value = agenteCorrente.codice;
-    }
-    debugLog(`Select aggiornata: ${select.options.length} opzioni`);
+    debugLog(`Select aggiornata: ${select.options.length-1} agenti`);
 }
 
 async function selezionaAgente(codice) {
@@ -315,9 +308,9 @@ function mostraScadenzeAgenti() {
     if (!clienteKey) { container.innerHTML = '<div class="info-messaggio">Seleziona un cliente.</div>'; return; }
     let [codice, ragione] = clienteKey.split('|'), clienteSCA = datiAgenti.sca.find(c => c.codice === codice && c.ragione === ragione);
     if (!clienteSCA || clienteSCA.scadenze.length === 0) { container.innerHTML = `<div class="info-messaggio">Nessuna scadenza (SCA) per ${ragione}</div>`; return; }
-    let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3><table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></tr></thead><tbody>`;
+    let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3><table class="tabella"><thead><tr><th>Scadenza</th><th>N. Doc.</th><th>Data documento</th><th>Importo</th></td></thead><tbody>`;
     for (let s of clienteSCA.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="white-space:nowrap">${s.dataDoc}</td><td style="text-align:right">${formatNumber(s.importo)} €</td></tr>`;
-    html += `</tbody>}</div>`; container.innerHTML = html;
+    html += `</tbody></table></div>`; container.innerHTML = html;
     debugLog(`Mostrate scadenze per ${codice} - ${ragione}`);
 }
 
@@ -436,11 +429,14 @@ document.getElementById('fileInputMultiAgenti').onchange = async (e) => {
 };
 
 // ==================== EVENTI UI ====================
-document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); else { agenteCorrente = null; datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); } };
+document.getElementById('selectAgente').onchange = (e) => { 
+    if (e.target.value) selezionaAgente(e.target.value); 
+    else { agenteCorrente = null; datiAgenti = { ord: [], sca: [] }; aggiornaClientiUniciAgenti(); } 
+};
 document.getElementById('cercaCliente').oninput = () => aggiornaTendinaClienti();
 document.getElementById('selectClienteAgenti').onchange = () => { mostraScadenzeAgenti(); mostraDettaglioAgenti(); };
 
-// MODALE CREA AGENTE - CORRETTA
+// MODALE CREA AGENTE
 document.getElementById('btnCreaAgente').onclick = () => {
     debugLog("Apertura modale crea agente");
     let modal = document.createElement('div'); 
@@ -484,9 +480,11 @@ document.getElementById('btnCreaAgente').onclick = () => {
 document.getElementById('btnVaiContabilita').onclick = () => { mostraPasswordOverlay((ok) => { if (ok) window.location.href = 'contabilita.html'; }); };
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 
-// Avvio
-caricaAgenti();
-debugLog("App Agenti v3.01 avviata con Firebase - fix creazione");
+// AVVIO - Forza caricamento agenti all'avvio
+(async function() {
+    await caricaAgenti();
+    debugLog("App Agenti v3.02 avviata con Firebase");
+})();
 </script>
 </body>
 </html>
