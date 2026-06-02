@@ -46,8 +46,9 @@
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
             flex-wrap: wrap;
+            gap: 15px;
         }
         .logo-rettangolo { 
             width: 300px; 
@@ -124,6 +125,7 @@
         }
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-whatsapp-header { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
         
         /* Main container */
@@ -216,44 +218,37 @@
                 align-items: stretch;
             }
             
-            /* Logo con pulsante mobile */
+            /* Logo centrato */
             .logo-area {
-                justify-content: space-between;
-                align-items: center;
+                justify-content: center;
+                flex-direction: column;
             }
             .btn-logo-mobile {
-                display: block;
+                display: none;
             }
             .logo-rettangolo {
-                width: 200px;
-                height: 60px;
+                width: 250px;
+                height: 70px;
+                margin: 0 auto;
             }
             
-            /* Pulsanti navigazione a tutta larghezza */
-            .nav-box {
-                width: 100%;
-                text-align: center;
-            }
-            .nav-grid {
-                justify-content: center;
-            }
-            .nav-btn {
-                padding: 10px 20px;
-                font-size: 1rem;
-            }
-            
-            /* Box azioni - elementi in colonna */
+            /* Griglia 2 colonne per pulsanti */
             .action-group {
-                flex-direction: column;
-                align-items: stretch;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
                 width: 100%;
+            }
+            .action-group label {
+                display: none;
             }
             .action-group select,
             .action-group button,
             .action-group input {
                 width: 100%;
                 padding: 10px;
-                font-size: 1rem;
+                font-size: 0.9rem;
+                margin: 0;
             }
             .action-group select {
                 min-width: unset;
@@ -261,10 +256,15 @@
             .action-group input {
                 min-width: unset;
             }
-            .file-status-inline {
-                margin-left: 0;
-                text-align: center;
-                margin-top: 5px;
+            
+            /* Pulsanti navigazione dimezzati */
+            .nav-box {
+                width: 100%;
+                padding: 5px 10px;
+            }
+            .nav-btn {
+                padding: 4px 12px;
+                font-size: 0.85rem;
             }
             
             /* Main container colonna singola */
@@ -288,20 +288,20 @@
             
             /* Pulsanti più grandi per il tocco */
             button, .btn-success, .btn-primary, .btn-whatsapp {
-                padding: 12px;
-                font-size: 1rem;
+                padding: 10px;
+                font-size: 0.9rem;
             }
             
-            /* Font più grande */
+            /* Font */
             body {
-                font-size: 16px;
+                font-size: 15px;
             }
             h3 {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             select, input {
-                padding: 12px;
-                font-size: 1rem;
+                padding: 10px;
+                font-size: 0.9rem;
             }
             
             /* Tabella scadenze scrollabile */
@@ -316,6 +316,20 @@
             .btn-whatsapp {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            /* File status inline */
+            .file-status-inline {
+                grid-column: span 2;
+                text-align: center;
+                margin-top: 5px;
+            }
+        }
+        
+        /* Nascondi pulsante CREA AGENTE su mobile */
+        @media (max-width: 768px) {
+            .btnCreaAgenteMobileHide {
+                display: none !important;
             }
         }
     </style>
@@ -343,17 +357,25 @@
     <!-- Seconda riga: box gestione agente (giallo) con tutti i controlli -->
     <div class="header-row-bottom">
         <div class="action-group">
-            <label>👤 Seleziona Agente:</label>
             <select id="selectAgente">
-                <option value="">-- Seleziona --</option>
+                <option value="">-- Seleziona agente --</option>
             </select>
+            <input type="text" id="cercaArticoloInline" placeholder="🔍 Cerca articolo...">
         </div>
         <div class="action-group">
-            <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
             <button id="btnCaricaFile" class="btn-primary">📂 Carica ORD + SCA</button>
-            <input type="text" id="cercaArticoloInline" placeholder="🔍 Cerca articolo...">
+            <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
+                </svg>
+                Invia Scadenze
+            </button>
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
+        </div>
+        <!-- Pulsante CREA AGENTE solo su PC (nascosto su mobile) -->
+        <div class="action-group btnCreaAgenteMobileHide">
+            <button id="btnCreaAgente" class="btn-success" style="display:inline-block; width:auto;">➕ CREA AGENTE</button>
         </div>
     </div>
 </div>
@@ -374,7 +396,7 @@
     </div>
 </div>
 <footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
-<div class="version">v5.05 - Agenti (Firebase)</div>
+<div class="version">v5.06 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -584,7 +606,7 @@ function parseSCA(text) {
 // ==================== INVIO WHATSAPP ====================
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) {
-        alert("Nessuna scadenza da inviare per questo cliente!");
+        alert("Nessuna scadenza da inviare per il cliente selezionato!");
         return;
     }
     
@@ -610,6 +632,14 @@ function inviaScadenzeWhatsApp(cliente) {
     // Codifica per URL
     let url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
     window.open(url, '_blank');
+}
+
+function inviaScadenzeClienteCorrente() {
+    if (!clienteScadenzeCorrente) {
+        alert("Seleziona prima un cliente con scadenze!");
+        return;
+    }
+    inviaScadenzeWhatsApp(clienteScadenzeCorrente);
 }
 
 // ==================== GESTIONE CLIENTI ====================
@@ -866,12 +896,13 @@ document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => filtraArticoli();
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
 document.getElementById('fileInput').onchange = async (e) => {
     await caricaFile(Array.from(e.target.files));
     e.target.value = '';
 };
 
-// MODALE CREA AGENTE
+// MODALE CREA AGENTE (solo PC)
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
     modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
@@ -942,16 +973,31 @@ logoDiv.addEventListener('mouseleave', () => {
     } 
 });
 
-// Logo su mobile (pulsante esplicito)
+// Logo su mobile (pulsante esplicito - visibile solo se non c'è logo)
+function aggiornaPulsanteLogoMobile() {
+    let logoPresente = localStorage.getItem('logo') !== null;
+    let btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) {
+        btnMobile.style.display = logoPresente ? 'none' : 'block';
+    }
+}
+
 document.getElementById('btnCaricaLogoMobile').onclick = () => {
     caricaLogoFile();
 };
 
+// Osserva i cambiamenti del logo per aggiornare il pulsante
+const observer = new MutationObserver(() => {
+    aggiornaPulsanteLogoMobile();
+});
+observer.observe(document.getElementById('logoImmagine'), { attributes: true });
+
 caricaLogo();
+aggiornaPulsanteLogoMobile();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.05 (mobile friendly)");
+console.log("🚀 App avviata - v5.06 (mobile ottimizzato)");
 </script>
 </body>
 </html>
