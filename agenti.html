@@ -25,7 +25,7 @@
         .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; }
         .articolo-item:hover { background: #fff3cd; }
         .file-status { font-size: 0.7rem; color: green; margin-top: 5px; text-align: center; }
-        .debug-box { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; }
+        .debug-box { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
@@ -61,15 +61,21 @@
         <input type="file" id="fileInput" multiple accept=".txt,.csv">
         <div id="fileStatus" class="file-status"></div>
         <button id="btnRicarica" style="background:#f39c12; color:#2c3e50;">🔄 RICARICA AGENTI</button>
+        
+        <h3 style="margin-top:20px;">👥 Seleziona Cliente</h3>
+        <select id="selectClienteAgenti">
+            <option value="">-- Seleziona cliente --</option>
+        </select>
+        
         <div id="debugBox" class="debug-box">🔍 Console debug:<br></div>
     </div>
     <div class="content-area">
-        <div id="scadenze"></div>
-        <div id="dettaglio"></div>
+        <div id="scadenzeAgenti"></div>
+        <div id="dettaglioAgenti"></div>
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v4.02 - Agenti (Firebase)</div>
+<div class="version">v4.03 - Agenti (Firebase)</div>
 
 <script>
 function debugLog(msg) {
@@ -100,6 +106,7 @@ let agentiLista = [];
 let agenteCorrente = null;
 let datiOrd = [];
 let datiSca = [];
+let clientiUnici = [];
 
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
@@ -110,11 +117,11 @@ async function caricaAgenti() {
         snapshot.forEach(doc => agentiLista.push(doc.data()));
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
         debugLog(`✅ Trovati ${agentiLista.length} agenti`);
-        aggiornaSelect();
+        aggiornaSelectAgenti();
     } catch(e) { debugLog("❌ ERRORE: "+e.message); }
 }
 
-function aggiornaSelect() {
+function aggiornaSelectAgenti() {
     let select = document.getElementById('selectAgente');
     let oldValue = select.value;
     select.innerHTML = '<option value="">-- Seleziona agente --</option>';
@@ -126,14 +133,15 @@ function aggiornaSelect() {
     }
     if (oldValue && agentiLista.find(a => a.codice === oldValue)) {
         select.value = oldValue;
+        selezionaAgente(oldValue);
     }
-    debugLog(`📋 Select: ${select.options.length-1} agenti`);
+    debugLog(`📋 Select agenti: ${select.options.length-1} agenti`);
 }
 
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
-    debugLog(`👤 Selezionato: ${codice} - ${agenteCorrente.nome}`);
+    debugLog(`👤 Agente selezionato: ${codice} - ${agenteCorrente.nome}`);
     
     try {
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
@@ -166,7 +174,7 @@ async function creaAgente(codice, nome) {
     } catch(e) { alert("ERRORE: "+e.message); return false; }
 }
 
-// ==================== PARSER ORD (VERSIONE FUNZIONANTE) ====================
+// ==================== PARSER ORD ====================
 function parseORD(text) {
     debugLog(`📄 Parsing ORD: ${text.length} caratteri`);
     const lines = text.split(/\r?\n/);
@@ -279,89 +287,107 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== VISUALIZZAZIONE ====================
+// ==================== GESTIONE CLIENTI ====================
 function aggiornaClienti() {
     let select = document.getElementById('selectClienteAgenti');
-    if (!select) {
-        document.getElementById('scadenze').innerHTML = '<div class="scadenze-box"><select id="selectClienteAgenti" style="width:100%"><option value="">-- Seleziona cliente --</option></select></div>';
-        select = document.getElementById('selectClienteAgenti');
-        select.onchange = () => { mostraScadenze(); mostraDettaglio(); };
+    let mappa = new Map();
+    
+    for (let c of datiOrd) {
+        mappa.set(c.codice, { 
+            codice: c.codice, 
+            ragione: c.ragione, 
+            hasScadenze: false, 
+            ordini: c.articoli 
+        });
     }
     
-    let mappa = new Map();
-    for (let c of datiOrd) {
-        mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: false, articoli: c.articoli });
-    }
     for (let c of datiSca) {
         if (mappa.has(c.codice)) {
-            mappa.get(c.codice).hasScadenze = c.scadenze.length > 0;
+            mappa.get(c.codice).hasScadenze = true;
+            mappa.get(c.codice).scadenze = c.scadenze;
         } else {
-            mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: c.scadenze.length > 0, articoli: [] });
+            mappa.set(c.codice, { 
+                codice: c.codice, 
+                ragione: c.ragione, 
+                hasScadenze: true, 
+                scadenze: c.scadenze,
+                ordini: [] 
+            });
         }
     }
     
-    let lista = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+    clientiUnici = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+    
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-    for (let c of lista) {
+    for (let c of clientiUnici) {
         let opt = document.createElement('option');
-        opt.value = `${c.codice}|${c.ragione}`;
-        let testo = `${c.codice} - ${c.ragione}`;
-        if (c.articoli && c.articoli.length > 0) testo += ` [${c.articoli.length}]`;
-        opt.textContent = testo;
+        opt.value = c.codice;
+        opt.textContent = `${c.codice} - ${c.ragione}`;
         if (c.hasScadenze) opt.style.color = '#c0392b';
         select.appendChild(opt);
     }
-    debugLog(`📋 Clienti: ${select.options.length-1} clienti nella tendina`);
+    
+    debugLog(`📋 Clienti: ${clientiUnici.length} clienti`);
+    
+    // Se c'è un cliente selezionato in precedenza, mostra i suoi dati
+    let currentVal = select.value;
+    if (currentVal) {
+        mostraDettaglioCliente(currentVal);
+    }
 }
 
-function mostraScadenze() {
-    let key = document.getElementById('selectClienteAgenti')?.value;
-    if (!key) return;
-    let [codice, ragione] = key.split('|');
-    let cliente = datiSca.find(c => c.codice === codice);
-    let container = document.getElementById('scadenze');
-    if (!cliente || !cliente.scadenze.length) {
-        container.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${ragione}</div>`;
-        return;
+function mostraDettaglioCliente(codice) {
+    let cliente = clientiUnici.find(c => c.codice === codice);
+    if (!cliente) return;
+    
+    let containerScadenze = document.getElementById('scadenzeAgenti');
+    let containerArticoli = document.getElementById('dettaglioAgenti');
+    
+    // Mostra scadenze
+    if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
+        let html = `<div class="scadenze-box">
+                    <h3>📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
+                    <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+        for (let s of cliente.scadenze) {
+            html += `<tr><td>${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
+        }
+        html += `</tbody></table></div>`;
+        containerScadenze.innerHTML = html;
+    } else {
+        containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
-    let html = `<div class="scadenze-box"><h3>📅 Scadenze - ${codice} ${ragione}</h3>
-                <table style="width:100%; border-collapse:collapse;">
-                <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
-    for (let s of cliente.scadenze) html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
-    html += `</tbody>}</div>`;
-    container.innerHTML = html;
-}
-
-function mostraDettaglio() {
-    let key = document.getElementById('selectClienteAgenti')?.value;
-    if (!key) return;
-    let [codice, ragione] = key.split('|');
-    let cliente = datiOrd.find(c => c.codice === codice);
-    let container = document.getElementById('dettaglio');
-    if (!cliente || !cliente.articoli.length) {
-        container.innerHTML = `<div class="scadenze-box">Nessun ordine per ${ragione}</div>`;
-        return;
+    
+    // Mostra articoli
+    if (cliente.ordini && cliente.ordini.length > 0) {
+        let html = `<div class="scadenze-box">
+                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
+        for (let art of cliente.ordini) {
+            let ultimiOrdini = art.coppie.slice(0, 4).map(o => `${o.data} (q.${o.qta})`).join(', ');
+            html += `<div class="articolo-item" data-codice="${art.codice}">
+                        <strong>${art.codice} ${art.descrizione}</strong><br>
+                        € ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%<br>
+                        <small>📦 Ultimi ordini: ${ultimiOrdini || 'nessuno'}</small>
+                    </div>`;
+        }
+        html += `</div>`;
+        containerArticoli.innerHTML = html;
+        
+        // Aggiungi eventi click per gli articoli
+        document.querySelectorAll('.articolo-item').forEach(el => {
+            el.onclick = () => {
+                let smallText = el.querySelector('small')?.innerText || '';
+                alert("Storico dettagliato ordini:\n" + smallText);
+            };
+        });
+    } else {
+        containerArticoli.innerHTML = `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
     }
-    let html = `<div class="scadenze-box"><h3>📋 ORD - ${codice} ${ragione} (${cliente.articoli.length} articoli)</h3>`;
-    for (let art of cliente.articoli) {
-        let ultimiOrdini = art.coppie.slice(0, 4).map(o => `${o.data} (q.${o.qta})`).join(', ');
-        html += `<div class="articolo-item" style="border:1px solid #ddd; border-radius:8px; padding:10px; margin-bottom:10px; cursor:pointer;">
-                    <strong>${art.codice} ${art.descrizione}</strong><br>
-                    € ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%<br>
-                    <small>📦 Ultimi ordini: ${ultimiOrdini || 'nessuno'}</small>
-                </div>`;
-    }
-    html += `</div>`;
-    container.innerHTML = html;
-    document.querySelectorAll('.articolo-item').forEach(el => {
-        el.onclick = () => {
-            alert("Storico dettagliato ordini:\n" + el.querySelector('small')?.innerText);
-        };
-    });
 }
 
 // ==================== EVENTI ====================
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
+document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('btnRicarica').onclick = () => caricaAgenti();
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 
@@ -396,7 +422,7 @@ document.getElementById('fileInput').onchange = async (e) => {
     }
     
     if (!ord && !sca) {
-        alert("Nessun file ORD o SCA riconosciuto! I file devono contenere 'ord' o 'sca' nel nome.");
+        alert("Nessun file ORD o SCA riconosciuto!");
         return;
     }
     
@@ -436,7 +462,7 @@ caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-debugLog("🚀 App avviata - v4.02");
+debugLog("🚀 App avviata - v4.03");
 </script>
 </body>
 </html>
