@@ -11,10 +11,10 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
         
-        /* HEADER */
+        /* HEADER - compatto come v5.08 */
         .header {
             background: white;
-            padding: 15px 25px;
+            padding: 12px 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
@@ -24,21 +24,19 @@
         .header-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
         }
         
         .logo-area {
             display: flex;
             align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
         .logo-rettangolo { 
-            width: 300px; 
-            height: 80px; 
+            width: 250px; 
+            height: 60px; 
             background: transparent; 
             display: flex; 
             align-items: center; 
@@ -47,116 +45,114 @@
             cursor: pointer; 
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .logo-rettangolo span { font-size: 1.5rem; }
+        .logo-rettangolo span { font-size: 1.2rem; }
         .btn-logo-mobile {
             display: none;
             background: #3498db;
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        /* Box navigazione compatto - stile come v5.08 */
+        .nav-box { 
+            background: #f1c40f; 
+            border-radius: 12px; 
+            padding: 8px 15px; 
+        }
+        .nav-grid { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+        }
+        .nav-btn { 
+            background: white; 
+            color: #2c3e50; 
+            border: none; 
+            padding: 5px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold;
             font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        /* Box 1 e Box 2 affiancati */
-        .boxes-container {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        /* Box 1 - stile uguale a agenti */
-        .box-navigazione {
-            background: #f1c40f;
-            border-radius: 16px;
-            padding: 15px 20px;
-            min-width: 220px;
-        }
-        .box-navigazione .nav-btn {
-            background: white;
-            color: #2c3e50;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin: 5px 0;
-            text-align: center;
             transition: all 0.2s;
         }
-        .box-navigazione .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
-        .box-navigazione .nav-btn.disabled { background: #ecf0f1; color: #95a5a6; cursor: not-allowed; opacity: 0.8; }
+        .nav-btn:hover { background: #e67e22; color: white; }
+        .nav-btn.disabled { background: #ecf0f1; color: #95a5a6; cursor: not-allowed; opacity: 0.8; }
         
-        /* Box 2 */
-        .box-schede {
+        /* Box schede compatto */
+        .schede-box {
             background: #f1c40f;
-            border-radius: 16px;
-            padding: 15px 20px;
-            min-width: 200px;
+            border-radius: 12px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            display: inline-block;
         }
         .scheda-btn {
             background: white;
             color: #2c3e50;
             border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 5px 12px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            width: 100%;
-            margin: 5px 0;
-            text-align: center;
+            font-size: 0.8rem;
             transition: all 0.2s;
+            margin: 0 3px;
         }
         .scheda-btn.active-scheda {
             background: #3498db;
             color: white;
         }
-        .scheda-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
+        .scheda-btn:hover { background: #e67e22; color: white; }
         
-        /* Box 1 interno - riga per ANNO, MESE, SALDO */
+        /* Dati periodo compatti (ANNO, MESE, SALDO) */
         .dati-periodo {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 8px;
             flex-wrap: wrap;
         }
         .dato-item {
-            flex: 1;
-            min-width: 80px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: white;
+            padding: 3px 8px;
+            border-radius: 6px;
         }
         .dato-item label {
             font-size: 0.7rem;
             font-weight: bold;
             color: #2c3e50;
-            display: block;
-            margin-bottom: 3px;
+            margin: 0;
         }
         .dato-item select, .dato-item input {
-            width: 100%;
-            padding: 5px 8px;
-            border-radius: 6px;
+            padding: 3px 5px;
+            border-radius: 4px;
             border: 1px solid #ccc;
-            font-size: 0.8rem;
-            background: white;
+            font-size: 0.75rem;
+            width: auto;
+            min-width: 70px;
         }
         
-        /* Main container */
+        /* Main container - come v5.08 */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         
-        /* Sidebar (colonna sinistra vuota o con pulsanti) */
+        /* Sidebar - come v5.08 */
         .sidebar {
-            width: 340px;
+            width: 320px;
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             position: sticky;
-            top: 200px;
+            top: 120px;
             height: fit-content;
-            max-height: calc(100vh - 220px);
+            max-height: calc(100vh - 140px);
             overflow-y: auto;
             border: 1px solid #ddd;
         }
@@ -165,45 +161,50 @@
             flex: 1;
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             overflow-x: auto;
         }
         
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
-        button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0; font-weight: bold; width: 100%; }
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 3px; color: #2c3e50; font-size: 0.8rem; }
+        input, select { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.8rem; }
+        button { background: #3498db; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; margin: 4px 0; font-weight: bold; width: 100%; }
+        button:hover { opacity: 0.85; }
         .btn-danger { background: #e74c3c; }
         .btn-success { background: #27ae60; }
-        .btn-verde { background: #27ae60; color: white; font-weight: bold; }
-        .btn-giallo { background: #f1c40f; color: #2c3e50; font-weight: bold; }
-        .btn-rosso { background: #e74c3c; color: white; font-weight: bold; }
-        .tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 15px; }
-        .tabella th, .tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        .btn-verde { background: #27ae60; color: white; }
+        .btn-giallo { background: #f1c40f; color: #2c3e50; }
+        .btn-rosso { background: #e74c3c; color: white; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+        .btn-group button { width: auto; flex: 1; }
+        .tabella { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 10px; }
+        .tabella th, .tabella td { border: 1px solid #ddd; padding: 6px; text-align: left; vertical-align: top; }
         .tabella th { background: #e9ecef; }
-        .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
-        .editable-cell { cursor: pointer; min-width: 80px; display: inline-block; width: 100%; }
+        .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 12px; margin-bottom: 20px; border-radius: 8px; overflow-x: auto; }
+        .editable-cell { cursor: pointer; min-width: 70px; display: inline-block; width: 100%; }
         .editable-cell:hover { background-color: #fff3cd; }
-        .cell-input { width: 100%; border: none; background: transparent; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
+        .cell-input { width: 100%; border: none; background: transparent; font-family: inherit; font-size: inherit; padding: 2px; margin: -2px; }
         .cell-input:focus { outline: 1px solid #3498db; background: white; }
         .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
-        .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
-        footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
+        .action-buttons { display: none; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .version { position: fixed; bottom: 8px; right: 8px; background: #3498db; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.6rem; font-weight: bold; z-index: 100; }
+        footer { text-align: center; margin: 15px; font-size: 0.65rem; color: #95a5a6; }
         .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
-        .debug-console { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 0.7rem; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
+        .debug-console { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 0.65rem; padding: 8px; margin-top: 12px; border-radius: 6px; max-height: 120px; overflow-y: auto; }
         
         @media (max-width: 768px) { 
             .main-container { flex-direction: column; } 
-            .sidebar { width: 100%; position: static; top: 0; max-height: none; }
+            .sidebar { width: 100%; position: static; }
             .header-row { flex-direction: column; align-items: stretch; }
-            .boxes-container { flex-direction: column; }
+            .nav-box { width: 100%; text-align: center; }
+            .nav-grid { justify-content: center; }
             .logo-rettangolo { width: 100%; margin: 0 auto; }
-            .logo-area { justify-content: center; flex-direction: column; }
+            .logo-area { justify-content: center; }
             .btn-logo-mobile { display: block; }
             .dati-periodo { flex-direction: column; }
+            .dato-item { justify-content: space-between; }
         }
     </style>
 </head>
@@ -216,71 +217,69 @@
                     <img id="logoImmagine" style="display:none;">
                     <span id="logoSpan">🏢 LOGO</span>
                 </div>
-                <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
+                <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 LOGO</button>
             </div>
             
-            <!-- Box 1 e Box 2 affiancati -->
-            <div class="boxes-container">
-                <!-- Box 1: CONTABILITÀ, AGENTI, CAMBIA PWD, ESCI + ANNO, MESE, SALDO -->
-                <div class="box-navigazione">
+            <!-- Box navigazione compatto: 4 pulsanti -->
+            <div class="nav-box">
+                <div class="nav-grid">
                     <button class="nav-btn disabled" disabled>📊 CONTABILITÀ</button>
                     <button id="btnVaiAgenti" class="nav-btn">👥 AGENTI</button>
-                    <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                    <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PWD</button>
                     <button id="navLogout" class="nav-btn">🚪 ESCI</button>
-                    
-                    <!-- ANNO, MESE, SALDO INIZIALE (sotto CAMBIA PASSWORD) -->
-                    <div class="dati-periodo">
-                        <div class="dato-item">
-                            <label>📅 ANNO</label>
-                            <select id="annoSelect">
-                                <option value="2024">2024</option><option value="2025">2025</option>
-                                <option value="2026" selected>2026</option>
-                                <option value="2027">2027</option><option value="2028">2028</option>
-                            </select>
-                        </div>
-                        <div class="dato-item">
-                            <label>📆 MESE</label>
-                            <select id="meseSelect">
-                                <option value="0">Gennaio</option><option value="1">Febbraio</option>
-                                <option value="2">Marzo</option><option value="3">Aprile</option>
-                                <option value="4">Maggio</option><option value="5">Giugno</option>
-                                <option value="6">Luglio</option><option value="7">Agosto</option>
-                                <option value="8">Settembre</option><option value="9">Ottobre</option>
-                                <option value="10">Novembre</option><option value="11">Dicembre</option>
-                            </select>
-                        </div>
-                        <div class="dato-item">
-                            <label>💰 SALDO</label>
-                            <input type="number" id="saldoIniziale" step="0.01" value="0">
-                        </div>
-                    </div>
                 </div>
-                
-                <!-- Box 2: PRIMA NOTA, CONTANTI, FORNITORI -->
-                <div class="box-schede">
-                    <button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button>
-                    <button id="btnContanti" class="scheda-btn">💵 CONTANTI</button>
-                    <button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button>
-                </div>
+            </div>
+        </div>
+        
+        <!-- Box schede: PRIMA NOTA, CONTANTI, FORNITORI -->
+        <div class="schede-box">
+            <button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button>
+            <button id="btnContanti" class="scheda-btn">💵 CONTANTI</button>
+            <button id="btnFornitori" class="scheda-btn">📄 FORNITORI</button>
+        </div>
+        
+        <!-- ANNO, MESE, SALDO (sotto le schede, compatto) -->
+        <div class="dati-periodo">
+            <div class="dato-item">
+                <label>📅 ANNO</label>
+                <select id="annoSelect">
+                    <option value="2024">2024</option><option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option><option value="2028">2028</option>
+                </select>
+            </div>
+            <div class="dato-item">
+                <label>📆 MESE</label>
+                <select id="meseSelect">
+                    <option value="0">Gennaio</option><option value="1">Febbraio</option>
+                    <option value="2">Marzo</option><option value="3">Aprile</option>
+                    <option value="4">Maggio</option><option value="5">Giugno</option>
+                    <option value="6">Luglio</option><option value="7">Agosto</option>
+                    <option value="8">Settembre</option><option value="9">Ottobre</option>
+                    <option value="10">Novembre</option><option value="11">Dicembre</option>
+                </select>
+            </div>
+            <div class="dato-item">
+                <label>💰 SALDO</label>
+                <input type="number" id="saldoIniziale" step="0.01" value="0">
             </div>
         </div>
     </div>
 
-    <div class="version" id="appVersion">v5.11 - Contabilità</div>
+    <div class="version" id="appVersion">v5.12 - Contabilità (compatta)</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
-            <!-- Pulsanti azione -->
             <button id="btnCaricaMese" class="btn-verde">📂 CARICA MESE</button>
-            <button id="btnRiprendiCorrente" class="btn-verde">📅 RIPRENDI MESE CORRENTE</button>
-            <button id="btnEsportaPDFMese" class="btn-giallo">📄 ESPORTA REPORT MESE</button>
-            <button id="btnEsportaPDFAnno" class="btn-giallo">📄 ESPORTA REPORT ANNO</button>
-            <button id="btnEsportaCSVMese" class="btn-rosso">📎 ESPORTA CSV MESE</button>
-            <button id="btnEsportaCSVAnno" class="btn-rosso">📎 ESPORTA CSV ANNO</button>
+            <button id="btnRiprendiCorrente" class="btn-verde">📅 RIPRENDI MESE</button>
+            <button id="btnEsportaPDFMese" class="btn-giallo">📄 REPORT MESE</button>
+            <button id="btnEsportaPDFAnno" class="btn-giallo">📄 REPORT ANNO</button>
+            <button id="btnEsportaCSVMese" class="btn-rosso">📎 CSV MESE</button>
+            <button id="btnEsportaCSVAnno" class="btn-rosso">📎 CSV ANNO</button>
             
             <hr>
             
-            <button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button>
+            <div class="form-group"><button id="btnMemorizza" class="btn-success btn-memorizza">💾 MEMORIZZA</button></div>
             
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
             <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
@@ -288,15 +287,15 @@
 
         <div class="content-area">
             <div id="contabilitaContainer">
-                <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><div id="saldoInfo"></div><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th><th>✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></tr><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA</h3><div id="saldoInfo"></div><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:25px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><div id="totaleContantiInfo"></div><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:25px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:25px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
             </div>
             <div id="formArea"></div>
-            <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button></div></div>
+            <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 SALVA</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:8px;">◀ INDIETRO</button></div></div>
         </div>
     </div>
-    <footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
+    <footer>Logo: tieni premuto 3 secondi (PC) o clicca LOGO (mobile)</footer>
 </div>
 
 <script>
@@ -370,7 +369,7 @@ async function caricaStatoFirebase() {
     } catch(e) { debugLog("ERRORE caricamento: "+e.message); }
 }
 
-function calcolaSaldo() { let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td; document.getElementById('saldoInfo').innerHTML=`<div style="display:flex;gap:20px;flex-wrap:wrap"><div><strong>📈 Totale Avere:</strong> ${formatNumber(ta)} €</div><div><strong>📉 Totale Dare:</strong> ${formatNumber(td)} €</div><div><strong>💰 Saldo mese:</strong> ${formatNumber(sal)} €</div></div>`; document.getElementById('totaleContantiInfo').innerHTML=`<div><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(tc)} €</div>`; }
+function calcolaSaldo() { let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td; document.getElementById('saldoInfo').innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:0.75rem"><div><strong>📈 Avere:</strong> ${formatNumber(ta)} €</div><div><strong>📉 Dare:</strong> ${formatNumber(td)} €</div><div><strong>💰 Saldo:</strong> ${formatNumber(sal)} €</div></div>`; document.getElementById('totaleContantiInfo').innerHTML=`<div style="font-size:0.75rem"><strong>💵 Totale Incasso:</strong> ${formatNumber(tc)} €</div>`; }
 function hasSelectedRows() { if(currentScheda==='primanota') return Array.from(document.querySelectorAll('#primaNotaBody .row-check-prima')).some(c=>c.checked); if(currentScheda==='contanti') return Array.from(document.querySelectorAll('#contantiBody .row-check-contanti')).some(c=>c.checked); if(currentScheda==='fornitori') return Array.from(document.querySelectorAll('#fornitoriBody .row-check-fornitori')).some(c=>c.checked); return false; }
 function getSelectedRows() { let sel=[]; if(currentScheda==='primanota') document.querySelectorAll('#primaNotaBody .row-check-prima').forEach((c,i)=>{if(c.checked) sel.push(i);}); if(currentScheda==='contanti') document.querySelectorAll('#contantiBody .row-check-contanti').forEach((c,i)=>{if(c.checked) sel.push(i);}); if(currentScheda==='fornitori') document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach((c,i)=>{if(c.checked) sel.push(i);}); return sel; }
 function aggiornaPulsantiAzione() { let hs=hasSelectedRows(); if(currentScheda==='primanota') document.getElementById('primaNotaActionButtons').style.display=hs?'flex':'none'; if(currentScheda==='contanti') document.getElementById('contantiActionButtons').style.display=hs?'flex':'none'; if(currentScheda==='fornitori') document.getElementById('fornitoriActionButtons').style.display=hs?'flex':'none'; }
@@ -378,7 +377,7 @@ function aggiornaPulsantiAzione() { let hs=hasSelectedRows(); if(currentScheda==
 async function applicaModifiche() {
     for(let k in pendingChanges){ let p=k.split('|'), s=p[0], ri=parseInt(p[1]), f=p[2], nv=pendingChanges[k]; if(s==='primanota'&&primaNota[ri]){ let na= f==='avere'?parseNumber(nv):primaNota[ri].avere, nd=f==='dare'?parseNumber(nv):primaNota[ri].dare; if(na>0&&nd>0){ alert(`Errore: Avere e Dare non possono essere entrambi >0 riga ${ri+1}`); return; } } }
     for(let k in pendingChanges){ let p=k.split('|'), s=p[0], ri=parseInt(p[1]), f=p[2], nv=pendingChanges[k]; if(s==='primanota'&&primaNota[ri]){ primaNota[ri][f]=nv; if(f==='avere'&&parseNumber(nv)>0) primaNota[ri].dare=0; if(f==='dare'&&parseNumber(nv)>0) primaNota[ri].avere=0; } else if(s==='contanti'&&contanti[ri]) contanti[ri][f]=nv; else if(s==='fornitori'&&fattureFornitori[ri]) fattureFornitori[ri][f]=nv; }
-    pendingChanges={}; aggiornaTabelle(); await salvaStatoFirebase(); alert("Modifiche salvate con successo su Firebase!");
+    pendingChanges={}; aggiornaTabelle(); await salvaStatoFirebase(); alert("Modifiche salvate su Firebase!");
 }
 
 function makeEditableCellPrimaNota(val,idx,field,isSel){
@@ -493,9 +492,9 @@ async function memorizzaNuovo(){
 async function eliminaSelezionati(s){ if(s==='primanota'){ let ck=document.querySelectorAll('#primaNotaBody .row-check-prima'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(primaNota[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) primaNota=n; document.getElementById('selectAllPrimaNota').checked=false; } if(s==='contanti'){ let ck=document.querySelectorAll('#contantiBody .row-check-contanti'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(contanti[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) contanti=n; document.getElementById('selectAllContanti').checked=false; } if(s==='fornitori'){ let ck=document.querySelectorAll('#fornitoriBody .row-check-fornitori'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(fattureFornitori[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) fattureFornitori=n; document.getElementById('selectAllFornitori').checked=false; } pendingChanges={}; aggiornaTabelle(); await salvaStatoFirebase(); }
 async function cambiaMese(){ currentYear=parseInt(document.getElementById('annoSelect').value); currentMonth=parseInt(document.getElementById('meseSelect').value); await caricaStatoFirebase(); pendingChanges={}; }
 async function riprendiMeseCorrente(){ const ultimo=localStorage.getItem('ultimoMeseLavorato'); if(ultimo){ const {anno,mese}=JSON.parse(ultimo); currentYear=anno; currentMonth=mese; await caricaStatoFirebase(); alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`); } else alert("Nessun mese precedente trovato."); pendingChanges={}; }
-function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><tr><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
+function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
 <div class="section-title">💵 INCASSO CONTANTI</div><table class="contanti-table"><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody></table>
-<div class="section-title">📄 FATTURE FORNITORI</div><table class="fornitori-table"><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
+<div class="section-title">📄 FATTURE FORNITORI</div><table class="fornitori-table"><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></table></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
 <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Responsabile Amministrativo<br>_________________________</div><script>window.onload=()=>window.print();<\/script></body></html>`); w.document.close(); }
 function esportaPDFAnno() {
     let logo = localStorage.getItem('logo_azienda');
@@ -535,7 +534,7 @@ function esportaPDFAnno() {
              <div class="summary-item"><div>💰 Saldo Annuale</div><div class="summary-value ${(totaleAvereAnno-totaleDareAnno)>=0?'positive':'negative'}">${formatNumber(totaleAvereAnno-totaleDareAnno)} €</div></div></div>`;
     
     html += `<div class="section-title">📋 DETTAGLIO MENSILE</div>
-             <table><thead><tr><th>Mese</th><th class="text-right">Entrate (€)</th><th class="text-right">Uscite (€)</th><th class="text-right">Saldo (€)</th></tr></thead><tbody>`;
+             <table><thead><tr><th>Mese</th><th class="text-right">Entrate (€)</th><th class="text-right">Uscite (€)</th><th class="text-right">Saldo (€)</th><tr></thead><tbody>`;
     
     for (let m = 0; m < 12; m++) {
         let saved = localStorage.getItem(`contabilita_${currentYear}_${m}`);
@@ -557,7 +556,7 @@ function esportaCSV(perAnno){ let rows=[["Data","Descrizione","Avere","Dare","In
 
 function mostraPasswordOverlay(callback) {
     const overlay = document.createElement('div'); overlay.className = 'password-overlay';
-    overlay.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Contabilità</h3><p>Inserisci la password amministratore</p><input type="password" id="pwdInput" style="width:100%; margin:10px 0;"><div class="btn-group" style="justify-content:center;"><button id="pwdOkBtn" class="btn-success">OK</button><button id="pwdCancelBtn" class="btn-danger">ANNULLA</button></div></div>`;
+    overlay.innerHTML = `<div class="password-modal"><h3>🔐 Accesso Contabilità</h3><p>Inserisci password</p><input type="password" id="pwdInput" style="width:100%; margin:10px 0;"><div class="btn-group" style="justify-content:center;"><button id="pwdOkBtn" class="btn-success">OK</button><button id="pwdCancelBtn" class="btn-danger">ANNULLA</button></div></div>`;
     document.body.appendChild(overlay);
     document.getElementById('pwdOkBtn').onclick = () => { const pwd = document.getElementById('pwdInput').value; if (pwd === ADMIN_PASSWORD) { overlay.remove(); callback(true); } else { alert("Password errata!"); overlay.remove(); callback(false); } };
     document.getElementById('pwdCancelBtn').onclick = () => { overlay.remove(); callback(false); };
@@ -635,7 +634,7 @@ document.getElementById('btnSalvaPassword').onclick = () => {
     if (nuova !== conferma) { alert("Le password non coincidono"); return; }
     ADMIN_PASSWORD = nuova;
     localStorage.setItem('admin_password', nuova);
-    alert("Password cambiata con successo!");
+    alert("Password cambiata!");
     document.getElementById('nuovaPassword').value = '';
     document.getElementById('confermaPassword').value = '';
     document.getElementById('contabilitaContainer').style.display = 'block';
@@ -645,8 +644,8 @@ document.getElementById('btnSalvaPassword').onclick = () => {
 
 // Inizializza form area
 let fa = document.getElementById('formArea');
-if(currentScheda === 'primanota') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div><div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div><div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>`;
-else if(currentScheda === 'contanti') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div><div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`;
+if(currentScheda === 'primanota') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div><div class="form-group"><label>💰 Avere (entrate)</label><input type="number" id="formAvere" step="0.01" value="0"></div><div class="form-group"><label>💰 Dare (uscite)</label><input type="number" id="formDare" step="0.01" value="0"></div>`;
+else if(currentScheda === 'contanti') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div><div class="form-group"><label>💰 Incasso Contanti</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`;
 else if(currentScheda === 'fornitori') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
 
 caricaStatoFirebase().then(() => setScheda('primanota'));
