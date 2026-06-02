@@ -94,13 +94,16 @@
             color: #2c3e50;
             margin-right: 5px;
         }
-        .action-group select, .action-group button {
+        .action-group select, .action-group button, .action-group input {
             margin: 0;
             width: auto;
             padding: 6px 12px;
         }
         .action-group select {
             min-width: 180px;
+        }
+        .action-group input {
+            min-width: 200px;
         }
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
@@ -128,7 +131,33 @@
         button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; font-weight: bold; }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
         select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
-        .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
+        .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; position: relative; }
+        .scadenze-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            width: auto;
+            margin: 0;
+        }
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            transform: translateY(-1px);
+        }
         .articolo-item { 
             border: 1px solid #ddd; 
             border-radius: 8px; 
@@ -195,6 +224,7 @@
         <div class="action-group">
             <button id="btnCreaAgente" class="btn-success">➕ CREA AGENTE</button>
             <button id="btnCaricaFile" class="btn-primary">📂 Carica ORD + SCA</button>
+            <input type="text" id="cercaArticoloInline" placeholder="🔍 Cerca articolo...">
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
@@ -210,9 +240,6 @@
         <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;">
             <option value="">-- Seleziona cliente --</option>
         </select>
-        
-        <h3 style="margin-top:20px;">🔍 Cerca Articolo</h3>
-        <input type="text" id="cercaArticolo" placeholder="Digita codice o descrizione...">
     </div>
     <div class="content-area">
         <div id="scadenzeAgenti"></div>
@@ -220,7 +247,7 @@
     </div>
 </div>
 <footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v5.03 - Agenti (Firebase)</div>
+<div class="version">v5.04 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -241,6 +268,7 @@ let agenteCorrente = null;
 let datiOrd = [];
 let datiSca = [];
 let clientiUnici = [];
+let clienteScadenzeCorrente = null;
 
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
@@ -286,7 +314,7 @@ async function selezionaAgente(codice) {
         aggiornaClienti();
         // Reset campi ricerca
         document.getElementById('cercaCliente').value = '';
-        document.getElementById('cercaArticolo').value = '';
+        document.getElementById('cercaArticoloInline').value = '';
         document.getElementById('scadenzeAgenti').innerHTML = '';
         document.getElementById('dettaglioAgenti').innerHTML = '';
     } catch(e) { console.error("❌ ERRORE: "+e.message); alert("Errore caricamento dati: "+e.message); }
@@ -426,6 +454,37 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
+// ==================== INVIO WHATSAPP ====================
+function inviaScadenzeWhatsApp(cliente) {
+    if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) {
+        alert("Nessuna scadenza da inviare per questo cliente!");
+        return;
+    }
+    
+    // Formatta il messaggio
+    let messaggio = `📅 *SCADENZE CLIENTE*\n`;
+    messaggio += `🏢 *${cliente.codice} - ${cliente.ragione}*\n`;
+    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    messaggio += `📋 *DETTAGLIO SCADENZE:*\n\n`;
+    
+    let totale = 0;
+    for (let s of cliente.scadenze) {
+        messaggio += `📆 Scadenza: ${s.scadenza}\n`;
+        messaggio += `📄 N.Documento: ${s.numDoc}\n`;
+        messaggio += `💰 Importo: € ${s.importo.toFixed(2)}\n`;
+        messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        totale += s.importo;
+    }
+    
+    messaggio += `\n💶 *TOTALE SCADENZE: € ${totale.toFixed(2)}*\n`;
+    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    messaggio += `📱 Messaggio generato da inSAPA Agenti`;
+    
+    // Codifica per URL
+    let url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
+    window.open(url, '_blank');
+}
+
 // ==================== GESTIONE CLIENTI ====================
 function aggiornaClienti() {
     let mappa = new Map();
@@ -491,13 +550,23 @@ function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
     
+    clienteScadenzeCorrente = cliente;
+    
     let containerScadenze = document.getElementById('scadenzeAgenti');
     let containerArticoli = document.getElementById('dettaglioAgenti');
     
-    // Mostra scadenze
+    // Mostra scadenze con pulsante WhatsApp
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
         let html = `<div class="scadenze-box">
-                    <h3>📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
+                    <div class="scadenze-header">
+                        <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
+                        <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2zm.03 1.67c2.33 0 4.52.91 6.17 2.56 1.65 1.65 2.56 3.84 2.56 6.17 0 4.8-3.91 8.71-8.71 8.71-1.52 0-3-.4-4.29-1.15l-.3-.18-3.12.82.84-3.05-.19-.31c-.82-1.35-1.26-2.9-1.26-4.49 0-4.8 3.91-8.72 8.7-8.72zM8.68 7.46c-.18 0-.47.07-.72.32-.25.25-.96.94-.96 2.29 0 1.35.98 2.66 1.12 2.84.14.18 1.88 2.93 4.55 4.01.64.26 1.14.41 1.53.52.64.2 1.22.17 1.68.1.52-.07 1.6-.66 1.82-1.29.22-.63.22-1.17.15-1.28-.07-.11-.25-.18-.52-.31-.27-.13-1.6-.79-1.85-.88-.25-.09-.43-.13-.61.13-.18.26-.71.88-.87 1.06-.16.18-.32.2-.59.07-.27-.13-1.14-.42-2.17-1.34-.8-.72-1.34-1.6-1.5-1.87-.16-.27-.02-.41.12-.54.13-.13.29-.34.44-.51.15-.17.2-.29.3-.48.1-.19.05-.36-.02-.51-.07-.15-.61-1.47-.83-2.01-.22-.54-.44-.47-.61-.48-.15 0-.33-.01-.5-.01z"/>
+                            </svg>
+                            Invia Scadenze
+                        </button>
+                    </div>
                     <table style="width:100%; border-collapse:collapse;">
                     <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
@@ -558,7 +627,7 @@ function filtraArticoli() {
     let cliente = clientiUnici.find(c => c.codice === clienteCodice);
     if (!cliente || !cliente.ordini) return;
     
-    let searchText = document.getElementById('cercaArticolo').value.toLowerCase();
+    let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
     let filtrati = cliente.ordini.filter(art => 
         art.codice.toLowerCase().includes(searchText) || 
         art.descrizione.toLowerCase().includes(searchText)
@@ -668,7 +737,7 @@ async function caricaFile(files) {
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
 document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
-document.getElementById('cercaArticolo').oninput = () => filtraArticoli();
+document.getElementById('cercaArticoloInline').oninput = () => filtraArticoli();
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('fileInput').onchange = async (e) => {
     await caricaFile(Array.from(e.target.files));
@@ -747,7 +816,7 @@ caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.03");
+console.log("🚀 App avviata - v5.04");
 </script>
 </body>
 </html>
