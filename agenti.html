@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>inSAPA - Agenti</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -43,6 +43,12 @@
             gap: 15px;
         }
         
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
         .logo-rettangolo { 
             width: 300px; 
             height: 80px; 
@@ -55,6 +61,17 @@
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.5rem; }
+        .btn-logo-mobile {
+            display: none;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
         
         /* Pulsanti navigazione - sfondo bianco, testo nero grassetto */
         .nav-box { 
@@ -187,12 +204,119 @@
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
         
+        /* ==================== LAYOUT CELLULARE ==================== */
         @media (max-width: 768px) { 
-            .main-container { flex-direction: column; } 
-            .sidebar { width: 100%; position: static; top: 0; max-height: none; }
-            .header-row { flex-direction: column; align-items: stretch; }
-            .header-row-bottom { flex-direction: column; align-items: stretch; }
-            .action-group { justify-content: space-between; }
+            /* Header colonna singola */
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header-row-bottom {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            /* Logo con pulsante mobile */
+            .logo-area {
+                justify-content: space-between;
+                align-items: center;
+            }
+            .btn-logo-mobile {
+                display: block;
+            }
+            .logo-rettangolo {
+                width: 200px;
+                height: 60px;
+            }
+            
+            /* Pulsanti navigazione a tutta larghezza */
+            .nav-box {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-grid {
+                justify-content: center;
+            }
+            .nav-btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            /* Box azioni - elementi in colonna */
+            .action-group {
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+            }
+            .action-group select,
+            .action-group button,
+            .action-group input {
+                width: 100%;
+                padding: 10px;
+                font-size: 1rem;
+            }
+            .action-group select {
+                min-width: unset;
+            }
+            .action-group input {
+                min-width: unset;
+            }
+            .file-status-inline {
+                margin-left: 0;
+                text-align: center;
+                margin-top: 5px;
+            }
+            
+            /* Main container colonna singola */
+            .main-container {
+                flex-direction: column;
+            }
+            
+            /* Sidebar larga 100% */
+            .sidebar {
+                width: 100%;
+                position: static;
+                top: 0;
+                max-height: none;
+                margin-bottom: 20px;
+            }
+            
+            /* Content area */
+            .content-area {
+                width: 100%;
+            }
+            
+            /* Pulsanti più grandi per il tocco */
+            button, .btn-success, .btn-primary, .btn-whatsapp {
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            /* Font più grande */
+            body {
+                font-size: 16px;
+            }
+            h3 {
+                font-size: 1.2rem;
+            }
+            select, input {
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            /* Tabella scadenze scrollabile */
+            .scadenze-box {
+                overflow-x: auto;
+            }
+            .scadenze-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .btn-whatsapp {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -200,9 +324,12 @@
 <div class="header">
     <!-- Prima riga: logo + pulsanti navigazione -->
     <div class="header-row">
-        <div id="logoRettangolo" class="logo-rettangolo">
-            <img id="logoImmagine" style="display:none;">
-            <span id="logoSpan">🏢 LOGO</span>
+        <div class="logo-area">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <img id="logoImmagine" style="display:none;">
+                <span id="logoSpan">🏢 LOGO</span>
+            </div>
+            <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
         </div>
         <div class="nav-box">
             <div class="nav-grid">
@@ -246,8 +373,8 @@
         <div id="dettaglioAgenti"></div>
     </div>
 </div>
-<footer>Logo: tieni premuto 3 secondi per cambiarlo</footer>
-<div class="version">v5.04 - Agenti (Firebase)</div>
+<footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
+<div class="version">v5.05 - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -792,6 +919,8 @@ function caricaLogoFile() {
     }; 
     inp.click(); 
 }
+
+// Logo su PC (tieni premuto 3 secondi)
 let logoDiv = document.getElementById('logoRettangolo'); 
 let timer = null;
 logoDiv.addEventListener('mousedown', () => { 
@@ -812,11 +941,17 @@ logoDiv.addEventListener('mouseleave', () => {
         timer = null; 
     } 
 });
+
+// Logo su mobile (pulsante esplicito)
+document.getElementById('btnCaricaLogoMobile').onclick = () => {
+    caricaLogoFile();
+};
+
 caricaLogo();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.04");
+console.log("🚀 App avviata - v5.05 (mobile friendly)");
 </script>
 </body>
 </html>
