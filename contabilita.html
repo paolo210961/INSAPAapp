@@ -21,7 +21,7 @@
             z-index: 1000;
         }
         
-        /* Riga superiore: logo a sinistra, box pulsanti a destra (stesso layout di agenti) */
+        /* Riga superiore: logo a sinistra, box pulsanti a destra */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -193,7 +193,7 @@
 <body>
 <div id="appContainer">
     <div class="header">
-        <!-- Riga superiore: logo a sinistra, box pulsanti a destra (come agenti) -->
+        <!-- Riga superiore: logo a sinistra, box pulsanti a destra -->
         <div class="top-bar">
             <div class="logo-area">
                 <div id="logoRettangolo" class="logo-rettangolo">
@@ -214,7 +214,7 @@
             </div>
         </div>
         
-        <!-- Riga schede PRIMA NOTA, CONTANTI, FORNITORI (ripristinata) -->
+        <!-- Riga schede PRIMA NOTA, CONTANTI, FORNITORI (EDITABILI) -->
         <div class="scheda-container">
             <button id="btnPrimaNota" class="scheda-btn active-scheda">📋 PRIMA NOTA</button>
             <button id="btnContanti" class="scheda-btn">💵 CONTANTI</button>
@@ -222,7 +222,7 @@
         </div>
     </div>
 
-    <div class="version" id="appVersion">v5.15 - Contabilità</div>
+    <div class="version" id="appVersion">v5.16 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -274,7 +274,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== CONTABILITÀ (TUTTO IDENTICO ALLA v5.08) ====================
+// ==================== CONTABILITÀ ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let currentYear = 2026, currentMonth = 4, backupPreCaricamento = null, currentScheda = 'primanota';
 let primaNota = [], contanti = [], fattureFornitori = [], saldoIniziale = 0, nextFatturaId = 1, pendingChanges = {};
@@ -442,7 +442,39 @@ async function aggiornaTabelle() {
     sa = document.getElementById('selectAllFornitori'); if(sa){ let all = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
 }
 
-function setScheda(s){ currentScheda=s; document.getElementById('tabellaPrimaNotaContainer').style.display=s==='primanota'?'block':'none'; document.getElementById('tabellaContantiContainer').style.display=s==='contanti'?'block':'none'; document.getElementById('tabellaFornitoriContainer').style.display=s==='fornitori'?'block':'none'; document.getElementById('btnPrimaNota').classList.toggle('active-scheda',s==='primanota'); document.getElementById('btnContanti').classList.toggle('active-scheda',s==='contanti'); document.getElementById('btnFornitori').classList.toggle('active-scheda',s==='fornitori'); pendingChanges={}; aggiornaTabelle(); aggiornaPulsantiAzione(); }
+function setScheda(s){ 
+    currentScheda = s; 
+    document.getElementById('tabellaPrimaNotaContainer').style.display = s === 'primanota' ? 'block' : 'none';
+    document.getElementById('tabellaContantiContainer').style.display = s === 'contanti' ? 'block' : 'none';
+    document.getElementById('tabellaFornitoriContainer').style.display = s === 'fornitori' ? 'block' : 'none';
+    
+    // Aggiorna classe active sui pulsanti
+    document.getElementById('btnPrimaNota').classList.toggle('active-scheda', s === 'primanota');
+    document.getElementById('btnContanti').classList.toggle('active-scheda', s === 'contanti');
+    document.getElementById('btnFornitori').classList.toggle('active-scheda', s === 'fornitori');
+    
+    // Aggiorna il form in base alla scheda selezionata
+    let fa = document.getElementById('formArea');
+    if(s === 'primanota') {
+        fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div>
+                        <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>
+                        <div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div>
+                        <div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>`;
+    } else if(s === 'contanti') {
+        fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div>
+                        <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>
+                        <div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`;
+    } else if(s === 'fornitori') {
+        fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div>
+                        <div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div>
+                        <div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
+    }
+    
+    pendingChanges = {}; 
+    aggiornaTabelle(); 
+    aggiornaPulsantiAzione(); 
+}
+
 function pulisciForm(){}
 async function memorizzaNuovo(){
     if(currentScheda==='primanota'){ let d=document.getElementById('formDataPrimaNota')?.value, de=document.getElementById('formDescrizionePrimaNota')?.value, a=parseFloat(document.getElementById('formAvere')?.value)||0, da=parseFloat(document.getElementById('formDare')?.value)||0; if(!de){alert("Inserisci descrizione");return;} if(a>0&&da>0){alert("Non puoi inserire sia Avere che Dare");return;} if(a===0&&da===0){alert("Inserisci almeno un importo");return;} primaNota.push({data:formatDate(d),descrizione:de,avere:a||null,dare:da||null,verificato:false}); }
@@ -453,9 +485,9 @@ async function memorizzaNuovo(){
 async function eliminaSelezionati(s){ if(s==='primanota'){ let ck=document.querySelectorAll('#primaNotaBody .row-check-prima'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(primaNota[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) primaNota=n; document.getElementById('selectAllPrimaNota').checked=false; } if(s==='contanti'){ let ck=document.querySelectorAll('#contantiBody .row-check-contanti'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(contanti[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) contanti=n; document.getElementById('selectAllContanti').checked=false; } if(s==='fornitori'){ let ck=document.querySelectorAll('#fornitoriBody .row-check-fornitori'); let n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(fattureFornitori[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) fattureFornitori=n; document.getElementById('selectAllFornitori').checked=false; } pendingChanges={}; aggiornaTabelle(); await salvaStatoFirebase(); }
 async function cambiaMese(){ currentYear=parseInt(document.getElementById('annoSelect').value); currentMonth=parseInt(document.getElementById('meseSelect').value); await caricaStatoFirebase(); pendingChanges={}; }
 async function riprendiMeseCorrente(){ const ultimo=localStorage.getItem('ultimoMeseLavorato'); if(ultimo){ const {anno,mese}=JSON.parse(ultimo); currentYear=anno; currentMonth=mese; await caricaStatoFirebase(); alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`); } else alert("Nessun mese precedente trovato."); pendingChanges={}; }
-function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></table></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'</td><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
-<div class="section-title">💵 INCASSO CONTANTI</div><table class="contanti-table"><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th><tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody></table>
-<div class="section-title">📄 FATTURE FORNITORI</div><table class="fornitori-table"><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
+function esportaPDFMese(){ let mn=mesiLista[currentMonth]; let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda'); let w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
+<div class="section-title">💵 INCASSO CONTANTI</div><table class="contanti-table"><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody><tr>
+<div class="section-title">📄 FATTURE FORNITORI</div><table class="fornitori-table"><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<td><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
 <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Responsabile Amministrativo<br>_________________________</div><script>window.onload=()=>window.print();</script></body></html>`); w.document.close(); }
 function esportaCSV(perAnno){ let rows=[["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]]; let dataE=[]; if(perAnno){ for(let m=0;m<12;m++){ let saved=localStorage.getItem(`contabilita_${currentYear}_${m}`); if(saved){ try{ let d=JSON.parse(saved); for(let r of(d.primaNota||[])) dataE.push(r); for(let r of(d.contanti||[])) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); }catch(e){} } } } else { for(let r of primaNota) dataE.push(r); for(let r of contanti) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''}); } for(let r of dataE) rows.push([r.data||'',r.descrizione||'',r.avere?r.avere.toString().replace('.',','):'',r.dare?r.dare.toString().replace('.',','):'',r.incassoContanti?r.incassoContanti.toString().replace('.',','):'',r.verificato?"Sì":"No"]); let blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8"}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=perAnno?`contabilita_${currentYear}_anno.csv`:`contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href); }
 
@@ -468,21 +500,69 @@ function mostraPasswordOverlay(callback) {
 }
 
 // ==================== GESTIONE LOGO ====================
-function caricaLogo() { let l = localStorage.getItem('logo_azienda'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
+function caricaLogo() { 
+    let l = localStorage.getItem('logo_azienda'); 
+    if(l) { 
+        document.getElementById('logoImmagine').src = l; 
+        document.getElementById('logoImmagine').style.display = 'block'; 
+        document.getElementById('logoSpan').style.display = 'none'; 
+    } 
+}
 function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
-function caricaLogoFile() { let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if(f){ let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
+function caricaLogoFile() { 
+    let inp = document.createElement('input'); 
+    inp.type = 'file'; 
+    inp.accept = 'image/*'; 
+    inp.onchange = e => { 
+        let f = e.target.files[0]; 
+        if(f){ 
+            let r = new FileReader(); 
+            r.onload = ev => { 
+                let url = ev.target.result; 
+                document.getElementById('logoImmagine').src = url; 
+                document.getElementById('logoImmagine').style.display = 'block'; 
+                document.getElementById('logoSpan').style.display = 'none'; 
+                salvaLogo(url); 
+            }; 
+            r.readAsDataURL(f); 
+        } 
+    }; 
+    inp.click(); 
+}
 
-let logoDiv = document.getElementById('logoRettangolo'); let timer = null;
-logoDiv.addEventListener('mousedown', () => { timer = setTimeout(() => { caricaLogoFile(); timer = null; }, 3000); });
-logoDiv.addEventListener('mouseup', () => { if(timer) { clearTimeout(timer); timer = null; } });
-logoDiv.addEventListener('mouseleave', () => { if(timer) { clearTimeout(timer); timer = null; } });
+// Logo su PC (tieni premuto 3 secondi)
+let logoDiv = document.getElementById('logoRettangolo'); 
+let timer = null;
+logoDiv.addEventListener('mousedown', () => { 
+    timer = setTimeout(() => { 
+        caricaLogoFile(); 
+        timer = null; 
+    }, 3000); 
+});
+logoDiv.addEventListener('mouseup', () => { 
+    if(timer) { 
+        clearTimeout(timer); 
+        timer = null; 
+    } 
+});
+logoDiv.addEventListener('mouseleave', () => { 
+    if(timer) { 
+        clearTimeout(timer); 
+        timer = null; 
+    } 
+});
 
+// Logo su mobile (pulsante esplicito)
 function aggiornaPulsanteLogoMobile() {
     let logoPresente = localStorage.getItem('logo_azienda') !== null;
     let btnMobile = document.getElementById('btnCaricaLogoMobile');
-    if (btnMobile) { btnMobile.style.display = logoPresente ? 'none' : 'block'; }
+    if (btnMobile) { 
+        btnMobile.style.display = logoPresente ? 'none' : 'block'; 
+    }
 }
-document.getElementById('btnCaricaLogoMobile').onclick = () => { caricaLogoFile(); };
+document.getElementById('btnCaricaLogoMobile').onclick = () => { 
+    caricaLogoFile(); 
+};
 const observer = new MutationObserver(() => { aggiornaPulsanteLogoMobile(); });
 observer.observe(document.getElementById('logoImmagine'), { attributes: true });
 caricaLogo();
@@ -546,7 +626,7 @@ document.getElementById('btnSalvaPassword').onclick = () => {
     changePwdVisible = false;
 };
 
-// Inizializza form area (COME NELLA v5.08)
+// Inizializza form area (per la prima volta)
 let fa = document.getElementById('formArea');
 if(currentScheda === 'primanota') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div><div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div><div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>`;
 else if(currentScheda === 'contanti') fa.innerHTML = `<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div><div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`;
