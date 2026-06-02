@@ -208,7 +208,6 @@
         
         /* ==================== LAYOUT CELLULARE ==================== */
         @media (max-width: 768px) { 
-            /* Header colonna singola */
             .header-row {
                 flex-direction: column;
                 align-items: stretch;
@@ -217,8 +216,6 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            
-            /* Logo centrato */
             .logo-area {
                 justify-content: center;
                 flex-direction: column;
@@ -231,8 +228,6 @@
                 height: 70px;
                 margin: 0 auto;
             }
-            
-            /* Griglia 2 colonne per pulsanti */
             .action-group {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -256,8 +251,15 @@
             .action-group input {
                 min-width: unset;
             }
-            
-            /* Pulsanti navigazione dimezzati */
+            .action-group:first-child {
+                grid-template-columns: 1fr;
+            }
+            .action-group:first-child select {
+                width: 100%;
+            }
+            .action-group:first-child input {
+                display: none;
+            }
             .nav-box {
                 width: 100%;
                 padding: 5px 10px;
@@ -266,13 +268,9 @@
                 padding: 4px 12px;
                 font-size: 0.85rem;
             }
-            
-            /* Main container colonna singola */
             .main-container {
                 flex-direction: column;
             }
-            
-            /* Sidebar larga 100% */
             .sidebar {
                 width: 100%;
                 position: static;
@@ -280,19 +278,13 @@
                 max-height: none;
                 margin-bottom: 20px;
             }
-            
-            /* Content area */
             .content-area {
                 width: 100%;
             }
-            
-            /* Pulsanti più grandi per il tocco */
             button, .btn-success, .btn-primary, .btn-whatsapp {
                 padding: 10px;
                 font-size: 0.9rem;
             }
-            
-            /* Font */
             body {
                 font-size: 15px;
             }
@@ -303,8 +295,6 @@
                 padding: 10px;
                 font-size: 0.9rem;
             }
-            
-            /* Tabella scadenze scrollabile */
             .scadenze-box {
                 overflow-x: auto;
             }
@@ -317,8 +307,6 @@
                 width: 100%;
                 justify-content: center;
             }
-            
-            /* File status inline */
             .file-status-inline {
                 grid-column: span 2;
                 text-align: center;
@@ -326,7 +314,6 @@
             }
         }
         
-        /* Nascondi pulsante CREA AGENTE su mobile */
         @media (max-width: 768px) {
             .btnCreaAgenteMobileHide {
                 display: none !important;
@@ -336,7 +323,6 @@
 </head>
 <body>
 <div class="header">
-    <!-- Prima riga: logo + pulsanti navigazione -->
     <div class="header-row">
         <div class="logo-area">
             <div id="logoRettangolo" class="logo-rettangolo">
@@ -354,7 +340,6 @@
         </div>
     </div>
     
-    <!-- Seconda riga: box gestione agente (giallo) con tutti i controlli -->
     <div class="header-row-bottom">
         <div class="action-group">
             <select id="selectAgente">
@@ -363,7 +348,8 @@
             <input type="text" id="cercaArticoloInline" placeholder="🔍 Cerca articolo...">
         </div>
         <div class="action-group">
-            <button id="btnCaricaFile" class="btn-primary">📂 Carica ORD + SCA</button>
+            <!-- PULSANTE MODIFICATO: ora "ORD+SCA" -->
+            <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
             <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
                     <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
@@ -373,7 +359,6 @@
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
-        <!-- Pulsante CREA AGENTE solo su PC (nascosto su mobile) -->
         <div class="action-group btnCreaAgenteMobileHide">
             <button id="btnCreaAgente" class="btn-success" style="display:inline-block; width:auto;">➕ CREA AGENTE</button>
         </div>
@@ -396,7 +381,7 @@
     </div>
 </div>
 <footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
-<div class="version">v5.06 - Agenti (Firebase)</div>
+<div class="version">v5.07b - Agenti (Firebase)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -461,7 +446,6 @@ async function selezionaAgente(codice) {
         console.log(`📊 Dati caricati: ORD ${datiOrd.length} clienti, SCA ${datiSca.length} clienti`);
         document.getElementById('fileStatusInline').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
         aggiornaClienti();
-        // Reset campi ricerca
         document.getElementById('cercaCliente').value = '';
         document.getElementById('cercaArticoloInline').value = '';
         document.getElementById('scadenzeAgenti').innerHTML = '';
@@ -610,7 +594,6 @@ function inviaScadenzeWhatsApp(cliente) {
         return;
     }
     
-    // Formatta il messaggio
     let messaggio = `📅 *SCADENZE CLIENTE*\n`;
     messaggio += `🏢 *${cliente.codice} - ${cliente.ragione}*\n`;
     messaggio += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
@@ -629,7 +612,6 @@ function inviaScadenzeWhatsApp(cliente) {
     messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
     messaggio += `📱 Messaggio generato da inSAPA Agenti`;
     
-    // Codifica per URL
     let url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
     window.open(url, '_blank');
 }
@@ -712,30 +694,28 @@ function mostraDettaglioCliente(codice) {
     let containerScadenze = document.getElementById('scadenzeAgenti');
     let containerArticoli = document.getElementById('dettaglioAgenti');
     
-    // Mostra scadenze con pulsante WhatsApp
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
         let html = `<div class="scadenze-box">
                     <div class="scadenze-header">
                         <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
                         <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
-                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2zm.03 1.67c2.33 0 4.52.91 6.17 2.56 1.65 1.65 2.56 3.84 2.56 6.17 0 4.8-3.91 8.71-8.71 8.71-1.52 0-3-.4-4.29-1.15l-.3-.18-3.12.82.84-3.05-.19-.31c-.82-1.35-1.26-2.9-1.26-4.49 0-4.8 3.91-8.72 8.7-8.72zM8.68 7.46c-.18 0-.47.07-.72.32-.25.25-.96.94-.96 2.29 0 1.35.98 2.66 1.12 2.84.14.18 1.88 2.93 4.55 4.01.64.26 1.14.41 1.53.52.64.2 1.22.17 1.68.1.52-.07 1.6-.66 1.82-1.29.22-.63.22-1.17.15-1.28-.07-.11-.25-.18-.52-.31-.27-.13-1.6-.79-1.85-.88-.25-.09-.43-.13-.61.13-.18.26-.71.88-.87 1.06-.16.18-.32.2-.59.07-.27-.13-1.14-.42-2.17-1.34-.8-.72-1.34-1.6-1.5-1.87-.16-.27-.02-.41.12-.54.13-.13.29-.34.44-.51.15-.17.2-.29.3-.48.1-.19.05-.36-.02-.51-.07-.15-.61-1.47-.83-2.01-.22-.54-.44-.47-.61-.48-.15 0-.33-.01-.5-.01z"/>
+                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
                             </svg>
                             Invia Scadenze
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th><tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
-        html += `</tbody>}</div>`;
+        html += `</tbody></table></div>`;
         containerScadenze.innerHTML = html;
     } else {
         containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
     
-    // Mostra articoli
     if (cliente.ordini && cliente.ordini.length > 0) {
         let html = `<div class="scadenze-box">
                     <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
@@ -762,7 +742,6 @@ function mostraDettaglioCliente(codice) {
         html += `</div>`;
         containerArticoli.innerHTML = html;
         
-        // Eventi click per toggle storico
         document.querySelectorAll('.articolo-item').forEach(el => {
             el.onclick = (e) => {
                 e.stopPropagation();
@@ -902,7 +881,6 @@ document.getElementById('fileInput').onchange = async (e) => {
     e.target.value = '';
 };
 
-// MODALE CREA AGENTE (solo PC)
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
     modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
@@ -951,7 +929,6 @@ function caricaLogoFile() {
     inp.click(); 
 }
 
-// Logo su PC (tieni premuto 3 secondi)
 let logoDiv = document.getElementById('logoRettangolo'); 
 let timer = null;
 logoDiv.addEventListener('mousedown', () => { 
@@ -973,7 +950,6 @@ logoDiv.addEventListener('mouseleave', () => {
     } 
 });
 
-// Logo su mobile (pulsante esplicito - visibile solo se non c'è logo)
 function aggiornaPulsanteLogoMobile() {
     let logoPresente = localStorage.getItem('logo') !== null;
     let btnMobile = document.getElementById('btnCaricaLogoMobile');
@@ -986,7 +962,6 @@ document.getElementById('btnCaricaLogoMobile').onclick = () => {
     caricaLogoFile();
 };
 
-// Osserva i cambiamenti del logo per aggiornare il pulsante
 const observer = new MutationObserver(() => {
     aggiornaPulsanteLogoMobile();
 });
@@ -997,7 +972,7 @@ aggiornaPulsanteLogoMobile();
 
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.06 (mobile ottimizzato)");
+console.log("🚀 App avviata - v5.07b");
 </script>
 </body>
 </html>
