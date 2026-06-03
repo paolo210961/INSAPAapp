@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.31</title>
+    <title>inSAPA - Contabilità v5.32</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -20,7 +20,6 @@
             top: 0;
             z-index: 1000;
         }
-
         .header-row {
             display: flex;
             justify-content: space-between;
@@ -28,7 +27,6 @@
             flex-wrap: wrap;
             gap: 20px;
         }
-
         .logo-area {
             display: flex;
             align-items: center;
@@ -210,17 +208,9 @@
             color: #2c3e50;
         }
 
-        /* INTESTAZIONE TABELLA STICKY */
-        .sticky-table-header {
-            position: sticky;
-            top: 200px;
-            background: #e9ecef;
-            z-index: 997;
-        }
-
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
 
-        /* SIDEBAR COMPATTA */
+        /* SIDEBAR */
         .sidebar {
             width: 380px;
             background: white;
@@ -278,7 +268,7 @@
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
         .btn-group button { width: auto; flex: 1; }
         
-        /* TABELLA - SEMPLICE E DIRETTA */
+        /* CONTENUTO AREA */
         .content-area {
             flex: 1;
             background: white;
@@ -297,6 +287,8 @@
             overflow-x: auto;
             width: 100%;
         }
+        
+        /* TABELLA - SEMPLICE E FUNZIONANTE */
         .tabella { 
             width: 100%; 
             border-collapse: collapse; 
@@ -305,26 +297,29 @@
             background: white;
         }
         .tabella th, .tabella td { 
-            border: 1px solid #ddd; 
+            border: 1px solid #aaa; 
             padding: 10px 8px; 
             text-align: left; 
             vertical-align: middle;
             background: white;
-            color: #000000;
+            color: black;
         }
         .tabella th { 
             background: #e9ecef; 
             font-weight: bold;
+            color: black;
         }
         .tabella td.text-right {
             text-align: right;
         }
         .tabella td input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
             margin: 0;
+            display: inline-block;
         }
+        
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
@@ -362,7 +357,6 @@
             .toolbar-btn { font-size: 0.7rem; padding: 6px 12px; }
             .sticky-toolbar { top: 120px; }
             .sticky-summary { top: 176px; }
-            .sticky-table-header { top: 250px; }
             .form-row { flex-direction: column; gap: 0; }
         }
     </style>
@@ -414,7 +408,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.31 - Contabilità</div>
+    <div class="version" id="appVersion">v5.32 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -462,7 +456,7 @@
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
-                        <thead id="tabellaPrimaNotaThead" class="sticky-table-header">
+                        <thead>
                             <tr>
                                 <th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th>
                                 <th style="width:50px">#</th>
@@ -484,7 +478,7 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead id="tabellaContantiThead" class="sticky-table-header">
+                        <thead>
                             <tr>
                                 <th style="width:40px"><input type="checkbox" id="selectAllContanti"></th>
                                 <th style="width:50px">#</th>
@@ -504,7 +498,7 @@
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3>📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
-                        <thead id="tabellaFornitoriThead" class="sticky-table-header">
+                        <thead>
                             <tr>
                                 <th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th>
                                 <th>N° int</th>
@@ -629,7 +623,7 @@ function aggiornaRiepilogo() {
     }
 }
 
-// ========== FUNZIONI AGGIORNAMENTO TABELLE - RISCITTE DA ZERO ==========
+// ========== AGGIORNAMENTO TABELLE ==========
 function aggiornaTabelle() {
     // PRIMA NOTA
     const primaBody = document.getElementById('primaNotaBody');
@@ -642,29 +636,31 @@ function aggiornaTabelle() {
             const chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-prima';
-            chk.style.width = '18px';
-            chk.style.height = '18px';
+            chk.style.width = '20px';
+            chk.style.height = '20px';
+            chk.style.cursor = 'pointer';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
-            // Numero progressivo
-            row.insertCell(1).innerText = idx + 1;
-            // Data
-            row.insertCell(2).innerText = item.data || '';
-            // Descrizione
-            row.insertCell(3).innerText = item.descrizione || '';
+            // Numero
+            row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
+            row.insertCell(2).innerHTML = item.data || '';
+            row.insertCell(3).innerHTML = item.descrizione || '';
             // Avere
             const avereCell = row.insertCell(4);
             avereCell.className = 'text-right';
-            avereCell.innerText = item.avere ? formatNumber(item.avere) + ' €' : '';
+            avereCell.innerHTML = item.avere ? '<strong>' + formatNumber(item.avere) + ' €</strong>' : '';
             // Dare
             const dareCell = row.insertCell(5);
             dareCell.className = 'text-right';
-            dareCell.innerText = item.dare ? formatNumber(item.dare) + ' €' : '';
+            dareCell.innerHTML = item.dare ? '<strong>' + formatNumber(item.dare) + ' €</strong>' : '';
             // Verificato
             const verCell = row.insertCell(6);
             const verChk = document.createElement('input');
             verChk.type = 'checkbox';
             verChk.checked = item.verificato === true;
+            verChk.style.width = '20px';
+            verChk.style.height = '20px';
+            verChk.style.cursor = 'pointer';
             verChk.onchange = async () => {
                 item.verificato = verChk.checked;
                 await salvaStatoFirebase();
@@ -683,16 +679,17 @@ function aggiornaTabelle() {
             const chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-contanti';
-            chk.style.width = '18px';
-            chk.style.height = '18px';
+            chk.style.width = '20px';
+            chk.style.height = '20px';
+            chk.style.cursor = 'pointer';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx + 1;
-            row.insertCell(2).innerText = item.data || '';
-            row.insertCell(3).innerText = item.descrizione || '';
+            row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
+            row.insertCell(2).innerHTML = item.data || '';
+            row.insertCell(3).innerHTML = item.descrizione || '';
             const impCell = row.insertCell(4);
             impCell.className = 'text-right';
-            impCell.innerText = item.importo ? formatNumber(item.importo) + ' €' : '';
+            impCell.innerHTML = '<strong>' + formatNumber(item.importo) + ' €</strong>';
         });
     }
     
@@ -706,14 +703,15 @@ function aggiornaTabelle() {
             const chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-fornitori';
-            chk.style.width = '18px';
-            chk.style.height = '18px';
+            chk.style.width = '20px';
+            chk.style.height = '20px';
+            chk.style.cursor = 'pointer';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
-            row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
-            row.insertCell(2).innerText = item.data || '';
-            row.insertCell(3).innerText = item.fornitore || '';
-            row.insertCell(4).innerText = item.numeroFattura || '';
+            row.insertCell(1).innerHTML = '<strong>' + (nextFatturaId - fattureFornitori.length + idx) + '/' + currentYear + '</strong>';
+            row.insertCell(2).innerHTML = item.data || '';
+            row.insertCell(3).innerHTML = item.fornitore || '';
+            row.insertCell(4).innerHTML = item.numeroFattura || '';
         });
     }
     
@@ -941,11 +939,11 @@ function esportaPDFMese() {
     <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{display:flex;justify-content:space-around;margin:20px 0} .positive{color:green} .negative{color:red} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:8px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
     </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${currentYear}</div></div>
     <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div></div>
-    <h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>
+    <h3>PRIMA NOTA</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>
     ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-    </tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>
+    </tbody></table><h3>CONTANTI</h3> <table> <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>
     ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    </tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>
+    </tbody></table><h3>FORNITORI</h3> <table> <thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>
     ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
     </tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
@@ -984,9 +982,9 @@ async function esportaReportAnno() {
             w.document.write(`<h3>📅 ${mesiLista[mese.mese]} ${anno}</h3><p>Nessun dato</p>`);
         } else {
             w.document.write(`<h3>📅 ${mesiLista[mese.mese]} ${anno}</h3><div>Saldo iniziale: ${formatNumber(mese.saldoIniziale)} € | Entrate: ${formatNumber(mese.totaleEntrate)} € | Uscite: ${formatNumber(mese.totaleUscite)} € | Contanti: ${formatNumber(mese.totaleContanti)} €</div>`);
-            w.document.write(`<h4>Prima Nota</h4><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>`);
+            w.document.write(`<h4>Prima Nota</h4> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>`);
             mese.primaNota.forEach((r, i) => { w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`); });
-            w.document.write(`</tbody></table><h4>Contanti</h4><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>`);
+            w.document.write(`</tbody></table><h4>Contanti</h4> <table> <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>`);
             mese.contanti.forEach((r, i) => { w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`); });
             w.document.write(`</tbody></table>`);
         }
