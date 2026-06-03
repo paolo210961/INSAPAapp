@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.36</title>
+    <title>inSAPA - Contabilità v5.37</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -43,6 +43,7 @@
             justify-content: center;
             overflow: hidden;
             cursor: pointer;
+            position: relative;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.5rem; }
@@ -56,6 +57,26 @@
             cursor: pointer;
             font-size: 0.8rem;
             font-weight: bold;
+        }
+        /* Tooltip per il logo */
+        .logo-tooltip {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .logo-rettangolo:hover .logo-tooltip {
+            opacity: 1;
         }
 
         /* CENTRO - FLOPPY DISK */
@@ -377,6 +398,7 @@
             .sticky-toolbar { top: 120px; }
             .sticky-summary { top: 176px; }
             .form-row { flex-direction: column; gap: 0; }
+            .logo-tooltip { font-size: 0.6rem; white-space: nowrap; bottom: -20px; }
         }
     </style>
 </head>
@@ -388,6 +410,7 @@
                 <div id="logoRettangolo" class="logo-rettangolo">
                     <img id="logoImmagine" style="display:none;">
                     <span id="logoSpan">🏢 LOGO</span>
+                    <div class="logo-tooltip" id="logoTooltip">⚡ Clic breve: sito | 3s: nuovo logo | 6s: imposta link</div>
                 </div>
                 <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
             </div>
@@ -430,7 +453,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.36 - Contabilità</div>
+    <div class="version" id="appVersion">v5.37 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -553,7 +576,7 @@
             </div>
         </div>
     </div>
-    <footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
+    <footer>Logo: clic breve→sito | 3s→nuovo logo | 6s→imposta link</footer>
 </div>
 
 <script>
@@ -579,6 +602,126 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let editModeRow = null;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
+// ==================== GESTIONE LOGO CON TRE TEMPI ====================
+let pressTimer = null;
+let isLongPress = false;
+
+function getSitoWebLink() {
+    return localStorage.getItem('sito_web_link');
+}
+
+function setSitoWebLink(url) {
+    if (url && url.trim() !== '') {
+        localStorage.setItem('sito_web_link', url.trim());
+        showToast("✅ Link sito salvato: " + url.trim());
+    } else {
+        localStorage.removeItem('sito_web_link');
+        showToast("❌ Link sito rimosso");
+    }
+}
+
+function apriSitoWeb() {
+    const link = getSitoWebLink();
+    if (link) {
+        window.open(link, '_blank');
+        showToast("🔗 Apertura sito...");
+    } else {
+        showToast("⚠️ Nessun link configurato. Tieni premuto 6 secondi sul logo per impostarlo.", true);
+    }
+}
+
+function caricaLogoFile() { 
+    let inp = document.createElement('input'); 
+    inp.type = 'file'; 
+    inp.accept = 'image/*'; 
+    inp.onchange = e => { 
+        let f = e.target.files[0]; 
+        if(f){ 
+            let r = new FileReader(); 
+            r.onload = ev => { 
+                let url = ev.target.result; 
+                document.getElementById('logoImmagine').src = url; 
+                document.getElementById('logoImmagine').style.display = 'block'; 
+                document.getElementById('logoSpan').style.display = 'none'; 
+                salvaLogo(url); 
+                showToast("✅ Logo aggiornato!");
+            }; 
+            r.readAsDataURL(f); 
+        } 
+    }; 
+    inp.click(); 
+}
+
+function impostaLinkSito() {
+    let linkAttuale = getSitoWebLink() || "";
+    let nuovoLink = prompt("Inserisci il link del sito web (es. https://www.insapa.it):", linkAttuale);
+    if (nuovoLink !== null) {
+        if (nuovoLink.trim() === "") {
+            setSitoWebLink("");
+        } else {
+            if (!nuovoLink.startsWith("http://") && !nuovoLink.startsWith("https://")) {
+                nuovoLink = "https://" + nuovoLink;
+            }
+            setSitoWebLink(nuovoLink);
+        }
+    }
+}
+
+// Eventi per il logo con timer
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('mousedown', () => {
+    isLongPress = false;
+    pressTimer = setTimeout(() => {
+        isLongPress = true;
+        pressTimer = null;
+        // Secondo livello (6 secondi) - imposta link
+        setTimeout(() => {
+            if (isLongPress) {
+                isLongPress = false;
+                impostaLinkSito();
+            }
+        }, 3000);
+    }, 3000);
+});
+logoDiv.addEventListener('mouseup', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+        if (!isLongPress) {
+            // Clic breve - apri sito
+            apriSitoWeb();
+        }
+        isLongPress = false;
+    }
+});
+logoDiv.addEventListener('mouseleave', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+    isLongPress = false;
+});
+
+function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
+function caricaLogo() { 
+    let l = localStorage.getItem('logo_azienda'); 
+    if(l) { 
+        document.getElementById('logoImmagine').src = l; 
+        document.getElementById('logoImmagine').style.display = 'block'; 
+        document.getElementById('logoSpan').style.display = 'none'; 
+    } 
+}
+
+function aggiornaPulsanteLogoMobile() {
+    let logoPresente = localStorage.getItem('logo_azienda') !== null;
+    let btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) { btnMobile.style.display = logoPresente ? 'none' : 'block'; }
+}
+document.getElementById('btnCaricaLogoMobile').onclick = () => { caricaLogoFile(); };
+caricaLogo();
+aggiornaPulsanteLogoMobile();
+
+// ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -1246,7 +1389,7 @@ function esportaReportRagioniere() {
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
         <tbody>
             ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-            ${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td></tr>':''}
+            ${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}
             <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr>
         </tbody>
     </table>
@@ -1272,18 +1415,17 @@ function esportaPDFMese() {
     w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title>
     <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap} .positive{color:green} .negative{color:red} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #ddd;padding:8px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
     </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div>
-    <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div>`);
-    
-    w.document.write(`<h3>PRIMA NOTA</h3></table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>
-    ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
+    <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div>
+    <h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>
+    ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}<td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
     </tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>
-    ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}<tr><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
+    ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
     </tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>
     ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
     </tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>
-    ${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</tr>`).join('')}
-    </tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>
-    ${pagaDdt.map((r,i) => `</tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
+    ${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><tr>.html${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}
+    </tbody></table><h3>PAGA_DDT_CLIENTI</h3></table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>
+    ${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
     </tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
@@ -1348,25 +1490,6 @@ function esportaCSV(perAnno) {
     let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
 
-// ==================== GESTIONE LOGO ====================
-function caricaLogo() { let l = localStorage.getItem('logo_azienda'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
-function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
-function caricaLogoFile() { let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if(f){ let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
-let logoDiv = document.getElementById('logoRettangolo'); let timer = null;
-logoDiv.addEventListener('mousedown', () => { timer = setTimeout(() => { caricaLogoFile(); timer = null; }, 3000); });
-logoDiv.addEventListener('mouseup', () => { if(timer) { clearTimeout(timer); timer = null; } });
-logoDiv.addEventListener('mouseleave', () => { if(timer) { clearTimeout(timer); timer = null; } });
-function aggiornaPulsanteLogoMobile() {
-    let logoPresente = localStorage.getItem('logo_azienda') !== null;
-    let btnMobile = document.getElementById('btnCaricaLogoMobile');
-    if (btnMobile) { btnMobile.style.display = logoPresente ? 'none' : 'block'; }
-}
-document.getElementById('btnCaricaLogoMobile').onclick = () => { caricaLogoFile(); };
-const observer = new MutationObserver(() => { aggiornaPulsanteLogoMobile(); });
-observer.observe(document.getElementById('logoImmagine'), { attributes: true });
-caricaLogo();
-aggiornaPulsanteLogoMobile();
-
 // ==================== FLOPPY DISK DROPDOWN ====================
 const floppyBtn = document.getElementById('floppyBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
@@ -1375,7 +1498,6 @@ function closeDropdown() { dropdownMenu.classList.remove('show'); }
 floppyBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
 document.addEventListener('click', (e) => { if (!floppyBtn.contains(e.target) && !dropdownMenu.contains(e.target)) { closeDropdown(); } });
 
-// Assegnazione eventi dropdown
 document.getElementById('dropdownReportRagioniere').onclick = () => { closeDropdown(); esportaReportRagioniere(); };
 document.getElementById('dropdownReportMese').onclick = () => { closeDropdown(); esportaPDFMese(); };
 document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown(); esportaReportAnno(); };
@@ -1392,7 +1514,6 @@ document.getElementById('toolbarCaricaMese').onclick = () => document.getElement
 document.getElementById('toolbarRiprendiCorrente').onclick = riprendiMeseCorrente;
 document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
 
-// Bottoni SALVA ed ELIMINA per ogni tabella
 document.getElementById('btnSalvaModificaPrima').onclick = () => salvaModificheSelezionate('primanota');
 document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
 document.getElementById('btnSalvaModificaContanti').onclick = () => salvaModificheSelezionate('contanti');
