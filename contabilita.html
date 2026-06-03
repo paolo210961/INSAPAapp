@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.28</title>
+    <title>inSAPA - Contabilità v5.29</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -277,26 +277,55 @@
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
         .btn-group button { width: auto; flex: 1; }
         
-        /* TABELLA - FORZA TESTO NERO !!! */
-        .tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 15px; }
+        /* TABELLA - LARGA QUANTO LA PAGINA E TESTO NERO FORZATO */
+        .content-area {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            width: 100%;
+        }
+        .scadenze-box { 
+            background: #f8f9fa; 
+            border-left: 4px solid #3498db; 
+            padding: 15px; 
+            margin-bottom: 25px; 
+            border-radius: 10px; 
+            overflow-x: auto;
+            width: 100%;
+        }
+        .tabella { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 0.8rem; 
+            margin-top: 15px;
+            min-width: 600px;
+        }
         .tabella th, .tabella td { 
             border: 1px solid #ddd; 
             padding: 8px; 
             text-align: left; 
             vertical-align: top;
         }
+        /* FORZA TESTO NERO IN TUTTA LA TABELLA */
+        .tabella th, 
+        .tabella td, 
+        .tabella td span,
+        .tabella td input,
+        .editable-cell,
+        .cell-input {
+            color: #000000 !important;
+            background-color: white !important;
+        }
         .tabella th { 
-            background: #e9ecef; 
+            background: #e9ecef !important; 
             color: #000000 !important; 
         }
-        .tabella td, .editable-cell, .cell-input {
-            color: #000000 !important;
-            background: white !important;
-        }
-        .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
         .editable-cell { cursor: pointer; min-width: 80px; display: inline-block; width: 100%; }
         .editable-cell:hover { background-color: #fff3cd !important; }
-        .cell-input { width: 100%; border: none; background: white !important; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
+        .cell-input { width: 100%; border: none; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
         .cell-input:focus { outline: 1px solid #3498db; background: white !important; }
         .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
@@ -388,11 +417,10 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.28 - Contabilità</div>
+    <div class="version" id="appVersion">v5.29 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
-            <!-- RIGA 1: Anno e Mese affiancati -->
             <div class="form-row">
                 <div class="form-group">
                     <label>📅 Anno</label>
@@ -415,7 +443,6 @@
                 </div>
             </div>
             
-            <!-- Saldo iniziale a larghezza piena -->
             <div class="form-group">
                 <label>💰 Saldo iniziale (€)</label>
                 <input type="number" id="saldoIniziale" step="0.01" value="0" placeholder="0,00">
@@ -423,10 +450,8 @@
             
             <hr>
             
-            <!-- FORM DINAMICO (cambia in base alla scheda) -->
             <div id="formArea"></div>
             
-            <!-- Pulsante Memorizza -->
             <div class="form-group">
                 <button id="btnMemorizza" class="btn-success">💾 MEMORIZZA</button>
             </div>
@@ -919,11 +944,11 @@ function aggiornaForm() {
                     <input type="date" id="formDataPrimaNota">
                 </div>
                 <div class="form-group">
-                    <label>💰 Avere (entrate) €</label>
+                    <label>💰 Avere €</label>
                     <input type="number" id="formAvere" step="0.01" placeholder="0,00">
                 </div>
                 <div class="form-group">
-                    <label>💰 Dare (uscite) €</label>
+                    <label>💰 Dare €</label>
                     <input type="number" id="formDare" step="0.01" placeholder="0,00">
                 </div>
             </div>
@@ -940,7 +965,7 @@ function aggiornaForm() {
                     <input type="date" id="formDataContanti">
                 </div>
                 <div class="form-group">
-                    <label>💰 Incasso (€)</label>
+                    <label>💰 Incasso €</label>
                     <input type="number" id="formImportoContanti" step="0.01" placeholder="0,00">
                 </div>
             </div>
@@ -1163,7 +1188,7 @@ async function esportaReportAnno() {
             <div><strong>💰 Saldo mese:</strong> <span class="${mese.saldoMese >= 0 ? 'positive' : 'negative'}">${formatNumber(mese.saldoMese)} €</span></div>
         </div>
         <h4>📋 PRIMA NOTA</h4>
-        <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>`);
+        8台<thead>汽<th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th> </thead><tbody>`);
         
         mese.primaNota.forEach((r, i) => {
             w.document.write(`<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td><td>${r.verificato ? '✅' : ''}</td></tr>`);
@@ -1234,7 +1259,7 @@ function esportaPDFMese() {
     <table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>
     ${fattureFornitori.map((f, i) => `<tr><td>${nextFatturaId - fattureFornitori.length + i}/${currentYear}</td><td>${f.data || ''}</td><td>${f.fornitore || ''}</td><td>${f.numeroFattura || ''}</td></tr>`).join('')}
     ${fattureFornitori.length === 0 ? '<tr><td colspan="4">Nessuna fattura</td></tr>' : ''}
-    </tbody></table>
+    </tbody></tr>
     <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div>
     <div class="signature">Il Responsabile Amministrativo<br>_________________________</div>
     <script>window.onload=()=>window.print();<\/script>
