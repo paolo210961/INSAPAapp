@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.34</title>
+    <title>inSAPA - Contabilità v5.35</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -58,7 +58,7 @@
             font-weight: bold;
         }
 
-        /* CENTRO - FLOPPY DISK (ex bandierina) */
+        /* CENTRO - FLOPPY DISK */
         .floppy-container {
             position: relative;
             display: flex;
@@ -252,7 +252,6 @@
         input[type="number"] {
             text-align: right;
         }
-        /* Stile per i campi importo - selezione automatica */
         .import-field {
             cursor: text;
         }
@@ -329,6 +328,16 @@
             margin: 0;
             display: inline-block;
         }
+        .tabella td input[type="text"], 
+        .tabella td input[type="date"] {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .edit-mode {
+            background-color: #fffef5;
+        }
         
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
@@ -383,7 +392,6 @@
                 <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
             </div>
             
-            <!-- CENTRO - FLOPPY DISK -->
             <div class="floppy-container">
                 <button id="floppyBtn" class="floppy-btn">💾</button>
                 <div id="dropdownMenu" class="dropdown-menu">
@@ -410,6 +418,8 @@
         <button id="toolbarPrimaNota" class="toolbar-btn active">📋 PRIMA NOTA</button>
         <button id="toolbarContanti" class="toolbar-btn">💵 CONTANTI</button>
         <button id="toolbarFornitori" class="toolbar-btn">📄 FORNITORI</button>
+        <button id="toolbarAssClienti" class="toolbar-btn">📋 ASS_CONT_CLIENTI</button>
+        <button id="toolbarPagaDdt" class="toolbar-btn">📋 PAGA_DDT_CLIENTI</button>
         <button id="toolbarCaricaMese" class="toolbar-btn btn-yellow">📂 CARICA MESE</button>
         <button id="toolbarRiprendiCorrente" class="toolbar-btn btn-yellow">📅 RIPRENDI MESE CORRENTE</button>
     </div>
@@ -419,7 +429,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.34 - Contabilità</div>
+    <div class="version" id="appVersion">v5.35 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -464,40 +474,26 @@
 
         <div class="content-area">
             <div id="contabilitaContainer">
+                <!-- PRIMA NOTA -->
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
                         <thead>
-                            <tr>
-                                <th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th>
-                                <th style="width:50px">#</th>
-                                <th>Data</th>
-                                <th>Descrizione</th>
-                                <th class="text-right">Avere (€)</th>
-                                <th class="text-right">Dare (€)</th>
-                                <th style="width:50px">✅</th>
-                            </tr>
+                            <tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr>
                         </thead>
                         <tbody id="primaNotaBody"></tbody>
-                    </table>
+                    }</table>
                     <div id="primaNotaActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
                 
+                <!-- CONTANTI -->
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead>
-                            <tr>
-                                <th style="width:40px"><input type="checkbox" id="selectAllContanti"></th>
-                                <th style="width:50px">#</th>
-                                <th>Data</th>
-                                <th>Descrizione</th>
-                                <th class="text-right">Incasso (€)</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiActionButtons" class="action-buttons">
@@ -506,23 +502,42 @@
                     </div>
                 </div>
                 
+                <!-- FORNITORI -->
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3>📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
-                        <thead>
-                            <tr>
-                                <th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th>
-                                <th>N° int</th>
-                                <th>Data</th>
-                                <th>Fornitore</th>
-                                <th>N. Fattura</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
                         <tbody id="fornitoriBody"></tbody>
                     </table>
                     <div id="fornitoriActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button>
+                    </div>
+                </div>
+
+                <!-- ASS CONT CLIENTI -->
+                <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
+                    <h3>📋 ASS_CONT_CLIENTI</h3>
+                    <table class="tabella" id="tabellaAssClienti">
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
+                        <tbody id="assClientiBody"></tbody>
+                    </table>
+                    <div id="assClientiActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaAssClienti" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button>
+                    </div>
+                </div>
+
+                <!-- PAGA DDT CLIENTI -->
+                <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
+                    <h3>📋 PAGA_DDT_CLIENTI</h3>
+                    <table class="tabella" id="tabellaPagaDdt">
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
+                        <tbody id="pagaDdtBody"></tbody>
+                    </table>
+                    <div id="pagaDdtActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaPagaDdt" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiPagaDdt" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
             </div>
@@ -558,7 +573,9 @@ const db = firebase.firestore();
 // ==================== CONTABILITÀ ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let currentYear = 2026, currentMonth = 4, currentScheda = 'primanota';
-let primaNota = [], contanti = [], fattureFornitori = [], saldoIniziale = 0, nextFatturaId = 1;
+let primaNota = [], contanti = [], fattureFornitori = [], assClienti = [], pagaDdt = [];
+let saldoIniziale = 0, nextFatturaId = 1;
+let editModeRow = null; // per gestire la modifica riga
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
 function showToast(message, isError = false) {
@@ -586,21 +603,23 @@ function formatDate(d) {
     let x = new Date(d); 
     return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`; 
 }
+function formatDateInput(d) {
+    if (!d) return "";
+    let x = new Date(d);
+    return `${x.getFullYear()}-${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
+}
+function getTodayDate() {
+    return new Date().toISOString().slice(0, 10);
+}
 
-// Funzione per gestire i campi importo con selezione automatica
 function setupImportField(fieldId) {
     const field = document.getElementById(fieldId);
     if (field) {
-        field.addEventListener('focus', function() {
-            this.select();
-        });
+        field.addEventListener('focus', function() { this.select(); });
         field.addEventListener('blur', function() {
             let val = parseNumber(this.value);
-            if (val !== 0 && !isNaN(val)) {
-                this.value = formatNumber(val);
-            } else if (this.value === '' || this.value === '0' || this.value === '0,00') {
-                this.value = '';
-            }
+            if (val !== 0 && !isNaN(val)) this.value = formatNumber(val);
+            else if (this.value === '' || this.value === '0' || this.value === '0,00') this.value = '';
         });
     }
 }
@@ -610,6 +629,7 @@ async function salvaStatoFirebase() {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
             anno: currentYear, mese: currentMonth, saldoIniziale: saldoIniziale,
             primaNota: primaNota, contanti: contanti, fattureFornitori: fattureFornitori,
+            assClienti: assClienti, pagaDdt: pagaDdt,
             nextFatturaId: nextFatturaId, ultimoAggiornamento: new Date().toISOString()
         });
     } catch(e) { console.error("ERRORE salvataggio: " + e.message); }
@@ -624,10 +644,12 @@ async function caricaStatoFirebase() {
             primaNota = data.primaNota || [];
             contanti = data.contanti || [];
             fattureFornitori = data.fattureFornitori || [];
+            assClienti = data.assClienti || [];
+            pagaDdt = data.pagaDdt || [];
             nextFatturaId = data.nextFatturaId || 1;
             document.getElementById('saldoIniziale').value = saldoIniziale ? formatNumber(saldoIniziale) : '';
         } else {
-            saldoIniziale = 0; primaNota = []; contanti = []; fattureFornitori = []; nextFatturaId = 1;
+            saldoIniziale = 0; primaNota = []; contanti = []; fattureFornitori = []; assClienti = []; pagaDdt = []; nextFatturaId = 1;
             document.getElementById('saldoIniziale').value = '';
         }
         aggiornaTabelle();
@@ -649,7 +671,100 @@ function aggiornaRiepilogo() {
         summaryDiv.innerHTML = `<div><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(tc)} €</div>`;
     } else if (currentScheda === 'fornitori') {
         summaryDiv.innerHTML = `<div><strong>📄 Numero fatture fornitori:</strong> ${fattureFornitori.length}</div>`;
+    } else if (currentScheda === 'assclienti') {
+        let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        summaryDiv.innerHTML = `<div><strong>📋 Totale ASS_CONT_CLIENTI:</strong> ${formatNumber(tot)} €</div>`;
+    } else if (currentScheda === 'pagaddt') {
+        let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        summaryDiv.innerHTML = `<div><strong>📋 Totale PAGA_DDT_CLIENTI:</strong> ${formatNumber(tot)} €</div>`;
     }
+}
+
+// ========== FUNZIONI PER RENDERE EDITABILE UNA RIGA ==========
+function makeRowEditable(tipo, idx, row) {
+    if (tipo === 'primanota') {
+        const item = primaNota[idx];
+        row.cells[2].innerHTML = `<input type="date" value="${formatDateInput(item.data)}" class="edit-data">`;
+        row.cells[3].innerHTML = `<input type="text" value="${item.descrizione || ''}" class="edit-descrizione">`;
+        row.cells[4].innerHTML = `<input type="text" value="${item.avere ? formatNumber(item.avere) : ''}" class="edit-avere import-field">`;
+        row.cells[5].innerHTML = `<input type="text" value="${item.dare ? formatNumber(item.dare) : ''}" class="edit-dare import-field">`;
+        row.cells[6].innerHTML = `<input type="checkbox" ${item.verificato ? 'checked' : ''} class="edit-verificato">`;
+        row.classList.add('edit-mode');
+    } else if (tipo === 'assclienti') {
+        const item = assClienti[idx];
+        row.cells[1].innerHTML = `<input type="text" value="${item.dataIns || ''}" class="edit-dataIns" style="background:#f0f0f0" readonly>`;
+        row.cells[2].innerHTML = `<input type="text" value="${item.descrizione || ''}" class="edit-descrizione">`;
+        row.cells[3].innerHTML = `<input type="text" value="${item.nome || ''}" class="edit-nome">`;
+        row.cells[4].innerHTML = `<input type="text" value="${item.importo ? formatNumber(item.importo) : ''}" class="edit-importo import-field">`;
+        row.cells[5].innerHTML = `<input type="text" value="${item.numDoc || ''}" class="edit-numDoc">`;
+        row.cells[6].innerHTML = `<input type="date" value="${formatDateInput(item.dataDoc)}" class="edit-dataDoc">`;
+        row.classList.add('edit-mode');
+    } else if (tipo === 'pagaddt') {
+        const item = pagaDdt[idx];
+        row.cells[1].innerHTML = `<input type="text" value="${item.nome || ''}" class="edit-nome">`;
+        row.cells[2].innerHTML = `<input type="text" value="${item.numDoc || ''}" class="edit-numDoc">`;
+        row.cells[3].innerHTML = `<input type="date" value="${formatDateInput(item.data)}" class="edit-data">`;
+        row.cells[4].innerHTML = `<input type="text" value="${item.importo ? formatNumber(item.importo) : ''}" class="edit-importo import-field">`;
+        row.classList.add('edit-mode');
+    }
+    // Setup per campi importo
+    row.querySelectorAll('.import-field').forEach(f => setupImportFieldForElement(f));
+}
+
+function setupImportFieldForElement(field) {
+    if (!field) return;
+    field.addEventListener('focus', function() { this.select(); });
+    field.addEventListener('blur', function() {
+        let val = parseNumber(this.value);
+        if (val !== 0 && !isNaN(val)) this.value = formatNumber(val);
+        else if (this.value === '' || this.value === '0' || this.value === '0,00') this.value = '';
+    });
+}
+
+function saveEditedRow(tipo, idx) {
+    if (tipo === 'primanota') {
+        const row = document.querySelector(`#primaNotaBody tr:nth-child(${idx+1})`);
+        if (row) {
+            const newData = formatDate(row.querySelector('.edit-data')?.value);
+            const newDescrizione = row.querySelector('.edit-descrizione')?.value;
+            const newAvere = parseNumber(row.querySelector('.edit-avere')?.value);
+            const newDare = parseNumber(row.querySelector('.edit-dare')?.value);
+            const newVerificato = row.querySelector('.edit-verificato')?.checked;
+            if (newAvere > 0 && newDare > 0) {
+                showToast("Avere e Dare non possono essere entrambi >0", true);
+                return;
+            }
+            primaNota[idx] = {
+                data: newData, descrizione: newDescrizione,
+                avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false
+            };
+        }
+    } else if (tipo === 'assclienti') {
+        const row = document.querySelector(`#assClientiBody tr:nth-child(${idx+1})`);
+        if (row) {
+            assClienti[idx] = {
+                dataIns: row.querySelector('.edit-dataIns')?.value || getTodayDate(),
+                descrizione: row.querySelector('.edit-descrizione')?.value || '',
+                nome: row.querySelector('.edit-nome')?.value || '',
+                importo: parseNumber(row.querySelector('.edit-importo')?.value) || null,
+                numDoc: row.querySelector('.edit-numDoc')?.value || '',
+                dataDoc: row.querySelector('.edit-dataDoc')?.value ? formatDate(row.querySelector('.edit-dataDoc')?.value) : ''
+            };
+        }
+    } else if (tipo === 'pagaddt') {
+        const row = document.querySelector(`#pagaDdtBody tr:nth-child(${idx+1})`);
+        if (row) {
+            pagaDdt[idx] = {
+                nome: row.querySelector('.edit-nome')?.value || '',
+                numDoc: row.querySelector('.edit-numDoc')?.value || '',
+                data: row.querySelector('.edit-data')?.value ? formatDate(row.querySelector('.edit-data')?.value) : '',
+                importo: parseNumber(row.querySelector('.edit-importo')?.value) || null
+            };
+        }
+    }
+    aggiornaTabelle();
+    salvaStatoFirebase();
+    showToast("✅ Modifiche salvate!");
 }
 
 // ========== AGGIORNAMENTO TABELLE ==========
@@ -660,40 +775,26 @@ function aggiornaTabelle() {
         primaBody.innerHTML = '';
         primaNota.forEach((item, idx) => {
             const row = primaBody.insertRow();
-            // Checkbox selezione
             const chkCell = row.insertCell(0);
             const chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.className = 'row-check-prima';
             chk.style.width = '20px';
             chk.style.height = '20px';
-            chk.style.cursor = 'pointer';
-            chk.onchange = () => aggiornaPulsantiAzione();
+            chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('primanota', idx, row); else aggiornaTabelle(); };
             chkCell.appendChild(chk);
-            // Numero
             row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
             row.insertCell(2).innerHTML = item.data || '';
             row.insertCell(3).innerHTML = item.descrizione || '';
-            // Avere
-            const avereCell = row.insertCell(4);
-            avereCell.className = 'text-right';
-            avereCell.innerHTML = item.avere ? '<strong>' + formatNumber(item.avere) + ' €</strong>' : '';
-            // Dare
-            const dareCell = row.insertCell(5);
-            dareCell.className = 'text-right';
-            dareCell.innerHTML = item.dare ? '<strong>' + formatNumber(item.dare) + ' €</strong>' : '';
-            // Verificato
+            row.insertCell(4).innerHTML = item.avere ? '<strong>' + formatNumber(item.avere) + ' €</strong>' : '';
+            row.insertCell(5).innerHTML = item.dare ? '<strong>' + formatNumber(item.dare) + ' €</strong>' : '';
             const verCell = row.insertCell(6);
             const verChk = document.createElement('input');
             verChk.type = 'checkbox';
             verChk.checked = item.verificato === true;
             verChk.style.width = '20px';
             verChk.style.height = '20px';
-            verChk.style.cursor = 'pointer';
-            verChk.onchange = async () => {
-                item.verificato = verChk.checked;
-                await salvaStatoFirebase();
-            };
+            verChk.onchange = async () => { item.verificato = verChk.checked; await salvaStatoFirebase(); };
             verCell.appendChild(verChk);
         });
     }
@@ -710,7 +811,6 @@ function aggiornaTabelle() {
             chk.className = 'row-check-contanti';
             chk.style.width = '20px';
             chk.style.height = '20px';
-            chk.style.cursor = 'pointer';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
@@ -734,13 +834,60 @@ function aggiornaTabelle() {
             chk.className = 'row-check-fornitori';
             chk.style.width = '20px';
             chk.style.height = '20px';
-            chk.style.cursor = 'pointer';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (nextFatturaId - fattureFornitori.length + idx) + '/' + currentYear + '</strong>';
             row.insertCell(2).innerHTML = item.data || '';
             row.insertCell(3).innerHTML = item.fornitore || '';
             row.insertCell(4).innerHTML = item.numeroFattura || '';
+        });
+    }
+    
+    // ASS CLIENTI
+    const assClientiBody = document.getElementById('assClientiBody');
+    if (assClientiBody) {
+        assClientiBody.innerHTML = '';
+        assClienti.forEach((item, idx) => {
+            const row = assClientiBody.insertRow();
+            const chkCell = row.insertCell(0);
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.className = 'row-check-assclienti';
+            chk.style.width = '20px';
+            chk.style.height = '20px';
+            chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('assclienti', idx, row); else aggiornaTabelle(); };
+            chkCell.appendChild(chk);
+            row.insertCell(1).innerHTML = item.dataIns || '';
+            row.insertCell(2).innerHTML = item.descrizione || '';
+            row.insertCell(3).innerHTML = item.nome || '';
+            const impCell = row.insertCell(4);
+            impCell.className = 'text-right';
+            impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
+            row.insertCell(5).innerHTML = item.numDoc || '';
+            row.insertCell(6).innerHTML = item.dataDoc || '';
+        });
+    }
+    
+    // PAGA DDT
+    const pagaDdtBody = document.getElementById('pagaDdtBody');
+    if (pagaDdtBody) {
+        pagaDdtBody.innerHTML = '';
+        pagaDdt.forEach((item, idx) => {
+            const row = pagaDdtBody.insertRow();
+            const chkCell = row.insertCell(0);
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.className = 'row-check-pagaddt';
+            chk.style.width = '20px';
+            chk.style.height = '20px';
+            chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('pagaddt', idx, row); else aggiornaTabelle(); };
+            chkCell.appendChild(chk);
+            row.insertCell(1).innerHTML = item.nome || '';
+            row.insertCell(2).innerHTML = item.numDoc || '';
+            row.insertCell(3).innerHTML = item.data || '';
+            const impCell = row.insertCell(4);
+            impCell.className = 'text-right';
+            impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
         });
     }
     
@@ -753,29 +900,43 @@ function aggiornaPulsantiAzione() {
     if (currentScheda === 'primanota') {
         hasSelected = document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length > 0;
         document.getElementById('primaNotaActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllPrimaNota');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
     } else if (currentScheda === 'contanti') {
         hasSelected = document.querySelectorAll('#contantiBody .row-check-contanti:checked').length > 0;
         document.getElementById('contantiActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllContanti');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
     } else if (currentScheda === 'fornitori') {
         hasSelected = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked').length > 0;
         document.getElementById('fornitoriActionButtons').style.display = hasSelected ? 'flex' : 'none';
-    }
-    
-    // Select All
-    const selectAllPrima = document.getElementById('selectAllPrimaNota');
-    if (selectAllPrima) {
-        const allChecks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-        selectAllPrima.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-    }
-    const selectAllContanti = document.getElementById('selectAllContanti');
-    if (selectAllContanti) {
-        const allChecks = document.querySelectorAll('#contantiBody .row-check-contanti');
-        selectAllContanti.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-    }
-    const selectAllFornitori = document.getElementById('selectAllFornitori');
-    if (selectAllFornitori) {
-        const allChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-        selectAllFornitori.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        const selectAll = document.getElementById('selectAllFornitori');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    } else if (currentScheda === 'assclienti') {
+        hasSelected = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked').length > 0;
+        document.getElementById('assClientiActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllAssClienti');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#assClientiBody .row-check-assclienti');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    } else if (currentScheda === 'pagaddt') {
+        hasSelected = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked').length > 0;
+        document.getElementById('pagaDdtActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllPagaDdt');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
     }
 }
 
@@ -783,6 +944,7 @@ function aggiornaPulsantiAzione() {
 document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => {
     document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked);
     aggiornaPulsantiAzione();
+    aggiornaTabelle();
 });
 document.getElementById('selectAllContanti')?.addEventListener('change', (e) => {
     document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked);
@@ -792,46 +954,65 @@ document.getElementById('selectAllFornitori')?.addEventListener('change', (e) =>
     document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked);
     aggiornaPulsantiAzione();
 });
+document.getElementById('selectAllAssClienti')?.addEventListener('change', (e) => {
+    document.querySelectorAll('#assClientiBody .row-check-assclienti').forEach(c => c.checked = e.target.checked);
+    aggiornaPulsantiAzione();
+    aggiornaTabelle();
+});
+document.getElementById('selectAllPagaDdt')?.addEventListener('change', (e) => {
+    document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c => c.checked = e.target.checked);
+    aggiornaPulsantiAzione();
+    aggiornaTabelle();
+});
 
 // Elimina selezionati
 async function eliminaSelezionati(tipo) {
     if (tipo === 'primanota') {
         const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
         const nuovi = [];
-        for (let i = 0; i < checks.length; i++) {
-            if (!checks[i].checked) nuovi.push(primaNota[i]);
-        }
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) {
-            primaNota = nuovi;
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            showToast("Elementi eliminati");
-        }
+        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(primaNota[i]);
+        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) primaNota = nuovi;
     } else if (tipo === 'contanti') {
         const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
         const nuovi = [];
-        for (let i = 0; i < checks.length; i++) {
-            if (!checks[i].checked) nuovi.push(contanti[i]);
-        }
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) {
-            contanti = nuovi;
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            showToast("Elementi eliminati");
-        }
+        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(contanti[i]);
+        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) contanti = nuovi;
     } else if (tipo === 'fornitori') {
         const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
         const nuovi = [];
-        for (let i = 0; i < checks.length; i++) {
-            if (!checks[i].checked) nuovi.push(fattureFornitori[i]);
-        }
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) {
-            fattureFornitori = nuovi;
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            showToast("Elementi eliminati");
-        }
+        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(fattureFornitori[i]);
+        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) fattureFornitori = nuovi;
+    } else if (tipo === 'assclienti') {
+        const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti');
+        const nuovi = [];
+        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(assClienti[i]);
+        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) assClienti = nuovi;
+    } else if (tipo === 'pagaddt') {
+        const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt');
+        const nuovi = [];
+        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(pagaDdt[i]);
+        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) pagaDdt = nuovi;
     }
+    await salvaStatoFirebase();
+    aggiornaTabelle();
+    showToast("Elementi eliminati");
+}
+
+async function salvaModificheSelezionate(tipo) {
+    const checks = document.querySelectorAll(`#${getBodyId(tipo)} .row-check-${getClassPrefix(tipo)}:checked`);
+    for (let i = 0; i < checks.length; i++) {
+        const idx = Array.from(checks[i].parentNode.parentNode.parentNode.children).indexOf(checks[i].parentNode.parentNode);
+        saveEditedRow(tipo, idx);
+    }
+}
+
+function getBodyId(tipo) {
+    const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' };
+    return map[tipo];
+}
+function getClassPrefix(tipo) {
+    const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' };
+    return map[tipo];
 }
 
 // Cambia scheda
@@ -840,10 +1021,14 @@ function setScheda(s) {
     document.getElementById('tabellaPrimaNotaContainer').style.display = s === 'primanota' ? 'block' : 'none';
     document.getElementById('tabellaContantiContainer').style.display = s === 'contanti' ? 'block' : 'none';
     document.getElementById('tabellaFornitoriContainer').style.display = s === 'fornitori' ? 'block' : 'none';
+    document.getElementById('tabellaAssClientiContainer').style.display = s === 'assclienti' ? 'block' : 'none';
+    document.getElementById('tabellaPagaDdtContainer').style.display = s === 'pagaddt' ? 'block' : 'none';
     
     document.getElementById('toolbarPrimaNota').classList.toggle('active', s === 'primanota');
     document.getElementById('toolbarContanti').classList.toggle('active', s === 'contanti');
     document.getElementById('toolbarFornitori').classList.toggle('active', s === 'fornitori');
+    document.getElementById('toolbarAssClienti').classList.toggle('active', s === 'assclienti');
+    document.getElementById('toolbarPagaDdt').classList.toggle('active', s === 'pagaddt');
     
     aggiornaForm();
     aggiornaTabelle();
@@ -880,25 +1065,61 @@ function aggiornaForm() {
             </div>
             <div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>
         `;
+    } else if (currentScheda === 'assclienti') {
+        fa.innerHTML = `
+            <div class="form-row">
+                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div>
+                <div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div>
+                <div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div>
+            </div>
+            <div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>
+        `;
+        setupImportField('formImportoAss');
+    } else if (currentScheda === 'pagaddt') {
+        fa.innerHTML = `
+            <div class="form-row">
+                <div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div>
+                <div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div>
+                <div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div>
+            </div>
+        `;
+        setupImportField('formImportoPaga');
     }
     pulisciForm();
 }
 
 function pulisciForm() {
-    const oggi = new Date().toISOString().slice(0, 10);
+    const oggi = getTodayDate();
     if (currentScheda === 'primanota') {
-        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi;
-        if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
-        if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
-        if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
+        document.getElementById('formDataPrimaNota') && (document.getElementById('formDataPrimaNota').value = oggi);
+        document.getElementById('formDescrizionePrimaNota') && (document.getElementById('formDescrizionePrimaNota').value = '');
+        document.getElementById('formAvere') && (document.getElementById('formAvere').value = '');
+        document.getElementById('formDare') && (document.getElementById('formDare').value = '');
     } else if (currentScheda === 'contanti') {
-        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi;
-        if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
-        if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = '';
+        document.getElementById('formDataContanti') && (document.getElementById('formDataContanti').value = oggi);
+        document.getElementById('formDescrizioneContanti') && (document.getElementById('formDescrizioneContanti').value = '');
+        document.getElementById('formImportoContanti') && (document.getElementById('formImportoContanti').value = '');
     } else if (currentScheda === 'fornitori') {
-        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi;
-        if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
-        if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
+        document.getElementById('formDataFornitori') && (document.getElementById('formDataFornitori').value = oggi);
+        document.getElementById('formFornitore') && (document.getElementById('formFornitore').value = '');
+        document.getElementById('formNumeroFattura') && (document.getElementById('formNumeroFattura').value = '');
+    } else if (currentScheda === 'assclienti') {
+        document.getElementById('formDescrizioneAss') && (document.getElementById('formDescrizioneAss').value = '');
+        document.getElementById('formNomeAss') && (document.getElementById('formNomeAss').value = '');
+        document.getElementById('formImportoAss') && (document.getElementById('formImportoAss').value = '');
+        document.getElementById('formNumDocAss') && (document.getElementById('formNumDocAss').value = '');
+        document.getElementById('formDataDocAss') && (document.getElementById('formDataDocAss').value = '');
+    } else if (currentScheda === 'pagaddt') {
+        document.getElementById('formNomePaga') && (document.getElementById('formNomePaga').value = '');
+        document.getElementById('formNumDocPaga') && (document.getElementById('formNumDocPaga').value = '');
+        document.getElementById('formDataPaga') && (document.getElementById('formDataPaga').value = oggi);
+        document.getElementById('formImportoPaga') && (document.getElementById('formImportoPaga').value = '');
     }
 }
 
@@ -912,10 +1133,6 @@ async function memorizzaNuovo() {
         if (avere > 0 && dare > 0) { showToast("Non puoi inserire sia Avere che Dare", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo", true); return; }
         primaNota.push({ data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false });
-        await salvaStatoFirebase();
-        aggiornaTabelle();
-        pulisciForm();
-        showToast("✅ Riga aggiunta!");
     } else if (currentScheda === 'contanti') {
         const data = document.getElementById('formDataContanti')?.value;
         const descrizione = document.getElementById('formDescrizioneContanti')?.value;
@@ -923,10 +1140,6 @@ async function memorizzaNuovo() {
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         contanti.push({ data: formatDate(data), descrizione: descrizione, importo: importo });
-        await salvaStatoFirebase();
-        aggiornaTabelle();
-        pulisciForm();
-        showToast("✅ Incasso aggiunto!");
     } else if (currentScheda === 'fornitori') {
         const data = document.getElementById('formDataFornitori')?.value;
         const fornitore = document.getElementById('formFornitore')?.value.trim();
@@ -934,11 +1147,41 @@ async function memorizzaNuovo() {
         if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return; }
         fattureFornitori.push({ data: formatDate(data), fornitore: fornitore, numeroFattura: numeroFattura });
         nextFatturaId++;
-        await salvaStatoFirebase();
-        aggiornaTabelle();
-        pulisciForm();
-        showToast("✅ Fattura aggiunta!");
+    } else if (currentScheda === 'assclienti') {
+        const descrizione = document.getElementById('formDescrizioneAss')?.value;
+        const nome = document.getElementById('formNomeAss')?.value.trim();
+        const importo = parseNumber(document.getElementById('formImportoAss')?.value);
+        const numDoc = document.getElementById('formNumDocAss')?.value.trim();
+        const dataDoc = document.getElementById('formDataDocAss')?.value;
+        if (!nome) { showToast("Inserisci il nome", true); return; }
+        if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
+        assClienti.push({
+            dataIns: getTodayDate(),
+            descrizione: descrizione || '',
+            nome: nome,
+            importo: importo,
+            numDoc: numDoc || '',
+            dataDoc: dataDoc ? formatDate(dataDoc) : ''
+        });
+    } else if (currentScheda === 'pagaddt') {
+        const nome = document.getElementById('formNomePaga')?.value.trim();
+        const numDoc = document.getElementById('formNumDocPaga')?.value.trim();
+        const data = document.getElementById('formDataPaga')?.value;
+        const importo = parseNumber(document.getElementById('formImportoPaga')?.value);
+        if (!nome) { showToast("Inserisci il nome", true); return; }
+        if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
+        if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
+        pagaDdt.push({
+            nome: nome,
+            numDoc: numDoc,
+            data: data ? formatDate(data) : '',
+            importo: importo
+        });
     }
+    await salvaStatoFirebase();
+    aggiornaTabelle();
+    pulisciForm();
+    showToast("✅ Riga aggiunta!");
 }
 
 async function cambiaMese() {
@@ -967,19 +1210,26 @@ function esportaPDFMese() {
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     const tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    const tAss = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    const tPaga = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const sal = saldoIniziale + ta - td;
     const logo = localStorage.getItem('logo_azienda');
     const w = window.open();
     w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title>
-    <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{display:flex;justify-content:space-around;margin:20px 0} .positive{color:green} .negative{color:red} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:8px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
+    <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap} .positive{color:green} .negative{color:red} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #ddd;padding:8px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
     </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${currentYear}</div></div>
-    <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div></div>
-    <h3>PRIMA NOTA</h3> <tr> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>
+    <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div>`);
+    
+    w.document.write(`<h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>
     ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-    </tbody></table><h3>CONTANTI</h3> <td> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody>
+    </tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>
     ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    </tbody></table><h3>FORNITORI</h3> <table> <thead> <tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr> </thead><tbody>
+    </tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>
     ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
+    </tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>
+    ${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}
+    </tbody><tr><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>
+    ${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
     </tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
@@ -988,8 +1238,12 @@ function esportaPDFMese() {
 async function esportaReportAnno() {
     const anno = currentYear;
     const logo = localStorage.getItem('logo_azienda');
-    let tuttiIMesi = [];
-    let totaliAnno = { entrate: 0, uscite: 0, contanti: 0 };
+    let totaliAnno = { entrate: 0, uscite: 0, contanti: 0, assClienti: 0, pagaDdt: 0 };
+    const w = window.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title>
+    <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{background:#2c3e50;color:white;display:flex;justify-content:space-around;padding:20px;margin:20px 0;flex-wrap:wrap} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #ddd;padding:6px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
+    </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report Annuale ${anno}</div></div>`);
+    
     for (let m = 0; m < 12; m++) {
         try {
             const doc = await db.collection('contabilita').doc(`${anno}_${m}`).get();
@@ -998,33 +1252,23 @@ async function esportaReportAnno() {
                 const ta = (data.primaNota || []).reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
                 const td = (data.primaNota || []).reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
                 const tc = (data.contanti || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+                const tAss = (data.assClienti || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+                const tPaga = (data.pagaDdt || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
                 totaliAnno.entrate += ta;
                 totaliAnno.uscite += td;
                 totaliAnno.contanti += tc;
-                tuttiIMesi.push({ mese: m, presente: true, saldoIniziale: data.saldoIniziale || 0, primaNota: data.primaNota || [], contanti: data.contanti || [], totaleEntrate: ta, totaleUscite: td, totaleContanti: tc });
+                totaliAnno.assClienti += tAss;
+                totaliAnno.pagaDdt += tPaga;
+                w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Entrate: ${formatNumber(ta)} € | Uscite: ${formatNumber(td)} € | Contanti: ${formatNumber(tc)} € | ASS Clienti: ${formatNumber(tAss)} € | Paga DDT: ${formatNumber(tPaga)} €</div>`);
             } else {
-                tuttiIMesi.push({ mese: m, presente: false });
+                w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Nessun dato</div>`);
             }
-        } catch(e) { tuttiIMesi.push({ mese: m, presente: false }); }
-    }
-    const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title>
-    <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{background:#2c3e50;color:white;display:flex;justify-content:space-around;padding:20px;margin:20px 0} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #ddd;padding:6px} th{background:#3498db;color:white}</style>
-    </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report Annuale ${anno}</div></div>
-    <div class="summary"><div>📈 Totale Entrate: ${formatNumber(totaliAnno.entrate)} €</div><div>📉 Totale Uscite: ${formatNumber(totaliAnno.uscite)} €</div><div>💵 Contanti: ${formatNumber(totaliAnno.contanti)} €</div><div>💰 Saldo: ${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div>`);
-    for (const mese of tuttiIMesi) {
-        if (!mese.presente) {
-            w.document.write(`<h3>📅 ${mesiLista[mese.mese]} ${anno}</h3><p>Nessun dato</p>`);
-        } else {
-            w.document.write(`<h3>📅 ${mesiLista[mese.mese]} ${anno}</h3><div>Saldo iniziale: ${formatNumber(mese.saldoIniziale)} € | Entrate: ${formatNumber(mese.totaleEntrate)} € | Uscite: ${formatNumber(mese.totaleUscite)} € | Contanti: ${formatNumber(mese.totaleContanti)} €</div>`);
-            w.document.write(`<h4>Prima Nota</h4> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>`);
-            mese.primaNota.forEach((r, i) => { w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`); });
-            w.document.write(`</tbody></table><h4>Contanti</h4> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody>`);
-            mese.contanti.forEach((r, i) => { w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`); });
-            w.document.write(`</tbody></table>`);
+        } catch(e) {
+            w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Errore caricamento</div>`);
         }
     }
-    w.document.write(`<script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<div class="summary"><div>📈 Totale Entrate: ${formatNumber(totaliAnno.entrate)} €</div><div>📉 Totale Uscite: ${formatNumber(totaliAnno.uscite)} €</div><div>💵 Contanti: ${formatNumber(totaliAnno.contanti)} €</div><div>📋 ASS Clienti: ${formatNumber(totaliAnno.assClienti)} €</div><div>📋 Paga DDT: ${formatNumber(totaliAnno.pagaDdt)} €</div><div>💰 Saldo: ${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div>
+    <script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
@@ -1085,25 +1329,28 @@ document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); es
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
+document.getElementById('toolbarAssClienti').onclick = () => setScheda('assclienti');
+document.getElementById('toolbarPagaDdt').onclick = () => setScheda('pagaddt');
 document.getElementById('toolbarCaricaMese').onclick = () => document.getElementById('fileCaricaMese').click();
 document.getElementById('toolbarRiprendiCorrente').onclick = riprendiMeseCorrente;
 document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
-document.getElementById('btnSalvaModificaPrima').onclick = () => alert("Modifica celle cliccando direttamente sui valori");
+
+// Bottoni SALVA ed ELIMINA per ogni tabella
+document.getElementById('btnSalvaModificaPrima').onclick = () => salvaModificheSelezionate('primanota');
 document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
-document.getElementById('btnSalvaModificaContanti').onclick = () => alert("Modifica celle cliccando direttamente sui valori");
+document.getElementById('btnSalvaModificaContanti').onclick = () => salvaModificheSelezionate('contanti');
 document.getElementById('btnEliminaSelezionatiContanti').onclick = () => eliminaSelezionati('contanti');
-document.getElementById('btnSalvaModificaFornitori').onclick = () => alert("Modifica celle cliccando direttamente sui valori");
+document.getElementById('btnSalvaModificaFornitori').onclick = () => salvaModificheSelezionate('fornitori');
 document.getElementById('btnEliminaSelezionatiFornitori').onclick = () => eliminaSelezionati('fornitori');
-document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
-document.getElementById('saldoIniziale').onchange = async e => { 
-    saldoIniziale = parseNumber(e.target.value); 
-    await salvaStatoFirebase(); 
-    aggiornaTabelle(); 
-};
+document.getElementById('btnSalvaModificaAssClienti').onclick = () => salvaModificheSelezionate('assclienti');
+document.getElementById('btnEliminaSelezionatiAssClienti').onclick = () => eliminaSelezionati('assclienti');
+document.getElementById('btnSalvaModificaPagaDdt').onclick = () => salvaModificheSelezionate('pagaddt');
+document.getElementById('btnEliminaSelezionatiPagaDdt').onclick = () => eliminaSelezionati('pagaddt');
+
+document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
+document.getElementById('saldoIniziale').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); };
 document.getElementById('annoSelect').onchange = cambiaMese;
 document.getElementById('meseSelect').onchange = cambiaMese;
-
-// Setup per il campo saldo iniziale
 setupImportField('saldoIniziale');
 
 // ==================== NAVIGAZIONE ====================
