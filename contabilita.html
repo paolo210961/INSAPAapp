@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.25</title>
+    <title>inSAPA - Contabilità v5.26</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -149,9 +149,10 @@
             opacity: 0.8;
         }
 
-        /* BARRA PULSANTI ORIZZONTALE STICKY (top calcolato da JS) */
+        /* BARRA PULSANTI ORIZZONTALE STICKY - sotto la nav */
         .sticky-toolbar {
             position: sticky;
+            top: 92px;
             background: #f8f9fa;
             padding: 12px 20px;
             border-bottom: 2px solid #3498db;
@@ -191,9 +192,10 @@
             color: white;
         }
 
-        /* RIEPILOGO STICKY (top calcolato da JS) */
+        /* RIEPILOGO STICKY */
         .sticky-summary {
             position: sticky;
+            top: 138px;
             background: white;
             padding: 12px 20px;
             border-bottom: 1px solid #ddd;
@@ -205,11 +207,13 @@
             gap: 30px;
             flex-wrap: wrap;
             font-weight: bold;
+            color: #2c3e50;
         }
 
-        /* INTESTAZIONE TABELLA STICKY (top calcolato da JS) */
+        /* INTESTAZIONE TABELLA STICKY */
         .sticky-table-header {
             position: sticky;
+            top: 200px;
             background: #e9ecef;
             z-index: 997;
         }
@@ -236,21 +240,27 @@
 
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
-        input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; color: #2c3e50; }
         button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0; font-weight: bold; width: 100%; }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
         .btn-danger { background: #e74c3c; }
         .btn-success { background: #27ae60; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
         .btn-group button { width: auto; flex: 1; }
+        
+        /* TABELLA - FORZA TESTO NERO */
         .tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 15px; }
         .tabella th, .tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
-        .tabella th { background: #e9ecef; }
+        .tabella th { background: #e9ecef; color: #2c3e50; }
+        .tabella td, .editable-cell, .cell-input {
+            color: #2c3e50 !important;
+            background: white !important;
+        }
         .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
         .editable-cell { cursor: pointer; min-width: 80px; display: inline-block; width: 100%; }
-        .editable-cell:hover { background-color: #fff3cd; }
-        .cell-input { width: 100%; border: none; background: transparent; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
-        .cell-input:focus { outline: 1px solid #3498db; background: white; }
+        .editable-cell:hover { background-color: #fff3cd !important; }
+        .cell-input { width: 100%; border: none; background: white !important; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
+        .cell-input:focus { outline: 1px solid #3498db; background: white !important; }
         .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
@@ -288,6 +298,9 @@
             .bandierina-container { order: 2; margin: 10px 0; }
             .dropdown-menu { left: 50%; transform: translateX(-50%); min-width: 200px; }
             .toolbar-btn { font-size: 0.7rem; padding: 6px 12px; }
+            .sticky-toolbar { top: 120px; }
+            .sticky-summary { top: 176px; }
+            .sticky-table-header { top: 250px; }
         }
     </style>
 </head>
@@ -324,6 +337,7 @@
         </div>
     </div>
 
+    <!-- BARRA PULSANTI ORIZZONTALE STICKY (sotto la nav) -->
     <div id="stickyToolbar" class="sticky-toolbar">
         <button id="toolbarPrimaNota" class="toolbar-btn active">📋 PRIMA NOTA</button>
         <button id="toolbarContanti" class="toolbar-btn">💵 CONTANTI</button>
@@ -332,11 +346,12 @@
         <button id="toolbarRiprendiCorrente" class="toolbar-btn btn-yellow">📅 RIPRENDI MESE CORRENTE</button>
     </div>
 
+    <!-- RIEPILOGO STICKY -->
     <div id="stickySummary" class="sticky-summary">
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.25 - Contabilità</div>
+    <div class="version" id="appVersion">v5.26 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -353,11 +368,77 @@
 
         <div class="content-area">
             <div id="contabilitaContainer">
-                <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><table class="tabella" id="tabellaPrimaNota"><thead id="tabellaPrimaNotaThead">汽<th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th><th>✅</th> </thead><tbody id="primaNotaBody"></tbody> </table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><table class="tabella" id="tabellaContanti"><thead id="tabellaContantiThead">汽<th style="width:30px"><input type="checkbox" id="selectAllContanti"></th><th>#</th><th>Data</th><th>Descrizione</th><th>Incasso (€)</th> </thead><tbody id="contantiBody"></tbody> </table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead id="tabellaFornitoriThead">汽<th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th> </thead><tbody id="fornitoriBody"></tbody> </table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaPrimaNotaContainer" class="scadenze-box">
+                    <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
+                    <table class="tabella" id="tabellaPrimaNota">
+                        <thead id="tabellaPrimaNotaThead" class="sticky-table-header">
+                            <tr>
+                                <th style="width:30px"><input type="checkbox" id="selectAllPrimaNota"></th>
+                                <th>#</th>
+                                <th>Data</th>
+                                <th>Descrizione</th>
+                                <th>Avere (€)</th>
+                                <th>Dare (€)</th>
+                                <th>✅</th>
+                            </tr>
+                        </thead>
+                        <tbody id="primaNotaBody"></tbody>
+                    </table>
+                    <div id="primaNotaActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
+                    </div>
+                </div>
+                
+                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
+                    <h3>💵 INCASSO CONTANTI</h3>
+                    <table class="tabella" id="tabellaContanti">
+                        <thead id="tabellaContantiThead" class="sticky-table-header">
+                            <tr>
+                                <th style="width:30px"><input type="checkbox" id="selectAllContanti"></th>
+                                <th>#</th>
+                                <th>Data</th>
+                                <th>Descrizione</th>
+                                <th>Incasso (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contantiBody"></tbody>
+                    </table>
+                    <div id="contantiActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
+                    </div>
+                </div>
+                
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
+                    <h3>📄 FATTURE FORNITORI</h3>
+                    <table class="tabella" id="tabellaFornitori">
+                        <thead id="tabellaFornitoriThead" class="sticky-table-header">
+                            <tr>
+                                <th style="width:30px"><input type="checkbox" id="selectAllFornitori"></th>
+                                <th>N° int</th>
+                                <th>Data</th>
+                                <th>Fornitore</th>
+                                <th>N. Fattura</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fornitoriBody"></tbody>
+                    </table>
+                    <div id="fornitoriActionButtons" class="action-buttons">
+                        <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
+                        <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button>
+                    </div>
+                </div>
             </div>
-            <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button></div></div>
+            <div id="changePwdContainer" style="display: none;">
+                <div class="scadenze-box">
+                    <h3>🔑 Cambia Password Amministratore</h3>
+                    <div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div>
+                    <div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div>
+                    <button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button>
+                    <button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button>
+                </div>
+            </div>
         </div>
     </div>
     <footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
@@ -383,39 +464,6 @@ let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let currentYear = 2026, currentMonth = 4, backupPreCaricamento = null, currentScheda = 'primanota';
 let primaNota = [], contanti = [], fattureFornitori = [], saldoIniziale = 0, nextFatturaId = 1, pendingChanges = {};
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-
-// ==================== FUNZIONE PER AGGIORNARE LE POSIZIONI STICKY ====================
-function aggiornaPosizioniSticky() {
-    const header = document.getElementById('mainHeader');
-    const toolbar = document.getElementById('stickyToolbar');
-    const summary = document.getElementById('stickySummary');
-    
-    if (header && toolbar && summary) {
-        const headerHeight = header.offsetHeight;
-        const toolbarHeight = toolbar.offsetHeight;
-        
-        // Imposta il top della toolbar
-        toolbar.style.top = headerHeight + 'px';
-        
-        // Imposta il top del riepilogo (header + toolbar)
-        summary.style.top = (headerHeight + toolbarHeight) + 'px';
-        
-        // Imposta il top delle intestazioni delle tabelle (header + toolbar + summary)
-        const summaryHeight = summary.offsetHeight;
-        const tableHeaders = document.querySelectorAll('.sticky-table-header');
-        tableHeaders.forEach(thead => {
-            thead.style.top = (headerHeight + toolbarHeight + summaryHeight) + 'px';
-        });
-    }
-}
-
-// Osserva le modifiche del DOM per ricalcolare le posizioni sticky
-const resizeObserver = new ResizeObserver(() => {
-    aggiornaPosizioniSticky();
-});
-resizeObserver.observe(document.getElementById('mainHeader'));
-window.addEventListener('resize', () => aggiornaPosizioniSticky());
-window.addEventListener('scroll', () => aggiornaPosizioniSticky());
 
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
@@ -511,8 +559,11 @@ function makeEditableCellPrimaNota(val,idx,field,isSel){
     if(field==='verificato'){ let c=document.createElement('input'); c.type='checkbox'; c.checked=val===true; c.style.cursor='pointer'; c.onchange=async()=>{ primaNota[idx].verificato=c.checked; await aggiornaTabelle(); await salvaStatoFirebase(); }; return c; }
     let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val);
     let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell';
+    s.style.color = '#2c3e50';
     if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
     else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
+        inp.style.color = '#2c3e50';
+        inp.style.background = 'white';
         if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
         else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; }
         else{ inp.type='text'; inp.value=formatNumber(val)||''; }
@@ -524,8 +575,11 @@ function makeEditableCellPrimaNota(val,idx,field,isSel){
 function makeEditableCellContanti(val,idx,field,isSel){
     let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val);
     let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell';
+    s.style.color = '#2c3e50';
     if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
     else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
+        inp.style.color = '#2c3e50';
+        inp.style.background = 'white';
         if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
         else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; }
         else{ inp.type='text'; inp.value=formatNumber(val)||''; }
@@ -536,8 +590,11 @@ function makeEditableCellContanti(val,idx,field,isSel){
 }
 function makeEditableCellFornitori(val,idx,field,isSel){
     let s=document.createElement('span'); s.textContent=val||''; s.className='editable-cell';
+    s.style.color = '#2c3e50';
     if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
     else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
+        inp.style.color = '#2c3e50';
+        inp.style.background = 'white';
         if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
         else{ inp.type='text'; inp.value=val||''; }
         s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
@@ -604,7 +661,6 @@ async function aggiornaTabelle() {
     document.getElementById('saldoIniziale').value = saldoIniziale;
     aggiornaPulsantiAzione();
     aggiornaRiepilogo();
-    aggiornaPosizioniSticky();
     
     let sa = document.getElementById('selectAllPrimaNota'); if(sa){ let all = document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
     sa = document.getElementById('selectAllContanti'); if(sa){ let all = document.querySelectorAll('#contantiBody .row-check-contanti'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
@@ -626,7 +682,6 @@ function setScheda(s){
     aggiornaTabelle();
     aggiornaPulsantiAzione();
     aggiornaRiepilogo();
-    aggiornaPosizioniSticky();
 }
 function aggiornaForm(){ 
     let fa=document.getElementById('formArea'); 
@@ -861,10 +916,54 @@ function esportaPDFMese() {
     let mn=mesiLista[currentMonth];
     let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda');
     let w=window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:28px;font-weight:bold;color:#3498db}.periodo{font-size:18px;color:#666}.summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:24px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}.section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#3498db;color:white;padding:10px;text-align:left}td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background:#f9f9f9}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}.text-right{text-align:right}@media print{body{padding:20px}}</style></head><body><div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><div class="section-title">📋 PRIMA NOTA</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table>
-<div class="section-title">💵 INCASSO CONTANTI</div><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr></tbody></table>
-<div class="section-title">📄 FATTURE FORNITORI</div><table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}</tbody></table>
-<div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Responsabile Amministrativo<br>_________________________</div><script>window.onload=()=>window.print();<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>
+        body{font-family:'Segoe UI',sans-serif;padding:40px}
+        .header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}
+        .logo{max-width:300px;max-height:100px}
+        .title{font-size:28px;font-weight:bold;color:#3498db}
+        .periodo{font-size:18px;color:#666}
+        .summary{background:#ecf0f1;padding:20px;border-radius:12px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}
+        .summary-item{text-align:center}
+        .summary-value{font-size:24px;font-weight:bold}
+        .positive{color:#27ae60}.negative{color:#e74c3c}
+        .section-title{font-size:20px;font-weight:bold;margin:25px 0 15px;border-left:4px solid #3498db;padding-left:10px}
+        table{width:100%;border-collapse:collapse;margin-bottom:30px}
+        th{background:#3498db;color:white;padding:10px;text-align:left}
+        td{border:1px solid #ddd;padding:8px}
+        tr:nth-child(even){background:#f9f9f9}
+        .footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}
+        .signature{text-align:right;margin-top:30px;font-style:italic}
+        .text-right{text-align:right}
+        @media print{body{padding:20px}}
+    </style></head><body>
+    <div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div>
+    <div class="summary">
+        <div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div>
+        <div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div>
+        <div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div>
+        <div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div>
+    </div>
+    <div class="section-title">📋 PRIMA NOTA</div>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>
+    ${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
+    ${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td></tr>':''}
+    <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr>
+    </tbody></table>
+    <div class="section-title">💵 INCASSO CONTANTI</div>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>
+    ${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
+    ${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}
+    <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr>
+    </tbody></table>
+    <div class="section-title">📄 FATTURE FORNITORI</div>
+    <table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>
+    ${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
+    ${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}
+    </tbody></table>
+    <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div>
+    <div class="signature">Il Responsabile Amministrativo<br>_________________________</div>
+    <script>window.onload=()=>window.print();<\/script>
+    </body></html>`);
     w.document.close();
 }
 
@@ -997,7 +1096,6 @@ document.getElementById('btnSalvaPassword').onclick = () => {
 // Avvio applicazione
 caricaStatoFirebase().then(() => {
     setScheda('primanota');
-    aggiornaPosizioniSticky();
 });
 </script>
 </body>
