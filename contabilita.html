@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.26</title>
+    <title>inSAPA - Contabilità v5.27</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -149,7 +149,7 @@
             opacity: 0.8;
         }
 
-        /* BARRA PULSANTI ORIZZONTALE STICKY - sotto la nav */
+        /* BARRA PULSANTI ORIZZONTALE STICKY */
         .sticky-toolbar {
             position: sticky;
             top: 92px;
@@ -220,28 +220,57 @@
 
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
 
+        /* SIDEBAR COMPATTA */
         .sidebar {
-            width: 340px;
+            width: 380px;
             background: white;
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             height: fit-content;
         }
-
-        .content-area {
-            flex: 1;
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            overflow-x: auto;
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
         }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
-        input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; color: #2c3e50; }
-        button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin: 5px 0; font-weight: bold; width: 100%; }
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 0.8rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        input[type="number"] {
+            text-align: right;
+        }
+        button { 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            margin: 5px 0; 
+            font-weight: bold; 
+            width: 100%; 
+        }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
         .btn-danger { background: #e74c3c; }
         .btn-success { background: #27ae60; }
@@ -301,6 +330,7 @@
             .sticky-toolbar { top: 120px; }
             .sticky-summary { top: 176px; }
             .sticky-table-header { top: 250px; }
+            .form-row { flex-direction: column; gap: 0; }
         }
     </style>
 </head>
@@ -337,7 +367,7 @@
         </div>
     </div>
 
-    <!-- BARRA PULSANTI ORIZZONTALE STICKY (sotto la nav) -->
+    <!-- BARRA PULSANTI ORIZZONTALE STICKY -->
     <div id="stickyToolbar" class="sticky-toolbar">
         <button id="toolbarPrimaNota" class="toolbar-btn active">📋 PRIMA NOTA</button>
         <button id="toolbarContanti" class="toolbar-btn">💵 CONTANTI</button>
@@ -351,16 +381,57 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.26 - Contabilità</div>
+    <div class="version" id="appVersion">v5.27 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
-            <div class="form-group"><label>📅 Anno</label><select id="annoSelect"><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
-            <div class="form-group"><label>📆 Mese</label><select id="meseSelect"><option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option><option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option><option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option><option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option></select></div>
-            <div class="form-group"><label>💰 Saldo iniziale (€)</label><input type="number" id="saldoIniziale" step="0.01" value="0"></div>
+            <!-- RIGA 1: Anno e Mese affiancati -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Anno</label>
+                    <select id="annoSelect">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📆 Mese</label>
+                    <select id="meseSelect">
+                        <option value="0">Gennaio</option>
+                        <option value="1">Febbraio</option>
+                        <option value="2">Marzo</option>
+                        <option value="3">Aprile</option>
+                        <option value="4">Maggio</option>
+                        <option value="5">Giugno</option>
+                        <option value="6">Luglio</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Settembre</option>
+                        <option value="9">Ottobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Dicembre</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Saldo iniziale a larghezza piena -->
+            <div class="form-group">
+                <label>💰 Saldo iniziale (€)</label>
+                <input type="number" id="saldoIniziale" step="0.01" value="0" placeholder="0,00">
+            </div>
+            
             <hr>
+            
+            <!-- FORM DINAMICO (cambia in base alla scheda) -->
             <div id="formArea"></div>
-            <div class="form-group"><button id="btnMemorizza" class="btn-success">💾 MEMORIZZA</button></div>
+            
+            <!-- Pulsante Memorizza -->
+            <div class="form-group">
+                <button id="btnMemorizza" class="btn-success">💾 MEMORIZZA</button>
+            </div>
+            
             <hr>
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
             <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
@@ -485,12 +556,25 @@ function debugLog(msg) {
     console.log(msg);
 }
 
-function formatNumber(n) { if (n===null||n===undefined||n==='') return ''; let num=parseFloat(n); return isNaN(num)?'':num.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function parseNumber(s) { if(!s||s==='') return 0; let clean=s.toString().replace(/\./g,'').replace(',','.'); let num=parseFloat(clean); return isNaN(num)?0:num; }
-function formatDate(d) { if(!d) return ""; let x=new Date(d); return `${x.getDate().toString().padStart(2,'0')}/${(x.getMonth()+1).toString().padStart(2,'0')}/${x.getFullYear()}`; }
+function formatNumber(n) { 
+    if (n === null || n === undefined || n === '') return ''; 
+    let num = parseFloat(n); 
+    return isNaN(num) ? '' : num.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+}
+function parseNumber(s) { 
+    if (!s || s === '') return 0; 
+    let clean = s.toString().replace(/\./g, '').replace(',', '.'); 
+    let num = parseFloat(clean); 
+    return isNaN(num) ? 0 : num; 
+}
+function formatDate(d) { 
+    if (!d) return ""; 
+    let x = new Date(d); 
+    return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`; 
+}
 
 async function salvaStatoFirebase() {
-    if(!currentYear && currentYear!==0) return;
+    if (!currentYear && currentYear !== 0) return;
     debugLog(`Salvataggio su Firebase: ${currentYear}/${currentMonth}`);
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -504,14 +588,14 @@ async function salvaStatoFirebase() {
             ultimoAggiornamento: new Date().toISOString()
         });
         debugLog("Salvataggio completato");
-    } catch(e) { debugLog("ERRORE salvataggio: "+e.message); }
+    } catch(e) { debugLog("ERRORE salvataggio: " + e.message); }
 }
 
 async function caricaStatoFirebase() {
     debugLog(`Caricamento da Firebase: ${currentYear}/${currentMonth}`);
     try {
         const doc = await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).get();
-        if(doc.exists) {
+        if (doc.exists) {
             const data = doc.data();
             saldoIniziale = data.saldoIniziale || 0;
             primaNota = data.primaNota || [];
@@ -527,79 +611,222 @@ async function caricaStatoFirebase() {
         }
         await aggiornaTabelle();
         aggiornaRiepilogo();
-    } catch(e) { debugLog("ERRORE caricamento: "+e.message); }
+    } catch(e) { debugLog("ERRORE caricamento: " + e.message); }
 }
 
 function aggiornaRiepilogo() {
     const summaryDiv = document.getElementById('saldoInfo');
-    if(currentScheda === 'primanota') {
-        let ta = primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0);
-        let td = primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0);
+    if (currentScheda === 'primanota') {
+        let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
         let sal = saldoIniziale + ta - td;
         summaryDiv.innerHTML = `<div><strong>📈 Totale Avere:</strong> ${formatNumber(ta)} €</div><div><strong>📉 Totale Dare:</strong> ${formatNumber(td)} €</div><div><strong>💰 Saldo mese:</strong> ${formatNumber(sal)} €</div>`;
-    } else if(currentScheda === 'contanti') {
-        let tc = contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0);
+    } else if (currentScheda === 'contanti') {
+        let tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
         summaryDiv.innerHTML = `<div><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(tc)} €</div>`;
-    } else if(currentScheda === 'fornitori') {
+    } else if (currentScheda === 'fornitori') {
         summaryDiv.innerHTML = `<div><strong>📄 Numero fatture fornitori:</strong> ${fattureFornitori.length}</div>`;
     }
 }
 
-function hasSelectedRows() { if(currentScheda==='primanota') return Array.from(document.querySelectorAll('#primaNotaBody .row-check-prima')).some(c=>c.checked); if(currentScheda==='contanti') return Array.from(document.querySelectorAll('#contantiBody .row-check-contanti')).some(c=>c.checked); if(currentScheda==='fornitori') return Array.from(document.querySelectorAll('#fornitoriBody .row-check-fornitori')).some(c=>c.checked); return false; }
-function getSelectedRows() { let sel=[]; if(currentScheda==='primanota') document.querySelectorAll('#primaNotaBody .row-check-prima').forEach((c,i)=>{if(c.checked) sel.push(i);}); if(currentScheda==='contanti') document.querySelectorAll('#contantiBody .row-check-contanti').forEach((c,i)=>{if(c.checked) sel.push(i);}); if(currentScheda==='fornitori') document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach((c,i)=>{if(c.checked) sel.push(i);}); return sel; }
-function aggiornaPulsantiAzione() { let hs=hasSelectedRows(); if(currentScheda==='primanota') document.getElementById('primaNotaActionButtons').style.display=hs?'flex':'none'; if(currentScheda==='contanti') document.getElementById('contantiActionButtons').style.display=hs?'flex':'none'; if(currentScheda==='fornitori') document.getElementById('fornitoriActionButtons').style.display=hs?'flex':'none'; }
+function hasSelectedRows() { 
+    if (currentScheda === 'primanota') return Array.from(document.querySelectorAll('#primaNotaBody .row-check-prima')).some(c => c.checked); 
+    if (currentScheda === 'contanti') return Array.from(document.querySelectorAll('#contantiBody .row-check-contanti')).some(c => c.checked); 
+    if (currentScheda === 'fornitori') return Array.from(document.querySelectorAll('#fornitoriBody .row-check-fornitori')).some(c => c.checked); 
+    return false; 
+}
+function getSelectedRows() { 
+    let sel = []; 
+    if (currentScheda === 'primanota') document.querySelectorAll('#primaNotaBody .row-check-prima').forEach((c, i) => { if (c.checked) sel.push(i); }); 
+    if (currentScheda === 'contanti') document.querySelectorAll('#contantiBody .row-check-contanti').forEach((c, i) => { if (c.checked) sel.push(i); }); 
+    if (currentScheda === 'fornitori') document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach((c, i) => { if (c.checked) sel.push(i); }); 
+    return sel; 
+}
+function aggiornaPulsantiAzione() { 
+    let hs = hasSelectedRows(); 
+    if (currentScheda === 'primanota') document.getElementById('primaNotaActionButtons').style.display = hs ? 'flex' : 'none'; 
+    if (currentScheda === 'contanti') document.getElementById('contantiActionButtons').style.display = hs ? 'flex' : 'none'; 
+    if (currentScheda === 'fornitori') document.getElementById('fornitoriActionButtons').style.display = hs ? 'flex' : 'none'; 
+}
 
 async function applicaModifiche() {
-    for(let k in pendingChanges){ let p=k.split('|'), s=p[0], ri=parseInt(p[1]), f=p[2], nv=pendingChanges[k]; if(s==='primanota'&&primaNota[ri]){ let na= f==='avere'?parseNumber(nv):primaNota[ri].avere, nd=f==='dare'?parseNumber(nv):primaNota[ri].dare; if(na>0&&nd>0){ alert(`Errore: Avere e Dare non possono essere entrambi >0 riga ${ri+1}`); return; } } }
-    for(let k in pendingChanges){ let p=k.split('|'), s=p[0], ri=parseInt(p[1]), f=p[2], nv=pendingChanges[k]; if(s==='primanota'&&primaNota[ri]){ primaNota[ri][f]=nv; if(f==='avere'&&parseNumber(nv)>0) primaNota[ri].dare=0; if(f==='dare'&&parseNumber(nv)>0) primaNota[ri].avere=0; } else if(s==='contanti'&&contanti[ri]) contanti[ri][f]=nv; else if(s==='fornitori'&&fattureFornitori[ri]) fattureFornitori[ri][f]=nv; }
-    pendingChanges={}; await aggiornaTabelle(); await salvaStatoFirebase(); showToast("Modifiche salvate con successo!");
+    for (let k in pendingChanges) { 
+        let p = k.split('|'), s = p[0], ri = parseInt(p[1]), f = p[2], nv = pendingChanges[k]; 
+        if (s === 'primanota' && primaNota[ri]) { 
+            let na = f === 'avere' ? parseNumber(nv) : primaNota[ri].avere, nd = f === 'dare' ? parseNumber(nv) : primaNota[ri].dare; 
+            if (na > 0 && nd > 0) { alert(`Errore: Avere e Dare non possono essere entrambi >0 riga ${ri + 1}`); return; } 
+        } 
+    }
+    for (let k in pendingChanges) { 
+        let p = k.split('|'), s = p[0], ri = parseInt(p[1]), f = p[2], nv = pendingChanges[k]; 
+        if (s === 'primanota' && primaNota[ri]) { 
+            primaNota[ri][f] = nv; 
+            if (f === 'avere' && parseNumber(nv) > 0) primaNota[ri].dare = 0; 
+            if (f === 'dare' && parseNumber(nv) > 0) primaNota[ri].avere = 0; 
+        } else if (s === 'contanti' && contanti[ri]) { 
+            contanti[ri][f] = nv; 
+        } else if (s === 'fornitori' && fattureFornitori[ri]) { 
+            fattureFornitori[ri][f] = nv; 
+        } 
+    }
+    pendingChanges = {}; 
+    await aggiornaTabelle(); 
+    await salvaStatoFirebase(); 
+    showToast("Modifiche salvate con successo!");
 }
 
-function makeEditableCellPrimaNota(val,idx,field,isSel){
-    if(field==='verificato'){ let c=document.createElement('input'); c.type='checkbox'; c.checked=val===true; c.style.cursor='pointer'; c.onchange=async()=>{ primaNota[idx].verificato=c.checked; await aggiornaTabelle(); await salvaStatoFirebase(); }; return c; }
-    let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val);
-    let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell';
+function makeEditableCellPrimaNota(val, idx, field, isSel) {
+    if (field === 'verificato') { 
+        let c = document.createElement('input'); 
+        c.type = 'checkbox'; 
+        c.checked = val === true; 
+        c.style.cursor = 'pointer'; 
+        c.onchange = async () => { primaNota[idx].verificato = c.checked; await aggiornaTabelle(); await salvaStatoFirebase(); }; 
+        return c; 
+    }
+    let disp = (field === 'data' || field === 'descrizione') ? (val || '') : formatNumber(val);
+    let s = document.createElement('span'); 
+    s.textContent = disp || ''; 
+    s.className = 'editable-cell';
     s.style.color = '#2c3e50';
-    if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
-    else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
-        inp.style.color = '#2c3e50';
-        inp.style.background = 'white';
-        if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
-        else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; }
-        else{ inp.type='text'; inp.value=formatNumber(val)||''; }
-        s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
-        inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else if(field==='descrizione') nv=inp.value; else nv=parseNumber(inp.value); pendingChanges[`primanota|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; if(field==='data'||field==='descrizione') s.textContent=nv||''; else s.textContent=formatNumber(nv)||''; };
-        inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; }
+    if (!isSel) { 
+        s.classList.add('editable-disabled'); 
+        s.style.cursor = 'not-allowed'; 
+    } else { 
+        s.style.cursor = 'pointer'; 
+        s.onclick = () => { 
+            let inp = document.createElement('input'); 
+            inp.className = 'cell-input';
+            inp.style.color = '#2c3e50';
+            inp.style.background = 'white';
+            if (field === 'data') { 
+                let dv = ''; 
+                if (val) { 
+                    let p = val.split('/'); 
+                    if (p.length === 3) dv = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`; 
+                } 
+                inp.type = 'date'; 
+                inp.value = dv; 
+            } else if (field === 'descrizione') { 
+                inp.type = 'text'; 
+                inp.value = val || ''; 
+            } else { 
+                inp.type = 'text'; 
+                inp.value = formatNumber(val) || ''; 
+            }
+            s.style.display = 'none'; 
+            s.parentNode.insertBefore(inp, s); 
+            inp.focus();
+            inp.onblur = () => { 
+                let nv; 
+                if (field === 'data') nv = inp.value ? formatDate(inp.value) : ''; 
+                else if (field === 'descrizione') nv = inp.value; 
+                else nv = parseNumber(inp.value); 
+                pendingChanges[`primanota|${idx}|${field}`] = nv; 
+                inp.remove(); 
+                s.style.display = 'inline'; 
+                if (field === 'data' || field === 'descrizione') s.textContent = nv || ''; 
+                else s.textContent = formatNumber(nv) || ''; 
+            };
+            inp.onkeypress = (e) => { if (e.key === 'Enter') inp.blur(); }; 
+        }; 
+    }
     return s;
 }
-function makeEditableCellContanti(val,idx,field,isSel){
-    let disp=(field==='data'||field==='descrizione')?(val||''):formatNumber(val);
-    let s=document.createElement('span'); s.textContent=disp||''; s.className='editable-cell';
+
+function makeEditableCellContanti(val, idx, field, isSel) {
+    let disp = (field === 'data' || field === 'descrizione') ? (val || '') : formatNumber(val);
+    let s = document.createElement('span'); 
+    s.textContent = disp || ''; 
+    s.className = 'editable-cell';
     s.style.color = '#2c3e50';
-    if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
-    else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
-        inp.style.color = '#2c3e50';
-        inp.style.background = 'white';
-        if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
-        else if(field==='descrizione'){ inp.type='text'; inp.value=val||''; }
-        else{ inp.type='text'; inp.value=formatNumber(val)||''; }
-        s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
-        inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else if(field==='descrizione') nv=inp.value; else nv=parseNumber(inp.value); pendingChanges[`contanti|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; if(field==='data'||field==='descrizione') s.textContent=nv||''; else s.textContent=formatNumber(nv)||''; };
-        inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; }
+    if (!isSel) { 
+        s.classList.add('editable-disabled'); 
+        s.style.cursor = 'not-allowed'; 
+    } else { 
+        s.style.cursor = 'pointer'; 
+        s.onclick = () => { 
+            let inp = document.createElement('input'); 
+            inp.className = 'cell-input';
+            inp.style.color = '#2c3e50';
+            inp.style.background = 'white';
+            if (field === 'data') { 
+                let dv = ''; 
+                if (val) { 
+                    let p = val.split('/'); 
+                    if (p.length === 3) dv = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`; 
+                } 
+                inp.type = 'date'; 
+                inp.value = dv; 
+            } else if (field === 'descrizione') { 
+                inp.type = 'text'; 
+                inp.value = val || ''; 
+            } else { 
+                inp.type = 'text'; 
+                inp.value = formatNumber(val) || ''; 
+            }
+            s.style.display = 'none'; 
+            s.parentNode.insertBefore(inp, s); 
+            inp.focus();
+            inp.onblur = () => { 
+                let nv; 
+                if (field === 'data') nv = inp.value ? formatDate(inp.value) : ''; 
+                else if (field === 'descrizione') nv = inp.value; 
+                else nv = parseNumber(inp.value); 
+                pendingChanges[`contanti|${idx}|${field}`] = nv; 
+                inp.remove(); 
+                s.style.display = 'inline'; 
+                if (field === 'data' || field === 'descrizione') s.textContent = nv || ''; 
+                else s.textContent = formatNumber(nv) || ''; 
+            };
+            inp.onkeypress = (e) => { if (e.key === 'Enter') inp.blur(); }; 
+        }; 
+    }
     return s;
 }
-function makeEditableCellFornitori(val,idx,field,isSel){
-    let s=document.createElement('span'); s.textContent=val||''; s.className='editable-cell';
+
+function makeEditableCellFornitori(val, idx, field, isSel) {
+    let s = document.createElement('span'); 
+    s.textContent = val || ''; 
+    s.className = 'editable-cell';
     s.style.color = '#2c3e50';
-    if(!isSel){ s.classList.add('editable-disabled'); s.style.cursor='not-allowed'; }
-    else{ s.style.cursor='pointer'; s.onclick=()=>{ let inp=document.createElement('input'); inp.className='cell-input';
-        inp.style.color = '#2c3e50';
-        inp.style.background = 'white';
-        if(field==='data'){ let dv=''; if(val){ let p=val.split('/'); if(p.length===3) dv=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } inp.type='date'; inp.value=dv; }
-        else{ inp.type='text'; inp.value=val||''; }
-        s.style.display='none'; s.parentNode.insertBefore(inp,s); inp.focus();
-        inp.onblur=()=>{ let nv; if(field==='data') nv=inp.value?formatDate(inp.value):''; else nv=inp.value; pendingChanges[`fornitori|${idx}|${field}`]=nv; inp.remove(); s.style.display='inline'; s.textContent=nv||''; };
-        inp.onkeypress=(e)=>{if(e.key==='Enter') inp.blur();}; }; }
+    if (!isSel) { 
+        s.classList.add('editable-disabled'); 
+        s.style.cursor = 'not-allowed'; 
+    } else { 
+        s.style.cursor = 'pointer'; 
+        s.onclick = () => { 
+            let inp = document.createElement('input'); 
+            inp.className = 'cell-input';
+            inp.style.color = '#2c3e50';
+            inp.style.background = 'white';
+            if (field === 'data') { 
+                let dv = ''; 
+                if (val) { 
+                    let p = val.split('/'); 
+                    if (p.length === 3) dv = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`; 
+                } 
+                inp.type = 'date'; 
+                inp.value = dv; 
+            } else { 
+                inp.type = 'text'; 
+                inp.value = val || ''; 
+            }
+            s.style.display = 'none'; 
+            s.parentNode.insertBefore(inp, s); 
+            inp.focus();
+            inp.onblur = () => { 
+                let nv; 
+                if (field === 'data') nv = inp.value ? formatDate(inp.value) : ''; 
+                else nv = inp.value; 
+                pendingChanges[`fornitori|${idx}|${field}`] = nv; 
+                inp.remove(); 
+                s.style.display = 'inline'; 
+                s.textContent = nv || ''; 
+            };
+            inp.onkeypress = (e) => { if (e.key === 'Enter') inp.blur(); }; 
+        }; 
+    }
     return s;
 }
 
@@ -611,10 +838,13 @@ async function aggiornaTabelle() {
         primaNota.forEach((riga, idx) => {
             let row = tbody.insertRow();
             let checkCell = row.insertCell(0);
-            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-prima'; chk.checked = selectedRows.includes(idx);
+            let chk = document.createElement('input'); 
+            chk.type = 'checkbox'; 
+            chk.className = 'row-check-prima'; 
+            chk.checked = selectedRows.includes(idx);
             chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
             checkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx+1;
+            row.insertCell(1).innerText = idx + 1;
             let isSelected = chk.checked;
             row.insertCell(2).appendChild(makeEditableCellPrimaNota(riga.data, idx, 'data', isSelected));
             row.insertCell(3).appendChild(makeEditableCellPrimaNota(riga.descrizione, idx, 'descrizione', isSelected));
@@ -629,10 +859,13 @@ async function aggiornaTabelle() {
         contanti.forEach((riga, idx) => {
             let row = contantiBody.insertRow();
             let checkCell = row.insertCell(0);
-            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-contanti'; chk.checked = selectedRows.includes(idx);
+            let chk = document.createElement('input'); 
+            chk.type = 'checkbox'; 
+            chk.className = 'row-check-contanti'; 
+            chk.checked = selectedRows.includes(idx);
             chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
             checkCell.appendChild(chk);
-            row.insertCell(1).innerText = idx+1;
+            row.insertCell(1).innerText = idx + 1;
             let isSelected = chk.checked;
             row.insertCell(2).appendChild(makeEditableCellContanti(riga.data, idx, 'data', isSelected));
             row.insertCell(3).appendChild(makeEditableCellContanti(riga.descrizione, idx, 'descrizione', isSelected));
@@ -645,7 +878,10 @@ async function aggiornaTabelle() {
         fattureFornitori.forEach((fatt, idx) => {
             let row = fornitoriBody.insertRow();
             let checkCell = row.insertCell(0);
-            let chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-fornitori'; chk.checked = selectedRows.includes(idx);
+            let chk = document.createElement('input'); 
+            chk.type = 'checkbox'; 
+            chk.className = 'row-check-fornitori'; 
+            chk.checked = selectedRows.includes(idx);
             chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
@@ -662,20 +898,23 @@ async function aggiornaTabelle() {
     aggiornaPulsantiAzione();
     aggiornaRiepilogo();
     
-    let sa = document.getElementById('selectAllPrimaNota'); if(sa){ let all = document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
-    sa = document.getElementById('selectAllContanti'); if(sa){ let all = document.querySelectorAll('#contantiBody .row-check-contanti'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
-    sa = document.getElementById('selectAllFornitori'); if(sa){ let all = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
+    let sa = document.getElementById('selectAllPrimaNota'); 
+    if (sa) { let all = document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
+    sa = document.getElementById('selectAllContanti'); 
+    if (sa) { let all = document.querySelectorAll('#contantiBody .row-check-contanti'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
+    sa = document.getElementById('selectAllFornitori'); 
+    if (sa) { let all = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); sa.checked = all.length > 0 && Array.from(all).every(c => c.checked); }
 }
 
-function setScheda(s){ 
+function setScheda(s) { 
     currentScheda = s;
-    document.getElementById('tabellaPrimaNotaContainer').style.display = (s==='primanota') ? 'block' : 'none';
-    document.getElementById('tabellaContantiContainer').style.display = (s==='contanti') ? 'block' : 'none';
-    document.getElementById('tabellaFornitoriContainer').style.display = (s==='fornitori') ? 'block' : 'none';
+    document.getElementById('tabellaPrimaNotaContainer').style.display = (s === 'primanota') ? 'block' : 'none';
+    document.getElementById('tabellaContantiContainer').style.display = (s === 'contanti') ? 'block' : 'none';
+    document.getElementById('tabellaFornitoriContainer').style.display = (s === 'fornitori') ? 'block' : 'none';
     
-    document.getElementById('toolbarPrimaNota').classList.toggle('active', s==='primanota');
-    document.getElementById('toolbarContanti').classList.toggle('active', s==='contanti');
-    document.getElementById('toolbarFornitori').classList.toggle('active', s==='fornitori');
+    document.getElementById('toolbarPrimaNota').classList.toggle('active', s === 'primanota');
+    document.getElementById('toolbarContanti').classList.toggle('active', s === 'contanti');
+    document.getElementById('toolbarFornitori').classList.toggle('active', s === 'fornitori');
     
     aggiornaForm();
     pendingChanges = {};
@@ -683,64 +922,117 @@ function setScheda(s){
     aggiornaPulsantiAzione();
     aggiornaRiepilogo();
 }
-function aggiornaForm(){ 
-    let fa=document.getElementById('formArea'); 
-    if(currentScheda==='primanota') fa.innerHTML=`<div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div><div class="form-group"><label>💰 Avere (entrate) €</label><input type="number" id="formAvere" step="0.01" value="0"></div><div class="form-group"><label>💰 Dare (uscite) €</label><input type="number" id="formDare" step="0.01" value="0"></div>`; 
-    else if(currentScheda==='contanti') fa.innerHTML=`<div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div><div class="form-group"><label>💰 Incasso Contanti €</label><input type="number" id="formImportoContanti" step="0.01" value="0"></div>`; 
-    else if(currentScheda==='fornitori') fa.innerHTML=`<div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`; 
+
+function aggiornaForm() { 
+    let fa = document.getElementById('formArea'); 
+    if (currentScheda === 'primanota') {
+        fa.innerHTML = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Data</label>
+                    <input type="date" id="formDataPrimaNota">
+                </div>
+                <div class="form-group">
+                    <label>💰 Avere (entrate) €</label>
+                    <input type="number" id="formAvere" step="0.01" placeholder="0,00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>📝 Descrizione</label>
+                <input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione">
+            </div>
+            <div class="form-group">
+                <label>💰 Dare (uscite) €</label>
+                <input type="number" id="formDare" step="0.01" placeholder="0,00">
+            </div>
+        `;
+    } else if (currentScheda === 'contanti') {
+        fa.innerHTML = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Data</label>
+                    <input type="date" id="formDataContanti">
+                </div>
+                <div class="form-group">
+                    <label>💰 Incasso (€)</label>
+                    <input type="number" id="formImportoContanti" step="0.01" placeholder="0,00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>📝 Descrizione</label>
+                <input type="text" id="formDescrizioneContanti" placeholder="Descrizione">
+            </div>
+        `;
+    } else if (currentScheda === 'fornitori') {
+        fa.innerHTML = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Data</label>
+                    <input type="date" id="formDataFornitori">
+                </div>
+                <div class="form-group">
+                    <label>🏢 Fornitore</label>
+                    <input type="text" id="formFornitore" placeholder="Nome fornitore">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>📄 N. Fattura</label>
+                <input type="text" id="formNumeroFattura" placeholder="Numero fattura">
+            </div>
+        `;
+    }
     pulisciForm(); 
 }
-function pulisciForm(){ 
-    let oggi = new Date().toISOString().slice(0,10); 
-    if(currentScheda==='primanota'){ 
-        if(document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi; 
-        if(document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = ''; 
-        if(document.getElementById('formAvere')) document.getElementById('formAvere').value = 0; 
-        if(document.getElementById('formDare')) document.getElementById('formDare').value = 0; 
-    } else if(currentScheda==='contanti'){ 
-        if(document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi; 
-        if(document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = ''; 
-        if(document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = 0; 
-    } else if(currentScheda==='fornitori'){ 
-        if(document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi; 
-        if(document.getElementById('formFornitore')) document.getElementById('formFornitore').value = ''; 
-        if(document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = ''; 
+
+function pulisciForm() { 
+    let oggi = new Date().toISOString().slice(0, 10); 
+    if (currentScheda === 'primanota') { 
+        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi; 
+        if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = ''; 
+        if (document.getElementById('formAvere')) document.getElementById('formAvere').value = ''; 
+        if (document.getElementById('formDare')) document.getElementById('formDare').value = ''; 
+    } else if (currentScheda === 'contanti') { 
+        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi; 
+        if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = ''; 
+        if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = ''; 
+    } else if (currentScheda === 'fornitori') { 
+        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi; 
+        if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = ''; 
+        if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = ''; 
     } 
 }
 
-async function memorizzaNuovo(){
-    if(currentScheda==='primanota'){ 
+async function memorizzaNuovo() {
+    if (currentScheda === 'primanota') { 
         let d = document.getElementById('formDataPrimaNota')?.value; 
         let de = document.getElementById('formDescrizionePrimaNota')?.value; 
-        let a = parseFloat(document.getElementById('formAvere')?.value)||0; 
-        let da = parseFloat(document.getElementById('formDare')?.value)||0; 
-        if(!de){ showToast("Inserisci descrizione", true); return; } 
-        if(a>0 && da>0){ showToast("Non puoi inserire sia Avere che Dare", true); return; } 
-        if(a===0 && da===0){ showToast("Inserisci almeno un importo", true); return; } 
-        primaNota.push({data:formatDate(d), descrizione:de, avere:a||null, dare:da||null, verificato:false}); 
+        let a = parseFloat(document.getElementById('formAvere')?.value) || 0; 
+        let da = parseFloat(document.getElementById('formDare')?.value) || 0; 
+        if (!de) { showToast("Inserisci descrizione", true); return; } 
+        if (a > 0 && da > 0) { showToast("Non puoi inserire sia Avere che Dare", true); return; } 
+        if (a === 0 && da === 0) { showToast("Inserisci almeno un importo", true); return; } 
+        primaNota.push({ data: formatDate(d), descrizione: de, avere: a || null, dare: da || null, verificato: false }); 
         await aggiornaTabelle();
         await salvaStatoFirebase();
         pulisciForm(); 
         showToast("✅ Riga di Prima Nota aggiunta con successo!");
-    }
-    else if(currentScheda==='contanti'){ 
+    } else if (currentScheda === 'contanti') { 
         let d = document.getElementById('formDataContanti')?.value; 
         let de = document.getElementById('formDescrizioneContanti')?.value; 
-        let im = parseFloat(document.getElementById('formImportoContanti')?.value)||0; 
-        if(!de){ showToast("Inserisci descrizione", true); return; } 
-        if(im<=0){ showToast("Inserisci importo valido", true); return; } 
-        contanti.push({data:formatDate(d), descrizione:de, importo:im}); 
+        let im = parseFloat(document.getElementById('formImportoContanti')?.value) || 0; 
+        if (!de) { showToast("Inserisci descrizione", true); return; } 
+        if (im <= 0) { showToast("Inserisci importo valido", true); return; } 
+        contanti.push({ data: formatDate(d), descrizione: de, importo: im }); 
         await aggiornaTabelle();
         await salvaStatoFirebase();
         pulisciForm(); 
         showToast("✅ Incasso Contanti aggiunto con successo!");
-    }
-    else if(currentScheda==='fornitori'){ 
+    } else if (currentScheda === 'fornitori') { 
         let d = document.getElementById('formDataFornitori')?.value; 
         let fo = document.getElementById('formFornitore')?.value.trim(); 
         let nu = document.getElementById('formNumeroFattura')?.value.trim(); 
-        if(!fo || !nu){ showToast("Compila tutti i campi", true); return; } 
-        fattureFornitori.push({data:formatDate(d), fornitore:fo, numeroFattura:nu}); 
+        if (!fo || !nu) { showToast("Compila tutti i campi", true); return; } 
+        fattureFornitori.push({ data: formatDate(d), fornitore: fo, numeroFattura: nu }); 
         nextFatturaId++; 
         await aggiornaTabelle();
         await salvaStatoFirebase();
@@ -750,26 +1042,26 @@ async function memorizzaNuovo(){
     aggiornaRiepilogo();
 }
 
-async function eliminaSelezionati(s){ 
-    if(s==='primanota'){ 
+async function eliminaSelezionati(s) { 
+    if (s === 'primanota') { 
         let ck = document.querySelectorAll('#primaNotaBody .row-check-prima'); 
         let n = []; 
-        for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(primaNota[i]); 
-        if(confirm(`Eliminare ${ck.length-n.length} righe?`)) primaNota = n; 
+        for (let i = 0; i < ck.length; i++) if (!ck[i].checked) n.push(primaNota[i]); 
+        if (confirm(`Eliminare ${ck.length - n.length} righe?`)) primaNota = n; 
         document.getElementById('selectAllPrimaNota').checked = false; 
     } 
-    if(s==='contanti'){ 
+    if (s === 'contanti') { 
         let ck = document.querySelectorAll('#contantiBody .row-check-contanti'); 
         let n = []; 
-        for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(contanti[i]); 
-        if(confirm(`Eliminare ${ck.length-n.length} righe?`)) contanti = n; 
+        for (let i = 0; i < ck.length; i++) if (!ck[i].checked) n.push(contanti[i]); 
+        if (confirm(`Eliminare ${ck.length - n.length} righe?`)) contanti = n; 
         document.getElementById('selectAllContanti').checked = false; 
     } 
-    if(s==='fornitori'){ 
+    if (s === 'fornitori') { 
         let ck = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); 
         let n = []; 
-        for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(fattureFornitori[i]); 
-        if(confirm(`Eliminare ${ck.length-n.length} righe?`)) fattureFornitori = n; 
+        for (let i = 0; i < ck.length; i++) if (!ck[i].checked) n.push(fattureFornitori[i]); 
+        if (confirm(`Eliminare ${ck.length - n.length} righe?`)) fattureFornitori = n; 
         document.getElementById('selectAllFornitori').checked = false; 
     } 
     pendingChanges = {}; 
@@ -779,16 +1071,16 @@ async function eliminaSelezionati(s){
     showToast("Elementi eliminati con successo");
 }
 
-async function cambiaMese(){ 
+async function cambiaMese() { 
     currentYear = parseInt(document.getElementById('annoSelect').value); 
     currentMonth = parseInt(document.getElementById('meseSelect').value); 
     await caricaStatoFirebase(); 
     pendingChanges = {}; 
 }
-async function riprendiMeseCorrente(){ 
+async function riprendiMeseCorrente() { 
     const ultimo = localStorage.getItem('ultimoMeseLavorato'); 
-    if(ultimo){ 
-        const {anno,mese} = JSON.parse(ultimo); 
+    if (ultimo) { 
+        const { anno, mese } = JSON.parse(ultimo); 
         currentYear = anno; 
         currentMonth = mese; 
         await caricaStatoFirebase(); 
@@ -819,9 +1111,9 @@ async function esportaReportAnno() {
                 datiMese.primaNota = data.primaNota || [];
                 datiMese.contanti = data.contanti || [];
                 
-                const ta = datiMese.primaNota.reduce((s,r) => s + (parseNumber(r.avere)||0), 0);
-                const td = datiMese.primaNota.reduce((s,r) => s + (parseNumber(r.dare)||0), 0);
-                const tc = datiMese.contanti.reduce((s,r) => s + (parseNumber(r.importo)||0), 0);
+                const ta = datiMese.primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+                const td = datiMese.primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+                const tc = datiMese.contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
                 datiMese.totaleEntrate = ta;
                 datiMese.totaleUscite = td;
                 datiMese.totaleContanti = tc;
@@ -861,14 +1153,14 @@ async function esportaReportAnno() {
         .footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px}
         @media print{body{padding:20px}}
     </style></head><body>
-    <div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}
+    <div class="header">${logo ? `<img src="${logo}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}
     <div class="title">REPORT CONTABILITÀ ANNUALE</div>
     <div class="periodo">Anno ${anno}</div></div>
     <div class="summary-anno">
         <div class="summary-item"><div>📈 Totale Entrate Anno</div><div class="summary-value positive">${formatNumber(totaliAnno.entrate)} €</div></div>
         <div class="summary-item"><div>📉 Totale Uscite Anno</div><div class="summary-value negative">${formatNumber(totaliAnno.uscite)} €</div></div>
         <div class="summary-item"><div>💵 Incasso Contanti Anno</div><div class="summary-value positive">${formatNumber(totaliAnno.contanti)} €</div></div>
-        <div class="summary-item"><div>💰 Saldo Annuale</div><div class="summary-value ${(totaliAnno.entrate-totaliAnno.uscite)>=0?'positive':'negative'}">${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div>
+        <div class="summary-item"><div>💰 Saldo Annuale</div><div class="summary-value ${(totaliAnno.entrate - totaliAnno.uscite) >= 0 ? 'positive' : 'negative'}">${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div>
     </div>`);
     
     for (const mese of tuttiIMesi) {
@@ -884,24 +1176,24 @@ async function esportaReportAnno() {
             <div><strong>📈 Entrate:</strong> <span class="positive">${formatNumber(mese.totaleEntrate)} €</span></div>
             <div><strong>📉 Uscite:</strong> <span class="negative">${formatNumber(mese.totaleUscite)} €</span></div>
             <div><strong>💵 Contanti:</strong> ${formatNumber(mese.totaleContanti)} €</div>
-            <div><strong>💰 Saldo mese:</strong> <span class="${mese.saldoMese>=0?'positive':'negative'}">${formatNumber(mese.saldoMese)} €</span></div>
+            <div><strong>💰 Saldo mese:</strong> <span class="${mese.saldoMese >= 0 ? 'positive' : 'negative'}">${formatNumber(mese.saldoMese)} €</span></div>
         </div>
         <h4>📋 PRIMA NOTA</h4>
-        <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>`);
+        <table><thead><td><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>`);
         
-        mese.primaNota.forEach((r,i) => {
-            w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`);
+        mese.primaNota.forEach((r, i) => {
+            w.document.write(`<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td><td>${r.verificato ? '✅' : ''}</td></tr>`);
         });
-        if(mese.primaNota.length === 0) w.document.write(`<tr><td colspan="6">Nessun movimento</td></tr>`);
+        if (mese.primaNota.length === 0) w.document.write(`<tr><td colspan="6">Nessun movimento</td></tr>`);
         
         w.document.write(`</tbody></table>
         <h4>💵 INCASSO CONTANTI</h4>
         <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>`);
         
-        mese.contanti.forEach((r,i) => {
-            w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`);
+        mese.contanti.forEach((r, i) => {
+            w.document.write(`<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`);
         });
-        if(mese.contanti.length === 0) w.document.write(`<tr><td colspan="4">Nessun incasso</td></tr>`);
+        if (mese.contanti.length === 0) w.document.write(`<tr><td colspan="4">Nessun incasso</td></tr>`);
         
         w.document.write(`</tbody></table></div>`);
     }
@@ -913,9 +1205,9 @@ async function esportaReportAnno() {
 }
 
 function esportaPDFMese() {
-    let mn=mesiLista[currentMonth];
-    let ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0), tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=localStorage.getItem('logo_azienda');
-    let w=window.open();
+    let mn = mesiLista[currentMonth];
+    let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0), td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0), tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0), sal = saldoIniziale + ta - td, logo = localStorage.getItem('logo_azienda');
+    let w = window.open();
     w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${currentYear}</title><style>
         body{font-family:'Segoe UI',sans-serif;padding:40px}
         .header{text-align:center;border-bottom:3px solid #3498db;padding-bottom:20px;margin-bottom:30px}
@@ -936,29 +1228,29 @@ function esportaPDFMese() {
         .text-right{text-align:right}
         @media print{body{padding:20px}}
     </style></head><body>
-    <div class="header">${logo?`<img src="${logo}" class="logo">`:'<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div>
+    <div class="header">${logo ? `<img src="${logo}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT CONTABILITÀ</div><div class="periodo">${mn} ${currentYear}</div></div>
     <div class="summary">
         <div class="summary-item"><div>📈 Totale Entrate</div><div class="summary-value positive">${formatNumber(ta)} €</div></div>
         <div class="summary-item"><div>📉 Totale Uscite</div><div class="summary-value negative">${formatNumber(td)} €</div></div>
         <div class="summary-item"><div>💵 Incasso Contanti</div><div class="summary-value positive">${formatNumber(tc)} €</div></div>
-        <div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div>
+        <div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal >= 0 ? 'positive' : 'negative'}">${formatNumber(sal)} €</div></div>
     </div>
     <div class="section-title">📋 PRIMA NOTA</div>
     <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>
-    ${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-    ${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td></tr>':''}
+    ${primaNota.map((r, i) => `<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td><td>${r.verificato ? '✅' : ''}</td></tr>`).join('')}
+    ${primaNota.length === 0 ? '<tr><td colspan="6">Nessun movimento</td></tr>' : ''}
     <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr>
     </tbody></table>
     <div class="section-title">💵 INCASSO CONTANTI</div>
     <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>
-    ${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    ${contanti.length===0?'<tr><td colspan="4">Nessun incasso</td></tr>':''}
+    ${contanti.map((r, i) => `<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
+    ${contanti.length === 0 ? '<tr><td colspan="4">Nessun incasso</td>' : ''}
     <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr>
     </tbody></table>
     <div class="section-title">📄 FATTURE FORNITORI</div>
     <table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>
-    ${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
-    ${fattureFornitori.length===0?'<tr><td colspan="4">Nessuna fattura</td></tr>':''}
+    ${fattureFornitori.map((f, i) => `<tr><td>${nextFatturaId - fattureFornitori.length + i}/${currentYear}</td><td>${f.data || ''}</td><td>${f.fornitore || ''}</td><td>${f.numeroFattura || ''}</td></tr>`).join('')}
+    ${fattureFornitori.length === 0 ? '<tr><td colspan="4">Nessuna fattura</td></tr>' : ''}
     </tbody></table>
     <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div>
     <div class="signature">Il Responsabile Amministrativo<br>_________________________</div>
@@ -968,35 +1260,36 @@ function esportaPDFMese() {
 }
 
 function esportaCSV(perAnno) {
-    let rows=[["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]], dataE=[];
-    if(perAnno){
-        for(let m=0;m<12;m++){
-            let saved=localStorage.getItem(`contabilita_${currentYear}_${m}`);
-            if(saved){
-                try{ let d=JSON.parse(saved);
-                    for(let r of(d.primaNota||[])) dataE.push(r);
-                    for(let r of(d.contanti||[])) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''});
-                }catch(e){}
+    let rows = [["Data", "Descrizione", "Avere", "Dare", "IncassoContanti", "Verificato"]], dataE = [];
+    if (perAnno) {
+        for (let m = 0; m < 12; m++) {
+            let saved = localStorage.getItem(`contabilita_${currentYear}_${m}`);
+            if (saved) {
+                try {
+                    let d = JSON.parse(saved);
+                    for (let r of (d.primaNota || [])) dataE.push(r);
+                    for (let r of (d.contanti || [])) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' });
+                } catch (e) { }
             }
         }
     } else {
-        for(let r of primaNota) dataE.push(r);
-        for(let r of contanti) dataE.push({data:r.data,descrizione:r.descrizione,avere:'',dare:'',incassoContanti:r.importo,verificato:''});
+        for (let r of primaNota) dataE.push(r);
+        for (let r of contanti) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' });
     }
-    for(let r of dataE) rows.push([r.data||'',r.descrizione||'',r.avere?r.avere.toString().replace('.',','):'',r.dare?r.dare.toString().replace('.',','):'',r.incassoContanti?r.incassoContanti.toString().replace('.',','):'',r.verificato?"Sì":"No"]);
-    let blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8"});
-    let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=perAnno?`contabilita_${currentYear}_anno.csv`:`contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
+    for (let r of dataE) rows.push([r.data || '', r.descrizione || '', r.avere ? r.avere.toString().replace('.', ',') : '', r.dare ? r.dare.toString().replace('.', ',') : '', r.incassoContanti ? r.incassoContanti.toString().replace('.', ',') : '', r.verificato ? "Sì" : "No"]);
+    let blob = new Blob(["\uFEFF" + rows.map(r => r.join(";")).join("\n")], { type: "text/csv;charset=utf-8" });
+    let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth + 1).padStart(2, '0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ==================== GESTIONE LOGO ====================
-function caricaLogo() { let l = localStorage.getItem('logo_azienda'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
+function caricaLogo() { let l = localStorage.getItem('logo_azienda'); if (l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
 function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
-function caricaLogoFile() { let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if(f){ let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
+function caricaLogoFile() { let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if (f) { let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); }; r.readAsDataURL(f); } }; inp.click(); }
 
 let logoDiv = document.getElementById('logoRettangolo'); let timer = null;
 logoDiv.addEventListener('mousedown', () => { timer = setTimeout(() => { caricaLogoFile(); timer = null; }, 3000); });
-logoDiv.addEventListener('mouseup', () => { if(timer) { clearTimeout(timer); timer = null; } });
-logoDiv.addEventListener('mouseleave', () => { if(timer) { clearTimeout(timer); timer = null; } });
+logoDiv.addEventListener('mouseup', () => { if (timer) { clearTimeout(timer); timer = null; } });
+logoDiv.addEventListener('mouseleave', () => { if (timer) { clearTimeout(timer); timer = null; } });
 
 function aggiornaPulsanteLogoMobile() {
     let logoPresente = localStorage.getItem('logo_azienda') !== null;
@@ -1013,24 +1306,11 @@ aggiornaPulsanteLogoMobile();
 const bandierinaBtn = document.getElementById('bandierinaBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
 
-function toggleDropdown() {
-    dropdownMenu.classList.toggle('show');
-}
+function toggleDropdown() { dropdownMenu.classList.toggle('show'); }
+function closeDropdown() { dropdownMenu.classList.remove('show'); }
 
-function closeDropdown() {
-    dropdownMenu.classList.remove('show');
-}
-
-bandierinaBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleDropdown();
-});
-
-document.addEventListener('click', (e) => {
-    if (!bandierinaBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        closeDropdown();
-    }
-});
+bandierinaBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+document.addEventListener('click', (e) => { if (!bandierinaBtn.contains(e.target) && !dropdownMenu.contains(e.target)) { closeDropdown(); } });
 
 document.getElementById('dropdownReportMese').onclick = () => { closeDropdown(); esportaPDFMese(); };
 document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown(); esportaReportAnno(); };
@@ -1046,20 +1326,20 @@ document.getElementById('toolbarRiprendiCorrente').onclick = riprendiMeseCorrent
 
 // ==================== EVENTI ====================
 document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
-document.getElementById('btnSalvaModificaPrima').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
+document.getElementById('btnSalvaModificaPrima').onclick = () => { if (Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
 document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
-document.getElementById('btnSalvaModificaContanti').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
+document.getElementById('btnSalvaModificaContanti').onclick = () => { if (Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
 document.getElementById('btnEliminaSelezionatiContanti').onclick = () => eliminaSelezionati('contanti');
-document.getElementById('btnSalvaModificaFornitori').onclick = () => { if(Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
+document.getElementById('btnSalvaModificaFornitori').onclick = () => { if (Object.keys(pendingChanges).length) applicaModifiche(); else alert("Nessuna modifica"); };
 document.getElementById('btnEliminaSelezionatiFornitori').onclick = () => eliminaSelezionati('fornitori');
-document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); backupPreCaricamento={anno:currentYear,mese:currentMonth,saldoIniziale,primaNota:JSON.parse(JSON.stringify(primaNota)),contanti:JSON.parse(JSON.stringify(contanti)),fattureFornitori:JSON.parse(JSON.stringify(fattureFornitori)),nextFatturaId}; currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale; await salvaStatoFirebase(); await aggiornaTabelle(); alert(`File caricato su Firebase: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
+document.getElementById('fileCaricaMese').onchange = async (e) => { if (e.target.files[0]) { let f = e.target.files[0]; let r = new FileReader(); r.onload = async ev => { try { let d = JSON.parse(ev.target.result); backupPreCaricamento = { anno: currentYear, mese: currentMonth, saldoIniziale, primaNota: JSON.parse(JSON.stringify(primaNota)), contanti: JSON.parse(JSON.stringify(contanti)), fattureFornitori: JSON.parse(JSON.stringify(fattureFornitori)), nextFatturaId }; currentYear = d.anno; currentMonth = d.mese; saldoIniziale = d.saldoIniziale || 0; primaNota = d.primaNota || []; contanti = d.contanti || []; fattureFornitori = d.fattureFornitori || []; nextFatturaId = d.nextFatturaId || 1; document.getElementById('annoSelect').value = currentYear; document.getElementById('meseSelect').value = currentMonth; document.getElementById('saldoIniziale').value = saldoIniziale; await salvaStatoFirebase(); await aggiornaTabelle(); alert(`File caricato su Firebase: ${currentYear} - ${mesiLista[currentMonth]}`); } catch (err) { alert("Errore caricamento"); } }; r.readAsText(f); } };
 document.getElementById('saldoIniziale').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); await aggiornaTabelle(); };
 document.getElementById('annoSelect').onchange = cambiaMese;
 document.getElementById('meseSelect').onchange = cambiaMese;
-function setupSelectAll(bid,cid,cls){ let sa=document.getElementById(bid); if(sa) sa.onchange=e=>{ document.querySelectorAll(`#${cid} .${cls}`).forEach(c=>c.checked=e.target.checked); aggiornaTabelle(); aggiornaPulsantiAzione(); }; }
-setupSelectAll('selectAllPrimaNota','primaNotaBody','row-check-prima');
-setupSelectAll('selectAllContanti','contantiBody','row-check-contanti');
-setupSelectAll('selectAllFornitori','fornitoriBody','row-check-fornitori');
+function setupSelectAll(bid, cid, cls) { let sa = document.getElementById(bid); if (sa) sa.onchange = e => { document.querySelectorAll(`#${cid} .${cls}`).forEach(c => c.checked = e.target.checked); aggiornaTabelle(); aggiornaPulsantiAzione(); }; }
+setupSelectAll('selectAllPrimaNota', 'primaNotaBody', 'row-check-prima');
+setupSelectAll('selectAllContanti', 'contantiBody', 'row-check-contanti');
+setupSelectAll('selectAllFornitori', 'fornitoriBody', 'row-check-fornitori');
 
 // ==================== NAVIGAZIONE ====================
 document.getElementById('btnVaiAgenti').onclick = () => { window.location.href = 'agenti.html'; };
