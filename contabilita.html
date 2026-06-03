@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.29</title>
+    <title>inSAPA - Contabilità v5.30</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -207,7 +207,7 @@
             gap: 30px;
             flex-wrap: wrap;
             font-weight: bold;
-            color: #2c3e50;
+            color: #000000;
         }
 
         /* INTESTAZIONE TABELLA STICKY */
@@ -245,7 +245,7 @@
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
-            color: #2c3e50;
+            color: #000000;
             font-size: 0.8rem;
         }
         input, select {
@@ -254,7 +254,8 @@
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 0.9rem;
-            color: #2c3e50;
+            color: #000000;
+            background: white;
         }
         input[type="number"] {
             text-align: right;
@@ -309,13 +310,11 @@
             text-align: left; 
             vertical-align: top;
         }
-        /* FORZA TESTO NERO IN TUTTA LA TABELLA */
-        .tabella th, 
-        .tabella td, 
-        .tabella td span,
-        .tabella td input,
-        .editable-cell,
-        .cell-input {
+        /* FORZA TESTO NERO IN TUTTA LA TABELLA - RISOLVE IL PROBLEMA */
+        .tabella, .tabella th, .tabella td, 
+        .tabella td span, .tabella td input,
+        .editable-cell, .cell-input,
+        #primaNotaBody td, #contantiBody td, #fornitoriBody td {
             color: #000000 !important;
             background-color: white !important;
         }
@@ -323,9 +322,25 @@
             background: #e9ecef !important; 
             color: #000000 !important; 
         }
-        .editable-cell { cursor: pointer; min-width: 80px; display: inline-block; width: 100%; }
+        .editable-cell { 
+            cursor: pointer; 
+            min-width: 80px; 
+            display: inline-block; 
+            width: 100%;
+            color: #000000 !important;
+            background: white !important;
+        }
         .editable-cell:hover { background-color: #fff3cd !important; }
-        .cell-input { width: 100%; border: none; font-family: inherit; font-size: inherit; padding: 4px; margin: -4px; }
+        .cell-input { 
+            width: 100%; 
+            border: none; 
+            font-family: inherit; 
+            font-size: inherit; 
+            padding: 4px; 
+            margin: -4px;
+            color: #000000 !important;
+            background: white !important;
+        }
         .cell-input:focus { outline: 1px solid #3498db; background: white !important; }
         .editable-disabled { cursor: not-allowed; opacity: 0.6; background-color: #f5f5f5; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
@@ -349,6 +364,15 @@
             0% { opacity: 1; }
             70% { opacity: 1; }
             100% { opacity: 0; display: none; }
+        }
+
+        /* STILE PER CHECKBOX */
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin: 0;
+            background: white;
         }
 
         @media (max-width: 768px) {
@@ -417,7 +441,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.29 - Contabilità</div>
+    <div class="version" id="appVersion">v5.30 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -721,7 +745,7 @@ function makeEditableCellPrimaNota(val, idx, field, isSel) {
                 inp.value = val || ''; 
             } else { 
                 inp.type = 'text'; 
-                inp.value = formatNumber(val) || ''; 
+                inp.value = val !== null && val !== undefined ? val.toString() : ''; 
             }
             s.style.display = 'none'; 
             s.parentNode.insertBefore(inp, s); 
@@ -773,7 +797,7 @@ function makeEditableCellContanti(val, idx, field, isSel) {
                 inp.value = val || ''; 
             } else { 
                 inp.type = 'text'; 
-                inp.value = formatNumber(val) || ''; 
+                inp.value = val !== null && val !== undefined ? val.toString() : ''; 
             }
             s.style.display = 'none'; 
             s.parentNode.insertBefore(inp, s); 
@@ -843,6 +867,8 @@ function makeEditableCellFornitori(val, idx, field, isSel) {
 
 async function aggiornaTabelle() {
     const selectedRows = getSelectedRows();
+    
+    // PRIMA NOTA
     let tbody = document.getElementById('primaNotaBody');
     if (tbody) {
         tbody.innerHTML = '';
@@ -853,6 +879,9 @@ async function aggiornaTabelle() {
             chk.type = 'checkbox'; 
             chk.className = 'row-check-prima'; 
             chk.checked = selectedRows.includes(idx);
+            chk.style.margin = '0';
+            chk.style.width = '18px';
+            chk.style.height = '18px';
             chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = idx + 1;
@@ -864,6 +893,8 @@ async function aggiornaTabelle() {
             row.insertCell(6).appendChild(makeEditableCellPrimaNota(riga.verificato, idx, 'verificato', isSelected));
         });
     }
+    
+    // CONTANTI
     let contantiBody = document.getElementById('contantiBody');
     if (contantiBody) {
         contantiBody.innerHTML = '';
@@ -874,6 +905,9 @@ async function aggiornaTabelle() {
             chk.type = 'checkbox'; 
             chk.className = 'row-check-contanti'; 
             chk.checked = selectedRows.includes(idx);
+            chk.style.margin = '0';
+            chk.style.width = '18px';
+            chk.style.height = '18px';
             chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = idx + 1;
@@ -883,6 +917,8 @@ async function aggiornaTabelle() {
             row.insertCell(4).appendChild(makeEditableCellContanti(riga.importo, idx, 'importo', isSelected));
         });
     }
+    
+    // FORNITORI
     let fornitoriBody = document.getElementById('fornitoriBody');
     if (fornitoriBody) {
         fornitoriBody.innerHTML = '';
@@ -893,6 +929,9 @@ async function aggiornaTabelle() {
             chk.type = 'checkbox'; 
             chk.className = 'row-check-fornitori'; 
             chk.checked = selectedRows.includes(idx);
+            chk.style.margin = '0';
+            chk.style.width = '18px';
+            chk.style.height = '18px';
             chk.onchange = function() { aggiornaTabelle(); aggiornaPulsantiAzione(); };
             checkCell.appendChild(chk);
             row.insertCell(1).innerText = `${nextFatturaId - fattureFornitori.length + idx}/${currentYear}`;
@@ -902,6 +941,7 @@ async function aggiornaTabelle() {
             row.insertCell(4).appendChild(makeEditableCellFornitori(fatt.numeroFattura, idx, 'numeroFattura', isSelected));
         });
     }
+    
     await salvaStatoFirebase();
     document.getElementById('annoSelect').value = currentYear;
     document.getElementById('meseSelect').value = currentMonth;
@@ -1188,7 +1228,7 @@ async function esportaReportAnno() {
             <div><strong>💰 Saldo mese:</strong> <span class="${mese.saldoMese >= 0 ? 'positive' : 'negative'}">${formatNumber(mese.saldoMese)} €</span></div>
         </div>
         <h4>📋 PRIMA NOTA</h4>
-        8台<thead>汽<th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th> </thead><tbody>`);
+        <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>`);
         
         mese.primaNota.forEach((r, i) => {
             w.document.write(`<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td><td>${r.verificato ? '✅' : ''}</td></tr>`);
@@ -1252,14 +1292,18 @@ function esportaPDFMese() {
     <div class="section-title">💵 INCASSO CONTANTI</div>
     <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>
     ${contanti.map((r, i) => `<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    ${contanti.length === 0 ? '<tr><td colspan="4">Nessun incasso</td></tr>' : ''}
+    ${contanti.length === 0 ? '<tr><td colspan="4">Nessun incasso</td></td>' : ''}
     <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr>
-    </tbody></table>
+    </tbody>
+    </table>
     <div class="section-title">📄 FATTURE FORNITORI</div>
-    <table><thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody>
+    <table class="tabella">
+    <thead><tr><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
+    <tbody>
     ${fattureFornitori.map((f, i) => `<tr><td>${nextFatturaId - fattureFornitori.length + i}/${currentYear}</td><td>${f.data || ''}</td><td>${f.fornitore || ''}</td><td>${f.numeroFattura || ''}</td></tr>`).join('')}
     ${fattureFornitori.length === 0 ? '<tr><td colspan="4">Nessuna fattura</td></tr>' : ''}
-    </tbody></tr>
+    </tbody>
+    </table>
     <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div>
     <div class="signature">Il Responsabile Amministrativo<br>_________________________</div>
     <script>window.onload=()=>window.print();<\/script>
