@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.33</title>
+    <title>inSAPA - Contabilità v5.34</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -58,15 +58,15 @@
             font-weight: bold;
         }
 
-        /* BANDIERINA CENTRALE */
-        .bandierina-container {
+        /* CENTRO - FLOPPY DISK (ex bandierina) */
+        .floppy-container {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
             flex: 1;
         }
-        .bandierina-btn {
+        .floppy-btn {
             background: none;
             border: none;
             font-size: 2.2rem;
@@ -77,7 +77,7 @@
             width: auto;
             margin: 0;
         }
-        .bandierina-btn:hover {
+        .floppy-btn:hover {
             background: #f0f0f0;
             transform: scale(1.05);
         }
@@ -362,7 +362,7 @@
             .logo-rettangolo { width: 100%; margin: 0 auto; }
             .logo-area { justify-content: center; flex-direction: column; }
             .btn-logo-mobile { display: block; }
-            .bandierina-container { order: 2; margin: 10px 0; }
+            .floppy-container { order: 2; margin: 10px 0; }
             .dropdown-menu { left: 50%; transform: translateX(-50%); min-width: 200px; }
             .toolbar-btn { font-size: 0.7rem; padding: 6px 12px; }
             .sticky-toolbar { top: 120px; }
@@ -383,8 +383,9 @@
                 <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
             </div>
             
-            <div class="bandierina-container">
-                <button id="bandierinaBtn" class="bandierina-btn">🏁</button>
+            <!-- CENTRO - FLOPPY DISK -->
+            <div class="floppy-container">
+                <button id="floppyBtn" class="floppy-btn">💾</button>
                 <div id="dropdownMenu" class="dropdown-menu">
                     <button id="dropdownReportMese" class="dropdown-item">📄 A) Esporta Report Mese</button>
                     <button id="dropdownReportAnno" class="dropdown-item">📅 B) Esporta Report Anno</button>
@@ -418,7 +419,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.33 - Contabilità</div>
+    <div class="version" id="appVersion">v5.34 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -446,7 +447,7 @@
             
             <div class="form-group">
                 <label>💰 Saldo iniziale (€)</label>
-                <input type="number" id="saldoIniziale" step="0.01" value="0" placeholder="0,00">
+                <input type="text" id="saldoIniziale" class="import-field" placeholder="0,00">
             </div>
             
             <hr>
@@ -624,10 +625,10 @@ async function caricaStatoFirebase() {
             contanti = data.contanti || [];
             fattureFornitori = data.fattureFornitori || [];
             nextFatturaId = data.nextFatturaId || 1;
-            document.getElementById('saldoIniziale').value = saldoIniziale;
+            document.getElementById('saldoIniziale').value = saldoIniziale ? formatNumber(saldoIniziale) : '';
         } else {
             saldoIniziale = 0; primaNota = []; contanti = []; fattureFornitori = []; nextFatturaId = 1;
-            document.getElementById('saldoIniziale').value = 0;
+            document.getElementById('saldoIniziale').value = '';
         }
         aggiornaTabelle();
         aggiornaRiepilogo();
@@ -973,9 +974,9 @@ function esportaPDFMese() {
     <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{display:flex;justify-content:space-around;margin:20px 0} .positive{color:green} .negative{color:red} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:8px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
     </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${currentYear}</div></div>
     <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div></div>
-    <h3>PRIMA NOTA</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>
+    <h3>PRIMA NOTA</h3> <tr> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>
     ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-    </tbody></table><h3>CONTANTI</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody>
+    </tbody></table><h3>CONTANTI</h3> <td> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody>
     ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
     </tbody></table><h3>FORNITORI</h3> <table> <thead> <tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr> </thead><tbody>
     ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
@@ -1068,13 +1069,13 @@ observer.observe(document.getElementById('logoImmagine'), { attributes: true });
 caricaLogo();
 aggiornaPulsanteLogoMobile();
 
-// ==================== BANDIERINA DROPDOWN ====================
-const bandierinaBtn = document.getElementById('bandierinaBtn');
+// ==================== FLOPPY DISK DROPDOWN ====================
+const floppyBtn = document.getElementById('floppyBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
 function toggleDropdown() { dropdownMenu.classList.toggle('show'); }
 function closeDropdown() { dropdownMenu.classList.remove('show'); }
-bandierinaBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
-document.addEventListener('click', (e) => { if (!bandierinaBtn.contains(e.target) && !dropdownMenu.contains(e.target)) { closeDropdown(); } });
+floppyBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+document.addEventListener('click', (e) => { if (!floppyBtn.contains(e.target) && !dropdownMenu.contains(e.target)) { closeDropdown(); } });
 document.getElementById('dropdownReportMese').onclick = () => { closeDropdown(); esportaPDFMese(); };
 document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown(); esportaReportAnno(); };
 document.getElementById('dropdownCSVMese').onclick = () => { closeDropdown(); esportaCSV(false); };
@@ -1093,10 +1094,17 @@ document.getElementById('btnSalvaModificaContanti').onclick = () => alert("Modif
 document.getElementById('btnEliminaSelezionatiContanti').onclick = () => eliminaSelezionati('contanti');
 document.getElementById('btnSalvaModificaFornitori').onclick = () => alert("Modifica celle cliccando direttamente sui valori");
 document.getElementById('btnEliminaSelezionatiFornitori').onclick = () => eliminaSelezionati('fornitori');
-document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
-document.getElementById('saldoIniziale').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); };
+document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
+document.getElementById('saldoIniziale').onchange = async e => { 
+    saldoIniziale = parseNumber(e.target.value); 
+    await salvaStatoFirebase(); 
+    aggiornaTabelle(); 
+};
 document.getElementById('annoSelect').onchange = cambiaMese;
 document.getElementById('meseSelect').onchange = cambiaMese;
+
+// Setup per il campo saldo iniziale
+setupImportField('saldoIniziale');
 
 // ==================== NAVIGAZIONE ====================
 document.getElementById('btnVaiAgenti').onclick = () => { window.location.href = 'agenti.html'; };
