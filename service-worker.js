@@ -1,25 +1,28 @@
 const CACHE_NAME = 'insapa-v1';
+const BASE = '/INSAPAapp/';
+
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/contabilita.html',
-  '/agenti.html',
-  '/manifest.json',
-  '/icons/icon-48.png',
-  '/icons/icon-72.png',
-  '/icons/icon-96.png',
-  '/icons/icon-128.png',
-  '/icons/icon-144.png',
-  '/icons/icon-152.png',
-  '/icons/icon-192.png',
-  '/icons/icon-384.png',
-  '/icons/icon-512.png'
+  BASE,
+  BASE + 'index.html',
+  BASE + 'contabilita.html',
+  BASE + 'agenti.html',
+  BASE + 'manifest.json',
+  BASE + 'icons/icon-48.png',
+  BASE + 'icons/icon-72.png',
+  BASE + 'icons/icon-96.png',
+  BASE + 'icons/icon-144.png',
+  BASE + 'icons/icon-192.png',
+  BASE + 'icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+      .then(cache => {
+        console.log('Cache aperta');
+        return cache.addAll(urlsToCache);
+      })
+      .catch(err => console.log('Errore cache:', err))
   );
 });
 
