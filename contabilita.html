@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.32</title>
+    <title>inSAPA - Contabilità v5.33</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -87,14 +87,15 @@
             left: 50%;
             transform: translateX(-50%);
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            min-width: 220px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            min-width: 250px;
             z-index: 1001;
             display: none;
             flex-direction: column;
             overflow: hidden;
             margin-top: 8px;
+            border: 2px solid #3498db;
         }
         .dropdown-menu.show {
             display: flex;
@@ -102,22 +103,23 @@
         .dropdown-item {
             background: white;
             border: none;
-            padding: 12px 20px;
+            padding: 14px 20px;
             text-align: left;
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: bold;
             width: 100%;
             margin: 0;
-            border-bottom: 1px solid #eee;
-            transition: background 0.2s;
+            border-bottom: 1px solid #ddd;
+            transition: all 0.2s;
+            color: #000000;
         }
         .dropdown-item:last-child {
             border-bottom: none;
         }
         .dropdown-item:hover {
             background: #f1c40f;
-            color: #2c3e50;
+            color: #000000;
         }
 
         /* NAVIGAZIONE */
@@ -250,6 +252,14 @@
         input[type="number"] {
             text-align: right;
         }
+        /* Stile per i campi importo - selezione automatica */
+        .import-field {
+            cursor: text;
+        }
+        .import-field:focus {
+            outline: 2px solid #3498db;
+            background-color: #fffef5;
+        }
         button { 
             background: #3498db; 
             color: white; 
@@ -288,7 +298,7 @@
             width: 100%;
         }
         
-        /* TABELLA - SEMPLICE E FUNZIONANTE */
+        /* TABELLA */
         .tabella { 
             width: 100%; 
             border-collapse: collapse; 
@@ -408,7 +418,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.32 - Contabilità</div>
+    <div class="version" id="appVersion">v5.33 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -574,6 +584,24 @@ function formatDate(d) {
     if (!d) return ""; 
     let x = new Date(d); 
     return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`; 
+}
+
+// Funzione per gestire i campi importo con selezione automatica
+function setupImportField(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        field.addEventListener('focus', function() {
+            this.select();
+        });
+        field.addEventListener('blur', function() {
+            let val = parseNumber(this.value);
+            if (val !== 0 && !isNaN(val)) {
+                this.value = formatNumber(val);
+            } else if (this.value === '' || this.value === '0' || this.value === '0,00') {
+                this.value = '';
+            }
+        });
+    }
 }
 
 async function salvaStatoFirebase() {
@@ -827,19 +855,22 @@ function aggiornaForm() {
         fa.innerHTML = `
             <div class="form-row">
                 <div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div>
-                <div class="form-group"><label>💰 Avere €</label><input type="number" id="formAvere" step="0.01" placeholder="0,00"></div>
-                <div class="form-group"><label>💰 Dare €</label><input type="number" id="formDare" step="0.01" placeholder="0,00"></div>
+                <div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div>
+                <div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div>
             </div>
             <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>
         `;
+        setupImportField('formAvere');
+        setupImportField('formDare');
     } else if (currentScheda === 'contanti') {
         fa.innerHTML = `
             <div class="form-row">
                 <div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div>
-                <div class="form-group"><label>💰 Incasso €</label><input type="number" id="formImportoContanti" step="0.01" placeholder="0,00"></div>
+                <div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div>
             </div>
             <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>
         `;
+        setupImportField('formImportoContanti');
     } else if (currentScheda === 'fornitori') {
         fa.innerHTML = `
             <div class="form-row">
@@ -874,8 +905,8 @@ async function memorizzaNuovo() {
     if (currentScheda === 'primanota') {
         const data = document.getElementById('formDataPrimaNota')?.value;
         const descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
-        const avere = parseFloat(document.getElementById('formAvere')?.value) || 0;
-        const dare = parseFloat(document.getElementById('formDare')?.value) || 0;
+        let avere = parseNumber(document.getElementById('formAvere')?.value);
+        let dare = parseNumber(document.getElementById('formDare')?.value);
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (avere > 0 && dare > 0) { showToast("Non puoi inserire sia Avere che Dare", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo", true); return; }
@@ -887,7 +918,7 @@ async function memorizzaNuovo() {
     } else if (currentScheda === 'contanti') {
         const data = document.getElementById('formDataContanti')?.value;
         const descrizione = document.getElementById('formDescrizioneContanti')?.value;
-        const importo = parseFloat(document.getElementById('formImportoContanti')?.value) || 0;
+        let importo = parseNumber(document.getElementById('formImportoContanti')?.value);
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         contanti.push({ data: formatDate(data), descrizione: descrizione, importo: importo });
@@ -912,6 +943,7 @@ async function memorizzaNuovo() {
 async function cambiaMese() {
     currentYear = parseInt(document.getElementById('annoSelect').value);
     currentMonth = parseInt(document.getElementById('meseSelect').value);
+    localStorage.setItem('ultimoMeseLavorato', JSON.stringify({ anno: currentYear, mese: currentMonth }));
     await caricaStatoFirebase();
 }
 
@@ -921,6 +953,8 @@ async function riprendiMeseCorrente() {
         const { anno, mese } = JSON.parse(ultimo);
         currentYear = anno;
         currentMonth = mese;
+        document.getElementById('annoSelect').value = anno;
+        document.getElementById('meseSelect').value = mese;
         await caricaStatoFirebase();
         alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`);
     } else alert("Nessun mese precedente trovato.");
@@ -941,9 +975,9 @@ function esportaPDFMese() {
     <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div></div>
     <h3>PRIMA NOTA</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>
     ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-    </tbody></table><h3>CONTANTI</h3> <table> <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>
+    </tbody></table><h3>CONTANTI</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody>
     ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    </tbody></table><h3>FORNITORI</h3> <table> <thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>
+    </tbody></table><h3>FORNITORI</h3> <table> <thead> <tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr> </thead><tbody>
     ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${currentYear}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
     </tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
@@ -984,7 +1018,7 @@ async function esportaReportAnno() {
             w.document.write(`<h3>📅 ${mesiLista[mese.mese]} ${anno}</h3><div>Saldo iniziale: ${formatNumber(mese.saldoIniziale)} € | Entrate: ${formatNumber(mese.totaleEntrate)} € | Uscite: ${formatNumber(mese.totaleUscite)} € | Contanti: ${formatNumber(mese.totaleContanti)} €</div>`);
             w.document.write(`<h4>Prima Nota</h4> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>`);
             mese.primaNota.forEach((r, i) => { w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`); });
-            w.document.write(`</tbody></table><h4>Contanti</h4> <table> <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>`);
+            w.document.write(`</tbody></table><h4>Contanti</h4> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody>`);
             mese.contanti.forEach((r, i) => { w.document.write(`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`); });
             w.document.write(`</tbody></table>`);
         }
