@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.27</title>
+    <title>inSAPA - Contabilità v5.28</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -277,12 +277,20 @@
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
         .btn-group button { width: auto; flex: 1; }
         
-        /* TABELLA - FORZA TESTO NERO */
+        /* TABELLA - FORZA TESTO NERO !!! */
         .tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 15px; }
-        .tabella th, .tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
-        .tabella th { background: #e9ecef; color: #2c3e50; }
+        .tabella th, .tabella td { 
+            border: 1px solid #ddd; 
+            padding: 8px; 
+            text-align: left; 
+            vertical-align: top;
+        }
+        .tabella th { 
+            background: #e9ecef; 
+            color: #000000 !important; 
+        }
         .tabella td, .editable-cell, .cell-input {
-            color: #2c3e50 !important;
+            color: #000000 !important;
             background: white !important;
         }
         .scadenze-box { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; }
@@ -296,7 +304,6 @@
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
-        .debug-console { background: #2c3e50; color: #0f0; font-family: monospace; font-size: 0.7rem; padding: 10px; margin-top: 15px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
         .toast-message {
             position: fixed;
             bottom: 80px;
@@ -381,7 +388,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.27 - Contabilità</div>
+    <div class="version" id="appVersion">v5.28 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -400,18 +407,10 @@
                 <div class="form-group">
                     <label>📆 Mese</label>
                     <select id="meseSelect">
-                        <option value="0">Gennaio</option>
-                        <option value="1">Febbraio</option>
-                        <option value="2">Marzo</option>
-                        <option value="3">Aprile</option>
-                        <option value="4">Maggio</option>
-                        <option value="5">Giugno</option>
-                        <option value="6">Luglio</option>
-                        <option value="7">Agosto</option>
-                        <option value="8">Settembre</option>
-                        <option value="9">Ottobre</option>
-                        <option value="10">Novembre</option>
-                        <option value="11">Dicembre</option>
+                        <option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option>
+                        <option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option>
+                        <option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option>
+                        <option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option>
                     </select>
                 </div>
             </div>
@@ -434,7 +433,6 @@
             
             <hr>
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
-            <div id="debugConsole" class="debug-console">🔍 Console debug:</div>
         </div>
 
         <div class="content-area">
@@ -545,17 +543,6 @@ function showToast(message, isError = false) {
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
 
-function debugLog(msg) {
-    let consoleDiv = document.getElementById('debugConsole');
-    if(consoleDiv) {
-        let time = new Date().toLocaleTimeString();
-        consoleDiv.innerHTML += `<div>${time} - ${msg}</div>`;
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        if(consoleDiv.children.length > 50) consoleDiv.innerHTML = `<div>${time} - Console pulita</div>`;
-    }
-    console.log(msg);
-}
-
 function formatNumber(n) { 
     if (n === null || n === undefined || n === '') return ''; 
     let num = parseFloat(n); 
@@ -575,7 +562,6 @@ function formatDate(d) {
 
 async function salvaStatoFirebase() {
     if (!currentYear && currentYear !== 0) return;
-    debugLog(`Salvataggio su Firebase: ${currentYear}/${currentMonth}`);
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
             anno: currentYear,
@@ -587,12 +573,10 @@ async function salvaStatoFirebase() {
             nextFatturaId: nextFatturaId,
             ultimoAggiornamento: new Date().toISOString()
         });
-        debugLog("Salvataggio completato");
-    } catch(e) { debugLog("ERRORE salvataggio: " + e.message); }
+    } catch(e) { console.error("ERRORE salvataggio: " + e.message); }
 }
 
 async function caricaStatoFirebase() {
-    debugLog(`Caricamento da Firebase: ${currentYear}/${currentMonth}`);
     try {
         const doc = await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).get();
         if (doc.exists) {
@@ -603,15 +587,13 @@ async function caricaStatoFirebase() {
             fattureFornitori = data.fattureFornitori || [];
             nextFatturaId = data.nextFatturaId || 1;
             document.getElementById('saldoIniziale').value = saldoIniziale;
-            debugLog(`Dati caricati: ${primaNota.length} movimenti, ${contanti.length} contanti, ${fattureFornitori.length} fornitori`);
         } else {
-            debugLog("Nessun dato trovato, inizializzo vuoto");
             saldoIniziale = 0; primaNota = []; contanti = []; fattureFornitori = []; nextFatturaId = 1;
             document.getElementById('saldoIniziale').value = 0;
         }
         await aggiornaTabelle();
         aggiornaRiepilogo();
-    } catch(e) { debugLog("ERRORE caricamento: " + e.message); }
+    } catch(e) { console.error("ERRORE caricamento: " + e.message); }
 }
 
 function aggiornaRiepilogo() {
@@ -681,6 +663,7 @@ function makeEditableCellPrimaNota(val, idx, field, isSel) {
         c.type = 'checkbox'; 
         c.checked = val === true; 
         c.style.cursor = 'pointer'; 
+        c.style.backgroundColor = 'white';
         c.onchange = async () => { primaNota[idx].verificato = c.checked; await aggiornaTabelle(); await salvaStatoFirebase(); }; 
         return c; 
     }
@@ -688,7 +671,8 @@ function makeEditableCellPrimaNota(val, idx, field, isSel) {
     let s = document.createElement('span'); 
     s.textContent = disp || ''; 
     s.className = 'editable-cell';
-    s.style.color = '#2c3e50';
+    s.style.color = '#000000';
+    s.style.backgroundColor = 'white';
     if (!isSel) { 
         s.classList.add('editable-disabled'); 
         s.style.cursor = 'not-allowed'; 
@@ -697,8 +681,8 @@ function makeEditableCellPrimaNota(val, idx, field, isSel) {
         s.onclick = () => { 
             let inp = document.createElement('input'); 
             inp.className = 'cell-input';
-            inp.style.color = '#2c3e50';
-            inp.style.background = 'white';
+            inp.style.color = '#000000';
+            inp.style.backgroundColor = 'white';
             if (field === 'data') { 
                 let dv = ''; 
                 if (val) { 
@@ -739,7 +723,8 @@ function makeEditableCellContanti(val, idx, field, isSel) {
     let s = document.createElement('span'); 
     s.textContent = disp || ''; 
     s.className = 'editable-cell';
-    s.style.color = '#2c3e50';
+    s.style.color = '#000000';
+    s.style.backgroundColor = 'white';
     if (!isSel) { 
         s.classList.add('editable-disabled'); 
         s.style.cursor = 'not-allowed'; 
@@ -748,8 +733,8 @@ function makeEditableCellContanti(val, idx, field, isSel) {
         s.onclick = () => { 
             let inp = document.createElement('input'); 
             inp.className = 'cell-input';
-            inp.style.color = '#2c3e50';
-            inp.style.background = 'white';
+            inp.style.color = '#000000';
+            inp.style.backgroundColor = 'white';
             if (field === 'data') { 
                 let dv = ''; 
                 if (val) { 
@@ -789,7 +774,8 @@ function makeEditableCellFornitori(val, idx, field, isSel) {
     let s = document.createElement('span'); 
     s.textContent = val || ''; 
     s.className = 'editable-cell';
-    s.style.color = '#2c3e50';
+    s.style.color = '#000000';
+    s.style.backgroundColor = 'white';
     if (!isSel) { 
         s.classList.add('editable-disabled'); 
         s.style.cursor = 'not-allowed'; 
@@ -798,8 +784,8 @@ function makeEditableCellFornitori(val, idx, field, isSel) {
         s.onclick = () => { 
             let inp = document.createElement('input'); 
             inp.className = 'cell-input';
-            inp.style.color = '#2c3e50';
-            inp.style.background = 'white';
+            inp.style.color = '#000000';
+            inp.style.backgroundColor = 'white';
             if (field === 'data') { 
                 let dv = ''; 
                 if (val) { 
@@ -936,14 +922,14 @@ function aggiornaForm() {
                     <label>💰 Avere (entrate) €</label>
                     <input type="number" id="formAvere" step="0.01" placeholder="0,00">
                 </div>
+                <div class="form-group">
+                    <label>💰 Dare (uscite) €</label>
+                    <input type="number" id="formDare" step="0.01" placeholder="0,00">
+                </div>
             </div>
             <div class="form-group">
                 <label>📝 Descrizione</label>
                 <input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione">
-            </div>
-            <div class="form-group">
-                <label>💰 Dare (uscite) €</label>
-                <input type="number" id="formDare" step="0.01" placeholder="0,00">
             </div>
         `;
     } else if (currentScheda === 'contanti') {
@@ -1093,7 +1079,6 @@ async function riprendiMeseCorrente() {
 async function esportaReportAnno() {
     const anno = currentYear;
     const logo = localStorage.getItem('logo_azienda');
-    debugLog(`Inizio esportazione report annuale ${anno}...`);
     
     let tuttiIMesi = [];
     let totaliAnno = { entrate: 0, uscite: 0, contanti: 0 };
@@ -1126,7 +1111,6 @@ async function esportaReportAnno() {
             }
             tuttiIMesi.push(datiMese);
         } catch(e) {
-            debugLog(`Errore caricamento mese ${m}: ${e.message}`);
             tuttiIMesi.push({ mese: m, presente: false, primaNota: [], contanti: [] });
         }
     }
@@ -1179,7 +1163,7 @@ async function esportaReportAnno() {
             <div><strong>💰 Saldo mese:</strong> <span class="${mese.saldoMese >= 0 ? 'positive' : 'negative'}">${formatNumber(mese.saldoMese)} €</span></div>
         </div>
         <h4>📋 PRIMA NOTA</h4>
-        <table><thead><td><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>`);
+        <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th>✅</th></tr></thead><tbody>`);
         
         mese.primaNota.forEach((r, i) => {
             w.document.write(`<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td><td>${r.verificato ? '✅' : ''}</td></tr>`);
@@ -1201,7 +1185,6 @@ async function esportaReportAnno() {
     w.document.write(`<div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}<br>Report annuale completo di tutte le movimentazioni mese per mese.</div>
     <script>window.onload=()=>window.print();<\/script></body></html>`);
     w.document.close();
-    debugLog(`Report annuale ${anno} generato con ${mesiConDati} mesi con dati`);
 }
 
 function esportaPDFMese() {
@@ -1244,7 +1227,7 @@ function esportaPDFMese() {
     <div class="section-title">💵 INCASSO CONTANTI</div>
     <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead><tbody>
     ${contanti.map((r, i) => `<tr><td>${i + 1}</td><td>${r.data || ''}</td><td>${r.descrizione || ''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    ${contanti.length === 0 ? '<tr><td colspan="4">Nessun incasso</td>' : ''}
+    ${contanti.length === 0 ? '<tr><td colspan="4">Nessun incasso</td></tr>' : ''}
     <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALE</td><td class="text-right">${formatNumber(tc)} €</td></tr>
     </tbody></table>
     <div class="section-title">📄 FATTURE FORNITORI</div>
