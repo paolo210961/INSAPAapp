@@ -2,12 +2,12 @@
   "name": "inSAPA",
   "short_name": "inSAPA",
   "description": "Gestione aziendale - Contabilità e Agenti",
-  "start_url": "/index.html",
+  "start_url": "/INSAPAapp/index.html",
   "display": "standalone",
   "theme_color": "#3498db",
   "background_color": "#ffffff",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "/INSAPAapp/",
   "icons": [
     {
       "src": "icons/icon-72.png",
