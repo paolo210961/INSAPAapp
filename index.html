@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>inSAPA - Accesso</title>
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3498db">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="inSAPA">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -203,6 +212,15 @@ document.getElementById('btnContabilita').onclick = () => {
 document.getElementById('btnAgenti').onclick = () => {
     window.location.href = 'agenti.html';
 };
+
+// ==================== REGISTRAZIONE SERVICE WORKER PER PWA ====================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').then(reg => {
+        console.log('✅ Service Worker registrato con successo!');
+    }).catch(err => {
+        console.log('❌ Service Worker fallito:', err);
+    });
+}
 </script>
 </body>
 </html>
