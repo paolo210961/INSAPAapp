@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti v5.07e</title>
+    <title>inSAPA - Agenti v5.07f</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -120,11 +120,11 @@
         .btn-save { background: #27ae60; color: white; }
         .btn-cancel { background: #95a5a6; color: white; }
         
-        /* NAVIGAZIONE - STESSO SISTEMA DELLA TOOLBAR (SCROLL ORIZZONTALE) */
+        /* NAVIGAZIONE - SCROLL ORIZZONTALE, PULSANTI COMPATTI */
         .nav-box {
             background: #f1c40f;
             border-radius: 16px;
-            padding: 10px 20px;
+            padding: 8px 15px;
             overflow-x: auto;
             overflow-y: hidden;
             white-space: nowrap;
@@ -136,7 +136,7 @@
         .nav-box::-webkit-scrollbar-thumb { background: #fff; border-radius: 4px; }
         .nav-grid {
             display: inline-flex;
-            gap: 12px;
+            gap: 10px;
             white-space: nowrap;
         }
         .nav-btn {
@@ -146,11 +146,11 @@
             background: white;
             color: #2c3e50;
             border: none;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             transition: all 0.2s;
             flex-shrink: 0;
             white-space: nowrap;
@@ -246,8 +246,8 @@
         </div>
         <div class="nav-box">
             <div class="nav-grid">
+                <!-- In AGENTI il tasto AGENTI non compare -->
                 <button id="btnVaiContabilita" class="nav-btn contabilita">📊 CONTABILITÀ</button>
-                <button class="nav-btn agenti disabled" disabled>👥 AGENTI</button>
                 <button id="navChangePwd" class="nav-btn pwd">🔑 CAMBIA PASSWORD</button>
                 <button id="navLogout" class="nav-btn esci">🚪 ESCI</button>
             </div>
@@ -282,7 +282,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
-<div class="version">v5.07e - Agenti</div>
+<div class="version">v5.07f - Agenti</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -352,7 +352,7 @@ function inviaScadenzeClienteCorrente(){ if(!clienteScadenzeCorrente){ alert("Se
 
 function aggiornaClienti(){ let mappa=new Map(); for(let c of datiOrd){ mappa.set(c.codice,{ codice:c.codice, ragione:c.ragione, hasScadenze:false, scadenze:[], ordini:c.articoli }); } for(let c of datiSca){ if(mappa.has(c.codice)){ let cl=mappa.get(c.codice); cl.hasScadenze=true; cl.scadenze=c.scadenze; }else{ mappa.set(c.codice,{ codice:c.codice, ragione:c.ragione, hasScadenze:true, scadenze:c.scadenze, ordini:[] }); } } clientiUnici=Array.from(mappa.values()).sort((a,b)=>a.ragione.localeCompare(b.ragione)); filtraClienti(); }
 function filtraClienti(){ let txt=document.getElementById('cercaCliente').value.toLowerCase(); let filtrati=clientiUnici.filter(c=>c.codice.toLowerCase().includes(txt)||c.ragione.toLowerCase().includes(txt)); let sel=document.getElementById('selectClienteAgenti'); sel.innerHTML='<option value="">-- Seleziona cliente --</option>'; for(let c of filtrati){ let opt=document.createElement('option'); opt.value=c.codice; opt.textContent=`${c.codice} - ${c.ragione}`; if(c.hasScadenze&&c.scadenze.length>0){ opt.style.color='#c0392b'; opt.style.fontWeight='bold'; } sel.appendChild(opt); } if(filtrati.length===0){ document.getElementById('scadenzeAgenti').innerHTML='<div class="scadenze-box">Nessun cliente trovato</div>'; document.getElementById('dettaglioAgenti').innerHTML=''; } }
-function mostraDettaglioCliente(cod){ let cl=clientiUnici.find(c=>c.codice===cod); if(!cl) return; clienteScadenzeCorrente=cl; let contS=document.getElementById('scadenzeAgenti'); let contA=document.getElementById('dettaglioAgenti'); if(cl.hasScadenze&&cl.scadenze&&cl.scadenze.length>0){ let html=`<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cl.codice} ${cl.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg>Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th><tr></thead><tbody>`; for(let s of cl.scadenze){ html+=`<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`; } html+=`</tbody></table></div>`; contS.innerHTML=html; }else{ contS.innerHTML=`<div class="scadenze-box">Nessuna scadenza per ${cl.ragione}</div>`; } if(cl.ordini&&cl.ordini.length>0){ let html=`<div class="scadenze-box"><h3>📋 ORD - ${cl.codice} ${cl.ragione} (${cl.ordini.length} articoli)</h3>`; for(let art of cl.ordini){ let storico=''; if(art.coppie&&art.coppie.length>0){ let mostrati=art.coppie.slice(0,4); storico=`<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`; for(let ord of mostrati){ storico+=`<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; } storico+=`</div>`; }else{ storico=`<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; } html+=`<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`; } html+=`</div>`; contA.innerHTML=html; document.querySelectorAll('.articolo-item').forEach(el=>{ el.onclick=(e)=>{ e.stopPropagation(); let sd=el.querySelector('.storico-ordini'); if(sd) sd.classList.toggle('visible'); }; }); }else{ contA.innerHTML=`<div class="scadenze-box">Nessun ordine per ${cl.ragione}</div>`; } }
+function mostraDettaglioCliente(cod){ let cl=clientiUnici.find(c=>c.codice===cod); if(!cl) return; clienteScadenzeCorrente=cl; let contS=document.getElementById('scadenzeAgenti'); let contA=document.getElementById('dettaglioAgenti'); if(cl.hasScadenze&&cl.scadenze&&cl.scadenze.length>0){ let html=`<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cl.codice} ${cl.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg>Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`; for(let s of cl.scadenze){ html+=`<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`; } html+=`</tbody></table></div>`; contS.innerHTML=html; }else{ contS.innerHTML=`<div class="scadenze-box">Nessuna scadenza per ${cl.ragione}</div>`; } if(cl.ordini&&cl.ordini.length>0){ let html=`<div class="scadenze-box"><h3>📋 ORD - ${cl.codice} ${cl.ragione} (${cl.ordini.length} articoli)</h3>`; for(let art of cl.ordini){ let storico=''; if(art.coppie&&art.coppie.length>0){ let mostrati=art.coppie.slice(0,4); storico=`<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`; for(let ord of mostrati){ storico+=`<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; } storico+=`</div>`; }else{ storico=`<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; } html+=`<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`; } html+=`</div>`; contA.innerHTML=html; document.querySelectorAll('.articolo-item').forEach(el=>{ el.onclick=(e)=>{ e.stopPropagation(); let sd=el.querySelector('.storico-ordini'); if(sd) sd.classList.toggle('visible'); }; }); }else{ contA.innerHTML=`<div class="scadenze-box">Nessun ordine per ${cl.ragione}</div>`; } }
 function filtraArticoli(){ let cod=document.getElementById('selectClienteAgenti').value; if(!cod) return; let cl=clientiUnici.find(c=>c.codice===cod); if(!cl||!cl.ordini) return; let txt=document.getElementById('cercaArticoloInline').value.toLowerCase(); let filtrati=cl.ordini.filter(a=>a.codice.toLowerCase().includes(txt)||a.descrizione.toLowerCase().includes(txt)); let container=document.getElementById('dettaglioAgenti'); let html=`<div class="scadenze-box"><h3>📋 ORD - ${cl.codice} ${cl.ragione} (${filtrati.length} articoli)</h3>`; for(let art of filtrati){ let storico=''; if(art.coppie&&art.coppie.length>0){ let mostrati=art.coppie.slice(0,4); storico=`<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`; for(let ord of mostrati){ storico+=`<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; } storico+=`</div>`; }else{ storico=`<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; } html+=`<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`; } html+=`</div>`; container.innerHTML=html; document.querySelectorAll('.articolo-item').forEach(el=>{ el.onclick=(e)=>{ e.stopPropagation(); let sd=el.querySelector('.storico-ordini'); if(sd) sd.classList.toggle('visible'); }; }); }
 
 async function caricaFile(files){ if(!agenteCorrente){ alert("Seleziona prima un agente!"); return false; } if(files.length!==2){ alert("Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!"); return false; } let codAg=agenteCorrente.codice; let trov={ord:false,sca:false}; let ordT=null, scaT=null; for(let f of files){ let nome=f.name; let regOrd=new RegExp(`^ORD${codAg}\\.`,'i'); let regSca=new RegExp(`^SCA${codAg}\\.`,'i'); if(regOrd.test(nome)){ trov.ord=true; ordT=await f.text(); }else if(regSca.test(nome)){ trov.sca=true; scaT=await f.text(); }else{ alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAg}.txt\nSCA${codAg}.txt`); return false; } } if(!trov.ord||!trov.sca){ alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!"); return false; } datiOrd=[]; datiSca=[]; if(ordT) datiOrd=parseORD(ordT); if(scaT) datiSca=parseSCA(scaT); await salvaDatiAgente(); aggiornaClienti(); document.getElementById('fileStatusInline').innerHTML=`✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`; alert(`Caricamento completato!\nORD: ${datiOrd.length} clienti\nSCA: ${datiSca.length} clienti`); return true; }
