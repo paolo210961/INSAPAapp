@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.41</title>
+    <title>inSAPA - Contabilità v5.42</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -163,11 +163,11 @@
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #f1c40f; color: #000000; }
 
-        /* NAVIGAZIONE - STESSO SISTEMA DELLA TOOLBAR (SCROLL ORIZZONTALE) */
+        /* NAVIGAZIONE - SCROLL ORIZZONTALE, PULSANTI COMPATTI */
         .nav-box {
             background: #f1c40f;
             border-radius: 16px;
-            padding: 10px 20px;
+            padding: 8px 15px;
             overflow-x: auto;
             overflow-y: hidden;
             white-space: nowrap;
@@ -179,7 +179,7 @@
         .nav-box::-webkit-scrollbar-thumb { background: #fff; border-radius: 4px; }
         .nav-grid {
             display: inline-flex;
-            gap: 12px;
+            gap: 10px;
             white-space: nowrap;
         }
         .nav-btn {
@@ -189,11 +189,11 @@
             background: white;
             color: #2c3e50;
             border: none;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             transition: all 0.2s;
             flex-shrink: 0;
             white-space: nowrap;
@@ -367,7 +367,7 @@
             </div>
             <div class="nav-box">
                 <div class="nav-grid">
-                    <button class="nav-btn contabilita disabled" disabled>📊 CONTABILITÀ</button>
+                    <!-- In CONTABILITÀ il tasto CONTABILITÀ non compare -->
                     <button id="btnVaiAgenti" class="nav-btn agenti">👥 AGENTI</button>
                     <button id="navChangePwd" class="nav-btn pwd">🔑 CAMBIA PASSWORD</button>
                     <button id="navLogout" class="nav-btn esci">🚪 ESCI</button>
@@ -392,7 +392,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.41 - Contabilità</div>
+    <div class="version" id="appVersion">v5.42 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -411,7 +411,7 @@
             <div id="contabilitaContainer">
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
-                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody><tr><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;"><h3>📋 ASS_CONT_CLIENTI</h3><table class="tabella" id="tabellaAssClienti"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody id="assClientiBody"></tbody></table><div id="assClientiActionButtons" class="action-buttons"><button id="btnSalvaModificaAssClienti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button></div></div>
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;"><h3>📋 PAGA_DDT_CLIENTI</h3><table class="tabella" id="tabellaPagaDdt"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead><tbody id="pagaDdtBody"></tbody></table><div id="pagaDdtActionButtons" class="action-buttons"><button id="btnSalvaModificaPagaDdt" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPagaDdt" class="btn-danger">🗑 ELIMINA</button></div></div>
             </div>
@@ -521,17 +521,30 @@ function aggiornaTabelle(){
 
 function aggiornaPulsantiAzione(){
     let hs=false;
-    if(currentScheda==='primanota'){ hs=document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length>0; document.getElementById('primaNotaActionButtons').style.display=hs?'flex':'none'; const sa=document.getElementById('selectAllPrimaNota'); if(sa){ const all=document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); } }
-    else if(currentScheda==='contanti'){ hs=document.querySelectorAll('#contantiBody .row-check-contanti:checked').length>0; document.getElementById('contantiActionButtons').style.display=hs?'flex':'none'; const sa=document.getElementById('selectAllContanti'); if(sa){ const all=document.querySelectorAll('#contantiBody .row-check-contanti'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); } }
-    else if(currentScheda==='fornitori'){ hs=document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked').length>0; document.getElementById('fornitoriActionButtons').style.display=hs?'flex':'none'; const sa=document.getElementById('selectAllFornitori'); if(sa){ const all=document.querySelectorAll('#fornitoriBody .row-check-fornitori'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); } }
-    else if(currentScheda==='assclienti'){ hs=document.querySelectorAll('#assClientiBody .row-check-assclienti:checked').length>0; document.getElementById('assClientiActionButtons').style.display=hs?'flex':'none'; const sa=document.getElementById('selectAllAssClienti'); if(sa){ const all=document.querySelectorAll('#assClientiBody .row-check-assclienti'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); } }
-    else if(currentScheda==='pagaddt'){ hs=document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked').length>0; document.getElementById('pagaDdtActionButtons').style.display=hs?'flex':'none'; const sa=document.getElementById('selectAllPagaDdt'); if(sa){ const all=document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); sa.checked=all.length>0&&Array.from(all).every(c=>c.checked); } }
+    if(currentScheda==='primanota'){ hs=document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length>0; document.getElementById('primaNotaActionButtons').style.display=hs?'flex':'none'; }
+    else if(currentScheda==='contanti'){ hs=document.querySelectorAll('#contantiBody .row-check-contanti:checked').length>0; document.getElementById('contantiActionButtons').style.display=hs?'flex':'none'; }
+    else if(currentScheda==='fornitori'){ hs=document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked').length>0; document.getElementById('fornitoriActionButtons').style.display=hs?'flex':'none'; }
+    else if(currentScheda==='assclienti'){ hs=document.querySelectorAll('#assClientiBody .row-check-assclienti:checked').length>0; document.getElementById('assClientiActionButtons').style.display=hs?'flex':'none'; }
+    else if(currentScheda==='pagaddt'){ hs=document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked').length>0; document.getElementById('pagaDdtActionButtons').style.display=hs?'flex':'none'; }
+    // Select All
+    const sa=document.getElementById('selectAllPrimaNota');
+    if(sa){ const allChecks=document.querySelectorAll('#primaNotaBody .row-check-prima'); sa.checked=allChecks.length>0&&Array.from(allChecks).every(c=>c.checked); }
+    const sac=document.getElementById('selectAllContanti');
+    if(sac){ const allChecks=document.querySelectorAll('#contantiBody .row-check-contanti'); sac.checked=allChecks.length>0&&Array.from(allChecks).every(c=>c.checked); }
+    const saf=document.getElementById('selectAllFornitori');
+    if(saf){ const allChecks=document.querySelectorAll('#fornitoriBody .row-check-fornitori'); saf.checked=allChecks.length>0&&Array.from(allChecks).every(c=>c.checked); }
+    const saa=document.getElementById('selectAllAssClienti');
+    if(saa){ const allChecks=document.querySelectorAll('#assClientiBody .row-check-assclienti'); saa.checked=allChecks.length>0&&Array.from(allChecks).every(c=>c.checked); }
+    const sap=document.getElementById('selectAllPagaDdt');
+    if(sap){ const allChecks=document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); sap.checked=allChecks.length>0&&Array.from(allChecks).every(c=>c.checked); }
 }
-document.getElementById('selectAllPrimaNota')?.addEventListener('change',(e)=>{ document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); aggiornaTabelle(); });
+
+// GESTIONE SELECT ALL
+document.getElementById('selectAllPrimaNota')?.addEventListener('change',(e)=>{ document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); });
 document.getElementById('selectAllContanti')?.addEventListener('change',(e)=>{ document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); });
 document.getElementById('selectAllFornitori')?.addEventListener('change',(e)=>{ document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); });
-document.getElementById('selectAllAssClienti')?.addEventListener('change',(e)=>{ document.querySelectorAll('#assClientiBody .row-check-assclienti').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); aggiornaTabelle(); });
-document.getElementById('selectAllPagaDdt')?.addEventListener('change',(e)=>{ document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); aggiornaTabelle(); });
+document.getElementById('selectAllAssClienti')?.addEventListener('change',(e)=>{ document.querySelectorAll('#assClientiBody .row-check-assclienti').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); });
+document.getElementById('selectAllPagaDdt')?.addEventListener('change',(e)=>{ document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c=>c.checked=e.target.checked); aggiornaPulsantiAzione(); });
 
 async function eliminaSelezionati(tipo){
     if(tipo==='primanota'){ const ck=document.querySelectorAll('#primaNotaBody .row-check-prima'); const n=[]; for(let i=0;i<ck.length;i++) if(!ck[i].checked) n.push(primaNota[i]); if(confirm(`Eliminare ${ck.length-n.length} righe?`)) primaNota=n; }
@@ -599,7 +612,7 @@ function esportaPDFMese(){
     const mn=mesiLista[currentMonth], anno=currentYear;
     const ta=primaNota.reduce((s,r)=>s+(parseNumber(r.avere)||0),0), td=primaNota.reduce((s,r)=>s+(parseNumber(r.dare)||0),0);
     const tc=contanti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), tAss=assClienti.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), tPaga=pagaDdt.reduce((s,r)=>s+(parseNumber(r.importo)||0),0), sal=saldoIniziale+ta-td, logo=getLogoSaved();
-    const w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo?`<img src="${logo}" style="max-width:200px">`:'<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3> <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3> <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3> <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i)=>`<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3> <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i)=>`<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`); w.document.close();
+    const w=window.open(); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo?`<img src="${logo}" style="max-width:200px">`:'<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3> <tr> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody>${primaNota.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}<td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}<td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3> <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i)=>`<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3> </table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i)=>`<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></table>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3> <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i)=>`<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3> <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i)=>`<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`); w.document.close();
 }
 async function esportaReportAnno(){
     const anno=currentYear, logo=getLogoSaved();
