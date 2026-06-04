@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.44</title>
+    <title>inSAPA - Contabilità vC.5.45</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -187,14 +187,42 @@
         .toolbar-btn.btn-yellow { background: #f1c40f; color: #2c3e50; }
         .toolbar-btn.btn-yellow:hover { background: #e67e22; color: white; }
 
-        /* RIEPILOGO STICKY */
-        .sticky-summary {
+        /* AVVISO ROSSO MODIFICHE NON SALVATE */
+        .avviso-modifiche {
             position: sticky;
             top: 138px;
+            background: #e74c3c;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 998;
+            display: none;
+            border-bottom: 2px solid #c0392b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .avviso-modifiche.show {
+            display: block;
+        }
+        .avviso-modifiche span {
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* RIEPILOGO STICKY (con avviso presente si sposta) */
+        .sticky-summary {
+            position: sticky;
+            top: 180px;
             background: white;
             padding: 12px 20px;
             border-bottom: 1px solid #ddd;
-            z-index: 998;
+            z-index: 997;
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         .summary-content {
@@ -461,7 +489,8 @@
             }
             
             .sticky-toolbar { top: 110px; }
-            .sticky-summary { top: 160px; }
+            .avviso-modifiche { top: 156px; font-size: 0.75rem; padding: 10px; }
+            .sticky-summary { top: 198px; }
             
             .tabella { font-size: 0.7rem; min-width: 500px; }
             .tabella th, .tabella td { padding: 8px 5px; }
@@ -519,12 +548,17 @@
         <button id="toolbarRiprendiCorrente" class="toolbar-btn btn-yellow">📅 RIPRENDI MESE CORRENTE</button>
     </div>
 
+    <!-- AVVISO ROSSO MODIFICHE NON SALVATE -->
+    <div id="avvisoModifiche" class="avviso-modifiche">
+        ⚠️ <span>ATTENZIONE:</span> Hai modifiche non salvate! Premi il tasto <strong>"MEMORIZZA" (💾)</strong> prima di cambiare mese o uscire dalla pagina.
+    </div>
+
     <!-- RIEPILOGO STICKY -->
     <div id="stickySummary" class="sticky-summary">
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">vC.5.44 - Contabilità</div>
+    <div class="version" id="appVersion">vC.5.45 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -616,7 +650,7 @@
                     <table class="tabella" id="tabellaAssClienti">
                         <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
                         <tbody id="assClientiBody"></tbody>
-                    </table>
+                    <tr>
                     <div id="assClientiActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaAssClienti" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button>
@@ -721,7 +755,6 @@ function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     
-    // Prova a caricare logo.png
     fetch('icons/logo.png')
         .then(response => {
             if (response.ok) {
@@ -729,7 +762,6 @@ function caricaLogoSaved() {
                 logoImg.style.display = 'block';
                 logoSpan.style.display = 'none';
             } else {
-                // Prova logo.jpg
                 fetch('icons/logo.jpg')
                     .then(response2 => {
                         if (response2.ok) {
@@ -737,7 +769,6 @@ function caricaLogoSaved() {
                             logoImg.style.display = 'block';
                             logoSpan.style.display = 'none';
                         } else {
-                            // Prova logo.gif
                             fetch('icons/logo.gif')
                                 .then(response3 => {
                                     if (response3.ok) {
@@ -779,6 +810,26 @@ logoDivElem.addEventListener('click', (e) => {
         }, 300);
     }
 });
+
+// ==================== FUNZIONE PER MOSTRARE/NASCONDERE AVVISO ROSSO ====================
+function aggiornaAvvisoModifiche() {
+    const avviso = document.getElementById('avvisoModifiche');
+    if (modificheNonSalvate) {
+        avviso.classList.add('show');
+    } else {
+        avviso.classList.remove('show');
+    }
+}
+
+function marcaModificheNonSalvate() {
+    modificheNonSalvate = true;
+    aggiornaAvvisoModifiche();
+}
+
+function resetModificheNonSalvate() {
+    modificheNonSalvate = false;
+    aggiornaAvvisoModifiche();
+}
 
 // ==================== TOGGLE SIDEBAR MOBILE ====================
 const sidebar = document.getElementById('sidebarContabilita');
@@ -848,14 +899,6 @@ function setupImportField(fieldId) {
         });
         field.addEventListener('input', () => marcaModificheNonSalvate());
     }
-}
-
-function marcaModificheNonSalvate() {
-    modificheNonSalvate = true;
-}
-
-function resetModificheNonSalvate() {
-    modificheNonSalvate = false;
 }
 
 async function salvaStatoFirebase() {
@@ -1376,11 +1419,13 @@ async function riprendiMeseCorrente() {
     } 
 }
 
+// ==================== AVVISO CHIUSURA PAGINA (beforeunload) ====================
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) {
+        const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci.";
         e.preventDefault();
-        e.returnValue = 'Ci sono modifiche non salvate. Sei sicuro di voler uscire?';
-        return e.returnValue;
+        e.returnValue = message;
+        return message;
     }
 });
 
@@ -1404,7 +1449,8 @@ function esportaPDFMese() {
     const tPaga = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const sal = saldoIniziale + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno} </td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody><table><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}
+        w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3></table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno} </td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
@@ -1485,7 +1531,7 @@ setupImportField('saldoIniziale');
 
 document.getElementById('btnVaiAgenti').onclick = () => { 
     if (modificheNonSalvate) {
-        if (confirm("Ci sono modifiche non salvate. Vuoi salvare prima di andare agli agenti?")) {
+        if (confirm("⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente.\n\nVuoi salvare prima di andare agli agenti?\n\n✅ OK = SALVA e vai\n❌ ANNULLA = NON salvare e vai")) {
             salvaStatoFirebase().then(() => { window.location.href = 'agenti.html'; });
         } else {
             window.location.href = 'agenti.html';
@@ -1496,7 +1542,7 @@ document.getElementById('btnVaiAgenti').onclick = () => {
 };
 document.getElementById('navLogout').onclick = () => { 
     if (modificheNonSalvate) {
-        if (confirm("Ci sono modifiche non salvate. Vuoi salvare prima di uscire?")) {
+        if (confirm("⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente.\n\nVuoi salvare prima di uscire?\n\n✅ OK = SALVA e esci\n❌ ANNULLA = NON salvare e esci")) {
             salvaStatoFirebase().then(() => { window.location.href = 'index.html'; });
         } else {
             window.location.href = 'index.html';
