@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.39</title>
+    <title>inSAPA - Contabilità v5.40</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -213,23 +213,31 @@
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #f1c40f; color: #000000; }
 
-        /* NAVIGAZIONE - HAMBURGER MENU PER CELLULARE */
+        /* NAVIGAZIONE - 4 TASTI FISSI CON SCROLL ORIZZONTALE */
         .nav-box {
             background: #f1c40f;
             border-radius: 16px;
             padding: 10px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
-        .hamburger-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: #2c3e50;
+        .nav-box::-webkit-scrollbar {
+            height: 4px;
+        }
+        .nav-box::-webkit-scrollbar-track {
+            background: #e0a800;
+            border-radius: 4px;
+        }
+        .nav-box::-webkit-scrollbar-thumb {
+            background: #fff;
+            border-radius: 4px;
         }
         .nav-grid {
-            display: flex;
-            gap: 10px;
+            display: inline-flex;
+            gap: 12px;
+            white-space: nowrap;
         }
         .nav-btn {
             background: white;
@@ -240,8 +248,10 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s;
-            width: auto;
-            margin: 0;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
         .nav-btn.disabled {
@@ -250,6 +260,13 @@
             cursor: not-allowed;
             opacity: 0.8;
         }
+        .nav-btn.disabled:hover { transform: none; background: #ecf0f1; color: #95a5a6; }
+        
+        /* Colori specifici per i tasti */
+        .nav-btn.contabilita { background: #3498db; color: white; }
+        .nav-btn.agenti { background: #27ae60; color: white; }
+        .nav-btn.pwd { background: #f39c12; color: white; }
+        .nav-btn.esci { background: #e74c3c; color: white; }
 
         /* BARRA PULSANTI ORIZZONTALE STICKY */
         .sticky-toolbar {
@@ -263,6 +280,7 @@
             gap: 12px;
             flex-wrap: wrap;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
         }
         .toolbar-btn {
             background: #ecf0f1;
@@ -276,6 +294,7 @@
             transition: all 0.2s;
             width: auto;
             margin: 0;
+            white-space: nowrap;
         }
         .toolbar-btn:hover { background: #bdc3c7; transform: translateY(-1px); }
         .toolbar-btn.active { background: #3498db; color: white; }
@@ -302,7 +321,7 @@
 
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
 
-        /* SIDEBAR */
+        /* SIDEBAR - PC (layout normale) */
         .sidebar {
             width: 380px;
             background: white;
@@ -439,29 +458,8 @@
             .header-row { flex-direction: column; align-items: stretch; }
             .logo-rettangolo { width: 100%; margin: 0 auto; }
             .logo-area { justify-content: center; flex-direction: column; }
-            .btn-logo-mobile { display: block; }
             .floppy-container { order: 2; margin: 10px 0; }
             .dropdown-menu { left: 50%; transform: translateX(-50%); min-width: 200px; }
-            
-            /* HAMBURGER MENU */
-            .nav-box { position: relative; width: 100%; text-align: center; }
-            .hamburger-btn { display: block; margin: 0 auto; }
-            .nav-grid {
-                display: none;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                left: 0;
-                background: #f1c40f;
-                border-radius: 12px;
-                padding: 10px;
-                margin-top: 5px;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            }
-            .nav-grid.open { display: flex; }
-            .nav-btn { width: 100%; text-align: center; }
             
             /* SIDEBAR a tendina */
             .sidebar {
@@ -495,6 +493,7 @@
             input, select { padding: 10px; font-size: 1rem; }
             .btn-success { padding: 14px; font-size: 1rem; }
             
+            /* Barra toolbar scrollabile */
             .sticky-toolbar {
                 overflow-x: auto;
                 flex-wrap: nowrap;
@@ -521,6 +520,11 @@
             .scadenze-box { padding: 12px; }
             .scadenze-box h3 { font-size: 1rem; margin: 0 0 10px 0; }
             .logo-tooltip { display: none; }
+            
+            /* Quando il logo è caricato, nascondi il pulsante CARICA LOGO mobile */
+            .logo-loaded .btn-logo-mobile {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -532,7 +536,7 @@
                 <div id="logoRettangolo" class="logo-rettangolo">
                     <img id="logoImmagine" style="display:none;">
                     <span id="logoSpan">🏢 LOGO</span>
-                    <div class="logo-tooltip">⚡ 1 tap: Link1 | 2 tap: Link2 | 6 sec: Config</div>
+                    <div class="logo-tooltip" id="logoTooltip">⚡ 1 tap: Link1 | 2 tap: Link2 | 6 sec: Config</div>
                 </div>
                 <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
             </div>
@@ -549,12 +553,11 @@
             </div>
 
             <div class="nav-box">
-                <button id="hamburgerBtn" class="hamburger-btn">☰</button>
-                <div id="navGrid" class="nav-grid">
-                    <button class="nav-btn disabled" disabled>📊 CONTABILITÀ</button>
-                    <button id="btnVaiAgenti" class="nav-btn">👥 AGENTI</button>
-                    <button id="navChangePwd" class="nav-btn">🔑 CAMBIA PASSWORD</button>
-                    <button id="navLogout" class="nav-btn">🚪 ESCI</button>
+                <div class="nav-grid">
+                    <button class="nav-btn contabilita disabled" disabled>📊 CONTABILITÀ</button>
+                    <button id="btnVaiAgenti" class="nav-btn agenti">👥 AGENTI</button>
+                    <button id="navChangePwd" class="nav-btn pwd">🔑 CAMBIA PASSWORD</button>
+                    <button id="navLogout" class="nav-btn esci">🚪 ESCI</button>
                 </div>
             </div>
         </div>
@@ -576,7 +579,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.39 - Contabilità</div>
+    <div class="version" id="appVersion">v5.40 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -737,6 +740,15 @@ function setLinkSecondario(url) { localStorage.setItem('link_secondario', url); 
 function getLogoSaved() { return localStorage.getItem('logo_azienda'); }
 function setLogoSaved(url) { localStorage.setItem('logo_azienda', url); }
 
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
 function apriLinkPrincipale() {
     const link = getLinkPrincipale();
     if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link principale"); }
@@ -759,9 +771,9 @@ function mostraModaleConfig() {
         <div class="modal-container">
             <h3>🔧 CONFIGURAZIONE LOGO</h3>
             <label>📌 LINK SITO PRINCIPALE (1 tap)</label>
-            <input type="text" id="modalLink1" placeholder="https://..." value="${link1}">
+            <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
             <label>📌 LINK SECONDARIO (2 tap rapidi)</label>
-            <input type="text" id="modalLink2" placeholder="https://..." value="${link2}">
+            <input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g, '&quot;')}">
             <label>🖼️ LOGO AZIENDALE</label>
             <div class="logo-preview">
                 ${logoSaved ? `<img src="${logoSaved}" id="modalLogoPreview">` : '<span>Nessun logo caricato</span>'}
@@ -776,7 +788,6 @@ function mostraModaleConfig() {
     `;
     document.body.appendChild(modal);
     
-    // Carica nuovo logo
     document.getElementById('modalBtnCaricaLogo').onclick = () => {
         const fileInput = document.getElementById('modalLogoFile');
         fileInput.onchange = (e) => {
@@ -795,7 +806,6 @@ function mostraModaleConfig() {
         fileInput.click();
     };
     
-    // Salva
     document.getElementById('modalBtnSave').onclick = () => {
         const newLink1 = document.getElementById('modalLink1').value;
         const newLink2 = document.getElementById('modalLink2').value;
@@ -808,6 +818,10 @@ function mostraModaleConfig() {
             document.getElementById('logoImmagine').src = newLogoUrl;
             document.getElementById('logoImmagine').style.display = 'block';
             document.getElementById('logoSpan').style.display = 'none';
+        }
+        // Aggiorna classe per nascondere pulsante mobile se necessario
+        if (getLogoSaved()) {
+            document.getElementById('appContainer').classList.add('logo-loaded');
         }
         showToast("✅ Configurazione salvata!");
         modal.remove();
@@ -858,9 +872,47 @@ function caricaLogoSaved() {
         document.getElementById('logoImmagine').src = logo;
         document.getElementById('logoImmagine').style.display = 'block';
         document.getElementById('logoSpan').style.display = 'none';
+        document.getElementById('appContainer').classList.add('logo-loaded');
     }
 }
 caricaLogoSaved();
+
+function aggiornaPulsanteLogoMobile() {
+    let logoPresente = getLogoSaved() !== null;
+    let btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) {
+        if (logoPresente) {
+            btnMobile.style.display = 'none';
+            document.getElementById('appContainer').classList.add('logo-loaded');
+        } else {
+            btnMobile.style.display = 'block';
+            document.getElementById('appContainer').classList.remove('logo-loaded');
+        }
+    }
+}
+document.getElementById('btnCaricaLogoMobile').onclick = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const url = ev.target.result;
+                setLogoSaved(url);
+                document.getElementById('logoImmagine').src = url;
+                document.getElementById('logoImmagine').style.display = 'block';
+                document.getElementById('logoSpan').style.display = 'none';
+                document.getElementById('appContainer').classList.add('logo-loaded');
+                showToast("✅ Logo caricato! Premi SALVA nel modale per confermare.");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    fileInput.click();
+};
+aggiornaPulsanteLogoMobile();
 
 // ==================== TOGGLE SIDEBAR MOBILE ====================
 const sidebar = document.getElementById('sidebarContabilita');
@@ -868,21 +920,6 @@ if (sidebar) {
     sidebar.addEventListener('click', function(e) {
         if (window.innerWidth <= 768 && e.target === this) {
             this.classList.toggle('open');
-        }
-    });
-}
-
-// ==================== HAMBURGER MENU ====================
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const navGrid = document.getElementById('navGrid');
-if (hamburgerBtn && navGrid) {
-    hamburgerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navGrid.classList.toggle('open');
-    });
-    document.addEventListener('click', (e) => {
-        if (!navGrid.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-            navGrid.classList.remove('open');
         }
     });
 }
@@ -1327,9 +1364,9 @@ function esportaReportRagioniere() {
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     const sal = saldoIniziale + ta - td;
-    const logo = localStorage.getItem('logo_azienda');
+    const logo = getLogoSaved();
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:2px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:24px;font-weight:bold;color:#2c3e50}.periodo{font-size:16px;color:#666;margin-top:5px}.summary{background:#ecf0f1;padding:15px;border-radius:8px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:20px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#3498db;color:white}.text-right{text-align:right}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}@media print{body{padding:20px}}</style></head><body><div class="header">${logo ? `<img src="${logo}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT RAGIONIERE</div><div class="periodo">${mn} ${anno}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Avere (Entrate)</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Dare (Uscite)</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><h3>📋 PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table><div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Ragioniere<br>_________________________</div><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:2px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:24px;font-weight:bold;color:#2c3e50}.periodo{font-size:16px;color:#666;margin-top:5px}.summary{background:#ecf0f1;padding:15px;border-radius:8px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:20px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#3498db;color:white}.text-right{text-align:right}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}@media print{body{padding:20px}}</style></head><body><div class="header">${logo ? `<img src="${logo}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT RAGIONIERE</div><div class="periodo">${mn} ${anno}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Avere (Entrate)</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Dare (Uscite)</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><h3>📋 PRIMA NOTA</h3><tr><thead>汽<th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th> </thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td> </tr></tbody> </table><div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Ragioniere<br>_________________________</div><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
@@ -1341,15 +1378,15 @@ function esportaPDFMese() {
     const tAss = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const tPaga = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const sal = saldoIniziale + ta - td;
-    const logo = localStorage.getItem('logo_azienda');
+    const logo = getLogoSaved();
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr> </thead><tbody> ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')} </tbody> </table><h3>CONTANTI</h3> <table> <thead> <tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr> </thead><tbody> ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')} </tbody> </table><h3>FORNITORI</h3> <table> <thead> <tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr> </thead><tbody> ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')} </tbody> </table><h3>ASS_CONT_CLIENTI</h3> <table> <thead> <tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr> </thead><tbody> ${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')} </tbody> </table><h3>PAGA_DDT_CLIENTI</h3> <table> <thead> <tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr> </thead><tbody> ${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')} </tbody> </table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
 async function esportaReportAnno() {
     const anno = currentYear;
-    const logo = localStorage.getItem('logo_azienda');
+    const logo = getLogoSaved();
     let totaliAnno = { entrate: 0, uscite: 0, contanti: 0, assClienti: 0, pagaDdt: 0 };
     const w = window.open();
     w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{background:#2c3e50;color:white;display:flex;justify-content:space-around;padding:20px;margin:20px 0;flex-wrap:wrap}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:6px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report Annuale ${anno}</div></div>`);
