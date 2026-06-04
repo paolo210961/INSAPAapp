@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>inSAPA - Categoria</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
+
+        .header {
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        .logo-rettangolo {
+            width: 200px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
+
+        .btn-admin {
+            background: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-admin:hover { background: #e67e22; color: white; }
+        .btn-admin.active { background: #27ae60; color: white; }
+        .btn-home {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .categoria-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .categoria-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .categoria-header p {
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .articoli-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .articoli-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .articoli-header h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+        .btn-aggiungi {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none;
+        }
+        .btn-aggiungi.show { display: block; }
+
+        .articoli-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+        .articolo-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        .articolo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        .articolo-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #ecf0f1;
+        }
+        .articolo-info {
+            padding: 15px;
+        }
+        .articolo-codice {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+        .articolo-descrizione {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .card-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 8px;
+        }
+        .card-buttons.show { display: flex; }
+        .card-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .card-btn.edit:hover { background: #3498db; }
+        .card-btn:hover { background: #e74c3c; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-container h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+        }
+        .modal-container label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 5px 0;
+            color: #2c3e50;
+        }
+        .modal-container input, .modal-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .modal-container textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .drop-area {
+            border: 2px dashed #3498db;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+        .drop-area.drag-over {
+            background: #e3f2fd;
+            border-color: #27ae60;
+        }
+        .drop-area img {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-salva-modal { background: #27ae60; color: white; }
+        .btn-cancel-modal { background: #95a5a6; color: white; }
+
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: fadeOut 3s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+
+        .password-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .password-modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .btn-torna {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-torna:hover { background: #7f8c8d; }
+
+        @media (max-width: 1024px) {
+            .articoli-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .articoli-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .articolo-img { height: 150px; }
+            .categoria-header h1 { font-size: 1.5rem; }
+            .header-row { flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            .articoli-grid { grid-template-columns: 1fr; }
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-row">
+        <div class="logo-area" id="btnHome">
+            <div class="logo-rettangolo">
+                <img id="logoImmagine" style="display:none;">
+                <span id="logoSpan">🏢 inSAPA s.a.s.</span>
+            </div>
+        </div>
+        <div>
+            <button id="btnTornaHome" class="btn-torna">◀ TORNA ALLA HOME</button>
+            <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
+        </div>
+    </div>
+</div>
+
+<div id="categoriaHeader" class="categoria-header">
+    <h1 id="catNome">Caricamento...</h1>
+    <p id="catDescrizione"></p>
+</div>
+
+<div class="articoli-container">
+    <div class="articoli-header">
+        <h2>📦 Articoli</h2>
+        <button id="btnAggiungiArticolo" class="btn-aggiungi">➕ NUOVO ARTICOLO</button>
+    </div>
+    <div id="articoliGrid" class="articoli-grid">
+        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">Caricamento articoli...</div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p>
+</footer>
+
+<script>
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
+    authDomain: "insapa-database.firebaseapp.com",
+    projectId: "insapa-database",
+    storageBucket: "insapa-database.firebasestorage.app",
+    messagingSenderId: "331230245928",
+    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// ==================== VARIABILI ====================
+let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
+let isAdminMode = false;
+let categoriaId = null;
+let categoria = null;
+let articoli = [];
+let currentEditArticolo = null;
+let fotoTemp = null;
+
+// ==================== LOGO ====================
+function caricaLogo() {
+    const logoImg = document.getElementById('logoImmagine');
+    const logoSpan = document.getElementById('logoSpan');
+    fetch('icons/logo.png').then(r => {
+        if (r.ok) {
+            logoImg.src = 'icons/logo.png';
+            logoImg.style.display = 'block';
+            logoSpan.style.display = 'none';
+        } else {
+            fetch('icons/logo.jpg').then(r2 => {
+                if (r2.ok) {
+                    logoImg.src = 'icons/logo.jpg';
+                    logoImg.style.display = 'block';
+                    logoSpan.style.display = 'none';
+                }
+            }).catch(() => {});
+        }
+    }).catch(() => {});
+}
+caricaLogo();
+
+// ==================== UTILITY ====================
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// ==================== MODALITA' ADMIN ====================
+function mostraModalePassword() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="password-modal">
+            <h3>🔐 ACCESSO ADMIN</h3>
+            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
+            <div class="modal-buttons">
+                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('btnVerifica').onclick = () => {
+        const pwd = document.getElementById('passwordAdmin').value;
+        if (pwd === ADMIN_PASSWORD) {
+            isAdminMode = true;
+            localStorage.setItem('web_admin_mode', 'true');
+            showToast("✅ Modalità admin attivata!");
+            aggiornaUIAdmin();
+            modal.remove();
+        } else {
+            showToast("❌ Password errata!", true);
+        }
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+function disattivaModalitaAdmin() {
+    isAdminMode = false;
+    localStorage.removeItem('web_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIAdmin();
+}
+
+function aggiornaUIAdmin() {
+    const btnAdmin = document.getElementById('btnAdmin');
+    const btnAggiungi = document.getElementById('btnAggiungiArticolo');
+
+    if (isAdminMode) {
+        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
+        btnAdmin.classList.add('active');
+        btnAggiungi.classList.add('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
+    } else {
+        btnAdmin.textContent = "🔐 AREA ADMIN";
+        btnAdmin.classList.remove('active');
+        btnAggiungi.classList.remove('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
+    }
+}
+
+// ==================== CARICA CATEGORIA ====================
+async function caricaCategoria() {
+    const urlParams = new URLSearchParams(window.location.search);
+    categoriaId = urlParams.get('id');
+
+    if (!categoriaId) {
+        document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
+        return;
+    }
+
+    try {
+        const doc = await db.collection('web_categorie').doc(categoriaId).get();
+        if (doc.exists) {
+            categoria = { id: doc.id, ...doc.data() };
+            document.getElementById('catNome').innerText = categoria.nome;
+            document.getElementById('catDescrizione').innerText = categoria.descrizione || '';
+        } else {
+            document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// ==================== CARICA ARTICOLI ====================
+async function caricaArticoli() {
+    if (!categoriaId) return;
+
+    try {
+        const snapshot = await db.collection('web_articoli')
+            .where('categoriaId', '==', categoriaId)
+            .orderBy('codice', 'asc')
+            .get();
+        articoli = [];
+        snapshot.forEach(doc => {
+            articoli.push({ id: doc.id, ...doc.data() });
+        });
+        visualizzaArticoli();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore caricamento articoli", true);
+    }
+}
+
+function visualizzaArticoli() {
+    const grid = document.getElementById('articoliGrid');
+    if (articoli.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessun articolo presente. ' + (isAdminMode ? 'Clicca su "NUOVO ARTICOLO" per aggiungerne uno.' : '') + '</div>';
+        return;
+    }
+
+    grid.innerHTML = articoli.map(art => `
+        <div class="articolo-card" data-id="${art.id}">
+            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
+                <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')">✏️</button>
+                <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')">🗑</button>
+            </div>
+            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+            <div class="articolo-info">
+                <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
+                <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ==================== MODALE ARTICOLO ====================
+function mostraModaleArticolo(articolo = null) {
+    currentEditArticolo = articolo;
+    fotoTemp = null;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-container">
+            <h3>${articolo ? '✏️ MODIFICA ARTICOLO' : '➕ NUOVO ARTICOLO'}</h3>
+            <label>🔢 Codice articolo *</label>
+            <input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice || '') : ''}" placeholder="es. MTR-001">
+            <label>📝 Descrizione *</label>
+            <textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione || '') : ''}</textarea>
+            <label>🖼️ Immagine (trascina o clicca)</label>
+            <div id="dropArea" class="drop-area">
+                📸 Trascina un'immagine qui o clicca per selezionare
+                ${(articolo && articolo.fotoUrl) ? `<img src="${articolo.fotoUrl}" id="tempPreview">` : '<div id="tempPreview"></div>'}
+            </div>
+            <div class="modal-buttons">
+                <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const dropArea = document.getElementById('dropArea');
+    const tempPreview = document.getElementById('tempPreview');
+
+    dropArea.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => handleFile(e.target.files[0], tempPreview);
+        input.click();
+    });
+
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('drag-over');
+    });
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('drag-over');
+    });
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleFile(file, tempPreview);
+        } else {
+            showToast("Per favore, trascina un file immagine", true);
+        }
+    });
+
+    document.getElementById('btnSalvaArticolo').onclick = async () => {
+        const codice = document.getElementById('artCodice').value.trim();
+        const descrizione = document.getElementById('artDescrizione').value.trim();
+
+        if (!codice) {
+            showToast("Inserisci il codice articolo", true);
+            return;
+        }
+        if (!descrizione) {
+            showToast("Inserisci la descrizione", true);
+            return;
+        }
+
+        try {
+            let fotoUrl = articolo ? articolo.fotoUrl : null;
+
+            if (fotoTemp) {
+                const storageRef = storage.ref(`web/articoli/${categoriaId}/${Date.now()}_${fotoTemp.name}`);
+                const uploadTask = await storageRef.put(fotoTemp);
+                fotoUrl = await uploadTask.ref.getDownloadURL();
+            }
+
+            if (articolo) {
+                await db.collection('web_articoli').doc(articolo.id).update({
+                    codice, descrizione, fotoUrl,
+                    ultimoAggiornamento: new Date().toISOString()
+                });
+                showToast("✅ Articolo modificato!");
+            } else {
+                await db.collection('web_articoli').add({
+                    categoriaId,
+                    codice,
+                    descrizione,
+                    fotoUrl: fotoUrl || '',
+                    creatoIl: new Date().toISOString()
+                });
+                showToast("✅ Articolo aggiunto!");
+            }
+
+            await caricaArticoli();
+            modal.remove();
+        } catch(e) {
+            console.error(e);
+            showToast("Errore salvataggio articolo", true);
+        }
+    };
+
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+function handleFile(file, previewElement) {
+    if (!file.type.startsWith('image/')) {
+        showToast("Seleziona un file immagine", true);
+        return;
+    }
+    fotoTemp = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewElement.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:150px; margin-top:10px; border-radius:8px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function modificaArticolo(id) {
+    const art = articoli.find(a => a.id === id);
+    if (art) mostraModaleArticolo(art);
+}
+
+async function eliminaArticolo(id) {
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questo articolo?\n\nOperazione IRREVERSIBILE!")) return;
+
+    try {
+        await db.collection('web_articoli').doc(id).delete();
+        showToast("✅ Articolo eliminato!");
+        await caricaArticoli();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore eliminazione articolo", true);
+    }
+}
+
+// ==================== EVENTI ====================
+document.getElementById('btnAdmin').onclick = () => {
+    if (isAdminMode) {
+        disattivaModalitaAdmin();
+    } else {
+        mostraModalePassword();
+    }
+};
+
+document.getElementById('btnAggiungiArticolo').onclick = () => {
+    if (isAdminMode) mostraModaleArticolo(null);
+};
+
+document.getElementById('btnTornaHome').onclick = () => {
+    window.location.href = 'web.html';
+};
+
+document.getElementById('btnHome').onclick = () => {
+    window.location.href = 'web.html';
+};
+
+// ==================== AVVIO ====================
+const savedAdminMode = localStorage.getItem('web_admin_mode');
+if (savedAdminMode === 'true') {
+    isAdminMode = true;
+}
+
+Promise.all([caricaCategoria(), caricaArticoli()]).then(() => {
+    aggiornaUIAdmin();
+});
+</script>
+</body>
+</html>
