@@ -6,7 +6,6 @@
     <title>inSAPA - Home</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
@@ -72,10 +71,6 @@
         }
         .btn-salva {
             background: #27ae60;
-            color: white;
-        }
-        .btn-danger {
-            background: #e74c3c;
             color: white;
         }
         
@@ -250,25 +245,20 @@
             min-height: 80px;
             resize: vertical;
         }
-        .drop-area {
+        .link-immagine {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
             border: 2px dashed #3498db;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin: 15px 0;
+            border-radius: 8px;
             background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.2s;
         }
-        .drop-area.drag-over {
-            background: #e3f2fd;
-            border-color: #27ae60;
-        }
-        .drop-area img {
+        .anteprima-img {
             max-width: 100%;
             max-height: 150px;
             margin-top: 10px;
             border-radius: 8px;
+            display: none;
         }
         .modal-buttons {
             display: flex;
@@ -318,6 +308,17 @@
             margin: 15px 0;
             border: 1px solid #ddd;
             border-radius: 8px;
+        }
+        
+        .info-imgur {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .info-imgur a {
+            color: #3498db;
+            text-decoration: none;
         }
         
         @media (max-width: 1024px) {
@@ -399,7 +400,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 // ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
@@ -407,7 +407,7 @@ let isAdminMode = false;
 let categorie = [];
 let currentEditCategoria = null;
 
-// ==================== LOGO MODIFICATO (cerca .jpg prima) ====================
+// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
@@ -468,7 +468,6 @@ function apriLinkSecondario() {
     }
 }
 
-// Gestione click sul logo
 const logoSiti = document.getElementById('logoRettangolo');
 logoSiti.addEventListener('click', (e) => {
     const now = new Date().getTime();
@@ -611,14 +610,9 @@ function escapeHtml(str) {
     });
 }
 
-// ==================== MODALE AGGIUNTA/MODIFICA CATEGORIA ====================
-let fotoTemp = null;
-let fotoTempDataUrl = null;
-
+// ==================== MODALE AGGIUNTA/MODIFICA CATEGORIA (versione con link Imgur) ====================
 function mostraModaleCategoria(categoria = null) {
     currentEditCategoria = categoria;
-    fotoTemp = null;
-    fotoTempDataUrl = null;
     
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -629,10 +623,11 @@ function mostraModaleCategoria(categoria = null) {
             <input type="text" id="catNome" value="${categoria ? escapeHtml(categoria.nome) : ''}" placeholder="es. Motori">
             <label>📝 Descrizione</label>
             <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
-            <label>🖼️ Immagine (trascina o clicca)</label>
-            <div id="dropArea" class="drop-area">
-                📸 Trascina un'immagine qui o clicca per selezionare
-                ${(categoria && categoria.fotoUrl) ? `<img src="${categoria.fotoUrl}" id="tempPreview">` : '<div id="tempPreview"></div>'}
+            <label>🖼️ Immagine (URL da Imgur)</label>
+            <input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
+            <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
+            <div class="info-imgur">
+                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
             </div>
             <label>🔢 Ordine</label>
             <input type="number" id="catOrdine" value="${categoria ? (categoria.ordine || 0) : categorie.length + 1}" placeholder="0,1,2...">
@@ -644,38 +639,27 @@ function mostraModaleCategoria(categoria = null) {
     `;
     document.body.appendChild(modal);
     
-    const dropArea = document.getElementById('dropArea');
-    const tempPreview = document.getElementById('tempPreview');
+    // Gestione anteprima
+    const fotoUrlInput = document.getElementById('catFotoUrl');
+    const anteprimaImg = document.getElementById('anteprimaImg');
     
-    dropArea.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => handleFile(e.target.files[0], tempPreview);
-        input.click();
-    });
-    
-    dropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropArea.classList.add('drag-over');
-    });
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('drag-over');
-    });
-    dropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropArea.classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleFile(file, tempPreview);
+    function aggiornaAnteprima() {
+        const url = fotoUrlInput.value.trim();
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            anteprimaImg.src = url;
+            anteprimaImg.style.display = 'block';
         } else {
-            showToast("Per favore, trascina un file immagine", true);
+            anteprimaImg.style.display = 'none';
         }
-    });
+    }
+    
+    fotoUrlInput.addEventListener('input', aggiornaAnteprima);
+    aggiornaAnteprima();
     
     document.getElementById('btnSalvaCategoria').onclick = async () => {
         const nome = document.getElementById('catNome').value.trim();
         const descrizione = document.getElementById('catDescrizione').value;
+        const fotoUrl = document.getElementById('catFotoUrl').value.trim();
         const ordine = parseInt(document.getElementById('catOrdine').value) || 0;
         
         if (!nome) {
@@ -684,14 +668,6 @@ function mostraModaleCategoria(categoria = null) {
         }
         
         try {
-            let fotoUrl = categoria ? categoria.fotoUrl : null;
-            
-            if (fotoTemp) {
-                const storageRef = storage.ref(`web/categorie/${Date.now()}_${fotoTemp.name}`);
-                const uploadTask = await storageRef.put(fotoTemp);
-                fotoUrl = await uploadTask.ref.getDownloadURL();
-            }
-            
             if (categoria) {
                 await db.collection('web_categorie').doc(categoria.id).update({
                     nome, descrizione, ordine, fotoUrl,
@@ -715,20 +691,6 @@ function mostraModaleCategoria(categoria = null) {
     };
     
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-function handleFile(file, previewElement) {
-    if (!file.type.startsWith('image/')) {
-        showToast("Seleziona un file immagine", true);
-        return;
-    }
-    fotoTemp = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        fotoTempDataUrl = e.target.result;
-        previewElement.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:150px; margin-top:10px; border-radius:8px;">`;
-    };
-    reader.readAsDataURL(file);
 }
 
 async function modificaCategoria(id) {
@@ -772,13 +734,27 @@ document.getElementById('btnSalvaGlobale').onclick = async () => {
     showToast("💾 Tutto già salvato su Firebase!");
 };
 
+// ==================== CARICA LINK DA FILE ====================
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+        }
+    } catch(e) { console.warn("link.html non trovato"); }
+}
+caricaLinkDaFile();
+
 // ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('web_admin_mode');
 if (savedAdminMode === 'true') {
     isAdminMode = true;
 }
 
-Promise.all([caricaLinkDaFile(), caricaCategorie()]).then(() => {
+caricaCategorie().then(() => {
     aggiornaUIModalitaAdmin();
 });
 </script>
