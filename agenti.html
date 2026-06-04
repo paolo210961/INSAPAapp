@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.43</title>
+    <title>inSAPA - Agenti vA.5.44</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
         
-        /* HEADER */
         .header {
             background: white;
             padding: 15px 25px;
@@ -79,7 +78,6 @@
         }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
         
-        /* NAVIGAZIONE - HAMBURGER MENU */
         .nav-box { 
             background: #f1c40f; 
             border-radius: 16px; 
@@ -112,7 +110,6 @@
             opacity: 0.8;
         }
         
-        /* Box gestione agente */
         .action-group {
             display: flex;
             align-items: center;
@@ -141,7 +138,6 @@
         .btn-whatsapp-header { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
         
-        /* Tooltip per ORD+SCA */
         .tooltip-wrapper {
             position: relative;
             display: inline-block;
@@ -181,7 +177,6 @@
             opacity: 1;
         }
         
-        /* Main container */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         
         .sidebar { 
@@ -275,7 +270,21 @@
             100% { opacity: 0; display: none; }
         }
         
-        /* ==================== LAYOUT CELLULARE ==================== */
+        .avviso-modifiche {
+            position: sticky;
+            top: 110px;
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            z-index: 998;
+            display: none;
+            border-bottom: 2px solid #c0392b;
+        }
+        .avviso-modifiche.show { display: block; }
+        
         @media (max-width: 768px) { 
             .header-row {
                 flex-direction: column;
@@ -297,7 +306,6 @@
             .logo-tooltip {
                 display: none;
             }
-            /* HAMBURGER MENU */
             .nav-box {
                 position: relative;
                 width: 100%;
@@ -414,6 +422,11 @@
                 bottom: 100%;
                 border-color: transparent transparent #2c3e50 transparent;
             }
+            .avviso-modifiche {
+                top: 156px;
+                font-size: 0.7rem;
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -447,7 +460,7 @@
         <div class="action-group">
             <div class="tooltip-wrapper">
                 <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
-                <span class="tooltip-text">📌 I file devono essere nominati:<br>ORD{codice}.txt e SCA{codice}.txt<br>Esempio: ORD01.txt e SCA01.txt</span>
+                <span class="tooltip-text">📌 I file devono essere nominati:<br>ORD{codice}.txt e SCA{codice}.txt<br>Esempio: ORD01.txt e SCA01.txt<br><br>Supporta anche .csv o senza estensione</span>
             </div>
             <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
@@ -465,6 +478,10 @@
     </div>
 </div>
 
+<div class="avviso-modifiche" id="avvisoModifiche">
+    ⚠️ ATTENZIONE: Ci sono modifiche non salvate! Premi "SALVA" prima di cambiare.
+</div>
+
 <div class="main-container">
     <div class="sidebar">
         <h3>🔍 Cerca Cliente</h3>
@@ -480,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.43 - Agenti</div>
+<div class="version">vA.5.44 - Agenti</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -502,6 +519,7 @@ let datiOrd = [];
 let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
+let modificheNonSalvate = false;
 
 // ==================== LINK E LOGO DA FILE ESTERNI ====================
 let linkPrincipale = "";
@@ -515,13 +533,8 @@ async function caricaLinkDaFile() {
             const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
-            console.log("Link caricati:", linkPrincipale, linkSecondario);
-        } else {
-            console.warn("link.html non trovato, uso link vuoti");
         }
-    } catch(e) {
-        console.warn("Errore caricamento link.html:", e);
-    }
+    } catch(e) { console.warn("Errore caricamento link.html:", e); }
 }
 
 function apriLinkPrincipale() {
@@ -546,77 +559,48 @@ function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     
-    fetch('icons/logo.png')
-        .then(response => {
-            if (response.ok) {
-                logoImg.src = 'icons/logo.png';
-                logoImg.style.display = 'block';
-                logoSpan.style.display = 'none';
-            } else {
-                fetch('icons/logo.jpg')
-                    .then(response2 => {
-                        if (response2.ok) {
-                            logoImg.src = 'icons/logo.jpg';
-                            logoImg.style.display = 'block';
-                            logoSpan.style.display = 'none';
-                        } else {
-                            fetch('icons/logo.gif')
-                                .then(response3 => {
-                                    if (response3.ok) {
-                                        logoImg.src = 'icons/logo.gif';
-                                        logoImg.style.display = 'block';
-                                        logoSpan.style.display = 'none';
-                                    } else {
-                                        logoImg.style.display = 'none';
-                                        logoSpan.style.display = 'block';
-                                    }
-                                })
-                                .catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
-                        }
-                    })
-                    .catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
-            }
-        })
-        .catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+    fetch('icons/logo.png').then(r => { 
+        if(r.ok) { 
+            logoImg.src = 'icons/logo.png'; 
+            logoImg.style.display = 'block'; 
+            logoSpan.style.display = 'none'; 
+        } else { 
+            fetch('icons/logo.jpg').then(r2 => { 
+                if(r2.ok) { 
+                    logoImg.src = 'icons/logo.jpg'; 
+                    logoImg.style.display = 'block'; 
+                    logoSpan.style.display = 'none'; 
+                } else { 
+                    logoImg.style.display = 'none'; 
+                    logoSpan.style.display = 'block'; 
+                } 
+            }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); 
+        } 
+    }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
 
-// Gestione eventi LOGO (1 tap, 2 tap)
-const logoDivElem = document.getElementById('logoRettangolo');
-let lastTap = 0;
+const logoDivElemAgenti = document.getElementById('logoRettangolo');
+let lastTapAgenti = 0;
 
-logoDivElem.addEventListener('click', (e) => {
+logoDivElemAgenti.addEventListener('click', (e) => {
     const now = new Date().getTime();
-    const tapLength = now - lastTap;
+    const tapLength = now - lastTapAgenti;
     if (tapLength < 300 && tapLength > 0) {
         e.stopPropagation();
         apriLinkSecondario();
-        lastTap = 0;
+        lastTapAgenti = 0;
     } else {
-        lastTap = now;
+        lastTapAgenti = now;
         setTimeout(() => {
-            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
+            if (lastTapAgenti !== 0 && (new Date().getTime() - lastTapAgenti) > 300) {
                 apriLinkPrincipale();
-                lastTap = 0;
+                lastTapAgenti = 0;
             }
         }, 300);
     }
 });
 
-// ==================== HAMBURGER MENU ====================
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const navGrid = document.getElementById('navGrid');
-if (hamburgerBtn && navGrid) {
-    hamburgerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navGrid.classList.toggle('open');
-    });
-    document.addEventListener('click', (e) => {
-        if (!navGrid.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-            navGrid.classList.remove('open');
-        }
-    });
-}
-
+// ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -626,13 +610,27 @@ function showToast(message, isError = false) {
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
 
+function aggiornaAvvisoModifiche() {
+    const avviso = document.getElementById('avvisoModifiche');
+    if (modificheNonSalvate) avviso.classList.add('show');
+    else avviso.classList.remove('show');
+}
+
+function marcaModificheNonSalvate() {
+    modificheNonSalvate = true;
+    aggiornaAvvisoModifiche();
+}
+
+function resetModificheNonSalvate() {
+    modificheNonSalvate = false;
+    aggiornaAvvisoModifiche();
+}
+
 // ==================== FUNZIONI AGENTI ====================
 function normalizzaCodiceAgente(codice) {
     if (!codice) return codice;
     let num = parseInt(codice, 10);
-    if (!isNaN(num)) {
-        return num.toString();
-    }
+    if (!isNaN(num)) return num.toString();
     return codice;
 }
 
@@ -711,6 +709,7 @@ async function selezionaAgente(codice) {
         document.getElementById('cercaCliente').value = '';
         document.getElementById('cercaArticoloInline').value = '';
         document.getElementById('dettaglioAgenti').innerHTML = '';
+        resetModificheNonSalvate();
     } catch(e) { alert("Errore caricamento dati: "+e.message); }
 }
 
@@ -720,6 +719,8 @@ async function salvaDatiAgente() {
         await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiOrd });
         await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiSca });
         document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
+        resetModificheNonSalvate();
+        showToast("✅ Dati salvati!");
     } catch(e) { alert("Errore salvataggio: "+e.message); }
 }
 
@@ -993,7 +994,6 @@ function mostraDettaglioCliente(codice) {
     clienteScadenzeCorrente = cliente;
     
     let containerArticoli = document.getElementById('dettaglioAgenti');
-    
     let html = '';
     
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
@@ -1072,7 +1072,6 @@ function filtraArticoli() {
     );
     
     let containerArticoli = document.getElementById('dettaglioAgenti');
-    
     let html = '';
     
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
@@ -1091,7 +1090,7 @@ function filtraArticoli() {
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
-        html += `</tbody> </table></div>`;
+        html += `</tbody></table></div>`;
     } else {
         html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
@@ -1137,7 +1136,7 @@ function filtraArticoli() {
     });
 }
 
-// ==================== CARICA FILE ====================
+// ==================== CARICA FILE (CORRETTO) ====================
 async function caricaFile(files) {
     if (!agenteCorrente) {
         alert("Seleziona prima un agente!");
@@ -1155,10 +1154,12 @@ async function caricaFile(files) {
     
     for (let file of files) {
         let nome = file.name;
-        let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
-        let regexOrdVecchio = new RegExp(`^ORD${codAgente.padStart(4, '0')}\\.`, 'i');
-        let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
-        let regexScaVecchio = new RegExp(`^SCA${codAgente.padStart(4, '0')}\\.`, 'i');
+        
+        // Regex migliorati: accettano .txt, .csv, o nessuna estensione
+        let regexOrd = new RegExp(`^ORD${codAgente}(\\.[a-zA-Z0-9]+)?$`, 'i');
+        let regexOrdVecchio = new RegExp(`^ORD${codAgente.padStart(4, '0')}(\\.[a-zA-Z0-9]+)?$`, 'i');
+        let regexSca = new RegExp(`^SCA${codAgente}(\\.[a-zA-Z0-9]+)?$`, 'i');
+        let regexScaVecchio = new RegExp(`^SCA${codAgente.padStart(4, '0')}(\\.[a-zA-Z0-9]+)?$`, 'i');
         
         if (regexOrd.test(nome) || regexOrdVecchio.test(nome)) {
             trovati.ord = true;
@@ -1169,13 +1170,13 @@ async function caricaFile(files) {
             scaText = await file.text();
         }
         else {
-            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt o ORD${codAgente.padStart(4, '0')}.txt\nSCA${codAgente}.txt o SCA${codAgente.padStart(4, '0')}.txt\n\nEsempio: ORD${codAgente}.txt e SCA${codAgente}.txt`);
+            alert(`❌ FILE NON VALIDO: "${nome}"\n\nI file devono essere nominati come:\n\n📄 ORD${codAgente}.txt  (o .csv)\n📄 SCA${codAgente}.txt  (o .csv)\n\n📌 Esempio con codice "${codAgente}":\n   ORD${codAgente}.txt e SCA${codAgente}.txt\n\n📌 Se il codice è "001", usare:\n   ORD001.txt e SCA001.txt\n\nSupporta anche file senza estensione.`);
             return false;
         }
     }
     
     if (!trovati.ord || !trovati.sca) {
-        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!");
+        alert("❌ FILE MANCANTI\n\nDevi selezionare ENTRAMBI i file:\n- ORD" + codAgente + ".txt\n- SCA" + codAgente + ".txt\n\nNecessari entrambi per il corretto funzionamento.");
         return false;
     }
     
@@ -1192,20 +1193,48 @@ async function caricaFile(files) {
     await salvaDatiAgente();
     aggiornaClienti();
     document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
-    alert(`Caricamento completato!\nORD: ${datiOrd.length} clienti\nSCA: ${datiSca.length} clienti`);
+    alert(`✅ CARICAMENTO COMPLETATO!\n\n📊 ORD: ${datiOrd.length} clienti\n📊 SCA: ${datiSca.length} clienti\n\nTotale clienti unici: ${clientiUnici.length}`);
     return true;
 }
 
+// ==================== HAMBURGER MENU ====================
+const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
+const navGridAgenti = document.getElementById('navGrid');
+if (hamburgerBtnAgenti && navGridAgenti) {
+    hamburgerBtnAgenti.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navGridAgenti.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+        if (!navGridAgenti.contains(e.target) && !hamburgerBtnAgenti.contains(e.target)) {
+            navGridAgenti.classList.remove('open');
+        }
+    });
+}
+
 // ==================== EVENTI ====================
-document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
+document.getElementById('selectAgente').onchange = (e) => { 
+    if (e.target.value && modificheNonSalvate) {
+        if (confirm("⚠️ Ci sono modifiche non salvate. Vuoi salvare prima di cambiare agente?")) {
+            salvaDatiAgente().then(() => selezionaAgente(e.target.value));
+        } else {
+            selezionaAgente(e.target.value);
+        }
+    } else if (e.target.value) {
+        selezionaAgente(e.target.value);
+    }
+};
+
 document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => {
     let clienteCodice = document.getElementById('selectClienteAgenti').value;
     if (clienteCodice) filtraArticoli();
 };
+
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
+
 document.getElementById('fileInput').onchange = async (e) => {
     await caricaFile(Array.from(e.target.files));
     e.target.value = '';
