@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti v5.07c</title>
+    <title>inSAPA - Agenti vA.5.40</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -518,12 +518,11 @@
         </select>
     </div>
     <div class="content-area">
-        <div id="scadenzeAgenti"></div>
         <div id="dettaglioAgenti"></div>
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
-<div class="version">v5.07c - Agenti (Logo Manager Dual Link)</div>
+<div class="version">vA.5.40 - Agenti (Logo Manager Dual Link)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -639,8 +638,17 @@ function mostraModaleConfig() {
         }
         showToast("✅ Configurazione salvata!");
         modal.remove();
+        aggiornaPulsanteLogoMobile();
     };
     document.getElementById('modalBtnCancel').onclick = () => modal.remove();
+}
+
+function aggiornaPulsanteLogoMobile() {
+    const logoPresente = getLogoSaved() !== null;
+    const btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) {
+        btnMobile.style.display = logoPresente ? 'none' : 'block';
+    }
 }
 
 // Gestione eventi LOGO
@@ -687,16 +695,10 @@ function caricaLogoSaved() {
         document.getElementById('logoImmagine').style.display = 'block';
         document.getElementById('logoSpan').style.display = 'none';
     }
+    aggiornaPulsanteLogoMobile();
 }
 caricaLogoSaved();
 
-function aggiornaPulsanteLogoMobile() {
-    let logoPresente = getLogoSaved() !== null;
-    let btnMobile = document.getElementById('btnCaricaLogoMobile');
-    if (btnMobile) {
-        btnMobile.style.display = logoPresente ? 'none' : 'block';
-    }
-}
 document.getElementById('btnCaricaLogoMobile').onclick = () => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -712,13 +714,13 @@ document.getElementById('btnCaricaLogoMobile').onclick = () => {
                 document.getElementById('logoImmagine').style.display = 'block';
                 document.getElementById('logoSpan').style.display = 'none';
                 showToast("✅ Logo caricato! Premi SALVA nel modale per confermare.");
+                aggiornaPulsanteLogoMobile();
             };
             reader.readAsDataURL(file);
         }
     };
     fileInput.click();
 };
-aggiornaPulsanteLogoMobile();
 
 // ==================== HAMBURGER MENU ====================
 const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -774,7 +776,6 @@ async function selezionaAgente(codice) {
         aggiornaClienti();
         document.getElementById('cercaCliente').value = '';
         document.getElementById('cercaArticoloInline').value = '';
-        document.getElementById('scadenzeAgenti').innerHTML = '';
         document.getElementById('dettaglioAgenti').innerHTML = '';
     } catch(e) { alert("Errore caricamento dati: "+e.message); }
 }
@@ -998,8 +999,7 @@ function filtraClienti() {
     }
     
     if (clientiFiltrati.length === 0) {
-        document.getElementById('scadenzeAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
-        document.getElementById('dettaglioAgenti').innerHTML = '';
+        document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
     }
 }
 
@@ -1009,11 +1009,13 @@ function mostraDettaglioCliente(codice) {
     
     clienteScadenzeCorrente = cliente;
     
-    let containerScadenze = document.getElementById('scadenzeAgenti');
     let containerArticoli = document.getElementById('dettaglioAgenti');
     
+    let html = '';
+    
+    // Mostra scadenze se presenti
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
-        let html = `<div class="scadenze-box">
+        html += `<div class="scadenze-box">
                     <div class="scadenze-header">
                         <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
                         <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
@@ -1024,18 +1026,18 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
         html += `</tbody></table></div>`;
-        containerScadenze.innerHTML = html;
     } else {
-        containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
+        html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
     
+    // Mostra ordini se presenti
     if (cliente.ordini && cliente.ordini.length > 0) {
-        let html = `<div class="scadenze-box">
+        html += `<div class="scadenze-box">
                     <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
         for (let art of cliente.ordini) {
             let storicoHtml = '';
@@ -1058,20 +1060,21 @@ function mostraDettaglioCliente(codice) {
                     </div>`;
         }
         html += `</div>`;
-        containerArticoli.innerHTML = html;
-        
-        document.querySelectorAll('.articolo-item').forEach(el => {
-            el.onclick = (e) => {
-                e.stopPropagation();
-                let storicoDiv = el.querySelector('.storico-ordini');
-                if (storicoDiv) {
-                    storicoDiv.classList.toggle('visible');
-                }
-            };
-        });
     } else {
-        containerArticoli.innerHTML = `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
+        html += `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
     }
+    
+    containerArticoli.innerHTML = html;
+    
+    document.querySelectorAll('.articolo-item').forEach(el => {
+        el.onclick = (e) => {
+            e.stopPropagation();
+            let storicoDiv = el.querySelector('.storico-ordini');
+            if (storicoDiv) {
+                storicoDiv.classList.toggle('visible');
+            }
+        };
+    });
 }
 
 function filtraArticoli() {
@@ -1087,32 +1090,62 @@ function filtraArticoli() {
         art.descrizione.toLowerCase().includes(searchText)
     );
     
-    let container = document.getElementById('dettaglioAgenti');
-    let html = `<div class="scadenze-box">
-                <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
+    let containerArticoli = document.getElementById('dettaglioAgenti');
     
-    for (let art of filtrati) {
-        let storicoHtml = '';
-        if (art.coppie && art.coppie.length > 0) {
-            let mostrati = art.coppie.slice(0, 4);
-            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
-                            <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
-            for (let ord of mostrati) {
-                storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
-            }
-            storicoHtml += `</div>`;
-        } else {
-            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+    let html = '';
+    
+    // Mostra scadenze se presenti
+    if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
+        html += `<div class="scadenze-box">
+                    <div class="scadenze-header">
+                        <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
+                        <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
+                            </svg>
+                            Invia Scadenze
+                        </button>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
+        for (let s of cliente.scadenze) {
+            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
-        
-        html += `<div class="articolo-item" data-codice="${art.codice}">
-                    <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
-                    <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
-                    ${storicoHtml}
-                </div>`;
+        html += `</tbody></table></div>`;
+    } else {
+        html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
-    html += `</div>`;
-    container.innerHTML = html;
+    
+    // Mostra ordini filtrati
+    if (filtrati.length > 0) {
+        html += `<div class="scadenze-box">
+                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
+        for (let art of filtrati) {
+            let storicoHtml = '';
+            if (art.coppie && art.coppie.length > 0) {
+                let mostrati = art.coppie.slice(0, 4);
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
+                                <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+                for (let ord of mostrati) {
+                    storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
+                }
+                storicoHtml += `</div>`;
+            } else {
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+            }
+            
+            html += `<div class="articolo-item" data-codice="${art.codice}">
+                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
+                        <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
+                        ${storicoHtml}
+                    </div>`;
+        }
+        html += `</div>`;
+    } else {
+        html += `<div class="scadenze-box">Nessun articolo trovato per "${searchText}"</div>`;
+    }
+    
+    containerArticoli.innerHTML = html;
     
     document.querySelectorAll('.articolo-item').forEach(el => {
         el.onclick = (e) => {
@@ -1186,7 +1219,10 @@ async function caricaFile(files) {
 document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
 document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
-document.getElementById('cercaArticoloInline').oninput = () => filtraArticoli();
+document.getElementById('cercaArticoloInline').oninput = () => {
+    let clienteCodice = document.getElementById('selectClienteAgenti').value;
+    if (clienteCodice) filtraArticoli();
+};
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
 document.getElementById('fileInput').onchange = async (e) => {
