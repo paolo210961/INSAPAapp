@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.42</title>
+    <title>inSAPA - Agenti vA.5.43</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -61,17 +61,6 @@
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.5rem; }
-        .btn-logo-mobile {
-            display: none;
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
         .logo-tooltip {
             position: absolute;
             bottom: -25px;
@@ -89,89 +78,6 @@
             transition: opacity 0.3s;
         }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
-        
-        /* MODALE CONFIGURAZIONE LOGO */
-        .modal-overlay-config {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .modal-container-config {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .modal-container-config h3 {
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-            text-align: center;
-        }
-        .modal-container-config label {
-            display: block;
-            font-weight: bold;
-            margin: 15px 0 5px 0;
-            color: #2c3e50;
-        }
-        .modal-container-config input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        .logo-preview {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 15px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .logo-preview img {
-            max-width: 60px;
-            max-height: 60px;
-            object-fit: contain;
-        }
-        .logo-preview span {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        .btn-file {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            width: 100%;
-        }
-        .modal-buttons-config {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons-config button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-save-config { background: #27ae60; color: white; }
-        .btn-cancel-config { background: #95a5a6; color: white; }
         
         /* NAVIGAZIONE - HAMBURGER MENU */
         .nav-box { 
@@ -383,9 +289,6 @@
                 justify-content: center;
                 flex-direction: column;
             }
-            .btn-logo-mobile {
-                display: block;
-            }
             .logo-rettangolo {
                 width: 250px;
                 height: 70px;
@@ -521,9 +424,8 @@
             <div id="logoRettangolo" class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 LOGO</span>
-                <div class="logo-tooltip">⚡ 1 tap: Link1 | 2 tap: Link2 | 6 sec: Config</div>
+                <div class="logo-tooltip">⚡ 1 tap: Link1 | 2 tap: Link2</div>
             </div>
-            <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
         </div>
         <div class="nav-box">
             <button id="hamburgerBtn" class="hamburger-btn">☰</button>
@@ -577,8 +479,8 @@
         <div id="dettaglioAgenti"></div>
     </div>
 </div>
-<footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
-<div class="version">vA.5.42 - Agenti (Logo Manager Dual Link)</div>
+<footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
+<div class="version">vA.5.43 - Agenti</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -601,114 +503,87 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 
-// ==================== LOGO MANAGER - DUAL LINK (VERSIONE UNIFICATA) ====================
-let pressTimer = null;
-let lastTap = 0;
-let isLongPress = false;
+// ==================== LINK E LOGO DA FILE ESTERNI ====================
+let linkPrincipale = "";
+let linkSecondario = "";
 
-function getLinkPrincipale() { return localStorage.getItem('link_principale_agenti') || ""; }
-function setLinkPrincipale(url) { localStorage.setItem('link_principale_agenti', url); }
-function getLinkSecondario() { return localStorage.getItem('link_secondario_agenti') || ""; }
-function setLinkSecondario(url) { localStorage.setItem('link_secondario_agenti', url); }
-function getLogoSaved() { return localStorage.getItem('logo_agenti'); }
-function setLogoSaved(url) { localStorage.setItem('logo_agenti', url); }
-
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
-    toast.innerText = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
-}
-
-function apriLinkPrincipale() {
-    const link = getLinkPrincipale();
-    if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link principale"); }
-    else { showToast("⚠️ Link principale non configurato. Tieni premuto 6 sec sul logo per configurarlo.", true); }
-}
-
-function apriLinkSecondario() {
-    const link = getLinkSecondario();
-    if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link secondario"); }
-    else { showToast("⚠️ Link secondario non configurato. Tieni premuto 6 sec sul logo per configurarlo.", true); }
-}
-
-function mostraModaleConfig() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay-config';
-    const link1 = getLinkPrincipale();
-    const link2 = getLinkSecondario();
-    const logoSaved = getLogoSaved();
-    modal.innerHTML = `
-        <div class="modal-container-config">
-            <h3>🔧 CONFIGURAZIONE LOGO</h3>
-            <label>📌 LINK PRINCIPALE (1 tap)</label>
-            <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
-            <label>📌 LINK SECONDARIO (2 tap rapidi)</label>
-            <input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g, '&quot;')}">
-            <label>🖼️ LOGO AZIENDALE</label>
-            <div class="logo-preview">
-                ${logoSaved ? `<img src="${logoSaved}" id="modalLogoPreview">` : '<span>Nessun logo caricato</span>'}
-            </div>
-            <input type="file" id="modalLogoFile" accept="image/*" style="display:none;">
-            <button id="modalBtnCaricaLogo" class="btn-file">📁 CARICA NUOVO LOGO</button>
-            <div class="modal-buttons-config">
-                <button id="modalBtnSave" class="btn-save-config">💾 SALVA</button>
-                <button id="modalBtnCancel" class="btn-cancel-config">❌ ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('modalBtnCaricaLogo').onclick = () => {
-        const fileInput = document.getElementById('modalLogoFile');
-        fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const newLogo = ev.target.result;
-                    const previewDiv = document.querySelector('.logo-preview');
-                    previewDiv.innerHTML = `<img src="${newLogo}" id="modalLogoPreview">`;
-                    showToast("Nuovo logo caricato, premi SALVA per confermare");
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-        fileInput.click();
-    };
-    
-    document.getElementById('modalBtnSave').onclick = () => {
-        const newLink1 = document.getElementById('modalLink1').value;
-        const newLink2 = document.getElementById('modalLink2').value;
-        setLinkPrincipale(newLink1);
-        setLinkSecondario(newLink2);
-        const newLogoPreview = document.querySelector('#modalLogoPreview');
-        if (newLogoPreview) {
-            const newLogoUrl = newLogoPreview.src;
-            setLogoSaved(newLogoUrl);
-            document.getElementById('logoImmagine').src = newLogoUrl;
-            document.getElementById('logoImmagine').style.display = 'block';
-            document.getElementById('logoSpan').style.display = 'none';
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+            console.log("Link caricati:", linkPrincipale, linkSecondario);
+        } else {
+            console.warn("link.html non trovato, uso link vuoti");
         }
-        showToast("✅ Configurazione salvata!");
-        modal.remove();
-        aggiornaPulsanteLogoMobile();
-    };
-    document.getElementById('modalBtnCancel').onclick = () => modal.remove();
-}
-
-function aggiornaPulsanteLogoMobile() {
-    const logoPresente = getLogoSaved() !== null;
-    const btnMobile = document.getElementById('btnCaricaLogoMobile');
-    if (btnMobile) {
-        btnMobile.style.display = logoPresente ? 'none' : 'block';
+    } catch(e) {
+        console.warn("Errore caricamento link.html:", e);
     }
 }
 
-// Gestione eventi LOGO
+function apriLinkPrincipale() {
+    if (linkPrincipale && linkPrincipale !== "") {
+        window.open(linkPrincipale, '_blank');
+        showToast("🔗 Apertura link principale");
+    } else {
+        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
+    }
+}
+
+function apriLinkSecondario() {
+    if (linkSecondario && linkSecondario !== "") {
+        window.open(linkSecondario, '_blank');
+        showToast("🔗 Apertura link secondario");
+    } else {
+        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
+    }
+}
+
+function caricaLogoSaved() {
+    const logoImg = document.getElementById('logoImmagine');
+    const logoSpan = document.getElementById('logoSpan');
+    
+    fetch('icons/logo.png')
+        .then(response => {
+            if (response.ok) {
+                logoImg.src = 'icons/logo.png';
+                logoImg.style.display = 'block';
+                logoSpan.style.display = 'none';
+            } else {
+                fetch('icons/logo.jpg')
+                    .then(response2 => {
+                        if (response2.ok) {
+                            logoImg.src = 'icons/logo.jpg';
+                            logoImg.style.display = 'block';
+                            logoSpan.style.display = 'none';
+                        } else {
+                            fetch('icons/logo.gif')
+                                .then(response3 => {
+                                    if (response3.ok) {
+                                        logoImg.src = 'icons/logo.gif';
+                                        logoImg.style.display = 'block';
+                                        logoSpan.style.display = 'none';
+                                    } else {
+                                        logoImg.style.display = 'none';
+                                        logoSpan.style.display = 'block';
+                                    }
+                                })
+                                .catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+                        }
+                    })
+                    .catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+            }
+        })
+        .catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+}
+
+// Gestione eventi LOGO (1 tap, 2 tap)
 const logoDivElem = document.getElementById('logoRettangolo');
+let lastTap = 0;
+
 logoDivElem.addEventListener('click', (e) => {
     const now = new Date().getTime();
     const tapLength = now - lastTap;
@@ -727,57 +602,6 @@ logoDivElem.addEventListener('click', (e) => {
     }
 });
 
-logoDivElem.addEventListener('mousedown', () => {
-    isLongPress = false;
-    pressTimer = setTimeout(() => {
-        isLongPress = true;
-        pressTimer = null;
-        mostraModaleConfig();
-    }, 6000);
-});
-logoDivElem.addEventListener('mouseup', () => {
-    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-    isLongPress = false;
-});
-logoDivElem.addEventListener('mouseleave', () => {
-    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-    isLongPress = false;
-});
-
-function caricaLogoSaved() {
-    const logo = getLogoSaved();
-    if (logo) {
-        document.getElementById('logoImmagine').src = logo;
-        document.getElementById('logoImmagine').style.display = 'block';
-        document.getElementById('logoSpan').style.display = 'none';
-    }
-    aggiornaPulsanteLogoMobile();
-}
-caricaLogoSaved();
-
-document.getElementById('btnCaricaLogoMobile').onclick = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const url = ev.target.result;
-                setLogoSaved(url);
-                document.getElementById('logoImmagine').src = url;
-                document.getElementById('logoImmagine').style.display = 'block';
-                document.getElementById('logoSpan').style.display = 'none';
-                showToast("✅ Logo caricato! Premi SALVA nel modale per confermare.");
-                aggiornaPulsanteLogoMobile();
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    fileInput.click();
-};
-
 // ==================== HAMBURGER MENU ====================
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const navGrid = document.getElementById('navGrid');
@@ -793,11 +617,18 @@ if (hamburgerBtn && navGrid) {
     });
 }
 
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
 // ==================== FUNZIONI AGENTI ====================
-// Funzione per normalizzare il codice agente (0001 -> 01)
 function normalizzaCodiceAgente(codice) {
     if (!codice) return codice;
-    // Se è composto solo da zeri e numeri, toglie gli zeri iniziali
     let num = parseInt(codice, 10);
     if (!isNaN(num)) {
         return num.toString();
@@ -811,7 +642,6 @@ async function caricaAgenti() {
         agentiLista = [];
         snapshot.forEach(doc => {
             let data = doc.data();
-            // Normalizza il codice durante il caricamento
             data.codice = normalizzaCodiceAgente(data.codice);
             agentiLista.push(data);
         });
@@ -823,7 +653,6 @@ async function caricaAgenti() {
         });
         aggiornaSelectAgenti();
         
-        // Ripristina ultimo agente selezionato
         const ultimoAgente = localStorage.getItem('ultimoAgenteSelezionato');
         if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) {
             document.getElementById('selectAgente').value = ultimoAgente;
@@ -852,20 +681,16 @@ async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
     
-    // Salva in localStorage
     localStorage.setItem('ultimoAgenteSelezionato', codice);
     
     try {
-        // Prova prima con il nuovo formato, poi con il vecchio (per migrazione)
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
         let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
         
-        // Se non trova con il nuovo formato, prova con il vecchio (con zeri)
         if (!ordDoc.exists) {
             let vecchioCodice = codice.padStart(4, '0');
             ordDoc = await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).get();
             if (ordDoc.exists) {
-                // Migra i dati al nuovo formato
                 await db.collection('agenti_dati').doc(`ord_${codice}`).set(ordDoc.data());
                 await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).delete();
             }
@@ -900,7 +725,6 @@ async function salvaDatiAgente() {
 
 async function creaAgente(codice, nome) {
     if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
-    // Normalizza il codice (toglie zeri iniziali)
     let codiceNorm = normalizzaCodiceAgente(codice);
     if (agentiLista.find(a => a.codice === codiceNorm)) { alert("Codice già esistente!"); return false; }
     try {
@@ -916,7 +740,6 @@ async function eliminaAgente() {
         return;
     }
     
-    // Modale di conferma
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
@@ -937,15 +760,12 @@ async function eliminaAgente() {
     
     document.getElementById('btnConfermaElimina').onclick = async () => {
         try {
-            // Elimina da agenti_lista
             await db.collection('agenti_lista').doc(agenteCorrente.codice).delete();
-            // Elimina dati ORD e SCA
             await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).delete();
             await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).delete();
             
             showToast(`✅ Agente ${agenteCorrente.codice} eliminato con successo!`);
             
-            // Reset e ricarica
             agenteCorrente = null;
             localStorage.removeItem('ultimoAgenteSelezionato');
             datiOrd = [];
@@ -1271,7 +1091,7 @@ function filtraArticoli() {
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
-        html += `</tbody></table></div>`;
+        html += `</tbody> </table></div>`;
     } else {
         html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
@@ -1335,7 +1155,6 @@ async function caricaFile(files) {
     
     for (let file of files) {
         let nome = file.name;
-        // Supporta sia il vecchio formato (0001) che il nuovo (01)
         let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
         let regexOrdVecchio = new RegExp(`^ORD${codAgente.padStart(4, '0')}\\.`, 'i');
         let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
@@ -1412,7 +1231,9 @@ document.getElementById('btnCreaAgente').onclick = () => {
 document.getElementById('btnEliminaAgente').onclick = () => eliminaAgente();
 
 // ==================== AVVIO ====================
-caricaAgenti();
+Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(() => {
+    caricaAgenti();
+});
 </script>
 </body>
 </html>
