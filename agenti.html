@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti</title>
+    <title>inSAPA - Agenti v5.07c</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
         
-        /* HEADER CON DUE RIGHE */
+        /* HEADER */
         .header {
             background: white;
             padding: 15px 25px;
@@ -20,7 +20,6 @@
             z-index: 1000;
         }
         
-        /* Prima riga: logo + pulsanti navigazione */
         .header-row {
             display: flex;
             justify-content: space-between;
@@ -30,7 +29,6 @@
             margin-bottom: 15px;
         }
         
-        /* Seconda riga: box gestione agente (giallo) */
         .header-row-bottom {
             background: #fff3cd;
             border: 1px solid #ffecb3;
@@ -59,6 +57,7 @@
             justify-content: center; 
             overflow: hidden; 
             cursor: pointer; 
+            position: relative;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.5rem; }
@@ -73,12 +72,120 @@
             font-size: 0.8rem;
             font-weight: bold;
         }
+        .logo-tooltip {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
         
-        /* Pulsanti navigazione - sfondo bianco, testo nero grassetto */
+        /* MODALE CONFIGURAZIONE LOGO */
+        .modal-overlay-config {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-container-config {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .modal-container-config h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .modal-container-config label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 5px 0;
+            color: #2c3e50;
+        }
+        .modal-container-config input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .logo-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .logo-preview img {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: contain;
+        }
+        .logo-preview span {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .btn-file {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+        .modal-buttons-config {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons-config button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-save-config { background: #27ae60; color: white; }
+        .btn-cancel-config { background: #95a5a6; color: white; }
+        
+        /* NAVIGAZIONE - HAMBURGER MENU */
         .nav-box { 
             background: #f1c40f; 
             border-radius: 16px; 
             padding: 10px 20px; 
+        }
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #2c3e50;
         }
         .nav-grid { display: flex; gap: 10px; }
         .nav-btn { 
@@ -98,9 +205,8 @@
             cursor: not-allowed; 
             opacity: 0.8;
         }
-        .nav-btn.disabled:hover { transform: none; background: #ecf0f1; color: #95a5a6; }
         
-        /* Box gestione agente - elementi inline */
+        /* Box gestione agente */
         .action-group {
             display: flex;
             align-items: center;
@@ -131,7 +237,6 @@
         /* Main container */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         
-        /* Sidebar fissa durante lo scroll */
         .sidebar { 
             width: 340px; 
             background: white; 
@@ -205,6 +310,23 @@
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
+        .toast-message {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2000;
+            font-weight: bold;
+            animation: fadeOut 3s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
         
         /* ==================== LAYOUT CELLULARE ==================== */
         @media (max-width: 768px) { 
@@ -221,13 +343,43 @@
                 flex-direction: column;
             }
             .btn-logo-mobile {
-                display: none;
+                display: block;
             }
             .logo-rettangolo {
                 width: 250px;
                 height: 70px;
                 margin: 0 auto;
             }
+            .logo-tooltip {
+                display: none;
+            }
+            /* HAMBURGER MENU */
+            .nav-box {
+                position: relative;
+                width: 100%;
+                text-align: center;
+            }
+            .hamburger-btn {
+                display: block;
+                margin: 0 auto;
+            }
+            .nav-grid {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                left: 0;
+                background: #f1c40f;
+                border-radius: 12px;
+                padding: 10px;
+                margin-top: 5px;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+            .nav-grid.open { display: flex; }
+            .nav-btn { width: 100%; text-align: center; }
+            
             .action-group {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -259,14 +411,6 @@
             }
             .action-group:first-child input {
                 display: none;
-            }
-            .nav-box {
-                width: 100%;
-                padding: 5px 10px;
-            }
-            .nav-btn {
-                padding: 4px 12px;
-                font-size: 0.85rem;
             }
             .main-container {
                 flex-direction: column;
@@ -312,9 +456,6 @@
                 text-align: center;
                 margin-top: 5px;
             }
-        }
-        
-        @media (max-width: 768px) {
             .btnCreaAgenteMobileHide {
                 display: none !important;
             }
@@ -328,11 +469,13 @@
             <div id="logoRettangolo" class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 LOGO</span>
+                <div class="logo-tooltip">⚡ 1 tap: Link1 | 2 tap: Link2 | 6 sec: Config</div>
             </div>
             <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
         </div>
         <div class="nav-box">
-            <div class="nav-grid">
+            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+            <div id="navGrid" class="nav-grid">
                 <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
                 <button class="nav-btn disabled" disabled>👥 AGENTI</button>
                 <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
@@ -348,7 +491,6 @@
             <input type="text" id="cercaArticoloInline" placeholder="🔍 Cerca articolo...">
         </div>
         <div class="action-group">
-            <!-- PULSANTE MODIFICATO: ora "ORD+SCA" -->
             <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
             <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
@@ -380,8 +522,8 @@
         <div id="dettaglioAgenti"></div>
     </div>
 </div>
-<footer>Logo: clicca sul pulsante CARICA LOGO su mobile / tieni premuto 3 secondi su PC</footer>
-<div class="version">v5.07b - Agenti (Firebase)</div>
+<footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
+<div class="version">v5.07c - Agenti (Logo Manager Dual Link)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -404,17 +546,204 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 
+// ==================== LOGO MANAGER - DUAL LINK ====================
+let pressTimer = null;
+let lastTap = 0;
+let isLongPress = false;
+
+function getLinkPrincipale() { return localStorage.getItem('link_principale_agenti') || ""; }
+function setLinkPrincipale(url) { localStorage.setItem('link_principale_agenti', url); }
+function getLinkSecondario() { return localStorage.getItem('link_secondario_agenti') || ""; }
+function setLinkSecondario(url) { localStorage.setItem('link_secondario_agenti', url); }
+function getLogoSaved() { return localStorage.getItem('logo_agenti'); }
+function setLogoSaved(url) { localStorage.setItem('logo_agenti', url); }
+
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
+function apriLinkPrincipale() {
+    const link = getLinkPrincipale();
+    if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link principale"); }
+    else { showToast("⚠️ Link principale non configurato. Tieni premuto 6 sec sul logo per configurarlo.", true); }
+}
+
+function apriLinkSecondario() {
+    const link = getLinkSecondario();
+    if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link secondario"); }
+    else { showToast("⚠️ Link secondario non configurato. Tieni premuto 6 sec sul logo per configurarlo.", true); }
+}
+
+function mostraModaleConfig() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay-config';
+    const link1 = getLinkPrincipale();
+    const link2 = getLinkSecondario();
+    const logoSaved = getLogoSaved();
+    modal.innerHTML = `
+        <div class="modal-container-config">
+            <h3>🔧 CONFIGURAZIONE LOGO</h3>
+            <label>📌 LINK SITO PRINCIPALE (1 tap)</label>
+            <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
+            <label>📌 LINK SECONDARIO (2 tap rapidi)</label>
+            <input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g, '&quot;')}">
+            <label>🖼️ LOGO AZIENDALE</label>
+            <div class="logo-preview">
+                ${logoSaved ? `<img src="${logoSaved}" id="modalLogoPreview">` : '<span>Nessun logo caricato</span>'}
+            </div>
+            <input type="file" id="modalLogoFile" accept="image/*" style="display:none;">
+            <button id="modalBtnCaricaLogo" class="btn-file">📁 CARICA NUOVO LOGO</button>
+            <div class="modal-buttons-config">
+                <button id="modalBtnSave" class="btn-save-config">💾 SALVA</button>
+                <button id="modalBtnCancel" class="btn-cancel-config">❌ ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('modalBtnCaricaLogo').onclick = () => {
+        const fileInput = document.getElementById('modalLogoFile');
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const newLogo = ev.target.result;
+                    const previewDiv = document.querySelector('.logo-preview');
+                    previewDiv.innerHTML = `<img src="${newLogo}" id="modalLogoPreview">`;
+                    showToast("Nuovo logo caricato, premi SALVA per confermare");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        fileInput.click();
+    };
+    
+    document.getElementById('modalBtnSave').onclick = () => {
+        const newLink1 = document.getElementById('modalLink1').value;
+        const newLink2 = document.getElementById('modalLink2').value;
+        setLinkPrincipale(newLink1);
+        setLinkSecondario(newLink2);
+        const newLogoPreview = document.querySelector('#modalLogoPreview');
+        if (newLogoPreview) {
+            const newLogoUrl = newLogoPreview.src;
+            setLogoSaved(newLogoUrl);
+            document.getElementById('logoImmagine').src = newLogoUrl;
+            document.getElementById('logoImmagine').style.display = 'block';
+            document.getElementById('logoSpan').style.display = 'none';
+        }
+        showToast("✅ Configurazione salvata!");
+        modal.remove();
+    };
+    document.getElementById('modalBtnCancel').onclick = () => modal.remove();
+}
+
+// Gestione eventi LOGO
+const logoDivElem = document.getElementById('logoRettangolo');
+logoDivElem.addEventListener('click', (e) => {
+    const now = new Date().getTime();
+    const tapLength = now - lastTap;
+    if (tapLength < 300 && tapLength > 0) {
+        e.stopPropagation();
+        apriLinkSecondario();
+        lastTap = 0;
+    } else {
+        lastTap = now;
+        setTimeout(() => {
+            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
+                apriLinkPrincipale();
+                lastTap = 0;
+            }
+        }, 300);
+    }
+});
+
+logoDivElem.addEventListener('mousedown', () => {
+    isLongPress = false;
+    pressTimer = setTimeout(() => {
+        isLongPress = true;
+        pressTimer = null;
+        mostraModaleConfig();
+    }, 6000);
+});
+logoDivElem.addEventListener('mouseup', () => {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    isLongPress = false;
+});
+logoDivElem.addEventListener('mouseleave', () => {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    isLongPress = false;
+});
+
+function caricaLogoSaved() {
+    const logo = getLogoSaved();
+    if (logo) {
+        document.getElementById('logoImmagine').src = logo;
+        document.getElementById('logoImmagine').style.display = 'block';
+        document.getElementById('logoSpan').style.display = 'none';
+    }
+}
+caricaLogoSaved();
+
+function aggiornaPulsanteLogoMobile() {
+    let logoPresente = getLogoSaved() !== null;
+    let btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) {
+        btnMobile.style.display = logoPresente ? 'none' : 'block';
+    }
+}
+document.getElementById('btnCaricaLogoMobile').onclick = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const url = ev.target.result;
+                setLogoSaved(url);
+                document.getElementById('logoImmagine').src = url;
+                document.getElementById('logoImmagine').style.display = 'block';
+                document.getElementById('logoSpan').style.display = 'none';
+                showToast("✅ Logo caricato! Premi SALVA nel modale per confermare.");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    fileInput.click();
+};
+aggiornaPulsanteLogoMobile();
+
+// ==================== HAMBURGER MENU ====================
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const navGrid = document.getElementById('navGrid');
+if (hamburgerBtn && navGrid) {
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navGrid.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+        if (!navGrid.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+            navGrid.classList.remove('open');
+        }
+    });
+}
+
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
-    console.log("📥 Caricamento agenti da Firebase...");
     try {
         const snapshot = await db.collection('agenti_lista').get();
         agentiLista = [];
         snapshot.forEach(doc => agentiLista.push(doc.data()));
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
-        console.log(`✅ Trovati ${agentiLista.length} agenti`);
         aggiornaSelectAgenti();
-    } catch(e) { console.error("❌ ERRORE: "+e.message); alert("Errore caricamento agenti: "+e.message); }
+    } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
 
 function aggiornaSelectAgenti() {
@@ -436,21 +765,18 @@ function aggiornaSelectAgenti() {
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
-    console.log(`👤 Agente selezionato: ${codice} - ${agenteCorrente.nome}`);
-    
     try {
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
         let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
         datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
         datiSca = scaDoc.exists ? scaDoc.data().dati : [];
-        console.log(`📊 Dati caricati: ORD ${datiOrd.length} clienti, SCA ${datiSca.length} clienti`);
         document.getElementById('fileStatusInline').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
         aggiornaClienti();
         document.getElementById('cercaCliente').value = '';
         document.getElementById('cercaArticoloInline').value = '';
         document.getElementById('scadenzeAgenti').innerHTML = '';
         document.getElementById('dettaglioAgenti').innerHTML = '';
-    } catch(e) { console.error("❌ ERRORE: "+e.message); alert("Errore caricamento dati: "+e.message); }
+    } catch(e) { alert("Errore caricamento dati: "+e.message); }
 }
 
 async function salvaDatiAgente() {
@@ -458,9 +784,8 @@ async function salvaDatiAgente() {
     try {
         await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiOrd });
         await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiSca });
-        console.log(`💾 Dati salvati per ${agenteCorrente.codice}`);
         document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
-    } catch(e) { console.error("❌ ERRORE salvataggio: "+e.message); alert("Errore salvataggio: "+e.message); }
+    } catch(e) { alert("Errore salvataggio: "+e.message); }
 }
 
 async function creaAgente(codice, nome) {
@@ -468,7 +793,6 @@ async function creaAgente(codice, nome) {
     if (agentiLista.find(a => a.codice === codice)) { alert("Codice già esistente!"); return false; }
     try {
         await db.collection('agenti_lista').doc(codice).set({ codice, nome });
-        console.log(`✅ Agente ${codice} - ${nome} creato`);
         await caricaAgenti();
         return true;
     } catch(e) { alert("ERRORE: "+e.message); return false; }
@@ -476,7 +800,6 @@ async function creaAgente(codice, nome) {
 
 // ==================== PARSER ORD ====================
 function parseORD(text) {
-    console.log(`📄 Parsing ORD: ${text.length} caratteri`);
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
@@ -541,13 +864,11 @@ function parseORD(text) {
         });
     }
     
-    console.log(`✅ ORD parsato: ${clienti.size} clienti`);
     return Array.from(clienti.values());
 }
 
 // ==================== PARSER SCA ====================
 function parseSCA(text) {
-    console.log(`📄 Parsing SCA: ${text.length} caratteri`);
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
@@ -583,7 +904,6 @@ function parseSCA(text) {
         }
     }
     
-    console.log(`✅ SCA parsato: ${clienti.size} clienti`);
     return Array.from(clienti.values());
 }
 
@@ -677,8 +997,6 @@ function filtraClienti() {
         select.appendChild(opt);
     }
     
-    console.log(`📋 Clienti filtrati: ${clientiFiltrati.length}/${clientiUnici.length}`);
-    
     if (clientiFiltrati.length === 0) {
         document.getElementById('scadenzeAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
         document.getElementById('dettaglioAgenti').innerHTML = '';
@@ -706,7 +1024,7 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th><tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
@@ -807,7 +1125,7 @@ function filtraArticoli() {
     });
 }
 
-// ==================== VALIDAZIONE FILE ====================
+// ==================== CARICA FILE ====================
 async function caricaFile(files) {
     if (!agenteCorrente) {
         alert("Seleziona prima un agente!");
@@ -831,12 +1149,10 @@ async function caricaFile(files) {
         if (regexOrd.test(nome)) {
             trovati.ord = true;
             ordText = await file.text();
-            console.log(`✅ File ORD valido: ${nome}`);
         } 
         else if (regexSca.test(nome)) {
             trovati.sca = true;
             scaText = await file.text();
-            console.log(`✅ File SCA valido: ${nome}`);
         }
         else {
             alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
@@ -851,15 +1167,12 @@ async function caricaFile(files) {
     
     datiOrd = [];
     datiSca = [];
-    console.log(`🗑️ Vecchi dati cancellati per agente ${agenteCorrente.codice}`);
     
     if (ordText) {
         datiOrd = parseORD(ordText);
-        console.log(`✅ ORD caricato: ${datiOrd.length} clienti`);
     }
     if (scaText) {
         datiSca = parseSCA(scaText);
-        console.log(`✅ SCA caricato: ${datiSca.length} clienti`);
     }
     
     await salvaDatiAgente();
@@ -898,81 +1211,8 @@ document.getElementById('btnCreaAgente').onclick = () => {
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 };
 
-// ==================== LOGO ====================
-function caricaLogo() { 
-    let l = localStorage.getItem('logo'); 
-    if(l) { 
-        document.getElementById('logoImmagine').src = l; 
-        document.getElementById('logoImmagine').style.display = 'block'; 
-        document.getElementById('logoSpan').style.display = 'none'; 
-    } 
-}
-function salvaLogo(u) { localStorage.setItem('logo', u); }
-function caricaLogoFile() { 
-    let inp = document.createElement('input'); 
-    inp.type = 'file'; 
-    inp.accept = 'image/*'; 
-    inp.onchange = e => { 
-        let f = e.target.files[0]; 
-        if(f){ 
-            let r = new FileReader(); 
-            r.onload = ev => { 
-                let url = ev.target.result; 
-                document.getElementById('logoImmagine').src = url; 
-                document.getElementById('logoImmagine').style.display = 'block'; 
-                document.getElementById('logoSpan').style.display = 'none'; 
-                salvaLogo(url); 
-            }; 
-            r.readAsDataURL(f); 
-        } 
-    }; 
-    inp.click(); 
-}
-
-let logoDiv = document.getElementById('logoRettangolo'); 
-let timer = null;
-logoDiv.addEventListener('mousedown', () => { 
-    timer = setTimeout(() => { 
-        caricaLogoFile(); 
-        timer = null; 
-    }, 3000); 
-});
-logoDiv.addEventListener('mouseup', () => { 
-    if(timer) { 
-        clearTimeout(timer); 
-        timer = null; 
-    } 
-});
-logoDiv.addEventListener('mouseleave', () => { 
-    if(timer) { 
-        clearTimeout(timer); 
-        timer = null; 
-    } 
-});
-
-function aggiornaPulsanteLogoMobile() {
-    let logoPresente = localStorage.getItem('logo') !== null;
-    let btnMobile = document.getElementById('btnCaricaLogoMobile');
-    if (btnMobile) {
-        btnMobile.style.display = logoPresente ? 'none' : 'block';
-    }
-}
-
-document.getElementById('btnCaricaLogoMobile').onclick = () => {
-    caricaLogoFile();
-};
-
-const observer = new MutationObserver(() => {
-    aggiornaPulsanteLogoMobile();
-});
-observer.observe(document.getElementById('logoImmagine'), { attributes: true });
-
-caricaLogo();
-aggiornaPulsanteLogoMobile();
-
 // ==================== AVVIO ====================
 caricaAgenti();
-console.log("🚀 App avviata - v5.07b");
 </script>
 </body>
 </html>
