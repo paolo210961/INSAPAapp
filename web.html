@@ -412,14 +412,12 @@ function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     
-    // Prima cerca logo.jpg
     fetch('icons/logo.jpg').then(r => {
         if (r.ok) {
             logoImg.src = 'icons/logo.jpg';
             logoImg.style.display = 'block';
             logoSpan.style.display = 'none';
         } else {
-            // Se non trova .jpg, prova .png
             fetch('icons/logo.png').then(r2 => {
                 if (r2.ok) {
                     logoImg.src = 'icons/logo.png';
@@ -431,6 +429,64 @@ function caricaLogo() {
     }).catch(() => {});
 }
 caricaLogo();
+
+// ==================== GESTIONE LINK PER LOGO (1 TAP, 2 TAP) ====================
+let linkPrincipale = "";
+let linkSecondario = "";
+let lastTap = 0;
+
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+            console.log("Link caricati:", linkPrincipale, linkSecondario);
+        } else {
+            console.warn("link.html non trovato");
+        }
+    } catch(e) { console.warn("Errore caricamento link.html:", e); }
+}
+
+function apriLinkPrincipale() {
+    if (linkPrincipale && linkPrincipale !== "") {
+        window.open(linkPrincipale, '_blank');
+        showToast("🔗 Apertura link principale");
+    } else {
+        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
+    }
+}
+
+function apriLinkSecondario() {
+    if (linkSecondario && linkSecondario !== "") {
+        window.open(linkSecondario, '_blank');
+        showToast("🔗 Apertura link secondario");
+    } else {
+        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
+    }
+}
+
+// Gestione click sul logo
+const logoSiti = document.getElementById('logoRettangolo');
+logoSiti.addEventListener('click', (e) => {
+    const now = new Date().getTime();
+    const tapLength = now - lastTap;
+    if (tapLength < 300 && tapLength > 0) {
+        e.stopPropagation();
+        apriLinkSecondario();
+        lastTap = 0;
+    } else {
+        lastTap = now;
+        setTimeout(() => {
+            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
+                apriLinkPrincipale();
+                lastTap = 0;
+            }
+        }, 300);
+    }
+});
 
 // ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
@@ -716,27 +772,13 @@ document.getElementById('btnSalvaGlobale').onclick = async () => {
     showToast("💾 Tutto già salvato su Firebase!");
 };
 
-// ==================== CARICA LINK DA FILE ====================
-async function caricaLinkDaFile() {
-    try {
-        const response = await fetch('link.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
-            if (lines.length >= 1) console.log("Link1:", lines[0]);
-            if (lines.length >= 2) console.log("Link2:", lines[1]);
-        }
-    } catch(e) { console.warn("link.html non trovato"); }
-}
-caricaLinkDaFile();
-
 // ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('web_admin_mode');
 if (savedAdminMode === 'true') {
     isAdminMode = true;
 }
 
-caricaCategorie().then(() => {
+Promise.all([caricaLinkDaFile(), caricaCategorie()]).then(() => {
     aggiornaUIModalitaAdmin();
 });
 </script>
