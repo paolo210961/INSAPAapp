@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti v5.07f</title>
+    <title>inSAPA - Agenti v5.07c</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -19,6 +19,7 @@
             top: 0;
             z-index: 1000;
         }
+        
         .header-row {
             display: flex;
             justify-content: space-between;
@@ -27,6 +28,7 @@
             gap: 20px;
             margin-bottom: 15px;
         }
+        
         .header-row-bottom {
             background: #fff3cd;
             border: 1px solid #ffecb3;
@@ -38,6 +40,7 @@
             flex-wrap: wrap;
             gap: 15px;
         }
+        
         .logo-area {
             display: flex;
             align-items: center;
@@ -45,15 +48,15 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        .logo-rettangolo {
-            width: 300px;
-            height: 80px;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
+        .logo-rettangolo { 
+            width: 300px; 
+            height: 80px; 
+            background: transparent; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            cursor: pointer; 
             position: relative;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -88,7 +91,7 @@
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
         
         /* MODALE CONFIGURAZIONE LOGO */
-        .modal-overlay {
+        .modal-overlay-config {
             position: fixed;
             top: 0;
             left: 0;
@@ -100,7 +103,7 @@
             align-items: center;
             z-index: 2000;
         }
-        .modal-container {
+        .modal-container-config {
             background: white;
             border-radius: 20px;
             padding: 25px;
@@ -108,71 +111,124 @@
             max-width: 450px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .modal-container h3 { margin: 0 0 20px 0; color: #2c3e50; text-align: center; }
-        .modal-container label { display: block; font-weight: bold; margin: 15px 0 5px 0; color: #2c3e50; }
-        .modal-container input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
-        .logo-preview { display: flex; align-items: center; gap: 15px; margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; }
-        .logo-preview img { max-width: 60px; max-height: 60px; object-fit: contain; }
-        .logo-preview span { font-size: 0.8rem; color: #666; }
-        .btn-file { background: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; width: 100%; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-save { background: #27ae60; color: white; }
-        .btn-cancel { background: #95a5a6; color: white; }
-        
-        /* NAVIGAZIONE - SCROLL ORIZZONTALE, PULSANTI COMPATTI */
-        .nav-box {
-            background: #f1c40f;
-            border-radius: 16px;
-            padding: 8px 15px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
-        .nav-box::-webkit-scrollbar { height: 4px; }
-        .nav-box::-webkit-scrollbar-track { background: #e0a800; border-radius: 4px; }
-        .nav-box::-webkit-scrollbar-thumb { background: #fff; border-radius: 4px; }
-        .nav-grid {
-            display: inline-flex;
-            gap: 10px;
-            white-space: nowrap;
-        }
-        .nav-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: white;
+        .modal-container-config h3 {
+            margin: 0 0 20px 0;
             color: #2c3e50;
+            text-align: center;
+        }
+        .modal-container-config label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 5px 0;
+            color: #2c3e50;
+        }
+        .modal-container-config input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .logo-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .logo-preview img {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: contain;
+        }
+        .logo-preview span {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .btn-file {
+            background: #3498db;
+            color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+        .modal-buttons-config {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons-config button {
+            flex: 1;
+            padding: 12px;
+            border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.8rem;
+        }
+        .btn-save-config { background: #27ae60; color: white; }
+        .btn-cancel-config { background: #95a5a6; color: white; }
+        
+        /* NAVIGAZIONE - HAMBURGER MENU */
+        .nav-box { 
+            background: #f1c40f; 
+            border-radius: 16px; 
+            padding: 10px 20px; 
+        }
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+        .nav-grid { display: flex; gap: 10px; }
+        .nav-btn { 
+            background: white; 
+            color: #2c3e50; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
             transition: all 0.2s;
-            flex-shrink: 0;
-            white-space: nowrap;
         }
         .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
-        .nav-btn.disabled {
-            background: #ecf0f1;
-            color: #95a5a6;
-            cursor: not-allowed;
+        .nav-btn.disabled { 
+            background: #ecf0f1; 
+            color: #95a5a6; 
+            cursor: not-allowed; 
             opacity: 0.8;
         }
-        .nav-btn.contabilita { background: #3498db; color: white; }
-        .nav-btn.agenti { background: #27ae60; color: white; }
-        .nav-btn.pwd { background: #f39c12; color: white; }
-        .nav-btn.esci { background: #e74c3c; color: white; }
         
         /* Box gestione agente */
-        .action-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .action-group label { font-weight: bold; color: #2c3e50; margin-right: 5px; }
-        .action-group select, .action-group button, .action-group input { margin: 0; width: auto; padding: 6px 12px; }
-        .action-group select { min-width: 180px; }
-        .action-group input { min-width: 200px; }
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .action-group label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-right: 5px;
+        }
+        .action-group select, .action-group button, .action-group input {
+            margin: 0;
+            width: auto;
+            padding: 6px 12px;
+        }
+        .action-group select {
+            min-width: 180px;
+        }
+        .action-group input {
+            min-width: 200px;
+        }
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-whatsapp-header { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
@@ -180,56 +236,229 @@
         
         /* Main container */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
-        .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 200px; height: fit-content; max-height: calc(100vh - 220px); overflow-y: auto; }
+        
+        .sidebar { 
+            width: 340px; 
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 200px;
+            height: fit-content;
+            max-height: calc(100vh - 220px);
+            overflow-y: auto;
+        }
+        
         .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        
         button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; font-weight: bold; }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
         select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
         .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; position: relative; }
-        .scadenze-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
-        .btn-whatsapp { background: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; width: auto; margin: 0; }
-        .btn-whatsapp:hover { background: #128C7E; transform: translateY(-1px); }
-        .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .scadenze-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            width: auto;
+            margin: 0;
+        }
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            transform: translateY(-1px);
+        }
+        .articolo-item { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+        }
         .articolo-item:hover { background-color: #fff3cd; transform: translateX(5px); }
         .articolo-titolo { font-weight: bold; }
-        .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 2px solid #3498db; font-size: 0.75rem; display: none; }
+        .storico-ordini { 
+            margin-top: 10px; 
+            padding-top: 10px; 
+            border-top: 2px solid #3498db; 
+            font-size: 0.75rem; 
+            display: none; 
+        }
         .storico-ordini.visible { display: block; }
         .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 4px 8px; margin: 3px; border-radius: 6px; }
         .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
         .cliente-rosso { color: #c0392b; font-weight: bold; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
-        .toast-message { position: fixed; bottom: 80px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
-        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group-modal button { margin: 0; }
+        .toast-message {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2000;
+            font-weight: bold;
+            animation: fadeOut 3s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
         
-        /* LAYOUT CELLULARE */
+        /* ==================== LAYOUT CELLULARE ==================== */
         @media (max-width: 768px) { 
-            .header-row { flex-direction: column; align-items: stretch; }
-            .header-row-bottom { flex-direction: column; align-items: stretch; }
-            .logo-area { justify-content: center; flex-direction: column; }
-            .btn-logo-mobile { display: block; }
-            .logo-rettangolo { width: 250px; height: 70px; margin: 0 auto; }
-            .logo-tooltip { display: none; }
-            .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-            .action-group label { display: none; }
-            .action-group select, .action-group button, .action-group input { width: 100%; padding: 10px; font-size: 0.9rem; margin: 0; }
-            .action-group select { min-width: unset; }
-            .action-group input { min-width: unset; }
-            .action-group:first-child { grid-template-columns: 1fr; }
-            .action-group:first-child select { width: 100%; }
-            .action-group:first-child input { display: none; }
-            .main-container { flex-direction: column; }
-            .sidebar { width: 100%; position: static; top: 0; max-height: none; margin-bottom: 20px; }
-            .content-area { width: 100%; }
-            button, .btn-success, .btn-primary, .btn-whatsapp { padding: 10px; font-size: 0.9rem; }
-            body { font-size: 15px; }
-            h3 { font-size: 1.1rem; }
-            select, input { padding: 10px; font-size: 0.9rem; }
-            .scadenze-box { overflow-x: auto; }
-            .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
-            .btn-whatsapp { width: 100%; justify-content: center; }
-            .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
-            .btnCreaAgenteMobileHide { display: none !important; }
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header-row-bottom {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .logo-area {
+                justify-content: center;
+                flex-direction: column;
+            }
+            .btn-logo-mobile {
+                display: block;
+            }
+            .logo-rettangolo {
+                width: 250px;
+                height: 70px;
+                margin: 0 auto;
+            }
+            .logo-tooltip {
+                display: none;
+            }
+            /* HAMBURGER MENU */
+            .nav-box {
+                position: relative;
+                width: 100%;
+                text-align: center;
+            }
+            .hamburger-btn {
+                display: block;
+                margin: 0 auto;
+            }
+            .nav-grid {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                left: 0;
+                background: #f1c40f;
+                border-radius: 12px;
+                padding: 10px;
+                margin-top: 5px;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+            .nav-grid.open { display: flex; }
+            .nav-btn { width: 100%; text-align: center; }
+            
+            .action-group {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                width: 100%;
+            }
+            .action-group label {
+                display: none;
+            }
+            .action-group select,
+            .action-group button,
+            .action-group input {
+                width: 100%;
+                padding: 10px;
+                font-size: 0.9rem;
+                margin: 0;
+            }
+            .action-group select {
+                min-width: unset;
+            }
+            .action-group input {
+                min-width: unset;
+            }
+            .action-group:first-child {
+                grid-template-columns: 1fr;
+            }
+            .action-group:first-child select {
+                width: 100%;
+            }
+            .action-group:first-child input {
+                display: none;
+            }
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                top: 0;
+                max-height: none;
+                margin-bottom: 20px;
+            }
+            .content-area {
+                width: 100%;
+            }
+            button, .btn-success, .btn-primary, .btn-whatsapp {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            body {
+                font-size: 15px;
+            }
+            h3 {
+                font-size: 1.1rem;
+            }
+            select, input {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            .scadenze-box {
+                overflow-x: auto;
+            }
+            .scadenze-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .btn-whatsapp {
+                width: 100%;
+                justify-content: center;
+            }
+            .file-status-inline {
+                grid-column: span 2;
+                text-align: center;
+                margin-top: 5px;
+            }
+            .btnCreaAgenteMobileHide {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -245,14 +474,15 @@
             <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
         </div>
         <div class="nav-box">
-            <div class="nav-grid">
-                <!-- In AGENTI il tasto AGENTI non compare -->
-                <button id="btnVaiContabilita" class="nav-btn contabilita">📊 CONTABILITÀ</button>
-                <button id="navChangePwd" class="nav-btn pwd">🔑 CAMBIA PASSWORD</button>
-                <button id="navLogout" class="nav-btn esci">🚪 ESCI</button>
+            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+            <div id="navGrid" class="nav-grid">
+                <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
+                <button class="nav-btn disabled" disabled>👥 AGENTI</button>
+                <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
             </div>
         </div>
     </div>
+    
     <div class="header-row-bottom">
         <div class="action-group">
             <select id="selectAgente">
@@ -262,19 +492,30 @@
         </div>
         <div class="action-group">
             <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
-            <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg>Invia Scadenze</button>
+            <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
+                </svg>
+                Invia Scadenze
+            </button>
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
-        <div class="action-group btnCreaAgenteMobileHide"><button id="btnCreaAgente" class="btn-success" style="display:inline-block; width:auto;">➕ CREA AGENTE</button></div>
+        <div class="action-group btnCreaAgenteMobileHide">
+            <button id="btnCreaAgente" class="btn-success" style="display:inline-block; width:auto;">➕ CREA AGENTE</button>
+        </div>
     </div>
 </div>
+
 <div class="main-container">
     <div class="sidebar">
         <h3>🔍 Cerca Cliente</h3>
         <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
+        
         <h3 style="margin-top:20px;">👥 Seleziona Cliente</h3>
-        <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select>
+        <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;">
+            <option value="">-- Seleziona cliente --</option>
+        </select>
     </div>
     <div class="content-area">
         <div id="scadenzeAgenti"></div>
@@ -282,7 +523,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
-<div class="version">v5.07f - Agenti</div>
+<div class="version">v5.07c - Agenti (Logo Manager Dual Link)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -305,71 +546,672 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 
-// ==================== LOGO MANAGER ====================
-let pressTimer = null, lastTap = 0, isLongPress = false;
+// ==================== LOGO MANAGER - DUAL LINK ====================
+let pressTimer = null;
+let lastTap = 0;
+let isLongPress = false;
+
 function getLinkPrincipale() { return localStorage.getItem('link_principale_agenti') || ""; }
 function setLinkPrincipale(url) { localStorage.setItem('link_principale_agenti', url); }
 function getLinkSecondario() { return localStorage.getItem('link_secondario_agenti') || ""; }
 function setLinkSecondario(url) { localStorage.setItem('link_secondario_agenti', url); }
 function getLogoSaved() { return localStorage.getItem('logo_agenti'); }
 function setLogoSaved(url) { localStorage.setItem('logo_agenti', url); }
-function showToast(msg, isErr) { const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
-function apriLinkPrincipale() { const l=getLinkPrincipale(); if(l&&l.trim()){ window.open(l,'_blank'); showToast("🔗 Apertura link principale"); } else showToast("⚠️ Link principale non configurato. Tieni premuto 6 sec sul logo.",true); }
-function apriLinkSecondario() { const l=getLinkSecondario(); if(l&&l.trim()){ window.open(l,'_blank'); showToast("🔗 Apertura link secondario"); } else showToast("⚠️ Link secondario non configurato. Tieni premuto 6 sec sul logo.",true); }
-function mostraModaleConfig() {
-    const modal=document.createElement('div'); modal.className='modal-overlay';
-    const link1=getLinkPrincipale(), link2=getLinkSecondario(), logoSaved=getLogoSaved();
-    modal.innerHTML=`<div class="modal-container"><h3>🔧 CONFIGURAZIONE LOGO</h3><label>📌 LINK SITO PRINCIPALE (1 tap)</label><input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g,'&quot;')}"><label>📌 LINK SECONDARIO (2 tap rapidi)</label><input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g,'&quot;')}"><label>🖼️ LOGO AZIENDALE</label><div class="logo-preview">${logoSaved?`<img src="${logoSaved}" id="modalLogoPreview">`:'<span>Nessun logo caricato</span>'}</div><input type="file" id="modalLogoFile" accept="image/*" style="display:none;"><button id="modalBtnCaricaLogo" class="btn-file">📁 CARICA NUOVO LOGO</button><div class="modal-buttons"><button id="modalBtnSave" class="btn-save">💾 SALVA</button><button id="modalBtnCancel" class="btn-cancel">❌ ANNULLA</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('modalBtnCaricaLogo').onclick=()=>{ document.getElementById('modalLogoFile').click(); };
-    document.getElementById('modalLogoFile').onchange=(e)=>{ const f=e.target.files[0]; if(f){ const r=new FileReader(); r.onload=ev=>{ const previewDiv=document.querySelector('.logo-preview'); previewDiv.innerHTML=`<img src="${ev.target.result}" id="modalLogoPreview">`; showToast("Nuovo logo caricato, premi SALVA per confermare"); }; r.readAsDataURL(f); } };
-    document.getElementById('modalBtnSave').onclick=()=>{ setLinkPrincipale(document.getElementById('modalLink1').value); setLinkSecondario(document.getElementById('modalLink2').value); const newLogoPreview=document.querySelector('#modalLogoPreview'); if(newLogoPreview){ const url=newLogoPreview.src; setLogoSaved(url); document.getElementById('logoImmagine').src=url; document.getElementById('logoImmagine').style.display='block'; document.getElementById('logoSpan').style.display='none'; } showToast("✅ Configurazione salvata!"); modal.remove(); };
-    document.getElementById('modalBtnCancel').onclick=()=>modal.remove();
+
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
-const logoDivElem=document.getElementById('logoRettangolo');
-logoDivElem.addEventListener('click',(e)=>{ const now=Date.now(); if(now-lastTap<300&&now-lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }else{ lastTap=now; setTimeout(()=>{ if(lastTap!==0&&(Date.now()-lastTap)>300){ apriLinkPrincipale(); lastTap=0; } },300); } });
-logoDivElem.addEventListener('mousedown',()=>{ isLongPress=false; pressTimer=setTimeout(()=>{ isLongPress=true; pressTimer=null; mostraModaleConfig(); },6000); });
-logoDivElem.addEventListener('mouseup',()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } isLongPress=false; });
-logoDivElem.addEventListener('mouseleave',()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } isLongPress=false; });
-function caricaLogoSaved(){ const logo=getLogoSaved(); if(logo){ document.getElementById('logoImmagine').src=logo; document.getElementById('logoImmagine').style.display='block'; document.getElementById('logoSpan').style.display='none'; } }
+
+function apriLinkPrincipale() {
+    const link = getLinkPrincipale();
+    if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link principale"); }
+    else { showToast("⚠️ Link principale non configurato. Tieni premuto 6 sec sul logo per configurarlo.", true); }
+}
+
+function apriLinkSecondario() {
+    const link = getLinkSecondario();
+    if (link && link.trim() !== "") { window.open(link, '_blank'); showToast("🔗 Apertura link secondario"); }
+    else { showToast("⚠️ Link secondario non configurato. Tieni premuto 6 sec sul logo per configurarlo.", true); }
+}
+
+function mostraModaleConfig() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay-config';
+    const link1 = getLinkPrincipale();
+    const link2 = getLinkSecondario();
+    const logoSaved = getLogoSaved();
+    modal.innerHTML = `
+        <div class="modal-container-config">
+            <h3>🔧 CONFIGURAZIONE LOGO</h3>
+            <label>📌 LINK SITO PRINCIPALE (1 tap)</label>
+            <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
+            <label>📌 LINK SECONDARIO (2 tap rapidi)</label>
+            <input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g, '&quot;')}">
+            <label>🖼️ LOGO AZIENDALE</label>
+            <div class="logo-preview">
+                ${logoSaved ? `<img src="${logoSaved}" id="modalLogoPreview">` : '<span>Nessun logo caricato</span>'}
+            </div>
+            <input type="file" id="modalLogoFile" accept="image/*" style="display:none;">
+            <button id="modalBtnCaricaLogo" class="btn-file">📁 CARICA NUOVO LOGO</button>
+            <div class="modal-buttons-config">
+                <button id="modalBtnSave" class="btn-save-config">💾 SALVA</button>
+                <button id="modalBtnCancel" class="btn-cancel-config">❌ ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('modalBtnCaricaLogo').onclick = () => {
+        const fileInput = document.getElementById('modalLogoFile');
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const newLogo = ev.target.result;
+                    const previewDiv = document.querySelector('.logo-preview');
+                    previewDiv.innerHTML = `<img src="${newLogo}" id="modalLogoPreview">`;
+                    showToast("Nuovo logo caricato, premi SALVA per confermare");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        fileInput.click();
+    };
+    
+    document.getElementById('modalBtnSave').onclick = () => {
+        const newLink1 = document.getElementById('modalLink1').value;
+        const newLink2 = document.getElementById('modalLink2').value;
+        setLinkPrincipale(newLink1);
+        setLinkSecondario(newLink2);
+        const newLogoPreview = document.querySelector('#modalLogoPreview');
+        if (newLogoPreview) {
+            const newLogoUrl = newLogoPreview.src;
+            setLogoSaved(newLogoUrl);
+            document.getElementById('logoImmagine').src = newLogoUrl;
+            document.getElementById('logoImmagine').style.display = 'block';
+            document.getElementById('logoSpan').style.display = 'none';
+        }
+        showToast("✅ Configurazione salvata!");
+        modal.remove();
+    };
+    document.getElementById('modalBtnCancel').onclick = () => modal.remove();
+}
+
+// Gestione eventi LOGO
+const logoDivElem = document.getElementById('logoRettangolo');
+logoDivElem.addEventListener('click', (e) => {
+    const now = new Date().getTime();
+    const tapLength = now - lastTap;
+    if (tapLength < 300 && tapLength > 0) {
+        e.stopPropagation();
+        apriLinkSecondario();
+        lastTap = 0;
+    } else {
+        lastTap = now;
+        setTimeout(() => {
+            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
+                apriLinkPrincipale();
+                lastTap = 0;
+            }
+        }, 300);
+    }
+});
+
+logoDivElem.addEventListener('mousedown', () => {
+    isLongPress = false;
+    pressTimer = setTimeout(() => {
+        isLongPress = true;
+        pressTimer = null;
+        mostraModaleConfig();
+    }, 6000);
+});
+logoDivElem.addEventListener('mouseup', () => {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    isLongPress = false;
+});
+logoDivElem.addEventListener('mouseleave', () => {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    isLongPress = false;
+});
+
+function caricaLogoSaved() {
+    const logo = getLogoSaved();
+    if (logo) {
+        document.getElementById('logoImmagine').src = logo;
+        document.getElementById('logoImmagine').style.display = 'block';
+        document.getElementById('logoSpan').style.display = 'none';
+    }
+}
 caricaLogoSaved();
-function aggiornaPulsanteLogoMobile(){ const btn=document.getElementById('btnCaricaLogoMobile'); if(btn) btn.style.display=getLogoSaved()?'none':'block'; }
-document.getElementById('btnCaricaLogoMobile').onclick=()=>{ const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.onchange=e=>{ const f=e.target.files[0]; if(f){ const r=new FileReader(); r.onload=ev=>{ const url=ev.target.result; setLogoSaved(url); document.getElementById('logoImmagine').src=url; document.getElementById('logoImmagine').style.display='block'; document.getElementById('logoSpan').style.display='none'; showToast("✅ Logo caricato! Premi SALVA nel modale per confermare."); }; r.readAsDataURL(f); } }; inp.click(); };
+
+function aggiornaPulsanteLogoMobile() {
+    let logoPresente = getLogoSaved() !== null;
+    let btnMobile = document.getElementById('btnCaricaLogoMobile');
+    if (btnMobile) {
+        btnMobile.style.display = logoPresente ? 'none' : 'block';
+    }
+}
+document.getElementById('btnCaricaLogoMobile').onclick = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const url = ev.target.result;
+                setLogoSaved(url);
+                document.getElementById('logoImmagine').src = url;
+                document.getElementById('logoImmagine').style.display = 'block';
+                document.getElementById('logoSpan').style.display = 'none';
+                showToast("✅ Logo caricato! Premi SALVA nel modale per confermare.");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    fileInput.click();
+};
 aggiornaPulsanteLogoMobile();
 
+// ==================== HAMBURGER MENU ====================
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const navGrid = document.getElementById('navGrid');
+if (hamburgerBtn && navGrid) {
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navGrid.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+        if (!navGrid.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+            navGrid.classList.remove('open');
+        }
+    });
+}
+
 // ==================== FUNZIONI AGENTI ====================
-async function caricaAgenti(){ try{ const snap=await db.collection('agenti_lista').get(); agentiLista=[]; snap.forEach(d=>agentiLista.push(d.data())); agentiLista.sort((a,b)=>a.codice.localeCompare(b.codice)); aggiornaSelectAgenti(); }catch(e){ alert("Errore caricamento agenti: "+e.message); } }
-function aggiornaSelectAgenti(){ let sel=document.getElementById('selectAgente'); let old=sel.value; sel.innerHTML='<option value="">-- Seleziona agente --</option>'; for(let a of agentiLista){ let opt=document.createElement('option'); opt.value=a.codice; opt.textContent=`${a.codice} - ${a.nome}`; sel.appendChild(opt); } if(old&&agentiLista.find(a=>a.codice===old)){ sel.value=old; selezionaAgente(old); } }
-async function selezionaAgente(cod){ agenteCorrente=agentiLista.find(a=>a.codice===cod); if(!agenteCorrente) return; try{ let od=await db.collection('agenti_dati').doc(`ord_${cod}`).get(); let sd=await db.collection('agenti_dati').doc(`sca_${cod}`).get(); datiOrd=od.exists?od.data().dati:[]; datiSca=sd.exists?sd.data().dati:[]; document.getElementById('fileStatusInline').innerHTML=`ORD: ${datiOrd.length} | SCA: ${datiSca.length}`; aggiornaClienti(); document.getElementById('cercaCliente').value=''; document.getElementById('cercaArticoloInline').value=''; document.getElementById('scadenzeAgenti').innerHTML=''; document.getElementById('dettaglioAgenti').innerHTML=''; }catch(e){ alert("Errore caricamento dati: "+e.message); } }
-async function salvaDatiAgente(){ if(!agenteCorrente) return; try{ await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati:datiOrd }); await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati:datiSca }); document.getElementById('fileStatusInline').innerHTML=`✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`; }catch(e){ alert("Errore salvataggio: "+e.message); } }
-async function creaAgente(cod,nome){ if(!cod||!nome){ alert("Inserisci codice e nome!"); return false; } if(agentiLista.find(a=>a.codice===cod)){ alert("Codice già esistente!"); return false; } try{ await db.collection('agenti_lista').doc(cod).set({ codice:cod, nome:nome }); await caricaAgenti(); return true; }catch(e){ alert("ERRORE: "+e.message); return false; } }
+async function caricaAgenti() {
+    try {
+        const snapshot = await db.collection('agenti_lista').get();
+        agentiLista = [];
+        snapshot.forEach(doc => agentiLista.push(doc.data()));
+        agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
+        aggiornaSelectAgenti();
+    } catch(e) { alert("Errore caricamento agenti: "+e.message); }
+}
 
-function parseORD(text){ const lines=text.split(/\r?\n/); const clienti=new Map(); let curr=null; const reCliente=/^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/; const reCoppia=/(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g; for(let line of lines){ line=line.trimEnd(); if(line==="") continue; let mCliente=line.match(reCliente); if(mCliente){ curr={ codice:mCliente[1], ragione:mCliente[2].trim(), articoli:[] }; clienti.set(curr.codice,curr); continue; } if(!curr) continue; if(line.startsWith("Destinaz.")||line.startsWith("Telefoni")||line.includes("INESISTENTE")||line.includes("ELIMINATO")) continue; let coppie=[]; let match; while((match=reCoppia.exec(line))!==null){ let qta=parseFloat(match[1].replace(',','.')); let data=match[2]; coppie.push({ qta,data, start:match.index, end:match.index+match[0].length }); } if(coppie.length===0) continue; let firstStart=coppie[0].start; let descRaw=line.substring(0,firstStart).trim(); let tokens=descRaw.split(/\s+/); let codice=tokens[0]; let desc=tokens.slice(1).join(" "); let lastEnd=coppie[coppie.length-1].end; let after=line.substring(lastEnd).trim(); let nt=after.split(/\s+/); let prezzo=0,sconto1=0; if(nt.length>=2){ prezzo=parseFloat(nt[0].replace(',','.')); sconto1=parseFloat(nt[1].replace(',','.')); } coppie.sort((a,b)=>new Date(b.data.split('/').reverse().join('-'))-new Date(a.data.split('/').reverse().join('-'))); curr.articoli.push({ codice, descrizione:desc, coppie, prezzo, sconto1 }); } return Array.from(clienti.values()); }
-function parseSCA(text){ const lines=text.split(/\r?\n/); const clienti=new Map(); let curr=null; const reCliente=/^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/; const reScadenza=/^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/; for(let line of lines){ line=line.trim(); if(line==="") continue; let mCliente=line.match(reCliente); if(mCliente){ curr={ codice:mCliente[1], ragione:mCliente[2].trim(), scadenze:[] }; clienti.set(curr.codice,curr); continue; } if(curr){ let mScad=line.match(reScadenza); if(mScad){ let impStr=mScad[4].replace(/\./g,'').replace(',','.'); curr.scadenze.push({ scadenza:mScad[1], numDoc:mScad[2], dataDoc:mScad[3], importo:parseFloat(impStr) }); } } } return Array.from(clienti.values()); }
+function aggiornaSelectAgenti() {
+    let select = document.getElementById('selectAgente');
+    let oldValue = select.value;
+    select.innerHTML = '<option value="">-- Seleziona agente --</option>';
+    for (let a of agentiLista) {
+        let opt = document.createElement('option');
+        opt.value = a.codice;
+        opt.textContent = `${a.codice} - ${a.nome}`;
+        select.appendChild(opt);
+    }
+    if (oldValue && agentiLista.find(a => a.codice === oldValue)) {
+        select.value = oldValue;
+        selezionaAgente(oldValue);
+    }
+}
 
-function inviaScadenzeWhatsApp(cliente){ if(!cliente||!cliente.scadenze||cliente.scadenze.length===0){ alert("Nessuna scadenza da inviare!"); return; } let msg=`📅 *SCADENZE CLIENTE*\n🏢 *${cliente.codice} - ${cliente.ragione}*\n━━━━━━━━━━━━━━━━━━━━━\n\n📋 *DETTAGLIO SCADENZE:*\n\n`; let tot=0; for(let s of cliente.scadenze){ msg+=`📆 Scadenza: ${s.scadenza}\n📄 N.Documento: ${s.numDoc}\n💰 Importo: € ${s.importo.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━\n`; tot+=s.importo; } msg+=`\n💶 *TOTALE SCADENZE: € ${tot.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━\n📱 Messaggio generato da inSAPA Agenti`; window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank'); }
-function inviaScadenzeClienteCorrente(){ if(!clienteScadenzeCorrente){ alert("Seleziona prima un cliente con scadenze!"); return; } inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
+async function selezionaAgente(codice) {
+    agenteCorrente = agentiLista.find(a => a.codice === codice);
+    if (!agenteCorrente) return;
+    try {
+        let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
+        let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
+        datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
+        datiSca = scaDoc.exists ? scaDoc.data().dati : [];
+        document.getElementById('fileStatusInline').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
+        aggiornaClienti();
+        document.getElementById('cercaCliente').value = '';
+        document.getElementById('cercaArticoloInline').value = '';
+        document.getElementById('scadenzeAgenti').innerHTML = '';
+        document.getElementById('dettaglioAgenti').innerHTML = '';
+    } catch(e) { alert("Errore caricamento dati: "+e.message); }
+}
 
-function aggiornaClienti(){ let mappa=new Map(); for(let c of datiOrd){ mappa.set(c.codice,{ codice:c.codice, ragione:c.ragione, hasScadenze:false, scadenze:[], ordini:c.articoli }); } for(let c of datiSca){ if(mappa.has(c.codice)){ let cl=mappa.get(c.codice); cl.hasScadenze=true; cl.scadenze=c.scadenze; }else{ mappa.set(c.codice,{ codice:c.codice, ragione:c.ragione, hasScadenze:true, scadenze:c.scadenze, ordini:[] }); } } clientiUnici=Array.from(mappa.values()).sort((a,b)=>a.ragione.localeCompare(b.ragione)); filtraClienti(); }
-function filtraClienti(){ let txt=document.getElementById('cercaCliente').value.toLowerCase(); let filtrati=clientiUnici.filter(c=>c.codice.toLowerCase().includes(txt)||c.ragione.toLowerCase().includes(txt)); let sel=document.getElementById('selectClienteAgenti'); sel.innerHTML='<option value="">-- Seleziona cliente --</option>'; for(let c of filtrati){ let opt=document.createElement('option'); opt.value=c.codice; opt.textContent=`${c.codice} - ${c.ragione}`; if(c.hasScadenze&&c.scadenze.length>0){ opt.style.color='#c0392b'; opt.style.fontWeight='bold'; } sel.appendChild(opt); } if(filtrati.length===0){ document.getElementById('scadenzeAgenti').innerHTML='<div class="scadenze-box">Nessun cliente trovato</div>'; document.getElementById('dettaglioAgenti').innerHTML=''; } }
-function mostraDettaglioCliente(cod){ let cl=clientiUnici.find(c=>c.codice===cod); if(!cl) return; clienteScadenzeCorrente=cl; let contS=document.getElementById('scadenzeAgenti'); let contA=document.getElementById('dettaglioAgenti'); if(cl.hasScadenze&&cl.scadenze&&cl.scadenze.length>0){ let html=`<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cl.codice} ${cl.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg>Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`; for(let s of cl.scadenze){ html+=`<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`; } html+=`</tbody></table></div>`; contS.innerHTML=html; }else{ contS.innerHTML=`<div class="scadenze-box">Nessuna scadenza per ${cl.ragione}</div>`; } if(cl.ordini&&cl.ordini.length>0){ let html=`<div class="scadenze-box"><h3>📋 ORD - ${cl.codice} ${cl.ragione} (${cl.ordini.length} articoli)</h3>`; for(let art of cl.ordini){ let storico=''; if(art.coppie&&art.coppie.length>0){ let mostrati=art.coppie.slice(0,4); storico=`<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`; for(let ord of mostrati){ storico+=`<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; } storico+=`</div>`; }else{ storico=`<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; } html+=`<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`; } html+=`</div>`; contA.innerHTML=html; document.querySelectorAll('.articolo-item').forEach(el=>{ el.onclick=(e)=>{ e.stopPropagation(); let sd=el.querySelector('.storico-ordini'); if(sd) sd.classList.toggle('visible'); }; }); }else{ contA.innerHTML=`<div class="scadenze-box">Nessun ordine per ${cl.ragione}</div>`; } }
-function filtraArticoli(){ let cod=document.getElementById('selectClienteAgenti').value; if(!cod) return; let cl=clientiUnici.find(c=>c.codice===cod); if(!cl||!cl.ordini) return; let txt=document.getElementById('cercaArticoloInline').value.toLowerCase(); let filtrati=cl.ordini.filter(a=>a.codice.toLowerCase().includes(txt)||a.descrizione.toLowerCase().includes(txt)); let container=document.getElementById('dettaglioAgenti'); let html=`<div class="scadenze-box"><h3>📋 ORD - ${cl.codice} ${cl.ragione} (${filtrati.length} articoli)</h3>`; for(let art of filtrati){ let storico=''; if(art.coppie&&art.coppie.length>0){ let mostrati=art.coppie.slice(0,4); storico=`<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`; for(let ord of mostrati){ storico+=`<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; } storico+=`</div>`; }else{ storico=`<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; } html+=`<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`; } html+=`</div>`; container.innerHTML=html; document.querySelectorAll('.articolo-item').forEach(el=>{ el.onclick=(e)=>{ e.stopPropagation(); let sd=el.querySelector('.storico-ordini'); if(sd) sd.classList.toggle('visible'); }; }); }
+async function salvaDatiAgente() {
+    if (!agenteCorrente) return;
+    try {
+        await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).set({ dati: datiOrd });
+        await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).set({ dati: datiSca });
+        document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
+    } catch(e) { alert("Errore salvataggio: "+e.message); }
+}
 
-async function caricaFile(files){ if(!agenteCorrente){ alert("Seleziona prima un agente!"); return false; } if(files.length!==2){ alert("Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!"); return false; } let codAg=agenteCorrente.codice; let trov={ord:false,sca:false}; let ordT=null, scaT=null; for(let f of files){ let nome=f.name; let regOrd=new RegExp(`^ORD${codAg}\\.`,'i'); let regSca=new RegExp(`^SCA${codAg}\\.`,'i'); if(regOrd.test(nome)){ trov.ord=true; ordT=await f.text(); }else if(regSca.test(nome)){ trov.sca=true; scaT=await f.text(); }else{ alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAg}.txt\nSCA${codAg}.txt`); return false; } } if(!trov.ord||!trov.sca){ alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!"); return false; } datiOrd=[]; datiSca=[]; if(ordT) datiOrd=parseORD(ordT); if(scaT) datiSca=parseSCA(scaT); await salvaDatiAgente(); aggiornaClienti(); document.getElementById('fileStatusInline').innerHTML=`✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`; alert(`Caricamento completato!\nORD: ${datiOrd.length} clienti\nSCA: ${datiSca.length} clienti`); return true; }
+async function creaAgente(codice, nome) {
+    if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
+    if (agentiLista.find(a => a.codice === codice)) { alert("Codice già esistente!"); return false; }
+    try {
+        await db.collection('agenti_lista').doc(codice).set({ codice, nome });
+        await caricaAgenti();
+        return true;
+    } catch(e) { alert("ERRORE: "+e.message); return false; }
+}
 
-document.getElementById('selectAgente').onchange=e=>{ if(e.target.value) selezionaAgente(e.target.value); };
-document.getElementById('selectClienteAgenti').onchange=e=>{ if(e.target.value) mostraDettaglioCliente(e.target.value); };
-document.getElementById('cercaCliente').oninput=()=>filtraClienti();
-document.getElementById('cercaArticoloInline').oninput=()=>filtraArticoli();
-document.getElementById('btnCaricaFile').onclick=()=>document.getElementById('fileInput').click();
-document.getElementById('btnInviaScadenzeHeader').onclick=()=>inviaScadenzeClienteCorrente();
-document.getElementById('fileInput').onchange=async e=>{ await caricaFile(Array.from(e.target.files)); e.target.value=''; };
-document.getElementById('btnCreaAgente').onclick=()=>{ let modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div class="modal-container"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="modal-buttons"><button id="btnConferma" class="btn-save">CREA</button><button id="btnAnnulla" class="btn-cancel">ANNULLA</button></div></div>`; document.body.appendChild(modal); document.getElementById('btnConferma').onclick=async()=>{ let cd=document.getElementById('nuovoCodice').value.trim(); let nm=document.getElementById('nuovoNome').value.trim(); if(cd&&nm){ if(await creaAgente(cd,nm)){ alert(`Agente ${cd} - ${nm} creato!`); modal.remove(); } }else alert("Compila tutti i campi!"); }; document.getElementById('btnAnnulla').onclick=()=>modal.remove(); };
+// ==================== PARSER ORD ====================
+function parseORD(text) {
+    const lines = text.split(/\r?\n/);
+    const clienti = new Map();
+    let currentCliente = null;
+    const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
+    const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
+    
+    for (let line of lines) {
+        line = line.trimEnd();
+        if (line === "") continue;
+        
+        let mCliente = line.match(reCliente);
+        if (mCliente) {
+            currentCliente = { 
+                codice: mCliente[1], 
+                ragione: mCliente[2].trim(), 
+                articoli: [] 
+            };
+            clienti.set(currentCliente.codice, currentCliente);
+            continue;
+        }
+        
+        if (!currentCliente) continue;
+        
+        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || 
+            line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
+        
+        let coppie = [];
+        let match;
+        while ((match = reCoppia.exec(line)) !== null) {
+            let qta = parseFloat(match[1].replace(',', '.'));
+            let data = match[2];
+            coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
+        }
+        
+        if (coppie.length === 0) continue;
+        
+        let firstCoppiaStart = coppie[0].start;
+        let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
+        let tokens = descrizioneRaw.split(/\s+/);
+        let codice = tokens[0];
+        let descrizione = tokens.slice(1).join(" ");
+        
+        let lastCoppiaEnd = coppie[coppie.length-1].end;
+        let afterCoppie = line.substring(lastCoppiaEnd).trim();
+        let numTokens = afterCoppie.split(/\s+/);
+        let prezzo = 0, sconto1 = 0;
+        
+        if (numTokens.length >= 2) {
+            prezzo = parseFloat(numTokens[0].replace(',', '.'));
+            sconto1 = parseFloat(numTokens[1].replace(',', '.'));
+        }
+        
+        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - 
+                           new Date(a.data.split('/').reverse().join('-')));
+        
+        currentCliente.articoli.push({ 
+            codice, 
+            descrizione, 
+            coppie, 
+            prezzo, 
+            sconto1 
+        });
+    }
+    
+    return Array.from(clienti.values());
+}
 
-document.getElementById('btnVaiContabilita').onclick=()=>{ window.location.href='contabilita.html'; };
-document.getElementById('navLogout').onclick=()=>{ window.location.href='index.html'; };
-document.getElementById('navChangePwd').onclick=()=>{ alert("La password si cambia dalla sezione CONTABILITÀ"); };
+// ==================== PARSER SCA ====================
+function parseSCA(text) {
+    const lines = text.split(/\r?\n/);
+    const clienti = new Map();
+    let currentCliente = null;
+    const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+/;
+    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+.*?(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,]+)/;
+    
+    for (let line of lines) {
+        line = line.trim();
+        if (line === "") continue;
+        
+        let mCliente = line.match(reCliente);
+        if (mCliente) {
+            currentCliente = { 
+                codice: mCliente[1], 
+                ragione: mCliente[2].trim(), 
+                scadenze: [] 
+            };
+            clienti.set(currentCliente.codice, currentCliente);
+            continue;
+        }
+        
+        if (currentCliente) {
+            let mScad = line.match(reScadenza);
+            if (mScad) {
+                let importoStr = mScad[4].replace(/\./g, '').replace(',', '.');
+                currentCliente.scadenze.push({
+                    scadenza: mScad[1],
+                    numDoc: mScad[2],
+                    dataDoc: mScad[3],
+                    importo: parseFloat(importoStr)
+                });
+            }
+        }
+    }
+    
+    return Array.from(clienti.values());
+}
 
+// ==================== INVIO WHATSAPP ====================
+function inviaScadenzeWhatsApp(cliente) {
+    if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) {
+        alert("Nessuna scadenza da inviare per il cliente selezionato!");
+        return;
+    }
+    
+    let messaggio = `📅 *SCADENZE CLIENTE*\n`;
+    messaggio += `🏢 *${cliente.codice} - ${cliente.ragione}*\n`;
+    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    messaggio += `📋 *DETTAGLIO SCADENZE:*\n\n`;
+    
+    let totale = 0;
+    for (let s of cliente.scadenze) {
+        messaggio += `📆 Scadenza: ${s.scadenza}\n`;
+        messaggio += `📄 N.Documento: ${s.numDoc}\n`;
+        messaggio += `💰 Importo: € ${s.importo.toFixed(2)}\n`;
+        messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        totale += s.importo;
+    }
+    
+    messaggio += `\n💶 *TOTALE SCADENZE: € ${totale.toFixed(2)}*\n`;
+    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    messaggio += `📱 Messaggio generato da inSAPA Agenti`;
+    
+    let url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
+    window.open(url, '_blank');
+}
+
+function inviaScadenzeClienteCorrente() {
+    if (!clienteScadenzeCorrente) {
+        alert("Seleziona prima un cliente con scadenze!");
+        return;
+    }
+    inviaScadenzeWhatsApp(clienteScadenzeCorrente);
+}
+
+// ==================== GESTIONE CLIENTI ====================
+function aggiornaClienti() {
+    let mappa = new Map();
+    
+    for (let c of datiOrd) {
+        mappa.set(c.codice, { 
+            codice: c.codice, 
+            ragione: c.ragione, 
+            hasScadenze: false, 
+            scadenze: [],
+            ordini: c.articoli 
+        });
+    }
+    
+    for (let c of datiSca) {
+        if (mappa.has(c.codice)) {
+            mappa.get(c.codice).hasScadenze = true;
+            mappa.get(c.codice).scadenze = c.scadenze;
+        } else {
+            mappa.set(c.codice, { 
+                codice: c.codice, 
+                ragione: c.ragione, 
+                hasScadenze: true, 
+                scadenze: c.scadenze,
+                ordini: [] 
+            });
+        }
+    }
+    
+    clientiUnici = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+    filtraClienti();
+}
+
+function filtraClienti() {
+    let searchText = document.getElementById('cercaCliente').value.toLowerCase();
+    let clientiFiltrati = clientiUnici.filter(c => 
+        c.codice.toLowerCase().includes(searchText) || 
+        c.ragione.toLowerCase().includes(searchText)
+    );
+    
+    let select = document.getElementById('selectClienteAgenti');
+    select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
+    for (let c of clientiFiltrati) {
+        let opt = document.createElement('option');
+        opt.value = c.codice;
+        opt.textContent = `${c.codice} - ${c.ragione}`;
+        if (c.hasScadenze && c.scadenze.length > 0) {
+            opt.style.color = '#c0392b';
+            opt.style.fontWeight = 'bold';
+        }
+        select.appendChild(opt);
+    }
+    
+    if (clientiFiltrati.length === 0) {
+        document.getElementById('scadenzeAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
+        document.getElementById('dettaglioAgenti').innerHTML = '';
+    }
+}
+
+function mostraDettaglioCliente(codice) {
+    let cliente = clientiUnici.find(c => c.codice === codice);
+    if (!cliente) return;
+    
+    clienteScadenzeCorrente = cliente;
+    
+    let containerScadenze = document.getElementById('scadenzeAgenti');
+    let containerArticoli = document.getElementById('dettaglioAgenti');
+    
+    if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
+        let html = `<div class="scadenze-box">
+                    <div class="scadenze-header">
+                        <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
+                        <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
+                            </svg>
+                            Invia Scadenze
+                        </button>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+        for (let s of cliente.scadenze) {
+            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
+        }
+        html += `</tbody></table></div>`;
+        containerScadenze.innerHTML = html;
+    } else {
+        containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
+    }
+    
+    if (cliente.ordini && cliente.ordini.length > 0) {
+        let html = `<div class="scadenze-box">
+                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
+        for (let art of cliente.ordini) {
+            let storicoHtml = '';
+            if (art.coppie && art.coppie.length > 0) {
+                let mostrati = art.coppie.slice(0, 4);
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
+                                <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+                for (let ord of mostrati) {
+                    storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
+                }
+                storicoHtml += `</div>`;
+            } else {
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+            }
+            
+            html += `<div class="articolo-item" data-codice="${art.codice}">
+                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
+                        <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
+                        ${storicoHtml}
+                    </div>`;
+        }
+        html += `</div>`;
+        containerArticoli.innerHTML = html;
+        
+        document.querySelectorAll('.articolo-item').forEach(el => {
+            el.onclick = (e) => {
+                e.stopPropagation();
+                let storicoDiv = el.querySelector('.storico-ordini');
+                if (storicoDiv) {
+                    storicoDiv.classList.toggle('visible');
+                }
+            };
+        });
+    } else {
+        containerArticoli.innerHTML = `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
+    }
+}
+
+function filtraArticoli() {
+    let clienteCodice = document.getElementById('selectClienteAgenti').value;
+    if (!clienteCodice) return;
+    
+    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
+    if (!cliente || !cliente.ordini) return;
+    
+    let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
+    let filtrati = cliente.ordini.filter(art => 
+        art.codice.toLowerCase().includes(searchText) || 
+        art.descrizione.toLowerCase().includes(searchText)
+    );
+    
+    let container = document.getElementById('dettaglioAgenti');
+    let html = `<div class="scadenze-box">
+                <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
+    
+    for (let art of filtrati) {
+        let storicoHtml = '';
+        if (art.coppie && art.coppie.length > 0) {
+            let mostrati = art.coppie.slice(0, 4);
+            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
+                            <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+            for (let ord of mostrati) {
+                storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
+            }
+            storicoHtml += `</div>`;
+        } else {
+            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+        }
+        
+        html += `<div class="articolo-item" data-codice="${art.codice}">
+                    <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
+                    <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
+                    ${storicoHtml}
+                </div>`;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+    
+    document.querySelectorAll('.articolo-item').forEach(el => {
+        el.onclick = (e) => {
+            e.stopPropagation();
+            let storicoDiv = el.querySelector('.storico-ordini');
+            if (storicoDiv) {
+                storicoDiv.classList.toggle('visible');
+            }
+        };
+    });
+}
+
+// ==================== CARICA FILE ====================
+async function caricaFile(files) {
+    if (!agenteCorrente) {
+        alert("Seleziona prima un agente!");
+        return false;
+    }
+    
+    if (files.length !== 2) {
+        alert("Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!");
+        return false;
+    }
+    
+    let codAgente = agenteCorrente.codice;
+    let trovati = { ord: false, sca: false };
+    let ordText = null, scaText = null;
+    
+    for (let file of files) {
+        let nome = file.name;
+        let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
+        let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
+        
+        if (regexOrd.test(nome)) {
+            trovati.ord = true;
+            ordText = await file.text();
+        } 
+        else if (regexSca.test(nome)) {
+            trovati.sca = true;
+            scaText = await file.text();
+        }
+        else {
+            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
+            return false;
+        }
+    }
+    
+    if (!trovati.ord || !trovati.sca) {
+        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!");
+        return false;
+    }
+    
+    datiOrd = [];
+    datiSca = [];
+    
+    if (ordText) {
+        datiOrd = parseORD(ordText);
+    }
+    if (scaText) {
+        datiSca = parseSCA(scaText);
+    }
+    
+    await salvaDatiAgente();
+    aggiornaClienti();
+    document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
+    alert(`Caricamento completato!\nORD: ${datiOrd.length} clienti\nSCA: ${datiSca.length} clienti`);
+    return true;
+}
+
+// ==================== EVENTI ====================
+document.getElementById('selectAgente').onchange = (e) => { if (e.target.value) selezionaAgente(e.target.value); };
+document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
+document.getElementById('cercaCliente').oninput = () => filtraClienti();
+document.getElementById('cercaArticoloInline').oninput = () => filtraArticoli();
+document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
+document.getElementById('fileInput').onchange = async (e) => {
+    await caricaFile(Array.from(e.target.files));
+    e.target.value = '';
+};
+
+document.getElementById('btnCreaAgente').onclick = () => {
+    let modal = document.createElement('div'); modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnConferma').onclick = async () => {
+        let cod = document.getElementById('nuovoCodice').value.trim();
+        let nom = document.getElementById('nuovoNome').value.trim();
+        if (cod && nom) {
+            if (await creaAgente(cod, nom)) {
+                alert(`Agente ${cod} - ${nom} creato!`);
+                modal.remove();
+            }
+        } else alert("Compila tutti i campi!");
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+};
+
+// ==================== AVVIO ====================
 caricaAgenti();
 </script>
 </body>
