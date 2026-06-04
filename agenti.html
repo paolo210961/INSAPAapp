@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti v5.07c</title>
+    <title>inSAPA - Agenti v5.07d</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -48,15 +48,15 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        .logo-rettangolo { 
-            width: 300px; 
-            height: 80px; 
-            background: transparent; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            cursor: pointer; 
+        .logo-rettangolo {
+            width: 300px;
+            height: 80px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
             position: relative;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -91,7 +91,7 @@
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
         
         /* MODALE CONFIGURAZIONE LOGO */
-        .modal-overlay-config {
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -103,7 +103,7 @@
             align-items: center;
             z-index: 2000;
         }
-        .modal-container-config {
+        .modal-container {
             background: white;
             border-radius: 20px;
             padding: 25px;
@@ -111,124 +111,64 @@
             max-width: 450px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .modal-container-config h3 {
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-            text-align: center;
-        }
-        .modal-container-config label {
-            display: block;
-            font-weight: bold;
-            margin: 15px 0 5px 0;
-            color: #2c3e50;
-        }
-        .modal-container-config input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        .logo-preview {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 15px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .logo-preview img {
-            max-width: 60px;
-            max-height: 60px;
-            object-fit: contain;
-        }
-        .logo-preview span {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        .btn-file {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            width: 100%;
-        }
-        .modal-buttons-config {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons-config button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-save-config { background: #27ae60; color: white; }
-        .btn-cancel-config { background: #95a5a6; color: white; }
+        .modal-container h3 { margin: 0 0 20px 0; color: #2c3e50; text-align: center; }
+        .modal-container label { display: block; font-weight: bold; margin: 15px 0 5px 0; color: #2c3e50; }
+        .modal-container input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
+        .logo-preview { display: flex; align-items: center; gap: 15px; margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; }
+        .logo-preview img { max-width: 60px; max-height: 60px; object-fit: contain; }
+        .logo-preview span { font-size: 0.8rem; color: #666; }
+        .btn-file { background: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; width: 100%; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-save { background: #27ae60; color: white; }
+        .btn-cancel { background: #95a5a6; color: white; }
         
-        /* NAVIGAZIONE - HAMBURGER MENU */
-        .nav-box { 
-            background: #f1c40f; 
-            border-radius: 16px; 
-            padding: 10px 20px; 
+        /* NAVIGAZIONE - 4 TASTI FISSI CON SCROLL ORIZZONTALE */
+        .nav-box {
+            background: #f1c40f;
+            border-radius: 16px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
-        .hamburger-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
+        .nav-box::-webkit-scrollbar { height: 4px; }
+        .nav-box::-webkit-scrollbar-track { background: #e0a800; border-radius: 4px; }
+        .nav-box::-webkit-scrollbar-thumb { background: #fff; border-radius: 4px; }
+        .nav-grid { display: inline-flex; gap: 12px; white-space: nowrap; }
+        .nav-btn {
+            background: white;
             color: #2c3e50;
-        }
-        .nav-grid { display: flex; gap: 10px; }
-        .nav-btn { 
-            background: white; 
-            color: #2c3e50; 
-            border: none; 
-            padding: 8px 16px; 
-            border-radius: 8px; 
-            cursor: pointer; 
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: bold;
             transition: all 0.2s;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
-        .nav-btn.disabled { 
-            background: #ecf0f1; 
-            color: #95a5a6; 
-            cursor: not-allowed; 
+        .nav-btn.disabled {
+            background: #ecf0f1;
+            color: #95a5a6;
+            cursor: not-allowed;
             opacity: 0.8;
         }
+        .nav-btn.contabilita { background: #3498db; color: white; }
+        .nav-btn.agenti { background: #27ae60; color: white; }
+        .nav-btn.pwd { background: #f39c12; color: white; }
+        .nav-btn.esci { background: #e74c3c; color: white; }
         
         /* Box gestione agente */
-        .action-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .action-group label {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-right: 5px;
-        }
-        .action-group select, .action-group button, .action-group input {
-            margin: 0;
-            width: auto;
-            padding: 6px 12px;
-        }
-        .action-group select {
-            min-width: 180px;
-        }
-        .action-group input {
-            min-width: 200px;
-        }
+        .action-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .action-group label { font-weight: bold; color: #2c3e50; margin-right: 5px; }
+        .action-group select, .action-group button, .action-group input { margin: 0; width: auto; padding: 6px 12px; }
+        .action-group select { min-width: 180px; }
+        .action-group input { min-width: 200px; }
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-whatsapp-header { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
@@ -236,80 +176,25 @@
         
         /* Main container */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
-        
-        .sidebar { 
-            width: 340px; 
-            background: white; 
-            border-radius: 16px; 
-            padding: 20px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
-            position: sticky; 
-            top: 200px;
-            height: fit-content;
-            max-height: calc(100vh - 220px);
-            overflow-y: auto;
-        }
-        
+        .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 200px; height: fit-content; max-height: calc(100vh - 220px); overflow-y: auto; }
         .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
-        
         button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; font-weight: bold; }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
         select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
         .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; position: relative; }
-        .scadenze-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            width: auto;
-            margin: 0;
-        }
-        .btn-whatsapp:hover {
-            background: #128C7E;
-            transform: translateY(-1px);
-        }
-        .articolo-item { 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            padding: 10px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-        }
+        .scadenze-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+        .btn-whatsapp { background: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; width: auto; margin: 0; }
+        .btn-whatsapp:hover { background: #128C7E; transform: translateY(-1px); }
+        .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
         .articolo-item:hover { background-color: #fff3cd; transform: translateX(5px); }
         .articolo-titolo { font-weight: bold; }
-        .storico-ordini { 
-            margin-top: 10px; 
-            padding-top: 10px; 
-            border-top: 2px solid #3498db; 
-            font-size: 0.75rem; 
-            display: none; 
-        }
+        .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 2px solid #3498db; font-size: 0.75rem; display: none; }
         .storico-ordini.visible { display: block; }
         .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 4px 8px; margin: 3px; border-radius: 6px; }
         .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
         .cliente-rosso { color: #c0392b; font-weight: bold; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
-        .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group-modal button { margin: 0; }
         .toast-message {
             position: fixed;
             bottom: 80px;
@@ -328,137 +213,34 @@
             100% { opacity: 0; display: none; }
         }
         
-        /* ==================== LAYOUT CELLULARE ==================== */
+        /* LAYOUT CELLULARE */
         @media (max-width: 768px) { 
-            .header-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .header-row-bottom {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .logo-area {
-                justify-content: center;
-                flex-direction: column;
-            }
-            .btn-logo-mobile {
-                display: block;
-            }
-            .logo-rettangolo {
-                width: 250px;
-                height: 70px;
-                margin: 0 auto;
-            }
-            .logo-tooltip {
-                display: none;
-            }
-            /* HAMBURGER MENU */
-            .nav-box {
-                position: relative;
-                width: 100%;
-                text-align: center;
-            }
-            .hamburger-btn {
-                display: block;
-                margin: 0 auto;
-            }
-            .nav-grid {
-                display: none;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                left: 0;
-                background: #f1c40f;
-                border-radius: 12px;
-                padding: 10px;
-                margin-top: 5px;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            }
-            .nav-grid.open { display: flex; }
-            .nav-btn { width: 100%; text-align: center; }
-            
-            .action-group {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                width: 100%;
-            }
-            .action-group label {
-                display: none;
-            }
-            .action-group select,
-            .action-group button,
-            .action-group input {
-                width: 100%;
-                padding: 10px;
-                font-size: 0.9rem;
-                margin: 0;
-            }
-            .action-group select {
-                min-width: unset;
-            }
-            .action-group input {
-                min-width: unset;
-            }
-            .action-group:first-child {
-                grid-template-columns: 1fr;
-            }
-            .action-group:first-child select {
-                width: 100%;
-            }
-            .action-group:first-child input {
-                display: none;
-            }
-            .main-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                position: static;
-                top: 0;
-                max-height: none;
-                margin-bottom: 20px;
-            }
-            .content-area {
-                width: 100%;
-            }
-            button, .btn-success, .btn-primary, .btn-whatsapp {
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-            body {
-                font-size: 15px;
-            }
-            h3 {
-                font-size: 1.1rem;
-            }
-            select, input {
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-            .scadenze-box {
-                overflow-x: auto;
-            }
-            .scadenze-header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-            .btn-whatsapp {
-                width: 100%;
-                justify-content: center;
-            }
-            .file-status-inline {
-                grid-column: span 2;
-                text-align: center;
-                margin-top: 5px;
-            }
-            .btnCreaAgenteMobileHide {
-                display: none !important;
-            }
+            .header-row { flex-direction: column; align-items: stretch; }
+            .header-row-bottom { flex-direction: column; align-items: stretch; }
+            .logo-area { justify-content: center; flex-direction: column; }
+            .btn-logo-mobile { display: block; }
+            .logo-rettangolo { width: 250px; height: 70px; margin: 0 auto; }
+            .logo-tooltip { display: none; }
+            .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+            .action-group label { display: none; }
+            .action-group select, .action-group button, .action-group input { width: 100%; padding: 10px; font-size: 0.9rem; margin: 0; }
+            .action-group select { min-width: unset; }
+            .action-group input { min-width: unset; }
+            .action-group:first-child { grid-template-columns: 1fr; }
+            .action-group:first-child select { width: 100%; }
+            .action-group:first-child input { display: none; }
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; position: static; top: 0; max-height: none; margin-bottom: 20px; }
+            .content-area { width: 100%; }
+            button, .btn-success, .btn-primary, .btn-whatsapp { padding: 10px; font-size: 0.9rem; }
+            body { font-size: 15px; }
+            h3 { font-size: 1.1rem; }
+            select, input { padding: 10px; font-size: 0.9rem; }
+            .scadenze-box { overflow-x: auto; }
+            .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .btn-whatsapp { width: 100%; justify-content: center; }
+            .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
+            .btnCreaAgenteMobileHide { display: none !important; }
         }
     </style>
 </head>
@@ -474,11 +256,11 @@
             <button id="btnCaricaLogoMobile" class="btn-logo-mobile">📁 CARICA LOGO</button>
         </div>
         <div class="nav-box">
-            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
-            <div id="navGrid" class="nav-grid">
-                <button class="nav-btn" onclick="window.location.href='contabilita.html'">📊 CONTABILITÀ</button>
-                <button class="nav-btn disabled" disabled>👥 AGENTI</button>
-                <button class="nav-btn" onclick="window.location.href='index.html'">🚪 ESCI</button>
+            <div class="nav-grid">
+                <button id="btnVaiContabilita" class="nav-btn contabilita">📊 CONTABILITÀ</button>
+                <button class="nav-btn agenti disabled" disabled>👥 AGENTI</button>
+                <button id="navChangePwd" class="nav-btn pwd">🔑 CAMBIA PASSWORD</button>
+                <button id="navLogout" class="nav-btn esci">🚪 ESCI</button>
             </div>
         </div>
     </div>
@@ -511,7 +293,6 @@
     <div class="sidebar">
         <h3>🔍 Cerca Cliente</h3>
         <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
-        
         <h3 style="margin-top:20px;">👥 Seleziona Cliente</h3>
         <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;">
             <option value="">-- Seleziona cliente --</option>
@@ -523,7 +304,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
-<div class="version">v5.07c - Agenti (Logo Manager Dual Link)</div>
+<div class="version">v5.07d - Agenti</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -581,12 +362,12 @@ function apriLinkSecondario() {
 
 function mostraModaleConfig() {
     const modal = document.createElement('div');
-    modal.className = 'modal-overlay-config';
+    modal.className = 'modal-overlay';
     const link1 = getLinkPrincipale();
     const link2 = getLinkSecondario();
     const logoSaved = getLogoSaved();
     modal.innerHTML = `
-        <div class="modal-container-config">
+        <div class="modal-container">
             <h3>🔧 CONFIGURAZIONE LOGO</h3>
             <label>📌 LINK SITO PRINCIPALE (1 tap)</label>
             <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
@@ -598,9 +379,9 @@ function mostraModaleConfig() {
             </div>
             <input type="file" id="modalLogoFile" accept="image/*" style="display:none;">
             <button id="modalBtnCaricaLogo" class="btn-file">📁 CARICA NUOVO LOGO</button>
-            <div class="modal-buttons-config">
-                <button id="modalBtnSave" class="btn-save-config">💾 SALVA</button>
-                <button id="modalBtnCancel" class="btn-cancel-config">❌ ANNULLA</button>
+            <div class="modal-buttons">
+                <button id="modalBtnSave" class="btn-save">💾 SALVA</button>
+                <button id="modalBtnCancel" class="btn-cancel">❌ ANNULLA</button>
             </div>
         </div>
     `;
@@ -643,7 +424,6 @@ function mostraModaleConfig() {
     document.getElementById('modalBtnCancel').onclick = () => modal.remove();
 }
 
-// Gestione eventi LOGO
 const logoDivElem = document.getElementById('logoRettangolo');
 logoDivElem.addEventListener('click', (e) => {
     const now = new Date().getTime();
@@ -720,21 +500,6 @@ document.getElementById('btnCaricaLogoMobile').onclick = () => {
 };
 aggiornaPulsanteLogoMobile();
 
-// ==================== HAMBURGER MENU ====================
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const navGrid = document.getElementById('navGrid');
-if (hamburgerBtn && navGrid) {
-    hamburgerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navGrid.classList.toggle('open');
-    });
-    document.addEventListener('click', (e) => {
-        if (!navGrid.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-            navGrid.classList.remove('open');
-        }
-    });
-}
-
 // ==================== FUNZIONI AGENTI ====================
 async function caricaAgenti() {
     try {
@@ -809,23 +574,14 @@ function parseORD(text) {
     for (let line of lines) {
         line = line.trimEnd();
         if (line === "") continue;
-        
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            currentCliente = { 
-                codice: mCliente[1], 
-                ragione: mCliente[2].trim(), 
-                articoli: [] 
-            };
+            currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] };
             clienti.set(currentCliente.codice, currentCliente);
             continue;
         }
-        
         if (!currentCliente) continue;
-        
-        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || 
-            line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
-        
+        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
         let coppie = [];
         let match;
         while ((match = reCoppia.exec(line)) !== null) {
@@ -833,37 +589,23 @@ function parseORD(text) {
             let data = match[2];
             coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
         }
-        
         if (coppie.length === 0) continue;
-        
         let firstCoppiaStart = coppie[0].start;
         let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
         let tokens = descrizioneRaw.split(/\s+/);
         let codice = tokens[0];
         let descrizione = tokens.slice(1).join(" ");
-        
         let lastCoppiaEnd = coppie[coppie.length-1].end;
         let afterCoppie = line.substring(lastCoppiaEnd).trim();
         let numTokens = afterCoppie.split(/\s+/);
         let prezzo = 0, sconto1 = 0;
-        
         if (numTokens.length >= 2) {
             prezzo = parseFloat(numTokens[0].replace(',', '.'));
             sconto1 = parseFloat(numTokens[1].replace(',', '.'));
         }
-        
-        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - 
-                           new Date(a.data.split('/').reverse().join('-')));
-        
-        currentCliente.articoli.push({ 
-            codice, 
-            descrizione, 
-            coppie, 
-            prezzo, 
-            sconto1 
-        });
+        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+        currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
     }
-    
     return Array.from(clienti.values());
 }
 
@@ -878,32 +620,20 @@ function parseSCA(text) {
     for (let line of lines) {
         line = line.trim();
         if (line === "") continue;
-        
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            currentCliente = { 
-                codice: mCliente[1], 
-                ragione: mCliente[2].trim(), 
-                scadenze: [] 
-            };
+            currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), scadenze: [] };
             clienti.set(currentCliente.codice, currentCliente);
             continue;
         }
-        
         if (currentCliente) {
             let mScad = line.match(reScadenza);
             if (mScad) {
                 let importoStr = mScad[4].replace(/\./g, '').replace(',', '.');
-                currentCliente.scadenze.push({
-                    scadenza: mScad[1],
-                    numDoc: mScad[2],
-                    dataDoc: mScad[3],
-                    importo: parseFloat(importoStr)
-                });
+                currentCliente.scadenze.push({ scadenza: mScad[1], numDoc: mScad[2], dataDoc: mScad[3], importo: parseFloat(importoStr) });
             }
         }
     }
-    
     return Array.from(clienti.values());
 }
 
@@ -913,90 +643,50 @@ function inviaScadenzeWhatsApp(cliente) {
         alert("Nessuna scadenza da inviare per il cliente selezionato!");
         return;
     }
-    
-    let messaggio = `📅 *SCADENZE CLIENTE*\n`;
-    messaggio += `🏢 *${cliente.codice} - ${cliente.ragione}*\n`;
-    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    messaggio += `📋 *DETTAGLIO SCADENZE:*\n\n`;
-    
+    let messaggio = `📅 *SCADENZE CLIENTE*\n🏢 *${cliente.codice} - ${cliente.ragione}*\n━━━━━━━━━━━━━━━━━━━━━\n\n📋 *DETTAGLIO SCADENZE:*\n\n`;
     let totale = 0;
     for (let s of cliente.scadenze) {
-        messaggio += `📆 Scadenza: ${s.scadenza}\n`;
-        messaggio += `📄 N.Documento: ${s.numDoc}\n`;
-        messaggio += `💰 Importo: € ${s.importo.toFixed(2)}\n`;
-        messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        messaggio += `📆 Scadenza: ${s.scadenza}\n📄 N.Documento: ${s.numDoc}\n💰 Importo: € ${s.importo.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━\n`;
         totale += s.importo;
     }
-    
-    messaggio += `\n💶 *TOTALE SCADENZE: € ${totale.toFixed(2)}*\n`;
-    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    messaggio += `📱 Messaggio generato da inSAPA Agenti`;
-    
+    messaggio += `\n💶 *TOTALE SCADENZE: € ${totale.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━\n📱 Messaggio generato da inSAPA Agenti`;
     let url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
     window.open(url, '_blank');
 }
 
 function inviaScadenzeClienteCorrente() {
-    if (!clienteScadenzeCorrente) {
-        alert("Seleziona prima un cliente con scadenze!");
-        return;
-    }
+    if (!clienteScadenzeCorrente) { alert("Seleziona prima un cliente con scadenze!"); return; }
     inviaScadenzeWhatsApp(clienteScadenzeCorrente);
 }
 
 // ==================== GESTIONE CLIENTI ====================
 function aggiornaClienti() {
     let mappa = new Map();
-    
-    for (let c of datiOrd) {
-        mappa.set(c.codice, { 
-            codice: c.codice, 
-            ragione: c.ragione, 
-            hasScadenze: false, 
-            scadenze: [],
-            ordini: c.articoli 
-        });
-    }
-    
+    for (let c of datiOrd) { mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: false, scadenze: [], ordini: c.articoli }); }
     for (let c of datiSca) {
         if (mappa.has(c.codice)) {
             mappa.get(c.codice).hasScadenze = true;
             mappa.get(c.codice).scadenze = c.scadenze;
         } else {
-            mappa.set(c.codice, { 
-                codice: c.codice, 
-                ragione: c.ragione, 
-                hasScadenze: true, 
-                scadenze: c.scadenze,
-                ordini: [] 
-            });
+            mappa.set(c.codice, { codice: c.codice, ragione: c.ragione, hasScadenze: true, scadenze: c.scadenze, ordini: [] });
         }
     }
-    
     clientiUnici = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
     filtraClienti();
 }
 
 function filtraClienti() {
     let searchText = document.getElementById('cercaCliente').value.toLowerCase();
-    let clientiFiltrati = clientiUnici.filter(c => 
-        c.codice.toLowerCase().includes(searchText) || 
-        c.ragione.toLowerCase().includes(searchText)
-    );
-    
+    let clientiFiltrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(searchText) || c.ragione.toLowerCase().includes(searchText));
     let select = document.getElementById('selectClienteAgenti');
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
     for (let c of clientiFiltrati) {
         let opt = document.createElement('option');
         opt.value = c.codice;
         opt.textContent = `${c.codice} - ${c.ragione}`;
-        if (c.hasScadenze && c.scadenze.length > 0) {
-            opt.style.color = '#c0392b';
-            opt.style.fontWeight = 'bold';
-        }
+        if (c.hasScadenze && c.scadenze.length > 0) { opt.style.color = '#c0392b'; opt.style.fontWeight = 'bold'; }
         select.appendChild(opt);
     }
-    
     if (clientiFiltrati.length === 0) {
         document.getElementById('scadenzeAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
         document.getElementById('dettaglioAgenti').innerHTML = '';
@@ -1006,175 +696,76 @@ function filtraClienti() {
 function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
-    
     clienteScadenzeCorrente = cliente;
-    
     let containerScadenze = document.getElementById('scadenzeAgenti');
     let containerArticoli = document.getElementById('dettaglioAgenti');
-    
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
-        let html = `<div class="scadenze-box">
-                    <div class="scadenze-header">
-                        <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
-                        <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
-                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
-                            </svg>
-                            Invia Scadenze
-                        </button>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
-        for (let s of cliente.scadenze) {
-            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
-        }
+        let html = `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg>Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+        for (let s of cliente.scadenze) { html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</tr>`; }
         html += `</tbody></table></div>`;
         containerScadenze.innerHTML = html;
-    } else {
-        containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
-    }
-    
+    } else { containerScadenze.innerHTML = `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`; }
     if (cliente.ordini && cliente.ordini.length > 0) {
-        let html = `<div class="scadenze-box">
-                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
+        let html = `<div class="scadenze-box"><h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
         for (let art of cliente.ordini) {
             let storicoHtml = '';
             if (art.coppie && art.coppie.length > 0) {
                 let mostrati = art.coppie.slice(0, 4);
-                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
-                                <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
-                for (let ord of mostrati) {
-                    storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
-                }
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+                for (let ord of mostrati) { storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; }
                 storicoHtml += `</div>`;
-            } else {
-                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
-            }
-            
-            html += `<div class="articolo-item" data-codice="${art.codice}">
-                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
-                        <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
-                        ${storicoHtml}
-                    </div>`;
+            } else { storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; }
+            html += `<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storicoHtml}</div>`;
         }
         html += `</div>`;
         containerArticoli.innerHTML = html;
-        
-        document.querySelectorAll('.articolo-item').forEach(el => {
-            el.onclick = (e) => {
-                e.stopPropagation();
-                let storicoDiv = el.querySelector('.storico-ordini');
-                if (storicoDiv) {
-                    storicoDiv.classList.toggle('visible');
-                }
-            };
-        });
-    } else {
-        containerArticoli.innerHTML = `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
-    }
+        document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) { storicoDiv.classList.toggle('visible'); } }; });
+    } else { containerArticoli.innerHTML = `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`; }
 }
 
 function filtraArticoli() {
     let clienteCodice = document.getElementById('selectClienteAgenti').value;
     if (!clienteCodice) return;
-    
     let cliente = clientiUnici.find(c => c.codice === clienteCodice);
     if (!cliente || !cliente.ordini) return;
-    
     let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
-    let filtrati = cliente.ordini.filter(art => 
-        art.codice.toLowerCase().includes(searchText) || 
-        art.descrizione.toLowerCase().includes(searchText)
-    );
-    
+    let filtrati = cliente.ordini.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
     let container = document.getElementById('dettaglioAgenti');
-    let html = `<div class="scadenze-box">
-                <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
-    
+    let html = `<div class="scadenze-box"><h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
     for (let art of filtrati) {
         let storicoHtml = '';
         if (art.coppie && art.coppie.length > 0) {
             let mostrati = art.coppie.slice(0, 4);
-            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
-                            <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
-            for (let ord of mostrati) {
-                storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
-            }
+            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+            for (let ord of mostrati) { storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `; }
             storicoHtml += `</div>`;
-        } else {
-            storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
-        }
-        
-        html += `<div class="articolo-item" data-codice="${art.codice}">
-                    <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
-                    <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
-                    ${storicoHtml}
-                </div>`;
+        } else { storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`; }
+        html += `<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storicoHtml}</div>`;
     }
     html += `</div>`;
     container.innerHTML = html;
-    
-    document.querySelectorAll('.articolo-item').forEach(el => {
-        el.onclick = (e) => {
-            e.stopPropagation();
-            let storicoDiv = el.querySelector('.storico-ordini');
-            if (storicoDiv) {
-                storicoDiv.classList.toggle('visible');
-            }
-        };
-    });
+    document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) { storicoDiv.classList.toggle('visible'); } }; });
 }
 
 // ==================== CARICA FILE ====================
 async function caricaFile(files) {
-    if (!agenteCorrente) {
-        alert("Seleziona prima un agente!");
-        return false;
-    }
-    
-    if (files.length !== 2) {
-        alert("Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!");
-        return false;
-    }
-    
+    if (!agenteCorrente) { alert("Seleziona prima un agente!"); return false; }
+    if (files.length !== 2) { alert("Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
     let codAgente = agenteCorrente.codice;
     let trovati = { ord: false, sca: false };
     let ordText = null, scaText = null;
-    
     for (let file of files) {
         let nome = file.name;
         let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
         let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
-        
-        if (regexOrd.test(nome)) {
-            trovati.ord = true;
-            ordText = await file.text();
-        } 
-        else if (regexSca.test(nome)) {
-            trovati.sca = true;
-            scaText = await file.text();
-        }
-        else {
-            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
-            return false;
-        }
+        if (regexOrd.test(nome)) { trovati.ord = true; ordText = await file.text(); }
+        else if (regexSca.test(nome)) { trovati.sca = true; scaText = await file.text(); }
+        else { alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt\nSCA${codAgente}.txt`); return false; }
     }
-    
-    if (!trovati.ord || !trovati.sca) {
-        alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!");
-        return false;
-    }
-    
-    datiOrd = [];
-    datiSca = [];
-    
-    if (ordText) {
-        datiOrd = parseORD(ordText);
-    }
-    if (scaText) {
-        datiSca = parseSCA(scaText);
-    }
-    
+    if (!trovati.ord || !trovati.sca) { alert("Devi selezionare ENTRAMBI i file: ORD e SCA con il codice agente corretto!"); return false; }
+    datiOrd = []; datiSca = [];
+    if (ordText) { datiOrd = parseORD(ordText); }
+    if (scaText) { datiSca = parseSCA(scaText); }
     await salvaDatiAgente();
     aggiornaClienti();
     document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
@@ -1189,29 +780,25 @@ document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => filtraArticoli();
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
-document.getElementById('fileInput').onchange = async (e) => {
-    await caricaFile(Array.from(e.target.files));
-    e.target.value = '';
-};
-
+document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
+    modal.innerHTML = `<div class="modal-container"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="modal-buttons"><button id="btnConferma" class="btn-save">CREA</button><button id="btnAnnulla" class="btn-cancel">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('btnConferma').onclick = async () => {
         let cod = document.getElementById('nuovoCodice').value.trim();
         let nom = document.getElementById('nuovoNome').value.trim();
-        if (cod && nom) {
-            if (await creaAgente(cod, nom)) {
-                alert(`Agente ${cod} - ${nom} creato!`);
-                modal.remove();
-            }
-        } else alert("Compila tutti i campi!");
+        if (cod && nom) { if (await creaAgente(cod, nom)) { alert(`Agente ${cod} - ${nom} creato!`); modal.remove(); } }
+        else alert("Compila tutti i campi!");
     };
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 };
 
-// ==================== AVVIO ====================
+// NAVIGAZIONE
+document.getElementById('btnVaiContabilita').onclick = () => { window.location.href = 'contabilita.html'; };
+document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
+document.getElementById('navChangePwd').onclick = () => { alert("La password si cambia dalla sezione CONTABILITÀ"); };
+
 caricaAgenti();
 </script>
 </body>
