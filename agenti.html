@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.40</title>
+    <title>inSAPA - Agenti vA.5.42</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -230,9 +230,50 @@
             min-width: 200px;
         }
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-whatsapp-header { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
+        
+        /* Tooltip per ORD+SCA */
+        .tooltip-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip-wrapper .tooltip-text {
+            visibility: hidden;
+            width: 280px;
+            background-color: #2c3e50;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.7rem;
+            font-weight: normal;
+            white-space: normal;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .tooltip-wrapper .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+        .tooltip-wrapper:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
         
         /* Main container */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
@@ -306,7 +347,7 @@
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; text-align: center; }
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
@@ -425,7 +466,7 @@
             .content-area {
                 width: 100%;
             }
-            button, .btn-success, .btn-primary, .btn-whatsapp {
+            button, .btn-success, .btn-primary, .btn-danger, .btn-whatsapp {
                 padding: 10px;
                 font-size: 0.9rem;
             }
@@ -459,6 +500,17 @@
             .btnCreaAgenteMobileHide {
                 display: none !important;
             }
+            .tooltip-wrapper .tooltip-text {
+                width: 240px;
+                font-size: 0.65rem;
+                bottom: auto;
+                top: 125%;
+            }
+            .tooltip-wrapper .tooltip-text::after {
+                top: auto;
+                bottom: 100%;
+                border-color: transparent transparent #2c3e50 transparent;
+            }
         }
     </style>
 </head>
@@ -491,7 +543,10 @@
             <input type="text" id="cercaArticoloInline" placeholder="🔍 Cerca articolo...">
         </div>
         <div class="action-group">
-            <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
+            <div class="tooltip-wrapper">
+                <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
+                <span class="tooltip-text">📌 I file devono essere nominati:<br>ORD{codice}.txt e SCA{codice}.txt<br>Esempio: ORD01.txt e SCA01.txt</span>
+            </div>
             <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
                     <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
@@ -502,6 +557,7 @@
             <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
         <div class="action-group btnCreaAgenteMobileHide">
+            <button id="btnEliminaAgente" class="btn-danger" style="display:inline-block; width:auto;">🗑 ELIMINA AGENTE</button>
             <button id="btnCreaAgente" class="btn-success" style="display:inline-block; width:auto;">➕ CREA AGENTE</button>
         </div>
     </div>
@@ -522,7 +578,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2 | 6 sec→Configura</footer>
-<div class="version">vA.5.40 - Agenti (Logo Manager Dual Link)</div>
+<div class="version">vA.5.42 - Agenti (Logo Manager Dual Link)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -545,7 +601,7 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 
-// ==================== LOGO MANAGER - DUAL LINK ====================
+// ==================== LOGO MANAGER - DUAL LINK (VERSIONE UNIFICATA) ====================
 let pressTimer = null;
 let lastTap = 0;
 let isLongPress = false;
@@ -587,7 +643,7 @@ function mostraModaleConfig() {
     modal.innerHTML = `
         <div class="modal-container-config">
             <h3>🔧 CONFIGURAZIONE LOGO</h3>
-            <label>📌 LINK SITO PRINCIPALE (1 tap)</label>
+            <label>📌 LINK PRINCIPALE (1 tap)</label>
             <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
             <label>📌 LINK SECONDARIO (2 tap rapidi)</label>
             <input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g, '&quot;')}">
@@ -738,13 +794,41 @@ if (hamburgerBtn && navGrid) {
 }
 
 // ==================== FUNZIONI AGENTI ====================
+// Funzione per normalizzare il codice agente (0001 -> 01)
+function normalizzaCodiceAgente(codice) {
+    if (!codice) return codice;
+    // Se è composto solo da zeri e numeri, toglie gli zeri iniziali
+    let num = parseInt(codice, 10);
+    if (!isNaN(num)) {
+        return num.toString();
+    }
+    return codice;
+}
+
 async function caricaAgenti() {
     try {
         const snapshot = await db.collection('agenti_lista').get();
         agentiLista = [];
-        snapshot.forEach(doc => agentiLista.push(doc.data()));
-        agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            // Normalizza il codice durante il caricamento
+            data.codice = normalizzaCodiceAgente(data.codice);
+            agentiLista.push(data);
+        });
+        agentiLista.sort((a,b) => {
+            let aNum = parseInt(a.codice, 10);
+            let bNum = parseInt(b.codice, 10);
+            if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+            return a.codice.localeCompare(b.codice);
+        });
         aggiornaSelectAgenti();
+        
+        // Ripristina ultimo agente selezionato
+        const ultimoAgente = localStorage.getItem('ultimoAgenteSelezionato');
+        if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) {
+            document.getElementById('selectAgente').value = ultimoAgente;
+            selezionaAgente(ultimoAgente);
+        }
     } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
 
@@ -767,9 +851,34 @@ function aggiornaSelectAgenti() {
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
+    
+    // Salva in localStorage
+    localStorage.setItem('ultimoAgenteSelezionato', codice);
+    
     try {
+        // Prova prima con il nuovo formato, poi con il vecchio (per migrazione)
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
         let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
+        
+        // Se non trova con il nuovo formato, prova con il vecchio (con zeri)
+        if (!ordDoc.exists) {
+            let vecchioCodice = codice.padStart(4, '0');
+            ordDoc = await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).get();
+            if (ordDoc.exists) {
+                // Migra i dati al nuovo formato
+                await db.collection('agenti_dati').doc(`ord_${codice}`).set(ordDoc.data());
+                await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).delete();
+            }
+        }
+        if (!scaDoc.exists) {
+            let vecchioCodice = codice.padStart(4, '0');
+            scaDoc = await db.collection('agenti_dati').doc(`sca_${vecchioCodice}`).get();
+            if (scaDoc.exists) {
+                await db.collection('agenti_dati').doc(`sca_${codice}`).set(scaDoc.data());
+                await db.collection('agenti_dati').doc(`sca_${vecchioCodice}`).delete();
+            }
+        }
+        
         datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
         datiSca = scaDoc.exists ? scaDoc.data().dati : [];
         document.getElementById('fileStatusInline').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
@@ -791,12 +900,66 @@ async function salvaDatiAgente() {
 
 async function creaAgente(codice, nome) {
     if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
-    if (agentiLista.find(a => a.codice === codice)) { alert("Codice già esistente!"); return false; }
+    // Normalizza il codice (toglie zeri iniziali)
+    let codiceNorm = normalizzaCodiceAgente(codice);
+    if (agentiLista.find(a => a.codice === codiceNorm)) { alert("Codice già esistente!"); return false; }
     try {
-        await db.collection('agenti_lista').doc(codice).set({ codice, nome });
+        await db.collection('agenti_lista').doc(codiceNorm).set({ codice: codiceNorm, nome });
         await caricaAgenti();
         return true;
     } catch(e) { alert("ERRORE: "+e.message); return false; }
+}
+
+async function eliminaAgente() {
+    if (!agenteCorrente) {
+        alert("Nessun agente selezionato!");
+        return;
+    }
+    
+    // Modale di conferma
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>⚠️ ATTENZIONE ⚠️</h3>
+            <p>Sei sicuro di voler eliminare l'agente:<br><strong>${agenteCorrente.codice} - ${agenteCorrente.nome}</strong>?</p>
+            <p style="color: #e74c3c; font-size: 0.8rem;">Questa operazione ELIMINERÀ PERMANENTEMENTE:<br>
+            - Tutti i dati ORD dell'agente<br>
+            - Tutti i dati SCA dell'agente</p>
+            <p style="font-size: 0.8rem;">L'operazione è IRREVERSIBILE!</p>
+            <div class="btn-group-modal">
+                <button id="btnConfermaElimina" class="btn-danger">🗑 CONFERMA ELIMINAZIONE</button>
+                <button id="btnAnnullaElimina" class="btn-primary">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnConfermaElimina').onclick = async () => {
+        try {
+            // Elimina da agenti_lista
+            await db.collection('agenti_lista').doc(agenteCorrente.codice).delete();
+            // Elimina dati ORD e SCA
+            await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).delete();
+            await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).delete();
+            
+            showToast(`✅ Agente ${agenteCorrente.codice} eliminato con successo!`);
+            
+            // Reset e ricarica
+            agenteCorrente = null;
+            localStorage.removeItem('ultimoAgenteSelezionato');
+            datiOrd = [];
+            datiSca = [];
+            clientiUnici = [];
+            document.getElementById('dettaglioAgenti').innerHTML = '';
+            document.getElementById('fileStatusInline').innerHTML = '';
+            await caricaAgenti();
+            modal.remove();
+        } catch(e) {
+            alert("ERRORE durante l'eliminazione: "+e.message);
+        }
+    };
+    document.getElementById('btnAnnullaElimina').onclick = () => modal.remove();
 }
 
 // ==================== PARSER ORD ====================
@@ -1013,7 +1176,6 @@ function mostraDettaglioCliente(codice) {
     
     let html = '';
     
-    // Mostra scadenze se presenti
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
         html += `<div class="scadenze-box">
                     <div class="scadenze-header">
@@ -1035,7 +1197,6 @@ function mostraDettaglioCliente(codice) {
         html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
     
-    // Mostra ordini se presenti
     if (cliente.ordini && cliente.ordini.length > 0) {
         html += `<div class="scadenze-box">
                     <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
@@ -1094,7 +1255,6 @@ function filtraArticoli() {
     
     let html = '';
     
-    // Mostra scadenze se presenti
     if (cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0) {
         html += `<div class="scadenze-box">
                     <div class="scadenze-header">
@@ -1116,7 +1276,6 @@ function filtraArticoli() {
         html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
     
-    // Mostra ordini filtrati
     if (filtrati.length > 0) {
         html += `<div class="scadenze-box">
                     <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
@@ -1176,19 +1335,22 @@ async function caricaFile(files) {
     
     for (let file of files) {
         let nome = file.name;
+        // Supporta sia il vecchio formato (0001) che il nuovo (01)
         let regexOrd = new RegExp(`^ORD${codAgente}\\.`, 'i');
+        let regexOrdVecchio = new RegExp(`^ORD${codAgente.padStart(4, '0')}\\.`, 'i');
         let regexSca = new RegExp(`^SCA${codAgente}\\.`, 'i');
+        let regexScaVecchio = new RegExp(`^SCA${codAgente.padStart(4, '0')}\\.`, 'i');
         
-        if (regexOrd.test(nome)) {
+        if (regexOrd.test(nome) || regexOrdVecchio.test(nome)) {
             trovati.ord = true;
             ordText = await file.text();
         } 
-        else if (regexSca.test(nome)) {
+        else if (regexSca.test(nome) || regexScaVecchio.test(nome)) {
             trovati.sca = true;
             scaText = await file.text();
         }
         else {
-            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt\nSCA${codAgente}.txt`);
+            alert(`❌ File non valido: ${nome}\n\nI file DEVONO essere nominati:\nORD${codAgente}.txt o ORD${codAgente.padStart(4, '0')}.txt\nSCA${codAgente}.txt o SCA${codAgente.padStart(4, '0')}.txt\n\nEsempio: ORD${codAgente}.txt e SCA${codAgente}.txt`);
             return false;
         }
     }
@@ -1232,7 +1394,7 @@ document.getElementById('fileInput').onchange = async (e) => {
 
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 001"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-danger">ANNULLA</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 01"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-primary">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('btnConferma').onclick = async () => {
         let cod = document.getElementById('nuovoCodice').value.trim();
@@ -1246,6 +1408,8 @@ document.getElementById('btnCreaAgente').onclick = () => {
     };
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 };
+
+document.getElementById('btnEliminaAgente').onclick = () => eliminaAgente();
 
 // ==================== AVVIO ====================
 caricaAgenti();
