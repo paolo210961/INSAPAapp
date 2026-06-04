@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.44</title>
+    <title>inSAPA - Agenti vA.5.45</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -460,7 +460,7 @@
         <div class="action-group">
             <div class="tooltip-wrapper">
                 <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
-                <span class="tooltip-text">📌 I file devono essere nominati:<br>ORD{codice}.txt e SCA{codice}.txt<br>Esempio: ORD01.txt e SCA01.txt<br><br>Supporta anche .csv o senza estensione</span>
+                <span class="tooltip-text">📌 I file devono essere nominati:<br>ORD{codice}.txt e SCA{codice}.txt<br>Esempio: ORD01.txt e SCA01.txt<br>(accetta anche ORD1.txt e SCA1.txt)</span>
             </div>
             <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white">
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.44 - Agenti</div>
+<div class="version">vA.5.45 - Agenti</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -632,6 +632,25 @@ function normalizzaCodiceAgente(codice) {
     let num = parseInt(codice, 10);
     if (!isNaN(num)) return num.toString();
     return codice;
+}
+
+// ==================== FUNZIONE PER VERIFICARE NOME FILE (IGNORA ZERI INIZIALI) ====================
+function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
+    // tipo = 'ORD' o 'SCA'
+    // Toglie l'estensione
+    const baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
+    const regexNumero = /^([A-Z]+)(\d+)$/i;
+    const match = baseName.match(regexNumero);
+    
+    if (!match) return false;
+    if (match[1].toUpperCase() !== tipo) return false;
+    
+    const numeroFile = match[2];
+    const numeroAgente = parseInt(codiceAgente, 10);
+    const numeroFileParsed = parseInt(numeroFile, 10);
+    
+    // Confronto numerico (ignora gli zeri iniziali)
+    return numeroFileParsed === numeroAgente;
 }
 
 async function caricaAgenti() {
@@ -1008,7 +1027,7 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
@@ -1086,7 +1105,7 @@ function filtraArticoli() {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
@@ -1136,47 +1155,46 @@ function filtraArticoli() {
     });
 }
 
-// ==================== CARICA FILE (CORRETTO) ====================
+// ==================== CARICA FILE (CORRETTO - IGNORA ZERI INIZIALI) ====================
 async function caricaFile(files) {
     if (!agenteCorrente) {
-        alert("Seleziona prima un agente!");
+        alert("❌ Seleziona prima un agente!");
         return false;
     }
     
     if (files.length !== 2) {
-        alert("Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!");
+        alert("❌ Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!");
         return false;
     }
     
     let codAgente = agenteCorrente.codice;
     let trovati = { ord: false, sca: false };
     let ordText = null, scaText = null;
+    let errori = [];
     
     for (let file of files) {
         let nome = file.name;
         
-        // Regex migliorati: accettano .txt, .csv, o nessuna estensione
-        let regexOrd = new RegExp(`^ORD${codAgente}(\\.[a-zA-Z0-9]+)?$`, 'i');
-        let regexOrdVecchio = new RegExp(`^ORD${codAgente.padStart(4, '0')}(\\.[a-zA-Z0-9]+)?$`, 'i');
-        let regexSca = new RegExp(`^SCA${codAgente}(\\.[a-zA-Z0-9]+)?$`, 'i');
-        let regexScaVecchio = new RegExp(`^SCA${codAgente.padStart(4, '0')}(\\.[a-zA-Z0-9]+)?$`, 'i');
-        
-        if (regexOrd.test(nome) || regexOrdVecchio.test(nome)) {
+        if (nomeFileCorrisponde(nome, codAgente, 'ORD')) {
             trovati.ord = true;
             ordText = await file.text();
         } 
-        else if (regexSca.test(nome) || regexScaVecchio.test(nome)) {
+        else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) {
             trovati.sca = true;
             scaText = await file.text();
         }
         else {
-            alert(`❌ FILE NON VALIDO: "${nome}"\n\nI file devono essere nominati come:\n\n📄 ORD${codAgente}.txt  (o .csv)\n📄 SCA${codAgente}.txt  (o .csv)\n\n📌 Esempio con codice "${codAgente}":\n   ORD${codAgente}.txt e SCA${codAgente}.txt\n\n📌 Se il codice è "001", usare:\n   ORD001.txt e SCA001.txt\n\nSupporta anche file senza estensione.`);
-            return false;
+            errori.push(nome);
         }
     }
     
+    if (errori.length > 0) {
+        alert(`❌ FILE NON VALIDI: ${errori.join(', ')}\n\nI file devono essere nominati come:\n📄 ORD${codAgente}.txt (o ORD${parseInt(codAgente,10)}.txt)\n📄 SCA${codAgente}.txt (o SCA${parseInt(codAgente,10)}.txt)\n\n📌 Esempio con codice "${codAgente}":\n   ORD${codAgente}.txt e SCA${codAgente}.txt\n   oppure ORD${parseInt(codAgente,10)}.txt e SCA${parseInt(codAgente,10)}.txt`);
+        return false;
+    }
+    
     if (!trovati.ord || !trovati.sca) {
-        alert("❌ FILE MANCANTI\n\nDevi selezionare ENTRAMBI i file:\n- ORD" + codAgente + ".txt\n- SCA" + codAgente + ".txt\n\nNecessari entrambi per il corretto funzionamento.");
+        alert(`❌ FILE MANCANTI\n\nDevi selezionare ENTRAMBI i file:\n- ORD${codAgente}.txt (o ORD${parseInt(codAgente,10)}.txt)\n- SCA${codAgente}.txt (o SCA${parseInt(codAgente,10)}.txt)`);
         return false;
     }
     
