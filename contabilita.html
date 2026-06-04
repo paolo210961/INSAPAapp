@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.41</title>
-    <!-- Firebase SDK -->
+    <title>inSAPA - Contabilità vC.5.42</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -76,7 +75,7 @@
         }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
 
-        /* MODALE CONFIGURAZIONE LOGO */
+        /* MODALE CONFIGURAZIONE LOGO - VERSIONE UNIFICATA */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -576,7 +575,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">vC.5.41 - Contabilità</div>
+    <div class="version" id="appVersion">vC.5.42 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -725,7 +724,7 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let editModeRow = null;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-// ==================== LOGO MANAGER - DUAL LINK ====================
+// ==================== LOGO MANAGER - DUAL LINK (VERSIONE UNIFICATA) ====================
 let pressTimer = null;
 let lastTap = 0;
 let isLongPress = false;
@@ -758,10 +757,10 @@ function mostraModaleConfig() {
     modal.innerHTML = `
         <div class="modal-container">
             <h3>🔧 CONFIGURAZIONE LOGO</h3>
-            <label>📌 LINK SITO PRINCIPALE (1 tap)</label>
-            <input type="text" id="modalLink1" placeholder="https://..." value="${link1}">
+            <label>📌 LINK PRINCIPALE (1 tap)</label>
+            <input type="text" id="modalLink1" placeholder="https://..." value="${link1.replace(/"/g, '&quot;')}">
             <label>📌 LINK SECONDARIO (2 tap rapidi)</label>
-            <input type="text" id="modalLink2" placeholder="https://..." value="${link2}">
+            <input type="text" id="modalLink2" placeholder="https://..." value="${link2.replace(/"/g, '&quot;')}">
             <label>🖼️ LOGO AZIENDALE</label>
             <div class="logo-preview">
                 ${logoSaved ? `<img src="${logoSaved}" id="modalLogoPreview">` : '<span>Nessun logo caricato</span>'}
@@ -1268,7 +1267,6 @@ function aggiornaForm() {
     } else if (currentScheda === 'assclienti') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div></div><div class="form-row"><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div><div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div></div><div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>`;
         setupImportField('formImportoAss');
-        // Imposta data corrente per Data Doc
         if(document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = getTodayDate();
     } else if (currentScheda === 'pagaddt') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div><div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div></div><div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div></div>`;
@@ -1377,7 +1375,7 @@ function esportaPDFMese() {
     const sal = saldoIniziale + ta - td;
     const logo = getLogoSaved();
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody><tr><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
