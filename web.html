@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>inSAPA - Home</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 20px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .logo-rettangolo {
+            width: 200px;
+            height: 70px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
+
+        .admin-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .btn-admin {
+            background: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-admin:hover {
+            background: #e67e22;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-admin.active {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-salva {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* INFO AZIENDA */
+        .info-azienda {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .info-azienda h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .info-azienda p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .contatti {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .contatti a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .contatti a:hover { text-decoration: underline; }
+
+        /* CATEGORIE */
+        .categorie-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .categorie-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .categorie-header h2 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+        .btn-aggiungi {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: none;
+        }
+        .btn-aggiungi:hover { background: #219a52; transform: translateY(-2px); }
+        .btn-aggiungi.show { display: block; }
+
+        /* GRIGLIA CATEGORIE */
+        .categorie-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+        .categoria-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .categoria-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        .categoria-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #ecf0f1;
+        }
+        .categoria-info {
+            padding: 15px;
+        }
+        .categoria-nome {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .categoria-descrizione {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+        .card-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 8px;
+        }
+        .card-buttons.show {
+            display: flex;
+        }
+        .card-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .card-btn:hover {
+            background: #e74c3c;
+            transform: scale(1.1);
+        }
+        .card-btn.edit:hover { background: #3498db; }
+
+        /* MODALE */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-container h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+        }
+        .modal-container label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 5px 0;
+            color: #2c3e50;
+        }
+        .modal-container input, .modal-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .modal-container textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .drop-area {
+            border: 2px dashed #3498db;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .drop-area.drag-over {
+            background: #e3f2fd;
+            border-color: #27ae60;
+        }
+        .drop-area img {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-salva-modal { background: #27ae60; color: white; }
+        .btn-cancel-modal { background: #95a5a6; color: white; }
+
+        /* TOAST */
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2000;
+            font-weight: bold;
+            animation: fadeOut 3s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+
+        /* PASSWORD MODAL */
+        .password-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .password-modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .categorie-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .categoria-img { height: 150px; }
+            .categoria-nome { font-size: 1rem; }
+            .info-azienda h1 { font-size: 1.8rem; }
+            .info-azienda p { font-size: 0.9rem; }
+            .header-row { flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            .categorie-grid { grid-template-columns: 1fr; }
+        }
+
+        /* FOOTER */
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+        footer p { margin: 5px 0; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-row">
+        <div class="logo-area">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <img id="logoImmagine" style="display:none;">
+                <span id="logoSpan">🏢 inSAPA s.a.s.</span>
+            </div>
+        </div>
+        <div class="admin-area">
+            <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
+            <button id="btnSalvaGlobale" class="btn-admin btn-salva" style="display:none;">💾 SALVA TUTTO</button>
+        </div>
+    </div>
+</div>
+
+<div class="info-azienda" id="infoAzienda">
+    <h1>Benvenuti da inSAPA s.a.s.</h1>
+    <p>La tua soluzione di fiducia per componenti industriali e ricambi di qualità. Da oltre 20 anni forniamo prodotti eccellenti ai nostri clienti con professionalità e passione.</p>
+    <div class="contatti">
+        <a href="tel:+39123456789">📞 +39 123 456 789</a>
+        <a href="mailto:info@insapa.it">✉️ info@insapa.it</a>
+        <a href="#">📍 Via Roma, 1 - Milano</a>
+    </div>
+</div>
+
+<div class="categorie-container">
+    <div class="categorie-header">
+        <h2>📁 Le nostre categorie</h2>
+        <button id="btnAggiungiCategoria" class="btn-aggiungi">➕ NUOVA CATEGORIA</button>
+    </div>
+    <div id="categorieGrid" class="categorie-grid">
+        <!-- Le categorie vengono caricate dinamicamente -->
+        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">Caricamento categorie...</div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p>
+    <p>P.IVA 12345678901</p>
+</footer>
+
+<script>
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
+    authDomain: "insapa-database.firebaseapp.com",
+    projectId: "insapa-database",
+    storageBucket: "insapa-database.firebasestorage.app",
+    messagingSenderId: "331230245928",
+    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// ==================== VARIABILI ====================
+let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
+let isAdminMode = false;
+let categorie = [];
+let currentEditCategoria = null;
+
+// ==================== LOGO ====================
+function caricaLogo() {
+    const logoImg = document.getElementById('logoImmagine');
+    const logoSpan = document.getElementById('logoSpan');
+
+    fetch('icons/logo.png').then(r => {
+        if (r.ok) {
+            logoImg.src = 'icons/logo.png';
+            logoImg.style.display = 'block';
+            logoSpan.style.display = 'none';
+        } else {
+            fetch('icons/logo.jpg').then(r2 => {
+                if (r2.ok) {
+                    logoImg.src = 'icons/logo.jpg';
+                    logoImg.style.display = 'block';
+                    logoSpan.style.display = 'none';
+                }
+            }).catch(() => {});
+        }
+    }).catch(() => {});
+}
+caricaLogo();
+
+// ==================== FUNZIONI UTILI ====================
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
+// ==================== MODALITA' ADMIN ====================
+function mostraModalePassword() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="password-modal">
+            <h3>🔐 ACCESSO ADMIN</h3>
+            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
+            <div class="modal-buttons">
+                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('btnVerifica').onclick = () => {
+        const pwd = document.getElementById('passwordAdmin').value;
+        if (pwd === ADMIN_PASSWORD) {
+            isAdminMode = true;
+            localStorage.setItem('web_admin_mode', 'true');
+            showToast("✅ Modalità admin attivata!");
+            aggiornaUIModalitaAdmin();
+            modal.remove();
+        } else {
+            showToast("❌ Password errata!", true);
+        }
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+function disattivaModalitaAdmin() {
+    isAdminMode = false;
+    localStorage.removeItem('web_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIModalitaAdmin();
+}
+
+function aggiornaUIModalitaAdmin() {
+    const btnAdmin = document.getElementById('btnAdmin');
+    const btnSalvaGlobale = document.getElementById('btnSalvaGlobale');
+    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
+
+    if (isAdminMode) {
+        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
+        btnAdmin.classList.add('active');
+        btnSalvaGlobale.style.display = 'block';
+        btnAggiungiCategoria.classList.add('show');
+        // Mostra bottoni modifica su ogni card
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
+    } else {
+        btnAdmin.textContent = "🔐 AREA ADMIN";
+        btnAdmin.classList.remove('active');
+        btnSalvaGlobale.style.display = 'none';
+        btnAggiungiCategoria.classList.remove('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
+    }
+}
+
+// ==================== CARICA CATEGORIE ====================
+async function caricaCategorie() {
+    try {
+        const snapshot = await db.collection('web_categorie').orderBy('ordine', 'asc').get();
+        categorie = [];
+        snapshot.forEach(doc => {
+            categorie.push({ id: doc.id, ...doc.data() });
+        });
+        visualizzaCategorie();
+    } catch(e) {
+        console.error("Errore caricamento categorie:", e);
+        showToast("Errore caricamento categorie", true);
+    }
+}
+
+function visualizzaCategorie() {
+    const grid = document.getElementById('categorieGrid');
+    if (categorie.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessuna categoria presente. ' + (isAdminMode ? 'Clicca su "NUOVA CATEGORIA" per aggiungerne una.' : '') + '</div>';
+        return;
+    }
+
+    grid.innerHTML = categorie.map(cat => `
+        <div class="categoria-card" data-id="${cat.id}">
+            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
+                <button class="card-btn edit" onclick="event.stopPropagation(); modificaCategoria('${cat.id}')">✏️</button>
+                <button class="card-btn" onclick="event.stopPropagation(); eliminaCategoria('${cat.id}')">🗑</button>
+            </div>
+            <img class="categoria-img" src="${cat.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${cat.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+            <div class="categoria-info">
+                <div class="categoria-nome">${escapeHtml(cat.nome)}</div>
+                <div class="categoria-descrizione">${escapeHtml(cat.descrizione || '')}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Aggiungi event listener per il click sulla card
+    document.querySelectorAll('.categoria-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.classList.contains('card-btn')) return;
+            const id = card.dataset.id;
+            window.location.href = `web-categoria.html?id=${id}`;
+        });
+    });
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// ==================== MODALE AGGIUNTA/MODIFICA CATEGORIA ====================
+let fotoTemp = null;
+let fotoTempDataUrl = null;
+
+function mostraModaleCategoria(categoria = null) {
+    currentEditCategoria = categoria;
+    fotoTemp = null;
+    fotoTempDataUrl = null;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-container">
+            <h3>${categoria ? '✏️ MODIFICA CATEGORIA' : '➕ NUOVA CATEGORIA'}</h3>
+            <label>📌 Nome categoria *</label>
+            <input type="text" id="catNome" value="${categoria ? escapeHtml(categoria.nome) : ''}" placeholder="es. Motori">
+            <label>📝 Descrizione</label>
+            <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
+            <label>🖼️ Immagine (trascina o clicca)</label>
+            <div id="dropArea" class="drop-area">
+                📸 Trascina un'immagine qui o clicca per selezionare
+                ${(categoria && categoria.fotoUrl) ? `<img src="${categoria.fotoUrl}" id="tempPreview">` : '<div id="tempPreview"></div>'}
+            </div>
+            <label>🔢 Ordine</label>
+            <input type="number" id="catOrdine" value="${categoria ? (categoria.ordine || 0) : categorie.length + 1}" placeholder="0,1,2...">
+            <div class="modal-buttons">
+                <button id="btnSalvaCategoria" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Setup drag & drop
+    const dropArea = document.getElementById('dropArea');
+    const tempPreview = document.getElementById('tempPreview');
+
+    dropArea.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => handleFile(e.target.files[0], tempPreview);
+        input.click();
+    });
+
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('drag-over');
+    });
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('drag-over');
+    });
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleFile(file, tempPreview);
+        } else {
+            showToast("Per favore, trascina un file immagine", true);
+        }
+    });
+
+    document.getElementById('btnSalvaCategoria').onclick = async () => {
+        const nome = document.getElementById('catNome').value.trim();
+        const descrizione = document.getElementById('catDescrizione').value;
+        const ordine = parseInt(document.getElementById('catOrdine').value) || 0;
+
+        if (!nome) {
+            showToast("Inserisci il nome della categoria", true);
+            return;
+        }
+
+        try {
+            let fotoUrl = categoria ? categoria.fotoUrl : null;
+
+            if (fotoTemp) {
+                // Carica nuova immagine su Firebase Storage
+                const storageRef = storage.ref(`web/categorie/${Date.now()}_${fotoTemp.name}`);
+                const uploadTask = await storageRef.put(fotoTemp);
+                fotoUrl = await uploadTask.ref.getDownloadURL();
+            }
+
+            if (categoria) {
+                await db.collection('web_categorie').doc(categoria.id).update({
+                    nome, descrizione, ordine, fotoUrl,
+                    ultimoAggiornamento: new Date().toISOString()
+                });
+                showToast("✅ Categoria modificata!");
+            } else {
+                const newRef = await db.collection('web_categorie').add({
+                    nome, descrizione, ordine, fotoUrl: fotoUrl || '',
+                    creatoIl: new Date().toISOString()
+                });
+                showToast("✅ Categoria aggiunta!");
+            }
+
+            await caricaCategorie();
+            modal.remove();
+        } catch(e) {
+            console.error(e);
+            showToast("Errore salvataggio categoria", true);
+        }
+    };
+
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+function handleFile(file, previewElement) {
+    if (!file.type.startsWith('image/')) {
+        showToast("Seleziona un file immagine", true);
+        return;
+    }
+    fotoTemp = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        fotoTempDataUrl = e.target.result;
+        previewElement.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:150px; margin-top:10px; border-radius:8px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function modificaCategoria(id) {
+    const cat = categorie.find(c => c.id === id);
+    if (cat) mostraModaleCategoria(cat);
+}
+
+async function eliminaCategoria(id) {
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli associati!\n\nOperazione IRREVERSIBILE!")) return;
+
+    try {
+        // Elimina tutti gli articoli della categoria
+        const articoliSnap = await db.collection('web_articoli').where('categoriaId', '==', id).get();
+        const batch = db.batch();
+        articoliSnap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+
+        // Elimina categoria
+        await db.collection('web_categorie').doc(id).delete();
+
+        showToast("✅ Categoria eliminata!");
+        await caricaCategorie();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore eliminazione categoria", true);
+    }
+}
+
+// ==================== EVENTI ====================
+document.getElementById('btnAdmin').onclick = () => {
+    if (isAdminMode) {
+        disattivaModalitaAdmin();
+    } else {
+        mostraModalePassword();
+    }
+};
+
+document.getElementById('btnAggiungiCategoria').onclick = () => {
+    if (isAdminMode) {
+        mostraModaleCategoria(null);
+    }
+};
+
+document.getElementById('btnSalvaGlobale').onclick = async () => {
+    showToast("💾 Tutto già salvato su Firebase!");
+};
+
+// ==================== AVVIO ====================
+// Controlla se c'era modalità admin salvata
+const savedAdminMode = localStorage.getItem('web_admin_mode');
+if (savedAdminMode === 'true') {
+    isAdminMode = true;
+}
+
+caricaCategorie().then(() => {
+    aggiornaUIModalitaAdmin();
+});
+</script>
+</body>
+</html>
