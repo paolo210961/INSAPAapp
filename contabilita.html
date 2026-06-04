@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità v5.37</title>
+    <title>inSAPA - Contabilità v5.38</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -58,7 +58,6 @@
             font-size: 0.8rem;
             font-weight: bold;
         }
-        /* Tooltip per il logo */
         .logo-tooltip {
             position: absolute;
             bottom: -25px;
@@ -75,9 +74,7 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .logo-rettangolo:hover .logo-tooltip {
-            opacity: 1;
-        }
+        .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
 
         /* CENTRO - FLOPPY DISK */
         .floppy-container {
@@ -98,10 +95,7 @@
             width: auto;
             margin: 0;
         }
-        .floppy-btn:hover {
-            background: #f0f0f0;
-            transform: scale(1.05);
-        }
+        .floppy-btn:hover { background: #f0f0f0; transform: scale(1.05); }
         .dropdown-menu {
             position: absolute;
             top: 100%;
@@ -118,9 +112,7 @@
             margin-top: 8px;
             border: 2px solid #3498db;
         }
-        .dropdown-menu.show {
-            display: flex;
-        }
+        .dropdown-menu.show { display: flex; }
         .dropdown-item {
             background: white;
             border: none;
@@ -135,13 +127,8 @@
             transition: all 0.2s;
             color: #000000;
         }
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-        .dropdown-item:hover {
-            background: #f1c40f;
-            color: #000000;
-        }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background: #f1c40f; color: #000000; }
 
         /* NAVIGAZIONE */
         .nav-box {
@@ -196,22 +183,10 @@
             width: auto;
             margin: 0;
         }
-        .toolbar-btn:hover {
-            background: #bdc3c7;
-            transform: translateY(-1px);
-        }
-        .toolbar-btn.active {
-            background: #3498db;
-            color: white;
-        }
-        .toolbar-btn.btn-yellow {
-            background: #f1c40f;
-            color: #2c3e50;
-        }
-        .toolbar-btn.btn-yellow:hover {
-            background: #e67e22;
-            color: white;
-        }
+        .toolbar-btn:hover { background: #bdc3c7; transform: translateY(-1px); }
+        .toolbar-btn.active { background: #3498db; color: white; }
+        .toolbar-btn.btn-yellow { background: #f1c40f; color: #2c3e50; }
+        .toolbar-btn.btn-yellow:hover { background: #e67e22; color: white; }
 
         /* RIEPILOGO STICKY */
         .sticky-summary {
@@ -233,7 +208,7 @@
 
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
 
-        /* SIDEBAR */
+        /* SIDEBAR - PC (layout normale) */
         .sidebar {
             width: 380px;
             background: white;
@@ -247,13 +222,8 @@
             gap: 15px;
             margin-bottom: 15px;
         }
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+        .form-group { margin-bottom: 15px; }
         label {
             display: block;
             font-weight: bold;
@@ -270,16 +240,9 @@
             color: #2c3e50;
             background: white;
         }
-        input[type="number"] {
-            text-align: right;
-        }
-        .import-field {
-            cursor: text;
-        }
-        .import-field:focus {
-            outline: 2px solid #3498db;
-            background-color: #fffef5;
-        }
+        input[type="number"] { text-align: right; }
+        .import-field { cursor: text; }
+        .import-field:focus { outline: 2px solid #3498db; background-color: #fffef5; }
         button { 
             background: #3498db; 
             color: white; 
@@ -334,14 +297,8 @@
             background: white;
             color: black;
         }
-        .tabella th { 
-            background: #e9ecef; 
-            font-weight: bold;
-            color: black;
-        }
-        .tabella td.text-right {
-            text-align: right;
-        }
+        .tabella th { background: #e9ecef; font-weight: bold; color: black; }
+        .tabella td.text-right { text-align: right; }
         .tabella td input[type="checkbox"] {
             width: 20px;
             height: 20px;
@@ -356,15 +313,14 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        .edit-mode {
-            background-color: #fffef5;
-        }
+        .edit-mode { background-color: #fffef5; }
         
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .password-modal { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
+        .password-modal { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .password-modal input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
         .toast-message {
             position: fixed;
             bottom: 80px;
@@ -383,9 +339,12 @@
             100% { opacity: 0; display: none; }
         }
 
+        /* ========== MEDIA QUERY PER CELLULARE ========== */
         @media (max-width: 768px) {
+            /* Layout principale a colonna */
             .main-container { flex-direction: column; }
-            .sidebar { width: 100%; }
+            
+            /* HEADER più compatto */
             .header-row { flex-direction: column; align-items: stretch; }
             .nav-box { width: 100%; text-align: center; }
             .nav-grid { justify-content: center; }
@@ -394,11 +353,82 @@
             .btn-logo-mobile { display: block; }
             .floppy-container { order: 2; margin: 10px 0; }
             .dropdown-menu { left: 50%; transform: translateX(-50%); min-width: 200px; }
-            .toolbar-btn { font-size: 0.7rem; padding: 6px 12px; }
-            .sticky-toolbar { top: 120px; }
-            .sticky-summary { top: 176px; }
-            .form-row { flex-direction: column; gap: 0; }
-            .logo-tooltip { font-size: 0.6rem; white-space: nowrap; bottom: -20px; }
+            
+            /* SIDEBAR diventa un menu a tendina */
+            .sidebar {
+                width: 100%;
+                margin-bottom: 15px;
+                padding: 15px;
+                position: relative;
+                max-height: 60px;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+                cursor: pointer;
+                border-bottom: 2px solid #3498db;
+            }
+            .sidebar:before {
+                content: "☰ MENU FILTRI ▼";
+                display: block;
+                font-weight: bold;
+                color: #3498db;
+                margin-bottom: 10px;
+                font-size: 1rem;
+            }
+            .sidebar.open {
+                max-height: 600px;
+                overflow-y: auto;
+            }
+            .sidebar.open:before {
+                content: "☰ MENU FILTRI ▲";
+            }
+            
+            /* Form dentro sidebar compatto */
+            .form-row { flex-direction: column; gap: 10px; }
+            .form-group { margin-bottom: 12px; }
+            label { font-size: 0.75rem; }
+            input, select { padding: 10px; font-size: 1rem; }
+            
+            /* Pulsante memorizza più grande */
+            .btn-success { padding: 14px; font-size: 1rem; }
+            
+            /* Toolbar scrollabile orizzontalmente */
+            .sticky-toolbar {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                gap: 8px;
+                padding: 10px 15px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .sticky-toolbar::-webkit-scrollbar { display: none; }
+            .toolbar-btn {
+                flex-shrink: 0;
+                font-size: 0.7rem;
+                padding: 10px 14px;
+                white-space: nowrap;
+            }
+            
+            /* Sticky positions ricalcolate */
+            .sticky-toolbar { top: 110px; }
+            .sticky-summary { top: 160px; }
+            
+            /* Tabella più leggibile su mobile */
+            .tabella { font-size: 0.7rem; min-width: 500px; }
+            .tabella th, .tabella td { padding: 8px 5px; }
+            .tabella td input[type="checkbox"] { width: 22px; height: 22px; }
+            
+            /* Bottoni azione più grandi */
+            .action-buttons button {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            /* Box scadenze */
+            .scadenze-box { padding: 12px; }
+            .scadenze-box h3 { font-size: 1rem; margin: 0 0 10px 0; }
+            
+            /* Tooltip logo nascosto su mobile */
+            .logo-tooltip { display: none; }
         }
     </style>
 </head>
@@ -453,7 +483,7 @@
         <div id="saldoInfo" class="summary-content"></div>
     </div>
 
-    <div class="version" id="appVersion">v5.37 - Contabilità</div>
+    <div class="version" id="appVersion">v5.38 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -606,112 +636,42 @@ const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Lugl
 let pressTimer = null;
 let isLongPress = false;
 
-function getSitoWebLink() {
-    return localStorage.getItem('sito_web_link');
+function getSitoWebLink() { return localStorage.getItem('sito_web_link'); }
+function setSitoWebLink(url) { 
+    if (url && url.trim() !== '') { localStorage.setItem('sito_web_link', url.trim()); showToast("✅ Link sito salvato: " + url.trim()); } 
+    else { localStorage.removeItem('sito_web_link'); showToast("❌ Link sito rimosso"); } 
 }
-
-function setSitoWebLink(url) {
-    if (url && url.trim() !== '') {
-        localStorage.setItem('sito_web_link', url.trim());
-        showToast("✅ Link sito salvato: " + url.trim());
-    } else {
-        localStorage.removeItem('sito_web_link');
-        showToast("❌ Link sito rimosso");
-    }
+function apriSitoWeb() { 
+    const link = getSitoWebLink(); 
+    if (link) { window.open(link, '_blank'); showToast("🔗 Apertura sito..."); } 
+    else { showToast("⚠️ Nessun link configurato. Tieni premuto 6 secondi sul logo per impostarlo.", true); } 
 }
-
-function apriSitoWeb() {
-    const link = getSitoWebLink();
-    if (link) {
-        window.open(link, '_blank');
-        showToast("🔗 Apertura sito...");
-    } else {
-        showToast("⚠️ Nessun link configurato. Tieni premuto 6 secondi sul logo per impostarlo.", true);
-    }
-}
-
 function caricaLogoFile() { 
-    let inp = document.createElement('input'); 
-    inp.type = 'file'; 
-    inp.accept = 'image/*'; 
-    inp.onchange = e => { 
-        let f = e.target.files[0]; 
-        if(f){ 
-            let r = new FileReader(); 
-            r.onload = ev => { 
-                let url = ev.target.result; 
-                document.getElementById('logoImmagine').src = url; 
-                document.getElementById('logoImmagine').style.display = 'block'; 
-                document.getElementById('logoSpan').style.display = 'none'; 
-                salvaLogo(url); 
-                showToast("✅ Logo aggiornato!");
-            }; 
-            r.readAsDataURL(f); 
-        } 
-    }; 
-    inp.click(); 
+    let inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => { let f = e.target.files[0]; if(f){ let r = new FileReader(); r.onload = ev => { let url = ev.target.result; document.getElementById('logoImmagine').src = url; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; salvaLogo(url); showToast("✅ Logo aggiornato!"); }; r.readAsDataURL(f); } }; inp.click(); 
 }
-
 function impostaLinkSito() {
     let linkAttuale = getSitoWebLink() || "";
     let nuovoLink = prompt("Inserisci il link del sito web (es. https://www.insapa.it):", linkAttuale);
     if (nuovoLink !== null) {
-        if (nuovoLink.trim() === "") {
-            setSitoWebLink("");
-        } else {
-            if (!nuovoLink.startsWith("http://") && !nuovoLink.startsWith("https://")) {
-                nuovoLink = "https://" + nuovoLink;
-            }
-            setSitoWebLink(nuovoLink);
-        }
+        if (nuovoLink.trim() === "") { setSitoWebLink(""); } 
+        else { if (!nuovoLink.startsWith("http://") && !nuovoLink.startsWith("https://")) { nuovoLink = "https://" + nuovoLink; } setSitoWebLink(nuovoLink); }
     }
 }
-
-// Eventi per il logo con timer
-const logoDiv = document.getElementById('logoRettangolo');
-logoDiv.addEventListener('mousedown', () => {
+const logoDivElem = document.getElementById('logoRettangolo');
+logoDivElem.addEventListener('mousedown', () => {
     isLongPress = false;
     pressTimer = setTimeout(() => {
         isLongPress = true;
         pressTimer = null;
-        // Secondo livello (6 secondi) - imposta link
-        setTimeout(() => {
-            if (isLongPress) {
-                isLongPress = false;
-                impostaLinkSito();
-            }
-        }, 3000);
+        setTimeout(() => { if (isLongPress) { isLongPress = false; impostaLinkSito(); } }, 3000);
     }, 3000);
 });
-logoDiv.addEventListener('mouseup', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-        if (!isLongPress) {
-            // Clic breve - apri sito
-            apriSitoWeb();
-        }
-        isLongPress = false;
-    }
+logoDivElem.addEventListener('mouseup', () => {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; if (!isLongPress) { apriSitoWeb(); } isLongPress = false; }
 });
-logoDiv.addEventListener('mouseleave', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-    isLongPress = false;
-});
-
+logoDivElem.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } isLongPress = false; });
 function salvaLogo(u) { localStorage.setItem('logo_azienda', u); }
-function caricaLogo() { 
-    let l = localStorage.getItem('logo_azienda'); 
-    if(l) { 
-        document.getElementById('logoImmagine').src = l; 
-        document.getElementById('logoImmagine').style.display = 'block'; 
-        document.getElementById('logoSpan').style.display = 'none'; 
-    } 
-}
-
+function caricaLogo() { let l = localStorage.getItem('logo_azienda'); if(l) { document.getElementById('logoImmagine').src = l; document.getElementById('logoImmagine').style.display = 'block'; document.getElementById('logoSpan').style.display = 'none'; } }
 function aggiornaPulsanteLogoMobile() {
     let logoPresente = localStorage.getItem('logo_azienda') !== null;
     let btnMobile = document.getElementById('btnCaricaLogoMobile');
@@ -721,7 +681,16 @@ document.getElementById('btnCaricaLogoMobile').onclick = () => { caricaLogoFile(
 caricaLogo();
 aggiornaPulsanteLogoMobile();
 
-// ==================== FUNZIONI UTILI ====================
+// ==================== TOGGLE SIDEBAR MOBILE ====================
+const sidebar = document.getElementById('sidebarContabilita');
+if (sidebar) {
+    sidebar.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && e.target === this) {
+            this.classList.toggle('open');
+        }
+    });
+}
+
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -752,9 +721,7 @@ function formatDateInput(d) {
     let x = new Date(d);
     return `${x.getFullYear()}-${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
 }
-function getTodayDate() {
-    return new Date().toISOString().slice(0, 10);
-}
+function getTodayDate() { return new Date().toISOString().slice(0, 10); }
 
 function setupImportField(fieldId) {
     const field = document.getElementById(fieldId);
@@ -824,7 +791,6 @@ function aggiornaRiepilogo() {
     }
 }
 
-// ========== FUNZIONI PER RENDERE EDITABILE UNA RIGA ==========
 function makeRowEditable(tipo, idx, row) {
     if (tipo === 'primanota') {
         const item = primaNota[idx];
@@ -873,14 +839,8 @@ function saveEditedRow(tipo, idx) {
             const newAvere = parseNumber(row.querySelector('.edit-avere')?.value);
             const newDare = parseNumber(row.querySelector('.edit-dare')?.value);
             const newVerificato = row.querySelector('.edit-verificato')?.checked;
-            if (newAvere > 0 && newDare > 0) {
-                showToast("Avere e Dare non possono essere entrambi >0", true);
-                return;
-            }
-            primaNota[idx] = {
-                data: newData, descrizione: newDescrizione,
-                avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false
-            };
+            if (newAvere > 0 && newDare > 0) { showToast("Avere e Dare non possono essere entrambi >0", true); return; }
+            primaNota[idx] = { data: newData, descrizione: newDescrizione, avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false };
         }
     } else if (tipo === 'assclienti') {
         const row = document.querySelector(`#assClientiBody tr:nth-child(${idx+1})`);
@@ -910,20 +870,14 @@ function saveEditedRow(tipo, idx) {
     showToast("✅ Modifiche salvate!");
 }
 
-// ========== AGGIORNAMENTO TABELLE ==========
 function aggiornaTabelle() {
-    // PRIMA NOTA
     const primaBody = document.getElementById('primaNotaBody');
     if (primaBody) {
         primaBody.innerHTML = '';
         primaNota.forEach((item, idx) => {
             const row = primaBody.insertRow();
             const chkCell = row.insertCell(0);
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-prima';
-            chk.style.width = '20px';
-            chk.style.height = '20px';
+            const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-prima'; chk.style.width = '20px'; chk.style.height = '20px';
             chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('primanota', idx, row); else aggiornaTabelle(); };
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
@@ -932,51 +886,33 @@ function aggiornaTabelle() {
             row.insertCell(4).innerHTML = item.avere ? '<strong>' + formatNumber(item.avere) + ' €</strong>' : '';
             row.insertCell(5).innerHTML = item.dare ? '<strong>' + formatNumber(item.dare) + ' €</strong>' : '';
             const verCell = row.insertCell(6);
-            const verChk = document.createElement('input');
-            verChk.type = 'checkbox';
-            verChk.checked = item.verificato === true;
-            verChk.style.width = '20px';
-            verChk.style.height = '20px';
+            const verChk = document.createElement('input'); verChk.type = 'checkbox'; verChk.checked = item.verificato === true; verChk.style.width = '20px'; verChk.style.height = '20px';
             verChk.onchange = async () => { item.verificato = verChk.checked; await salvaStatoFirebase(); };
             verCell.appendChild(verChk);
         });
     }
-    
-    // CONTANTI
     const contantiBody = document.getElementById('contantiBody');
     if (contantiBody) {
         contantiBody.innerHTML = '';
         contanti.forEach((item, idx) => {
             const row = contantiBody.insertRow();
             const chkCell = row.insertCell(0);
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-contanti';
-            chk.style.width = '20px';
-            chk.style.height = '20px';
+            const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-contanti'; chk.style.width = '20px'; chk.style.height = '20px';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
             row.insertCell(2).innerHTML = item.data || '';
             row.insertCell(3).innerHTML = item.descrizione || '';
-            const impCell = row.insertCell(4);
-            impCell.className = 'text-right';
-            impCell.innerHTML = '<strong>' + formatNumber(item.importo) + ' €</strong>';
+            const impCell = row.insertCell(4); impCell.className = 'text-right'; impCell.innerHTML = '<strong>' + formatNumber(item.importo) + ' €</strong>';
         });
     }
-    
-    // FORNITORI
     const fornitoriBody = document.getElementById('fornitoriBody');
     if (fornitoriBody) {
         fornitoriBody.innerHTML = '';
         fattureFornitori.forEach((item, idx) => {
             const row = fornitoriBody.insertRow();
             const chkCell = row.insertCell(0);
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-fornitori';
-            chk.style.width = '20px';
-            chk.style.height = '20px';
+            const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-fornitori'; chk.style.width = '20px'; chk.style.height = '20px';
             chk.onchange = () => aggiornaPulsantiAzione();
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (nextFatturaId - fattureFornitori.length + idx) + '/' + currentYear + '</strong>';
@@ -985,55 +921,38 @@ function aggiornaTabelle() {
             row.insertCell(4).innerHTML = item.numeroFattura || '';
         });
     }
-    
-    // ASS CLIENTI
     const assClientiBody = document.getElementById('assClientiBody');
     if (assClientiBody) {
         assClientiBody.innerHTML = '';
         assClienti.forEach((item, idx) => {
             const row = assClientiBody.insertRow();
             const chkCell = row.insertCell(0);
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-assclienti';
-            chk.style.width = '20px';
-            chk.style.height = '20px';
+            const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-assclienti'; chk.style.width = '20px'; chk.style.height = '20px';
             chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('assclienti', idx, row); else aggiornaTabelle(); };
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = item.dataIns || '';
             row.insertCell(2).innerHTML = item.descrizione || '';
             row.insertCell(3).innerHTML = item.nome || '';
-            const impCell = row.insertCell(4);
-            impCell.className = 'text-right';
-            impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
+            const impCell = row.insertCell(4); impCell.className = 'text-right'; impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
             row.insertCell(5).innerHTML = item.numDoc || '';
             row.insertCell(6).innerHTML = item.dataDoc || '';
         });
     }
-    
-    // PAGA DDT
     const pagaDdtBody = document.getElementById('pagaDdtBody');
     if (pagaDdtBody) {
         pagaDdtBody.innerHTML = '';
         pagaDdt.forEach((item, idx) => {
             const row = pagaDdtBody.insertRow();
             const chkCell = row.insertCell(0);
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'row-check-pagaddt';
-            chk.style.width = '20px';
-            chk.style.height = '20px';
+            const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-pagaddt'; chk.style.width = '20px'; chk.style.height = '20px';
             chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('pagaddt', idx, row); else aggiornaTabelle(); };
             chkCell.appendChild(chk);
             row.insertCell(1).innerHTML = item.nome || '';
             row.insertCell(2).innerHTML = item.numDoc || '';
             row.insertCell(3).innerHTML = item.data || '';
-            const impCell = row.insertCell(4);
-            impCell.className = 'text-right';
-            impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
+            const impCell = row.insertCell(4); impCell.className = 'text-right'; impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
         });
     }
-    
     aggiornaPulsantiAzione();
     aggiornaRiepilogo();
 }
@@ -1044,101 +963,43 @@ function aggiornaPulsantiAzione() {
         hasSelected = document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length > 0;
         document.getElementById('primaNotaActionButtons').style.display = hasSelected ? 'flex' : 'none';
         const selectAll = document.getElementById('selectAllPrimaNota');
-        if (selectAll) {
-            const allChecks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-        }
+        if (selectAll) { const allChecks = document.querySelectorAll('#primaNotaBody .row-check-prima'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
     } else if (currentScheda === 'contanti') {
         hasSelected = document.querySelectorAll('#contantiBody .row-check-contanti:checked').length > 0;
         document.getElementById('contantiActionButtons').style.display = hasSelected ? 'flex' : 'none';
         const selectAll = document.getElementById('selectAllContanti');
-        if (selectAll) {
-            const allChecks = document.querySelectorAll('#contantiBody .row-check-contanti');
-            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-        }
+        if (selectAll) { const allChecks = document.querySelectorAll('#contantiBody .row-check-contanti'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
     } else if (currentScheda === 'fornitori') {
         hasSelected = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked').length > 0;
         document.getElementById('fornitoriActionButtons').style.display = hasSelected ? 'flex' : 'none';
         const selectAll = document.getElementById('selectAllFornitori');
-        if (selectAll) {
-            const allChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-        }
+        if (selectAll) { const allChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
     } else if (currentScheda === 'assclienti') {
         hasSelected = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked').length > 0;
         document.getElementById('assClientiActionButtons').style.display = hasSelected ? 'flex' : 'none';
         const selectAll = document.getElementById('selectAllAssClienti');
-        if (selectAll) {
-            const allChecks = document.querySelectorAll('#assClientiBody .row-check-assclienti');
-            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-        }
+        if (selectAll) { const allChecks = document.querySelectorAll('#assClientiBody .row-check-assclienti'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
     } else if (currentScheda === 'pagaddt') {
         hasSelected = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked').length > 0;
         document.getElementById('pagaDdtActionButtons').style.display = hasSelected ? 'flex' : 'none';
         const selectAll = document.getElementById('selectAllPagaDdt');
-        if (selectAll) {
-            const allChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt');
-            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
-        }
+        if (selectAll) { const allChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
     }
 }
 
-// Seleziona/Deseleziona tutto
-document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => {
-    document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked);
-    aggiornaPulsantiAzione();
-    aggiornaTabelle();
-});
-document.getElementById('selectAllContanti')?.addEventListener('change', (e) => {
-    document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked);
-    aggiornaPulsantiAzione();
-});
-document.getElementById('selectAllFornitori')?.addEventListener('change', (e) => {
-    document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked);
-    aggiornaPulsantiAzione();
-});
-document.getElementById('selectAllAssClienti')?.addEventListener('change', (e) => {
-    document.querySelectorAll('#assClientiBody .row-check-assclienti').forEach(c => c.checked = e.target.checked);
-    aggiornaPulsantiAzione();
-    aggiornaTabelle();
-});
-document.getElementById('selectAllPagaDdt')?.addEventListener('change', (e) => {
-    document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c => c.checked = e.target.checked);
-    aggiornaPulsantiAzione();
-    aggiornaTabelle();
-});
+document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => { document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); aggiornaTabelle(); });
+document.getElementById('selectAllContanti')?.addEventListener('change', (e) => { document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); });
+document.getElementById('selectAllFornitori')?.addEventListener('change', (e) => { document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); });
+document.getElementById('selectAllAssClienti')?.addEventListener('change', (e) => { document.querySelectorAll('#assClientiBody .row-check-assclienti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); aggiornaTabelle(); });
+document.getElementById('selectAllPagaDdt')?.addEventListener('change', (e) => { document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); aggiornaTabelle(); });
 
-// Elimina selezionati
 async function eliminaSelezionati(tipo) {
-    if (tipo === 'primanota') {
-        const checks = document.querySelectorAll('#primaNotaBody .row-check-prima');
-        const nuovi = [];
-        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(primaNota[i]);
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) primaNota = nuovi;
-    } else if (tipo === 'contanti') {
-        const checks = document.querySelectorAll('#contantiBody .row-check-contanti');
-        const nuovi = [];
-        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(contanti[i]);
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) contanti = nuovi;
-    } else if (tipo === 'fornitori') {
-        const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
-        const nuovi = [];
-        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(fattureFornitori[i]);
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) fattureFornitori = nuovi;
-    } else if (tipo === 'assclienti') {
-        const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti');
-        const nuovi = [];
-        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(assClienti[i]);
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) assClienti = nuovi;
-    } else if (tipo === 'pagaddt') {
-        const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt');
-        const nuovi = [];
-        for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(pagaDdt[i]);
-        if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) pagaDdt = nuovi;
-    }
-    await salvaStatoFirebase();
-    aggiornaTabelle();
-    showToast("Elementi eliminati");
+    if (tipo === 'primanota') { const checks = document.querySelectorAll('#primaNotaBody .row-check-prima'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(primaNota[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) primaNota = nuovi; }
+    else if (tipo === 'contanti') { const checks = document.querySelectorAll('#contantiBody .row-check-contanti'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(contanti[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) contanti = nuovi; }
+    else if (tipo === 'fornitori') { const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(fattureFornitori[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) fattureFornitori = nuovi; }
+    else if (tipo === 'assclienti') { const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(assClienti[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) assClienti = nuovi; }
+    else if (tipo === 'pagaddt') { const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(pagaDdt[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) pagaDdt = nuovi; }
+    await salvaStatoFirebase(); aggiornaTabelle(); showToast("Elementi eliminati");
 }
 
 async function salvaModificheSelezionate(tipo) {
@@ -1149,16 +1010,9 @@ async function salvaModificheSelezionate(tipo) {
     }
 }
 
-function getBodyId(tipo) {
-    const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' };
-    return map[tipo];
-}
-function getClassPrefix(tipo) {
-    const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' };
-    return map[tipo];
-}
+function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
+function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
 
-// Cambia scheda
 function setScheda(s) {
     currentScheda = s;
     document.getElementById('tabellaPrimaNotaContainer').style.display = s === 'primanota' ? 'block' : 'none';
@@ -1166,72 +1020,29 @@ function setScheda(s) {
     document.getElementById('tabellaFornitoriContainer').style.display = s === 'fornitori' ? 'block' : 'none';
     document.getElementById('tabellaAssClientiContainer').style.display = s === 'assclienti' ? 'block' : 'none';
     document.getElementById('tabellaPagaDdtContainer').style.display = s === 'pagaddt' ? 'block' : 'none';
-    
     document.getElementById('toolbarPrimaNota').classList.toggle('active', s === 'primanota');
     document.getElementById('toolbarContanti').classList.toggle('active', s === 'contanti');
     document.getElementById('toolbarFornitori').classList.toggle('active', s === 'fornitori');
     document.getElementById('toolbarAssClienti').classList.toggle('active', s === 'assclienti');
     document.getElementById('toolbarPagaDdt').classList.toggle('active', s === 'pagaddt');
-    
-    aggiornaForm();
-    aggiornaTabelle();
-    aggiornaRiepilogo();
+    aggiornaForm(); aggiornaTabelle(); aggiornaRiepilogo();
 }
 
 function aggiornaForm() {
     const fa = document.getElementById('formArea');
     if (currentScheda === 'primanota') {
-        fa.innerHTML = `
-            <div class="form-row">
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div>
-                <div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div>
-                <div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div>
-            </div>
-            <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>
-        `;
-        setupImportField('formAvere');
-        setupImportField('formDare');
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
+        setupImportField('formAvere'); setupImportField('formDare');
     } else if (currentScheda === 'contanti') {
-        fa.innerHTML = `
-            <div class="form-row">
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div>
-                <div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div>
-            </div>
-            <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>
-        `;
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>`;
         setupImportField('formImportoContanti');
     } else if (currentScheda === 'fornitori') {
-        fa.innerHTML = `
-            <div class="form-row">
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div>
-                <div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div>
-            </div>
-            <div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>
-        `;
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
     } else if (currentScheda === 'assclienti') {
-        fa.innerHTML = `
-            <div class="form-row">
-                <div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div>
-                <div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div>
-                <div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div>
-            </div>
-            <div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>
-        `;
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div></div><div class="form-row"><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div><div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div></div><div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>`;
         setupImportField('formImportoAss');
     } else if (currentScheda === 'pagaddt') {
-        fa.innerHTML = `
-            <div class="form-row">
-                <div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div>
-                <div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div>
-                <div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div>
-            </div>
-        `;
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div><div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div></div><div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div></div>`;
         setupImportField('formImportoPaga');
     }
     pulisciForm();
@@ -1240,29 +1051,29 @@ function aggiornaForm() {
 function pulisciForm() {
     const oggi = getTodayDate();
     if (currentScheda === 'primanota') {
-        document.getElementById('formDataPrimaNota') && (document.getElementById('formDataPrimaNota').value = oggi);
-        document.getElementById('formDescrizionePrimaNota') && (document.getElementById('formDescrizionePrimaNota').value = '');
-        document.getElementById('formAvere') && (document.getElementById('formAvere').value = '');
-        document.getElementById('formDare') && (document.getElementById('formDare').value = '');
+        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi;
+        if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
+        if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
+        if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
     } else if (currentScheda === 'contanti') {
-        document.getElementById('formDataContanti') && (document.getElementById('formDataContanti').value = oggi);
-        document.getElementById('formDescrizioneContanti') && (document.getElementById('formDescrizioneContanti').value = '');
-        document.getElementById('formImportoContanti') && (document.getElementById('formImportoContanti').value = '');
+        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi;
+        if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
+        if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = '';
     } else if (currentScheda === 'fornitori') {
-        document.getElementById('formDataFornitori') && (document.getElementById('formDataFornitori').value = oggi);
-        document.getElementById('formFornitore') && (document.getElementById('formFornitore').value = '');
-        document.getElementById('formNumeroFattura') && (document.getElementById('formNumeroFattura').value = '');
+        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi;
+        if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
+        if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
     } else if (currentScheda === 'assclienti') {
-        document.getElementById('formDescrizioneAss') && (document.getElementById('formDescrizioneAss').value = '');
-        document.getElementById('formNomeAss') && (document.getElementById('formNomeAss').value = '');
-        document.getElementById('formImportoAss') && (document.getElementById('formImportoAss').value = '');
-        document.getElementById('formNumDocAss') && (document.getElementById('formNumDocAss').value = '');
-        document.getElementById('formDataDocAss') && (document.getElementById('formDataDocAss').value = '');
+        if (document.getElementById('formDescrizioneAss')) document.getElementById('formDescrizioneAss').value = '';
+        if (document.getElementById('formNomeAss')) document.getElementById('formNomeAss').value = '';
+        if (document.getElementById('formImportoAss')) document.getElementById('formImportoAss').value = '';
+        if (document.getElementById('formNumDocAss')) document.getElementById('formNumDocAss').value = '';
+        if (document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = '';
     } else if (currentScheda === 'pagaddt') {
-        document.getElementById('formNomePaga') && (document.getElementById('formNomePaga').value = '');
-        document.getElementById('formNumDocPaga') && (document.getElementById('formNumDocPaga').value = '');
-        document.getElementById('formDataPaga') && (document.getElementById('formDataPaga').value = oggi);
-        document.getElementById('formImportoPaga') && (document.getElementById('formImportoPaga').value = '');
+        if (document.getElementById('formNomePaga')) document.getElementById('formNomePaga').value = '';
+        if (document.getElementById('formNumDocPaga')) document.getElementById('formNumDocPaga').value = '';
+        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = oggi;
+        if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
     }
 }
 
@@ -1298,14 +1109,7 @@ async function memorizzaNuovo() {
         const dataDoc = document.getElementById('formDataDocAss')?.value;
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        assClienti.push({
-            dataIns: getTodayDate(),
-            descrizione: descrizione || '',
-            nome: nome,
-            importo: importo,
-            numDoc: numDoc || '',
-            dataDoc: dataDoc ? formatDate(dataDoc) : ''
-        });
+        assClienti.push({ dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' });
     } else if (currentScheda === 'pagaddt') {
         const nome = document.getElementById('formNomePaga')?.value.trim();
         const numDoc = document.getElementById('formNumDocPaga')?.value.trim();
@@ -1314,96 +1118,27 @@ async function memorizzaNuovo() {
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        pagaDdt.push({
-            nome: nome,
-            numDoc: numDoc,
-            data: data ? formatDate(data) : '',
-            importo: importo
-        });
+        pagaDdt.push({ nome: nome, numDoc: numDoc, data: data ? formatDate(data) : '', importo: importo });
     }
-    await salvaStatoFirebase();
-    aggiornaTabelle();
-    pulisciForm();
-    showToast("✅ Riga aggiunta!");
+    await salvaStatoFirebase(); aggiornaTabelle(); pulisciForm(); showToast("✅ Riga aggiunta!");
 }
 
-async function cambiaMese() {
-    currentYear = parseInt(document.getElementById('annoSelect').value);
-    currentMonth = parseInt(document.getElementById('meseSelect').value);
-    localStorage.setItem('ultimoMeseLavorato', JSON.stringify({ anno: currentYear, mese: currentMonth }));
-    await caricaStatoFirebase();
-}
+async function cambiaMese() { currentYear = parseInt(document.getElementById('annoSelect').value); currentMonth = parseInt(document.getElementById('meseSelect').value); localStorage.setItem('ultimoMeseLavorato', JSON.stringify({ anno: currentYear, mese: currentMonth })); await caricaStatoFirebase(); }
+async function riprendiMeseCorrente() { const ultimo = localStorage.getItem('ultimoMeseLavorato'); if (ultimo) { const { anno, mese } = JSON.parse(ultimo); currentYear = anno; currentMonth = mese; document.getElementById('annoSelect').value = anno; document.getElementById('meseSelect').value = mese; await caricaStatoFirebase(); alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`); } else alert("Nessun mese precedente trovato."); }
 
-async function riprendiMeseCorrente() {
-    const ultimo = localStorage.getItem('ultimoMeseLavorato');
-    if (ultimo) {
-        const { anno, mese } = JSON.parse(ultimo);
-        currentYear = anno;
-        currentMonth = mese;
-        document.getElementById('annoSelect').value = anno;
-        document.getElementById('meseSelect').value = mese;
-        await caricaStatoFirebase();
-        alert(`Ripristinato mese: ${anno} - ${mesiLista[mese]}`);
-    } else alert("Nessun mese precedente trovato.");
-}
-
-// ========== ESPORTA REPORT RAGIONIERE (SOLO PRIMA NOTA) ==========
 function esportaReportRagioniere() {
-    const mn = mesiLista[currentMonth];
-    const anno = currentYear;
+    const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     const sal = saldoIniziale + ta - td;
     const logo = localStorage.getItem('logo_azienda');
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title>
-    <style>
-        body{font-family:'Segoe UI',sans-serif;padding:40px}
-        .header{text-align:center;border-bottom:2px solid #3498db;padding-bottom:20px;margin-bottom:30px}
-        .logo{max-width:300px;max-height:100px}
-        .title{font-size:24px;font-weight:bold;color:#2c3e50}
-        .periodo{font-size:16px;color:#666;margin-top:5px}
-        .summary{background:#ecf0f1;padding:15px;border-radius:8px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}
-        .summary-item{text-align:center}
-        .summary-value{font-size:20px;font-weight:bold}
-        .positive{color:#27ae60}.negative{color:#e74c3c}
-        table{width:100%;border-collapse:collapse;margin-top:20px}
-        th,td{border:1px solid #ddd;padding:8px;text-align:left}
-        th{background:#3498db;color:white}
-        .text-right{text-align:right}
-        .footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}
-        .signature{text-align:right;margin-top:30px;font-style:italic}
-        @media print{body{padding:20px}}
-    </style>
-    </head><body>
-    <div class="header">${logo ? `<img src="${logo}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}
-    <div class="title">REPORT RAGIONIERE</div>
-    <div class="periodo">${mn} ${anno}</div></div>
-    <div class="summary">
-        <div class="summary-item"><div>📈 Totale Avere (Entrate)</div><div class="summary-value positive">${formatNumber(ta)} €</div></div>
-        <div class="summary-item"><div>📉 Totale Dare (Uscite)</div><div class="summary-value negative">${formatNumber(td)} €</div></div>
-        <div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div>
-    </div>
-    <h3>📋 PRIMA NOTA</h3>
-    <table>
-        <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
-        <tbody>
-            ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-            ${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td>':''}
-            <tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr>
-        </tbody>
-    </table>
-    <div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div>
-    <div class="signature">Il Ragioniere<br>_________________________</div>
-    <script>window.onload=()=>window.print()<\/script>
-    </body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:2px solid #3498db;padding-bottom:20px;margin-bottom:30px}.logo{max-width:300px;max-height:100px}.title{font-size:24px;font-weight:bold;color:#2c3e50}.periodo{font-size:16px;color:#666;margin-top:5px}.summary{background:#ecf0f1;padding:15px;border-radius:8px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:20px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#3498db;color:white}.text-right{text-align:right}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}@media print{body{padding:20px}}</style></head><body><div class="header">${logo ? `<img src="${logo}" class="logo">` : '<h2>🏢 inSAPA s.a.s.</h2>'}<div class="title">REPORT RAGIONIERE</div><div class="periodo">${mn} ${anno}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Avere (Entrate)</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Dare (Uscite)</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><h3>📋 PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}${primaNota.length===0?'<tr><td colspan="6">Nessun movimento</td></tr>':''}<tr style="background:#ecf0f1;font-weight:bold"><td colspan="3">TOTALI</td><td class="text-right">${formatNumber(ta)} €</td><td class="text-right">${formatNumber(td)} €</td><td></td></tr></tbody></table><div class="footer">Documento generato da inSAPA s.a.s. - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Ragioniere<br>_________________________</div><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
-// ========== ESPORTA PDF MESE (COMPLETO) ==========
 function esportaPDFMese() {
-    const mn = mesiLista[currentMonth];
-    const anno = currentYear;
+    const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     const tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
@@ -1412,34 +1147,16 @@ function esportaPDFMese() {
     const sal = saldoIniziale + ta - td;
     const logo = localStorage.getItem('logo_azienda');
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title>
-    <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap} .positive{color:green} .negative{color:red} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #ddd;padding:8px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
-    </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div>
-    <div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div>
-    <h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>
-    ${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}<td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}
-    </tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>
-    ${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    </tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>
-    ${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}
-    </tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>
-    ${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><tr>.html${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}
-    </tbody></table><h3>PAGA_DDT_CLIENTI</h3></table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>
-    ${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}
-    </tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3><table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
-// ========== ESPORTA REPORT ANNO ==========
 async function esportaReportAnno() {
     const anno = currentYear;
     const logo = localStorage.getItem('logo_azienda');
     let totaliAnno = { entrate: 0, uscite: 0, contanti: 0, assClienti: 0, pagaDdt: 0 };
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title>
-    <style>body{font-family:'Segoe UI',sans-serif;padding:40px} .header{text-align:center} .title{font-size:28px;font-weight:bold} .summary{background:#2c3e50;color:white;display:flex;justify-content:space-around;padding:20px;margin:20px 0;flex-wrap:wrap} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #ddd;padding:6px} th{background:#3498db;color:white} .text-right{text-align:right}</style>
-    </head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report Annuale ${anno}</div></div>`);
-    
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{background:#2c3e50;color:white;display:flex;justify-content:space-around;padding:20px;margin:20px 0;flex-wrap:wrap}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:6px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header">${logo ? `<img src="${logo}" style="max-width:200px">` : '<h2>inSAPA s.a.s.</h2>'}<div class="title">Report Annuale ${anno}</div></div>`);
     for (let m = 0; m < 12; m++) {
         try {
             const doc = await db.collection('contabilita').doc(`${anno}_${m}`).get();
@@ -1450,61 +1167,36 @@ async function esportaReportAnno() {
                 const tc = (data.contanti || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
                 const tAss = (data.assClienti || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
                 const tPaga = (data.pagaDdt || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-                totaliAnno.entrate += ta;
-                totaliAnno.uscite += td;
-                totaliAnno.contanti += tc;
-                totaliAnno.assClienti += tAss;
-                totaliAnno.pagaDdt += tPaga;
+                totaliAnno.entrate += ta; totaliAnno.uscite += td; totaliAnno.contanti += tc; totaliAnno.assClienti += tAss; totaliAnno.pagaDdt += tPaga;
                 w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Entrate: ${formatNumber(ta)} € | Uscite: ${formatNumber(td)} € | Contanti: ${formatNumber(tc)} € | ASS Clienti: ${formatNumber(tAss)} € | Paga DDT: ${formatNumber(tPaga)} €</div>`);
-            } else {
-                w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Nessun dato</div>`);
-            }
-        } catch(e) {
-            w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Errore caricamento</div>`);
-        }
+            } else { w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Nessun dato</div>`); }
+        } catch(e) { w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Errore caricamento</div>`); }
     }
-    w.document.write(`<div class="summary"><div>📈 Totale Entrate: ${formatNumber(totaliAnno.entrate)} €</div><div>📉 Totale Uscite: ${formatNumber(totaliAnno.uscite)} €</div><div>💵 Contanti: ${formatNumber(totaliAnno.contanti)} €</div><div>📋 ASS Clienti: ${formatNumber(totaliAnno.assClienti)} €</div><div>📋 Paga DDT: ${formatNumber(totaliAnno.pagaDdt)} €</div><div>💰 Saldo: ${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div>
-    <script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<div class="summary"><div>📈 Totale Entrate: ${formatNumber(totaliAnno.entrate)} €</div><div>📉 Totale Uscite: ${formatNumber(totaliAnno.uscite)} €</div><div>💵 Contanti: ${formatNumber(totaliAnno.contanti)} €</div><div>📋 ASS Clienti: ${formatNumber(totaliAnno.assClienti)} €</div><div>📋 Paga DDT: ${formatNumber(totaliAnno.pagaDdt)} €</div><div>💰 Saldo: ${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
 function esportaCSV(perAnno) {
     let rows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]], dataE = [];
-    if (perAnno) {
-        for (let m = 0; m < 12; m++) {
-            let saved = localStorage.getItem(`contabilita_${currentYear}_${m}`);
-            if (saved) {
-                try {
-                    let d = JSON.parse(saved);
-                    for (let r of (d.primaNota || [])) dataE.push(r);
-                    for (let r of (d.contanti || [])) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' });
-                } catch(e) {}
-            }
-        }
-    } else {
-        for (let r of primaNota) dataE.push(r);
-        for (let r of contanti) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' });
-    }
+    if (perAnno) { for (let m = 0; m < 12; m++) { let saved = localStorage.getItem(`contabilita_${currentYear}_${m}`); if (saved) { try { let d = JSON.parse(saved); for (let r of (d.primaNota || [])) dataE.push(r); for (let r of (d.contanti || [])) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' }); } catch(e) {} } } }
+    else { for (let r of primaNota) dataE.push(r); for (let r of contanti) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' }); }
     for (let r of dataE) rows.push([r.data||'', r.descrizione||'', r.avere ? r.avere.toString().replace('.',',') : '', r.dare ? r.dare.toString().replace('.',',') : '', r.incassoContanti ? r.incassoContanti.toString().replace('.',',') : '', r.verificato ? "Sì" : "No"]);
     let blob = new Blob(["\uFEFF" + rows.map(r => r.join(";")).join("\n")], { type: "text/csv;charset=utf-8" });
     let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
 
-// ==================== FLOPPY DISK DROPDOWN ====================
 const floppyBtn = document.getElementById('floppyBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
 function toggleDropdown() { dropdownMenu.classList.toggle('show'); }
 function closeDropdown() { dropdownMenu.classList.remove('show'); }
 floppyBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
 document.addEventListener('click', (e) => { if (!floppyBtn.contains(e.target) && !dropdownMenu.contains(e.target)) { closeDropdown(); } });
-
 document.getElementById('dropdownReportRagioniere').onclick = () => { closeDropdown(); esportaReportRagioniere(); };
 document.getElementById('dropdownReportMese').onclick = () => { closeDropdown(); esportaPDFMese(); };
 document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown(); esportaReportAnno(); };
 document.getElementById('dropdownCSVMese').onclick = () => { closeDropdown(); esportaCSV(false); };
 document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); esportaCSV(true); };
 
-// ==================== EVENTI ====================
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
@@ -1513,7 +1205,6 @@ document.getElementById('toolbarPagaDdt').onclick = () => setScheda('pagaddt');
 document.getElementById('toolbarCaricaMese').onclick = () => document.getElementById('fileCaricaMese').click();
 document.getElementById('toolbarRiprendiCorrente').onclick = riprendiMeseCorrente;
 document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
-
 document.getElementById('btnSalvaModificaPrima').onclick = () => salvaModificheSelezionate('primanota');
 document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
 document.getElementById('btnSalvaModificaContanti').onclick = () => salvaModificheSelezionate('contanti');
@@ -1524,42 +1215,26 @@ document.getElementById('btnSalvaModificaAssClienti').onclick = () => salvaModif
 document.getElementById('btnEliminaSelezionatiAssClienti').onclick = () => eliminaSelezionati('assclienti');
 document.getElementById('btnSalvaModificaPagaDdt').onclick = () => salvaModificheSelezionate('pagaddt');
 document.getElementById('btnEliminaSelezionatiPagaDdt').onclick = () => eliminaSelezionati('pagaddt');
-
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoIniziale').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 document.getElementById('saldoIniziale').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); };
 document.getElementById('annoSelect').onchange = cambiaMese;
 document.getElementById('meseSelect').onchange = cambiaMese;
 setupImportField('saldoIniziale');
 
-// ==================== NAVIGAZIONE ====================
 document.getElementById('btnVaiAgenti').onclick = () => { window.location.href = 'agenti.html'; };
 document.getElementById('navLogout').onclick = () => { window.location.href = 'index.html'; };
 let changePwdVisible = false;
-document.getElementById('navChangePwd').onclick = () => {
-    if (!changePwdVisible) {
-        document.getElementById('contabilitaContainer').style.display = 'none';
-        document.getElementById('changePwdContainer').style.display = 'block';
-        changePwdVisible = true;
-    }
-};
-document.getElementById('btnAnnullaPassword').onclick = () => {
-    document.getElementById('contabilitaContainer').style.display = 'block';
-    document.getElementById('changePwdContainer').style.display = 'none';
-    changePwdVisible = false;
-};
+document.getElementById('navChangePwd').onclick = () => { if (!changePwdVisible) { document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; } };
+document.getElementById('btnAnnullaPassword').onclick = () => { document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false; };
 document.getElementById('btnSalvaPassword').onclick = () => {
     let nuova = document.getElementById('nuovaPassword').value;
     let conferma = document.getElementById('confermaPassword').value;
     if (!nuova) { alert("Inserisci una nuova password"); return; }
     if (nuova !== conferma) { alert("Le password non coincidono"); return; }
-    ADMIN_PASSWORD = nuova;
-    localStorage.setItem('admin_password', nuova);
+    ADMIN_PASSWORD = nuova; localStorage.setItem('admin_password', nuova);
     alert("Password cambiata con successo!");
-    document.getElementById('nuovaPassword').value = '';
-    document.getElementById('confermaPassword').value = '';
-    document.getElementById('contabilitaContainer').style.display = 'block';
-    document.getElementById('changePwdContainer').style.display = 'none';
-    changePwdVisible = false;
+    document.getElementById('nuovaPassword').value = ''; document.getElementById('confermaPassword').value = '';
+    document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false;
 };
 
 caricaStatoFirebase().then(() => setScheda('primanota'));
