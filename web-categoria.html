@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Home</title>
+    <title>inSAPA - Categoria</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
         
         .header {
             background: white;
-            padding: 20px 25px;
+            padding: 15px 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
@@ -30,26 +29,19 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            flex-wrap: wrap;
+            cursor: pointer;
         }
         .logo-rettangolo {
             width: 200px;
             height: 70px;
-            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: pointer;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
         
-        .admin-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
         .btn-admin {
             background: #f1c40f;
             color: #2c3e50;
@@ -58,74 +50,41 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem;
             transition: all 0.2s;
         }
-        .btn-admin:hover {
-            background: #e67e22;
-            color: white;
-            transform: translateY(-2px);
-        }
-        .btn-admin.active {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-salva {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
+        .btn-admin:hover { background: #e67e22; color: white; }
+        .btn-admin.active { background: #27ae60; color: white; }
         
-        .info-azienda {
+        .categoria-header {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
-            padding: 50px 20px;
+            padding: 40px 20px;
             text-align: center;
         }
-        .info-azienda h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+        .categoria-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
-        .info-azienda p {
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        .contatti {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .contatti a {
-            color: white;
-            text-decoration: none;
+        .categoria-header p {
             font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .contatti a:hover { text-decoration: underline; }
         
-        .categorie-container {
+        .articoli-container {
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
         }
-        .categorie-header {
+        .articoli-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             margin-bottom: 30px;
         }
-        .categorie-header h2 {
-            font-size: 1.8rem;
+        .articoli-header h2 {
+            font-size: 1.5rem;
             color: #2c3e50;
         }
         .btn-aggiungi {
@@ -136,50 +95,47 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem;
-            transition: all 0.2s;
             display: none;
         }
-        .btn-aggiungi:hover { background: #219a52; transform: translateY(-2px); }
         .btn-aggiungi.show { display: block; }
         
-        .categorie-grid {
+        .articoli-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 25px;
         }
-        .categoria-card {
+        .articolo-card {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
+            transition: transform 0.3s;
             position: relative;
         }
-        .categoria-card:hover {
+        .articolo-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
-        .categoria-img {
+        .articolo-img {
             width: 100%;
             height: 200px;
             object-fit: cover;
             background: #ecf0f1;
         }
-        .categoria-info {
+        .articolo-info {
             padding: 15px;
         }
-        .categoria-nome {
-            font-size: 1.2rem;
+        .articolo-codice {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+        .articolo-descrizione {
+            font-size: 1rem;
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 8px;
-        }
-        .categoria-descrizione {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            line-height: 1.4;
         }
         .card-buttons {
             position: absolute;
@@ -188,9 +144,7 @@
             display: none;
             gap: 8px;
         }
-        .card-buttons.show {
-            display: flex;
-        }
+        .card-buttons.show { display: flex; }
         .card-btn {
             background: rgba(0,0,0,0.7);
             color: white;
@@ -200,13 +154,9 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1rem;
-            transition: all 0.2s;
-        }
-        .card-btn:hover {
-            background: #e74c3c;
-            transform: scale(1.1);
         }
         .card-btn.edit:hover { background: #3498db; }
+        .card-btn:hover { background: #e74c3c; }
         
         .modal-overlay {
             position: fixed;
@@ -244,31 +194,25 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            font-size: 0.9rem;
         }
         .modal-container textarea {
             min-height: 80px;
             resize: vertical;
         }
-        .drop-area {
+        .link-immagine {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
             border: 2px dashed #3498db;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin: 15px 0;
+            border-radius: 8px;
             background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.2s;
         }
-        .drop-area.drag-over {
-            background: #e3f2fd;
-            border-color: #27ae60;
-        }
-        .drop-area img {
+        .anteprima-img {
             max-width: 100%;
             max-height: 150px;
             margin-top: 10px;
             border-radius: 8px;
+            display: none;
         }
         .modal-buttons {
             display: flex;
@@ -295,7 +239,6 @@
             padding: 12px 20px;
             border-radius: 8px;
             z-index: 2000;
-            font-weight: bold;
             animation: fadeOut 3s ease forwards;
         }
         @keyframes fadeOut {
@@ -320,19 +263,39 @@
             border-radius: 8px;
         }
         
+        .btn-torna {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-torna:hover { background: #7f8c8d; }
+        
+        .info-imgur {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .info-imgur a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
         @media (max-width: 1024px) {
-            .categorie-grid { grid-template-columns: repeat(3, 1fr); }
+            .articoli-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 768px) {
-            .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .categoria-img { height: 150px; }
-            .categoria-nome { font-size: 1rem; }
-            .info-azienda h1 { font-size: 1.8rem; }
-            .info-azienda p { font-size: 0.9rem; }
+            .articoli-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .articolo-img { height: 150px; }
+            .categoria-header h1 { font-size: 1.5rem; }
             .header-row { flex-direction: column; }
         }
         @media (max-width: 480px) {
-            .categorie-grid { grid-template-columns: 1fr; }
+            .articoli-grid { grid-template-columns: 1fr; }
         }
         
         footer {
@@ -342,48 +305,41 @@
             padding: 30px 20px;
             margin-top: 50px;
         }
-        footer p { margin: 5px 0; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area">
-            <div id="logoRettangolo" class="logo-rettangolo">
+        <div class="logo-area" id="btnHome">
+            <div class="logo-rettangolo" id="logoRettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
         </div>
-        <div class="admin-area">
+        <div>
+            <button id="btnTornaHome" class="btn-torna">◀ TORNA ALLA HOME</button>
             <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
-            <button id="btnSalvaGlobale" class="btn-admin btn-salva" style="display:none;">💾 SALVA TUTTO</button>
         </div>
     </div>
 </div>
 
-<div class="info-azienda" id="infoAzienda">
-    <h1>Benvenuti da inSAPA s.a.s.</h1>
-    <p>La tua soluzione di fiducia per componenti industriali e ricambi di qualità. Da oltre 20 anni forniamo prodotti eccellenti ai nostri clienti con professionalità e passione.</p>
-    <div class="contatti">
-        <a href="tel:+39123456789">📞 +39 123 456 789</a>
-        <a href="mailto:info@insapa.it">✉️ info@insapa.it</a>
-        <a href="#">📍 Via Roma, 1 - Milano</a>
-    </div>
+<div id="categoriaHeader" class="categoria-header">
+    <h1 id="catNome">Caricamento...</h1>
+    <p id="catDescrizione"></p>
 </div>
 
-<div class="categorie-container">
-    <div class="categorie-header">
-        <h2>📁 Le nostre categorie</h2>
-        <button id="btnAggiungiCategoria" class="btn-aggiungi">➕ NUOVA CATEGORIA</button>
+<div class="articoli-container">
+    <div class="articoli-header">
+        <h2>📦 Articoli</h2>
+        <button id="btnAggiungiArticolo" class="btn-aggiungi">➕ NUOVO ARTICOLO</button>
     </div>
-    <div id="categorieGrid" class="categorie-grid">
-        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">Caricamento categorie...</div>
+    <div id="articoliGrid" class="articoli-grid">
+        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">Caricamento articoli...</div>
     </div>
 </div>
 
 <footer>
     <p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p>
-    <p>P.IVA 12345678901</p>
 </footer>
 
 <script>
@@ -399,15 +355,16 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 // ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
-let categorie = [];
-let currentEditCategoria = null;
+let categoriaId = null;
+let categoria = null;
+let articoli = [];
+let currentEditArticolo = null;
 
-// ==================== LOGO MODIFICATO (cerca .jpg prima) ====================
+// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
@@ -468,7 +425,6 @@ function apriLinkSecondario() {
     }
 }
 
-// Gestione click sul logo
 const logoSiti = document.getElementById('logoRettangolo');
 logoSiti.addEventListener('click', (e) => {
     const now = new Date().getTime();
@@ -488,7 +444,7 @@ logoSiti.addEventListener('click', (e) => {
     }
 });
 
-// ==================== FUNZIONI UTILI ====================
+// ==================== UTILITY ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -496,6 +452,16 @@ function showToast(message, isError = false) {
     toast.innerText = message;
     document.body.appendChild(toast);
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ==================== MODALITA' ADMIN ====================
@@ -520,7 +486,7 @@ function mostraModalePassword() {
             isAdminMode = true;
             localStorage.setItem('web_admin_mode', 'true');
             showToast("✅ Modalità admin attivata!");
-            aggiornaUIModalitaAdmin();
+            aggiornaUIAdmin();
             modal.remove();
         } else {
             showToast("❌ Password errata!", true);
@@ -533,223 +499,194 @@ function disattivaModalitaAdmin() {
     isAdminMode = false;
     localStorage.removeItem('web_admin_mode');
     showToast("🔒 Modalità admin disattivata");
-    aggiornaUIModalitaAdmin();
+    aggiornaUIAdmin();
 }
 
-function aggiornaUIModalitaAdmin() {
+function aggiornaUIAdmin() {
     const btnAdmin = document.getElementById('btnAdmin');
-    const btnSalvaGlobale = document.getElementById('btnSalvaGlobale');
-    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
+    const btnAggiungi = document.getElementById('btnAggiungiArticolo');
     
     if (isAdminMode) {
         btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
         btnAdmin.classList.add('active');
-        btnSalvaGlobale.style.display = 'block';
-        btnAggiungiCategoria.classList.add('show');
+        btnAggiungi.classList.add('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
     } else {
         btnAdmin.textContent = "🔐 AREA ADMIN";
         btnAdmin.classList.remove('active');
-        btnSalvaGlobale.style.display = 'none';
-        btnAggiungiCategoria.classList.remove('show');
+        btnAggiungi.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
     }
 }
 
-// ==================== CARICA CATEGORIE ====================
-async function caricaCategorie() {
-    try {
-        const snapshot = await db.collection('web_categorie').orderBy('ordine', 'asc').get();
-        categorie = [];
-        snapshot.forEach(doc => {
-            categorie.push({ id: doc.id, ...doc.data() });
-        });
-        visualizzaCategorie();
-    } catch(e) {
-        console.error("Errore caricamento categorie:", e);
-        showToast("Errore caricamento categorie", true);
-    }
-}
-
-function visualizzaCategorie() {
-    const grid = document.getElementById('categorieGrid');
-    if (categorie.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessuna categoria presente. ' + (isAdminMode ? 'Clicca su "NUOVA CATEGORIA" per aggiungerne una.' : '') + '</div>';
+// ==================== CARICA CATEGORIA ====================
+async function caricaCategoria() {
+    const urlParams = new URLSearchParams(window.location.search);
+    categoriaId = urlParams.get('id');
+    
+    if (!categoriaId) {
+        document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
         return;
     }
     
-    grid.innerHTML = categorie.map(cat => `
-        <div class="categoria-card" data-id="${cat.id}">
+    try {
+        const doc = await db.collection('web_categorie').doc(categoriaId).get();
+        if (doc.exists) {
+            categoria = { id: doc.id, ...doc.data() };
+            document.getElementById('catNome').innerText = categoria.nome;
+            document.getElementById('catDescrizione').innerText = categoria.descrizione || '';
+        } else {
+            document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// ==================== CARICA ARTICOLI ====================
+async function caricaArticoli() {
+    if (!categoriaId) return;
+    
+    try {
+        const snapshot = await db.collection('web_articoli')
+            .where('categoriaId', '==', categoriaId)
+            .orderBy('codice', 'asc')
+            .get();
+        articoli = [];
+        snapshot.forEach(doc => {
+            articoli.push({ id: doc.id, ...doc.data() });
+        });
+        visualizzaArticoli();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore caricamento articoli", true);
+    }
+}
+
+function visualizzaArticoli() {
+    const grid = document.getElementById('articoliGrid');
+    if (articoli.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessun articolo presente. ' + (isAdminMode ? 'Clicca su "NUOVO ARTICOLO" per aggiungerne uno.' : '') + '</div>';
+        return;
+    }
+    
+    grid.innerHTML = articoli.map(art => `
+        <div class="articolo-card" data-id="${art.id}">
             <div class="card-buttons ${isAdminMode ? 'show' : ''}">
-                <button class="card-btn edit" onclick="event.stopPropagation(); modificaCategoria('${cat.id}')">✏️</button>
-                <button class="card-btn" onclick="event.stopPropagation(); eliminaCategoria('${cat.id}')">🗑</button>
+                <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')">✏️</button>
+                <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')">🗑</button>
             </div>
-            <img class="categoria-img" src="${cat.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${cat.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
-            <div class="categoria-info">
-                <div class="categoria-nome">${escapeHtml(cat.nome)}</div>
-                <div class="categoria-descrizione">${escapeHtml(cat.descrizione || '')}</div>
+            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+            <div class="articolo-info">
+                <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
+                <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
             </div>
         </div>
     `).join('');
-    
-    document.querySelectorAll('.categoria-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('card-btn')) return;
-            const id = card.dataset.id;
-            window.location.href = `web-categoria.html?id=${id}`;
-        });
-    });
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-// ==================== MODALE AGGIUNTA/MODIFICA CATEGORIA ====================
-let fotoTemp = null;
-let fotoTempDataUrl = null;
-
-function mostraModaleCategoria(categoria = null) {
-    currentEditCategoria = categoria;
-    fotoTemp = null;
-    fotoTempDataUrl = null;
+// ==================== MODALE ARTICOLO (versione con link Imgur) ====================
+function mostraModaleArticolo(articolo = null) {
+    currentEditArticolo = articolo;
     
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
         <div class="modal-container">
-            <h3>${categoria ? '✏️ MODIFICA CATEGORIA' : '➕ NUOVA CATEGORIA'}</h3>
-            <label>📌 Nome categoria *</label>
-            <input type="text" id="catNome" value="${categoria ? escapeHtml(categoria.nome) : ''}" placeholder="es. Motori">
-            <label>📝 Descrizione</label>
-            <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
-            <label>🖼️ Immagine (trascina o clicca)</label>
-            <div id="dropArea" class="drop-area">
-                📸 Trascina un'immagine qui o clicca per selezionare
-                ${(categoria && categoria.fotoUrl) ? `<img src="${categoria.fotoUrl}" id="tempPreview">` : '<div id="tempPreview"></div>'}
+            <h3>${articolo ? '✏️ MODIFICA ARTICOLO' : '➕ NUOVO ARTICOLO'}</h3>
+            <label>🔢 Codice articolo *</label>
+            <input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice || '') : ''}" placeholder="es. MTR-001">
+            <label>📝 Descrizione *</label>
+            <textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione || '') : ''}</textarea>
+            <label>🖼️ Immagine (URL da Imgur)</label>
+            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
+            <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
+            <div class="info-imgur">
+                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
             </div>
-            <label>🔢 Ordine</label>
-            <input type="number" id="catOrdine" value="${categoria ? (categoria.ordine || 0) : categorie.length + 1}" placeholder="0,1,2...">
             <div class="modal-buttons">
-                <button id="btnSalvaCategoria" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
                 <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
     
-    const dropArea = document.getElementById('dropArea');
-    const tempPreview = document.getElementById('tempPreview');
+    // Gestione anteprima
+    const fotoUrlInput = document.getElementById('artFotoUrl');
+    const anteprimaImg = document.getElementById('anteprimaImg');
     
-    dropArea.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => handleFile(e.target.files[0], tempPreview);
-        input.click();
-    });
-    
-    dropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropArea.classList.add('drag-over');
-    });
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('drag-over');
-    });
-    dropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropArea.classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleFile(file, tempPreview);
+    function aggiornaAnteprima() {
+        const url = fotoUrlInput.value.trim();
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            anteprimaImg.src = url;
+            anteprimaImg.style.display = 'block';
         } else {
-            showToast("Per favore, trascina un file immagine", true);
+            anteprimaImg.style.display = 'none';
         }
-    });
+    }
     
-    document.getElementById('btnSalvaCategoria').onclick = async () => {
-        const nome = document.getElementById('catNome').value.trim();
-        const descrizione = document.getElementById('catDescrizione').value;
-        const ordine = parseInt(document.getElementById('catOrdine').value) || 0;
+    fotoUrlInput.addEventListener('input', aggiornaAnteprima);
+    aggiornaAnteprima();
+    
+    document.getElementById('btnSalvaArticolo').onclick = async () => {
+        const codice = document.getElementById('artCodice').value.trim();
+        const descrizione = document.getElementById('artDescrizione').value.trim();
+        const fotoUrl = document.getElementById('artFotoUrl').value.trim();
         
-        if (!nome) {
-            showToast("Inserisci il nome della categoria", true);
+        if (!codice) {
+            showToast("Inserisci il codice articolo", true);
+            return;
+        }
+        if (!descrizione) {
+            showToast("Inserisci la descrizione", true);
             return;
         }
         
         try {
-            let fotoUrl = categoria ? categoria.fotoUrl : null;
-            
-            if (fotoTemp) {
-                const storageRef = storage.ref(`web/categorie/${Date.now()}_${fotoTemp.name}`);
-                const uploadTask = await storageRef.put(fotoTemp);
-                fotoUrl = await uploadTask.ref.getDownloadURL();
-            }
-            
-            if (categoria) {
-                await db.collection('web_categorie').doc(categoria.id).update({
-                    nome, descrizione, ordine, fotoUrl,
+            if (articolo) {
+                await db.collection('web_articoli').doc(articolo.id).update({
+                    codice, descrizione, fotoUrl,
                     ultimoAggiornamento: new Date().toISOString()
                 });
-                showToast("✅ Categoria modificata!");
+                showToast("✅ Articolo modificato!");
             } else {
-                await db.collection('web_categorie').add({
-                    nome, descrizione, ordine, fotoUrl: fotoUrl || '',
+                await db.collection('web_articoli').add({
+                    categoriaId,
+                    codice,
+                    descrizione,
+                    fotoUrl: fotoUrl || '',
                     creatoIl: new Date().toISOString()
                 });
-                showToast("✅ Categoria aggiunta!");
+                showToast("✅ Articolo aggiunto!");
             }
             
-            await caricaCategorie();
+            await caricaArticoli();
             modal.remove();
         } catch(e) {
             console.error(e);
-            showToast("Errore salvataggio categoria", true);
+            showToast("Errore salvataggio articolo", true);
         }
     };
     
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 }
 
-function handleFile(file, previewElement) {
-    if (!file.type.startsWith('image/')) {
-        showToast("Seleziona un file immagine", true);
-        return;
-    }
-    fotoTemp = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        fotoTempDataUrl = e.target.result;
-        previewElement.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:150px; margin-top:10px; border-radius:8px;">`;
-    };
-    reader.readAsDataURL(file);
+async function modificaArticolo(id) {
+    const art = articoli.find(a => a.id === id);
+    if (art) mostraModaleArticolo(art);
 }
 
-async function modificaCategoria(id) {
-    const cat = categorie.find(c => c.id === id);
-    if (cat) mostraModaleCategoria(cat);
-}
-
-async function eliminaCategoria(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli associati!\n\nOperazione IRREVERSIBILE!")) return;
+async function eliminaArticolo(id) {
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questo articolo?\n\nOperazione IRREVERSIBILE!")) return;
     
     try {
-        const articoliSnap = await db.collection('web_articoli').where('categoriaId', '==', id).get();
-        const batch = db.batch();
-        articoliSnap.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        await db.collection('web_categorie').doc(id).delete();
-        showToast("✅ Categoria eliminata!");
-        await caricaCategorie();
+        await db.collection('web_articoli').doc(id).delete();
+        showToast("✅ Articolo eliminato!");
+        await caricaArticoli();
     } catch(e) {
         console.error(e);
-        showToast("Errore eliminazione categoria", true);
+        showToast("Errore eliminazione articolo", true);
     }
 }
 
@@ -762,15 +699,31 @@ document.getElementById('btnAdmin').onclick = () => {
     }
 };
 
-document.getElementById('btnAggiungiCategoria').onclick = () => {
-    if (isAdminMode) {
-        mostraModaleCategoria(null);
-    }
+document.getElementById('btnAggiungiArticolo').onclick = () => {
+    if (isAdminMode) mostraModaleArticolo(null);
 };
 
-document.getElementById('btnSalvaGlobale').onclick = async () => {
-    showToast("💾 Tutto già salvato su Firebase!");
+document.getElementById('btnTornaHome').onclick = () => {
+    window.location.href = 'web.html';
 };
+
+document.getElementById('btnHome').onclick = () => {
+    window.location.href = 'web.html';
+};
+
+// ==================== CARICA LINK DA FILE ====================
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+        }
+    } catch(e) { console.warn("link.html non trovato"); }
+}
+caricaLinkDaFile();
 
 // ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('web_admin_mode');
@@ -778,8 +731,8 @@ if (savedAdminMode === 'true') {
     isAdminMode = true;
 }
 
-Promise.all([caricaLinkDaFile(), caricaCategorie()]).then(() => {
-    aggiornaUIModalitaAdmin();
+Promise.all([caricaLinkDaFile(), caricaCategoria(), caricaArticoli()]).then(() => {
+    aggiornaUIAdmin();
 });
 </script>
 </body>
