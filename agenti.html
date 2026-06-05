@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.50</title>
+    <title>inSAPA - Agenti vA.5.51</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.50 - Agenti (Parser note credito universale)</div>
+<div class="version">vA.5.51 - Agenti (asterisco = spazio)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -787,17 +787,14 @@ async function eliminaAgente() {
 
 // ==================== FUNZIONE PER CONVERTIRE IMPORTI ITALIANI ====================
 function convertiImportoItaliano(importoStr) {
-    // Rimuove il segno meno finale se presente (crediti)
     let isNegative = importoStr.endsWith('-');
     if (isNegative) {
         importoStr = importoStr.slice(0, -1);
     }
     
-    // Rimuove i punti (separatori delle migliaia) e sostituisce la virgola con il punto
     let importoPulito = importoStr.replace(/\./g, '').replace(',', '.');
     let importo = parseFloat(importoPulito);
     
-    // Applica il segno negativo se necessario
     if (isNegative && !isNaN(importo)) {
         importo = -importo;
     }
@@ -874,22 +871,17 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA UNIVERSALE (gestisce note credito e asterischi) ====================
+// ==================== PARSER SCA (asterisco trattato come spazio) ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
     
     // Regex per riconoscere la riga del cliente
-    // Formato: "CLIENTE: 000049 COOP CONSUMO SAN POLO                     Saldo         115,23-"
     const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+([\d\.,\-]+)/;
     
-    // Regex per riconoscere le righe di scadenza
-    // Gestisce sia date con asterisco che senza, e importi positivi/negativi
-    // Formato: "31/01/2024*NOTA CREDITO                       79   31/01/2024  Euro         115,23-"
-    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\*?\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
-    
     for (let line of lines) {
+        let originalLine = line;
         line = line.trim();
         if (line === "") continue;
         
@@ -904,14 +896,14 @@ function parseSCA(text) {
         if (line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
         if (line.startsWith("== ")) continue;
-        if (line.startsWith("")) continue; // carattere di form feed
+        if (line.startsWith("")) continue;
         
-        // Cerca la riga del cliente
+        // CERCA CLIENTE
         let mCliente = line.match(reCliente);
         if (mCliente) {
             let codiceRaw = mCliente[1];
             let ragione = mCliente[2].trim();
-            // Normalizza il codice: rimuove gli zeri iniziali (es. 000049 -> 49, 030120 -> 30120)
+            // Normalizza il codice: rimuove gli zeri iniziali
             let codiceNorm = parseInt(codiceRaw, 10).toString();
             
             currentCliente = { 
@@ -924,9 +916,15 @@ function parseSCA(text) {
             continue;
         }
         
-        // Cerca le righe di scadenza (solo se abbiamo un cliente attivo)
+        // CERCA SCADENZA - SOSTITUISCI L'ASTERISCO CON UNO SPAZIO
         if (currentCliente) {
-            let mScad = line.match(reScadenza);
+            // Tratta l'asterisco come uno spazio vuoto
+            let lineProcessed = line.replace(/\*/g, ' ');
+            
+            // Regex per la scadenza (ora l'asterisco non c'è più)
+            const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
+            
+            let mScad = lineProcessed.match(reScadenza);
             if (mScad) {
                 let importoStr = mScad[5];
                 let importo = convertiImportoItaliano(importoStr);
@@ -950,12 +948,12 @@ function parseSCA(text) {
     // Filtra i clienti che hanno almeno una scadenza
     const clientiConScadenze = Array.from(clienti.values()).filter(c => c.scadenze.length > 0);
     
-    console.log("=== PARSER SCA - DEBUG ===");
+    console.log("=== PARSER SCA - DEBUG (asterisco = spazio) ===");
     console.log("Totale clienti trovati:", clientiConScadenze.length);
     for (let c of clientiConScadenze) {
         console.log(`Cliente ${c.codice} (${c.codiceOriginale}): ${c.ragione} - ${c.scadenze.length} scadenze, Totale: ${c.scadenze.reduce((sum, s) => sum + s.importo, 0).toFixed(2)}`);
         for (let s of c.scadenze) {
-            console.log(`  - ${s.scadenza} ${s.descrizione.substring(0, 30)}... € ${s.importo.toFixed(2)}`);
+            console.log(`  - ${s.scadenza} | ${s.descrizione.substring(0, 40)}... | € ${s.importo.toFixed(2)}`);
         }
     }
     console.log("==========================");
@@ -1001,11 +999,10 @@ function inviaScadenzeClienteCorrente() {
     inviaScadenzeWhatsApp(clienteScadenzeCorrente);
 }
 
-// ==================== GESTIONE CLIENTI (con priorità scadenze) ====================
+// ==================== GESTIONE CLIENTI ====================
 function aggiornaClienti() {
     let mappa = new Map();
     
-    // Prima aggiungi i clienti da ORD
     for (let c of datiOrd) {
         let codiceNorm = c.codice.toString();
         mappa.set(codiceNorm, { 
@@ -1017,7 +1014,6 @@ function aggiornaClienti() {
         });
     }
     
-    // Poi aggiungi/aggiorna con i clienti da SCA
     for (let c of datiSca) {
         let codiceNorm = c.codice.toString();
         if (mappa.has(codiceNorm)) {
@@ -1046,13 +1042,11 @@ function aggiornaClienti() {
 function filtraClienti() {
     let searchText = document.getElementById('cercaCliente').value.toLowerCase();
     
-    // Filtra prima
     let clientiFiltrati = clientiUnici.filter(c => 
         c.codice.toLowerCase().includes(searchText) || 
         c.ragione.toLowerCase().includes(searchText)
     );
     
-    // ORDINA: prima quelli con scadenze, poi senza, poi alfabetico
     clientiFiltrati.sort((a, b) => {
         const aHasScad = a.hasScadenze && a.scadenze && a.scadenze.length > 0;
         const bHasScad = b.hasScadenze && b.scadenze && b.scadenze.length > 0;
@@ -1093,7 +1087,6 @@ function mostraDettaglioCliente(codice) {
     let containerArticoli = document.getElementById('dettaglioAgenti');
     let html = '';
     
-    // Mostra sezione scadenze se presenti
     const hasScadenze = cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0;
     if (hasScadenze) {
         html += `<div class="scadenze-box">
@@ -1122,7 +1115,6 @@ function mostraDettaglioCliente(codice) {
         html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
     
-    // Mostra ordini
     if (cliente.ordini && cliente.ordini.length > 0) {
         html += `<div class="scadenze-box">
                     <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
