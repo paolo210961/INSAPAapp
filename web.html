@@ -506,7 +506,6 @@
 <div class="team-section">
     <h2 class="team-title">👥 Il nostro team</h2>
     <div id="teamGrid" class="team-grid">
-        <!-- I dati del team vengono caricati da Firebase -->
         <div style="text-align: center; width: 100%;">Caricamento team...</div>
     </div>
 </div>
@@ -677,7 +676,6 @@ async function caricaTeam() {
             teamData.push({ id: doc.id, ...doc.data() });
         });
         
-        // Se non ci sono dati, crea i default
         if (teamData.length === 0) {
             const defaultTeam = [
                 { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", ordine: 1, whatsapp: "+393383012348" },
@@ -693,7 +691,6 @@ async function caricaTeam() {
         visualizzaTeam();
     } catch(e) {
         console.error("Errore caricamento team:", e);
-        // Fallback manuale
         teamData = [
             { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", whatsapp: "+393383012348" },
             { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", whatsapp: "+393357491607" }
@@ -897,7 +894,6 @@ function aggiornaUIModalitaAdmin() {
         btnAggiungiCategoria.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
     }
-    // Ricarica team per mostrare/nascondere bottoni modifica
     visualizzaTeam();
 }
 
