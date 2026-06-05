@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.48</title>
+    <title>inSAPA - Agenti vA.5.50</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.48 - Agenti (Parser SCA completo con asterischi e crediti)</div>
+<div class="version">vA.5.50 - Agenti (Parser note credito universale)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -785,6 +785,26 @@ async function eliminaAgente() {
     document.getElementById('btnAnnullaElimina').onclick = () => modal.remove();
 }
 
+// ==================== FUNZIONE PER CONVERTIRE IMPORTI ITALIANI ====================
+function convertiImportoItaliano(importoStr) {
+    // Rimuove il segno meno finale se presente (crediti)
+    let isNegative = importoStr.endsWith('-');
+    if (isNegative) {
+        importoStr = importoStr.slice(0, -1);
+    }
+    
+    // Rimuove i punti (separatori delle migliaia) e sostituisce la virgola con il punto
+    let importoPulito = importoStr.replace(/\./g, '').replace(',', '.');
+    let importo = parseFloat(importoPulito);
+    
+    // Applica il segno negativo se necessario
+    if (isNegative && !isNaN(importo)) {
+        importo = -importo;
+    }
+    
+    return isNaN(importo) ? 0 : importo;
+}
+
 // ==================== PARSER ORD ====================
 function parseORD(text) {
     const lines = text.split(/\r?\n/);
@@ -854,24 +874,26 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA COMPLETO (con asterischi e crediti) ====================
+// ==================== PARSER SCA UNIVERSALE (gestisce note credito e asterischi) ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
     
-    // Regex per cliente - più flessibile, cattura anche spazi multipli
+    // Regex per riconoscere la riga del cliente
+    // Formato: "CLIENTE: 000049 COOP CONSUMO SAN POLO                     Saldo         115,23-"
     const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+([\d\.,\-]+)/;
     
-    // Regex per scadenza - ora gestisce l'asterisco opzionale dopo la data
-    // Formato: 31/01/2024*NOTA CREDITO                       79   31/01/2024  Euro         115,23-
-    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\*?\s+(.*?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
+    // Regex per riconoscere le righe di scadenza
+    // Gestisce sia date con asterisco che senza, e importi positivi/negativi
+    // Formato: "31/01/2024*NOTA CREDITO                       79   31/01/2024  Euro         115,23-"
+    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\*?\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
     
     for (let line of lines) {
         line = line.trim();
         if (line === "") continue;
         
-        // Salta linee di separazione e intestazioni
+        // Salta linee che non contengono dati utili
         if (line.startsWith("===")) continue;
         if (line.startsWith("---")) continue;
         if (line.startsWith("Scadenza")) continue;
@@ -881,16 +903,20 @@ function parseSCA(text) {
         if (line.startsWith("TUTTE")) continue;
         if (line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
+        if (line.startsWith("== ")) continue;
+        if (line.startsWith("")) continue; // carattere di form feed
         
-        // Cerca cliente
+        // Cerca la riga del cliente
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            let codice = mCliente[1];
+            let codiceRaw = mCliente[1];
             let ragione = mCliente[2].trim();
-            // Normalizza il codice togliendo gli zeri iniziali
-            let codiceNorm = parseInt(codice, 10).toString();
+            // Normalizza il codice: rimuove gli zeri iniziali (es. 000049 -> 49, 030120 -> 30120)
+            let codiceNorm = parseInt(codiceRaw, 10).toString();
+            
             currentCliente = { 
                 codice: codiceNorm,
+                codiceOriginale: codiceRaw,
                 ragione: ragione, 
                 scadenze: [] 
             };
@@ -898,42 +924,43 @@ function parseSCA(text) {
             continue;
         }
         
-        // Cerca scadenza
+        // Cerca le righe di scadenza (solo se abbiamo un cliente attivo)
         if (currentCliente) {
             let mScad = line.match(reScadenza);
             if (mScad) {
                 let importoStr = mScad[5];
-                // Gestisce il formato "115,23-" (importo negativo)
-                let isNegative = importoStr.endsWith('-');
-                if (isNegative) {
-                    importoStr = importoStr.slice(0, -1);
-                }
-                // Converte formato italiano a numero (rimuove punti e sostituisce virgola)
-                importoStr = importoStr.replace(/\./g, '').replace(',', '.');
-                let importo = parseFloat(importoStr);
-                if (isNegative) importo = -importo;
+                let importo = convertiImportoItaliano(importoStr);
                 
-                if (!isNaN(importo)) {
-                    let descrizione = mScad[2].trim();
-                    currentCliente.scadenze.push({
-                        scadenza: mScad[1],
-                        descrizione: descrizione,
-                        numDoc: mScad[3],
-                        dataDoc: mScad[4],
-                        importo: importo
-                    });
-                }
+                let descrizione = mScad[2].trim();
+                let numDoc = mScad[3];
+                let dataDoc = mScad[4];
+                let dataScadenza = mScad[1];
+                
+                currentCliente.scadenze.push({
+                    scadenza: dataScadenza,
+                    descrizione: descrizione,
+                    numDoc: numDoc,
+                    dataDoc: dataDoc,
+                    importo: importo
+                });
             }
         }
     }
     
-    // Debug: stampa clienti trovati
-    console.log("Clienti SCA trovati:", Array.from(clienti.keys()));
-    for (let [codice, cliente] of clienti) {
-        console.log(`Cliente ${codice}: ${cliente.ragione} - ${cliente.scadenze.length} scadenze`);
-    }
+    // Filtra i clienti che hanno almeno una scadenza
+    const clientiConScadenze = Array.from(clienti.values()).filter(c => c.scadenze.length > 0);
     
-    return Array.from(clienti.values());
+    console.log("=== PARSER SCA - DEBUG ===");
+    console.log("Totale clienti trovati:", clientiConScadenze.length);
+    for (let c of clientiConScadenze) {
+        console.log(`Cliente ${c.codice} (${c.codiceOriginale}): ${c.ragione} - ${c.scadenze.length} scadenze, Totale: ${c.scadenze.reduce((sum, s) => sum + s.importo, 0).toFixed(2)}`);
+        for (let s of c.scadenze) {
+            console.log(`  - ${s.scadenza} ${s.descrizione.substring(0, 30)}... € ${s.importo.toFixed(2)}`);
+        }
+    }
+    console.log("==========================");
+    
+    return clientiConScadenze;
 }
 
 // ==================== INVIO WHATSAPP ====================
@@ -1010,7 +1037,6 @@ function aggiornaClienti() {
     
     clientiUnici = Array.from(mappa.values());
     
-    // Log per debug
     console.log("Clienti unici totali:", clientiUnici.length);
     console.log("Clienti CON scadenze:", clientiUnici.filter(c => c.hasScadenze && c.scadenze.length > 0).length);
     
@@ -1028,13 +1054,11 @@ function filtraClienti() {
     
     // ORDINA: prima quelli con scadenze, poi senza, poi alfabetico
     clientiFiltrati.sort((a, b) => {
-        // Se solo uno ha scadenze, va prima quello con scadenze
         const aHasScad = a.hasScadenze && a.scadenze && a.scadenze.length > 0;
         const bHasScad = b.hasScadenze && b.scadenze && b.scadenze.length > 0;
         
         if (aHasScad && !bHasScad) return -1;
         if (!aHasScad && bHasScad) return 1;
-        // Se entrambi hanno scadenze o entrambi non hanno, ordine alfabetico
         return a.ragione.localeCompare(b.ragione);
     });
     
@@ -1043,13 +1067,14 @@ function filtraClienti() {
     for (let c of clientiFiltrati) {
         let opt = document.createElement('option');
         opt.value = c.codice;
-        opt.textContent = `${c.codice} - ${c.ragione}`;
         
         const hasScadenze = c.hasScadenze && c.scadenze && c.scadenze.length > 0;
         if (hasScadenze) {
             opt.style.color = '#c0392b';
             opt.style.fontWeight = 'bold';
-            opt.textContent = `🔴 ${c.codice} - ${c.ragione} (${c.scadenze.length})`;
+            opt.textContent = `🔴 ${c.codice} - ${c.ragione} (${c.scadenze.length} scad.)`;
+        } else {
+            opt.textContent = `${c.codice} - ${c.ragione}`;
         }
         select.appendChild(opt);
     }
@@ -1068,7 +1093,7 @@ function mostraDettaglioCliente(codice) {
     let containerArticoli = document.getElementById('dettaglioAgenti');
     let html = '';
     
-    // Mostra sezioni scadenze se presenti
+    // Mostra sezione scadenze se presenti
     const hasScadenze = cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0;
     if (hasScadenze) {
         html += `<div class="scadenze-box">
@@ -1082,14 +1107,15 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
+            let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
             html += `<tr>
                         <td style="white-space:nowrap">${s.scadenza}</td>
                         <td style="font-size:0.8rem">${s.descrizione || ''}</td>
                         <td>${s.numDoc}</td>
-                        <td style="text-align:right">${s.importo.toFixed(2)} €</td>
-                     </tr>`;
+                        <td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td>
+                      </tr>`;
         }
         html += `</tbody></table></div>`;
     } else {
@@ -1167,14 +1193,15 @@ function filtraArticoli() {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
+            let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
             html += `<tr>
                         <td style="white-space:nowrap">${s.scadenza}</td>
                         <td style="font-size:0.8rem">${s.descrizione || ''}</td>
                         <td>${s.numDoc}</td>
-                        <td style="text-align:right">${s.importo.toFixed(2)} €</td>
-                     </tr>`;
+                        <td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td>
+                      </tr>`;
         }
         html += `</tbody></table></div>`;
     }
