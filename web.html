@@ -91,37 +91,137 @@
             margin: 0 auto;
             line-height: 1.6;
         }
-        .info-azienda .contatti {
-            margin-top: 30px;
+        
+        /* ========== SEZIONE TEAM ========== */
+        .team-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .team-title {
+            text-align: center;
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        .team-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .team-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 300px;
+            transition: transform 0.3s;
+            text-align: center;
+        }
+        .team-card:hover {
+            transform: translateY(-5px);
+        }
+        .team-foto {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #ecf0f1;
+        }
+        .team-info {
+            padding: 20px;
+        }
+        .team-nome {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .team-ruolo {
+            font-size: 0.9rem;
+            color: #3498db;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .team-telefono {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .team-telefono a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .btn-wa {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-wa:hover {
+            background: #128C7E;
+        }
+        .team-email {
+            margin: 10px 0;
+        }
+        .team-email a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        
+        /* ========== SEZIONE CONTATTI GENERALI ========== */
+        .contatti-generali {
+            background: #ecf0f1;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .contatti-generali h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .social-links {
             display: flex;
             justify-content: center;
             gap: 30px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        .info-azienda .contatti a {
-            color: white;
+        .social-links a {
+            color: #2c3e50;
             text-decoration: none;
-            font-size: 1rem;
+            font-size: 1.1rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            transition: color 0.2s;
         }
-        .info-azienda .contatti a:hover { text-decoration: underline; }
-        
-        /* ========== STILI PIEDE ========== */
-        footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: 50px;
+        .social-links a:hover {
+            color: #3498db;
         }
-        footer p {
-            margin: 5px 0;
-            font-size: 0.8rem;
-            color: #ccc;
+        .email-generale {
+            margin-top: 15px;
+        }
+        .email-generale a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1rem;
         }
         
+        /* ========== SEZIONE CATEGORIE ========== */
         .categorie-container {
             max-width: 1400px;
             margin: 40px auto;
@@ -291,6 +391,18 @@
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
         
+        /* MODALE TEAM */
+        .modal-team {
+            max-width: 500px;
+        }
+        .modal-team input, .modal-team textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        
         .toast-message {
             position: fixed;
             bottom: 30px;
@@ -336,6 +448,20 @@
             text-decoration: none;
         }
         
+        /* ========== PIEDE ========== */
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+        footer p {
+            margin: 5px 0;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        
         @media (max-width: 1024px) {
             .categorie-grid { grid-template-columns: repeat(3, 1fr); }
         }
@@ -346,6 +472,9 @@
             .info-azienda h1 { font-size: 1.8rem; }
             .info-azienda p { font-size: 0.9rem; }
             .header-row { flex-direction: column; }
+            .team-grid { gap: 20px; }
+            .team-card { width: 280px; }
+            .team-foto { height: 200px; }
         }
         @media (max-width: 480px) {
             .categorie-grid { grid-template-columns: 1fr; }
@@ -373,6 +502,27 @@
     <div class="loading">Caricamento informazioni...</div>
 </div>
 
+<!-- ========== SEZIONE TEAM ========== -->
+<div class="team-section">
+    <h2 class="team-title">👥 Il nostro team</h2>
+    <div id="teamGrid" class="team-grid">
+        <!-- I dati del team vengono caricati da Firebase -->
+        <div style="text-align: center; width: 100%;">Caricamento team...</div>
+    </div>
+</div>
+
+<!-- ========== SEZIONE CONTATTI GENERALI ========== -->
+<div class="contatti-generali">
+    <h3>📱 Seguici e contattaci</h3>
+    <div class="social-links">
+        <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" id="facebookLink">📘 Facebook</a>
+    </div>
+    <div class="email-generale">
+        ✉️ <a href="mailto:insapasas@gmail.com" id="emailGeneraleLink">insapasas@gmail.com</a>
+    </div>
+</div>
+
+<!-- ========== SEZIONE CATEGORIE ========== -->
 <div class="categorie-container">
     <div class="categorie-header">
         <h2>📁 Le nostre categorie</h2>
@@ -407,6 +557,7 @@ let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categorie = [];
 let currentEditCategoria = null;
+let teamData = [];
 
 // ==================== LOGO ====================
 function caricaLogo() {
@@ -444,7 +595,6 @@ async function caricaLinkDaFile() {
             const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
-            console.log("Link caricati:", linkPrincipale, linkSecondario);
         } else {
             console.warn("link.html non trovato");
         }
@@ -494,43 +644,190 @@ async function caricaTestiDaFile() {
         const response = await fetch('web_testa_piede.html');
         if (response.ok) {
             const html = await response.text();
-            
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             
             const h1 = doc.querySelector('h1');
             const p = doc.querySelector('p');
-            const contatti = doc.querySelector('.contatti');
-            const footerContent = doc.querySelector('footer');
             
             let testataHtml = '';
             if (h1) testataHtml += h1.outerHTML;
             if (p) testataHtml += p.outerHTML;
-            if (contatti) testataHtml += contatti.outerHTML;
             
             document.getElementById('infoAzienda').innerHTML = testataHtml;
             
+            const footerContent = doc.querySelector('footer');
             if (footerContent) {
                 document.getElementById('footer').innerHTML = footerContent.innerHTML;
             }
         } else {
-            console.warn("web_testa_piede.html non trovato, uso valori di default");
-            document.getElementById('infoAzienda').innerHTML = `
-                <h1>Benvenuti da inSAPA s.a.s.</h1>
-                <p>La tua soluzione di fiducia per componenti industriali e ricambi di qualità. Da oltre 20 anni forniamo prodotti eccellenti ai nostri clienti con professionalità e passione.</p>
-                <div class="contatti">
-                    <a href="tel:+39123456789">📞 +39 123 456 789</a>
-                    <a href="mailto:info@insapa.it">✉️ info@insapa.it</a>
-                    <a href="#">📍 Via Roma, 1 - Milano</a>
-                </div>
-            `;
-            document.getElementById('footer').innerHTML = `
-                <p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p>
-                <p>P.IVA 12345678901</p>
-            `;
+            console.warn("web_testa_piede.html non trovato");
         }
     } catch(e) {
         console.warn("Errore caricamento web_testa_piede.html:", e);
+    }
+}
+
+// ==================== CARICA DATI TEAM DA FIRESTORE ====================
+async function caricaTeam() {
+    try {
+        const snapshot = await db.collection('web_team').orderBy('ordine', 'asc').get();
+        teamData = [];
+        snapshot.forEach(doc => {
+            teamData.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Se non ci sono dati, crea i default
+        if (teamData.length === 0) {
+            const defaultTeam = [
+                { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", ordine: 1, whatsapp: "+393383012348" },
+                { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", ordine: 2, whatsapp: "+393357491607" }
+            ];
+            for (const member of defaultTeam) {
+                await db.collection('web_team').add(member);
+            }
+            await caricaTeam();
+            return;
+        }
+        
+        visualizzaTeam();
+    } catch(e) {
+        console.error("Errore caricamento team:", e);
+        // Fallback manuale
+        teamData = [
+            { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", whatsapp: "+393383012348" },
+            { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", whatsapp: "+393357491607" }
+        ];
+        visualizzaTeam();
+    }
+}
+
+function visualizzaTeam() {
+    const grid = document.getElementById('teamGrid');
+    if (teamData.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>';
+        return;
+    }
+    
+    grid.innerHTML = teamData.map(member => `
+        <div class="team-card" data-id="${member.id}">
+            <img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'">
+            <div class="team-info">
+                <div class="team-nome">${escapeHtml(member.nome)}</div>
+                <div class="team-ruolo">${escapeHtml(member.ruolo)}</div>
+                <div class="team-telefono">
+                    📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
+                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a>
+                </div>
+                <div class="team-email">
+                    ✉️ <a href="mailto:${member.email}">${member.email}</a>
+                </div>
+                ${isAdminMode ? `
+                    <div style="margin-top: 10px;">
+                        <button class="card-btn edit" onclick="event.stopPropagation(); modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button>
+                        <button class="card-btn" onclick="event.stopPropagation(); eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    if (isAdminMode) {
+        const btnAggiungiMembro = document.createElement('button');
+        btnAggiungiMembro.className = 'btn-aggiungi show';
+        btnAggiungiMembro.style.margin = '20px auto 0';
+        btnAggiungiMembro.style.display = 'block';
+        btnAggiungiMembro.style.width = 'auto';
+        btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM';
+        btnAggiungiMembro.onclick = () => mostraModaleTeam(null);
+        if (!document.getElementById('btnAggiungiMembroTeam')) {
+            btnAggiungiMembro.id = 'btnAggiungiMembroTeam';
+            grid.parentNode.appendChild(btnAggiungiMembro);
+        }
+    } else {
+        const existingBtn = document.getElementById('btnAggiungiMembroTeam');
+        if (existingBtn) existingBtn.remove();
+    }
+}
+
+function mostraModaleTeam(membro = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-container modal-team">
+            <h3>${membro ? '✏️ MODIFICA MEMBRO TEAM' : '➕ NUOVO MEMBRO TEAM'}</h3>
+            <label>📌 Nome *</label>
+            <input type="text" id="teamNome" value="${membro ? escapeHtml(membro.nome) : ''}" placeholder="es. Claudia">
+            <label>🎯 Ruolo *</label>
+            <input type="text" id="teamRuolo" value="${membro ? escapeHtml(membro.ruolo) : ''}" placeholder="es. Amministrazione">
+            <label>📞 Telefono</label>
+            <input type="text" id="teamTelefono" value="${membro ? escapeHtml(membro.telefono) : ''}" placeholder="es. +39 338 301 2348">
+            <label>📱 WhatsApp (numero con prefisso, senza spazi)</label>
+            <input type="text" id="teamWhatsapp" value="${membro ? escapeHtml(membro.whatsapp || '') : ''}" placeholder="es. 393383012348">
+            <label>✉️ Email</label>
+            <input type="email" id="teamEmail" value="${membro ? escapeHtml(membro.email) : ''}" placeholder="es. claudia@insapa.it">
+            <label>🖼️ Foto (nome file in icons/)</label>
+            <input type="text" id="teamFoto" value="${membro ? escapeHtml(membro.foto) : ''}" placeholder="es. claudia.jpg">
+            <label>🔢 Ordine</label>
+            <input type="number" id="teamOrdine" value="${membro ? (membro.ordine || 0) : teamData.length + 1}">
+            <div class="modal-buttons">
+                <button id="btnSalvaTeam" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnSalvaTeam').onclick = async () => {
+        const nome = document.getElementById('teamNome').value.trim();
+        const ruolo = document.getElementById('teamRuolo').value.trim();
+        const telefono = document.getElementById('teamTelefono').value.trim();
+        const whatsapp = document.getElementById('teamWhatsapp').value.trim();
+        const email = document.getElementById('teamEmail').value.trim();
+        const foto = document.getElementById('teamFoto').value.trim();
+        const ordine = parseInt(document.getElementById('teamOrdine').value) || 0;
+        
+        if (!nome || !ruolo) {
+            showToast("Inserisci nome e ruolo", true);
+            return;
+        }
+        
+        try {
+            if (membro) {
+                await db.collection('web_team').doc(membro.id).update({
+                    nome, ruolo, telefono, whatsapp, email, foto, ordine
+                });
+                showToast("✅ Membro aggiornato!");
+            } else {
+                await db.collection('web_team').add({
+                    nome, ruolo, telefono, whatsapp, email, foto, ordine
+                });
+                showToast("✅ Membro aggiunto!");
+            }
+            await caricaTeam();
+            modal.remove();
+        } catch(e) {
+            console.error(e);
+            showToast("Errore salvataggio", true);
+        }
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+async function modificaMembroTeam(id) {
+    const membro = teamData.find(m => m.id === id);
+    if (membro) mostraModaleTeam(membro);
+}
+
+async function eliminaMembroTeam(id) {
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questo membro dal team?")) return;
+    try {
+        await db.collection('web_team').doc(id).delete();
+        showToast("✅ Membro eliminato!");
+        await caricaTeam();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore eliminazione", true);
     }
 }
 
@@ -600,6 +897,8 @@ function aggiornaUIModalitaAdmin() {
         btnAggiungiCategoria.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
     }
+    // Ricarica team per mostrare/nascondere bottoni modifica
+    visualizzaTeam();
 }
 
 // ==================== CARICA CATEGORIE ====================
@@ -745,12 +1044,14 @@ async function modificaCategoria(id) {
 }
 
 async function eliminaCategoria(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli associati!\n\nOperazione IRREVERSIBILE!")) return;
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli e le famiglie associate!\n\nOperazione IRREVERSIBILE!")) return;
     
     try {
         const articoliSnap = await db.collection('web_articoli').where('categoriaId', '==', id).get();
+        const famiglieSnap = await db.collection('web_famiglie').where('categoriaId', '==', id).get();
         const batch = db.batch();
         articoliSnap.forEach(doc => batch.delete(doc.ref));
+        famiglieSnap.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
         await db.collection('web_categorie').doc(id).delete();
         showToast("✅ Categoria eliminata!");
@@ -786,7 +1087,7 @@ if (savedAdminMode === 'true') {
     isAdminMode = true;
 }
 
-Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaCategorie()]).then(() => {
+Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaTeam(), caricaCategorie()]).then(() => {
     aggiornaUIModalitaAdmin();
 });
 </script>
