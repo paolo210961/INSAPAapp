@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.45</title>
+    <title>inSAPA - Agenti vA.5.46</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.45 - Agenti</div>
+<div class="version">vA.5.46 - Agenti (Clienti con priorità scadenze)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -559,23 +559,23 @@ function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     
-    fetch('icons/logo.png').then(r => { 
-        if(r.ok) { 
-            logoImg.src = 'icons/logo.png'; 
-            logoImg.style.display = 'block'; 
-            logoSpan.style.display = 'none'; 
-        } else { 
-            fetch('icons/logo.jpg').then(r2 => { 
-                if(r2.ok) { 
-                    logoImg.src = 'icons/logo.jpg'; 
-                    logoImg.style.display = 'block'; 
-                    logoSpan.style.display = 'none'; 
-                } else { 
-                    logoImg.style.display = 'none'; 
-                    logoSpan.style.display = 'block'; 
-                } 
-            }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); 
-        } 
+    fetch('icons/logo.jpg').then(r => {
+        if (r.ok) {
+            logoImg.src = 'icons/logo.jpg';
+            logoImg.style.display = 'block';
+            logoSpan.style.display = 'none';
+        } else {
+            fetch('icons/logo.png').then(r2 => {
+                if (r2.ok) {
+                    logoImg.src = 'icons/logo.png';
+                    logoImg.style.display = 'block';
+                    logoSpan.style.display = 'none';
+                } else {
+                    logoImg.style.display = 'none';
+                    logoSpan.style.display = 'block';
+                }
+            }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+        }
     }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
 
@@ -599,6 +599,8 @@ logoDivElemAgenti.addEventListener('click', (e) => {
         }, 300);
     }
 });
+
+caricaLogoSaved();
 
 // ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
@@ -632,25 +634,6 @@ function normalizzaCodiceAgente(codice) {
     let num = parseInt(codice, 10);
     if (!isNaN(num)) return num.toString();
     return codice;
-}
-
-// ==================== FUNZIONE PER VERIFICARE NOME FILE (IGNORA ZERI INIZIALI) ====================
-function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
-    // tipo = 'ORD' o 'SCA'
-    // Toglie l'estensione
-    const baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
-    const regexNumero = /^([A-Z]+)(\d+)$/i;
-    const match = baseName.match(regexNumero);
-    
-    if (!match) return false;
-    if (match[1].toUpperCase() !== tipo) return false;
-    
-    const numeroFile = match[2];
-    const numeroAgente = parseInt(codiceAgente, 10);
-    const numeroFileParsed = parseInt(numeroFile, 10);
-    
-    // Confronto numerico (ignora gli zeri iniziali)
-    return numeroFileParsed === numeroAgente;
 }
 
 async function caricaAgenti() {
@@ -948,7 +931,7 @@ function inviaScadenzeClienteCorrente() {
     inviaScadenzeWhatsApp(clienteScadenzeCorrente);
 }
 
-// ==================== GESTIONE CLIENTI ====================
+// ==================== GESTIONE CLIENTI (con priorità scadenze) ====================
 function aggiornaClienti() {
     let mappa = new Map();
     
@@ -977,16 +960,27 @@ function aggiornaClienti() {
         }
     }
     
-    clientiUnici = Array.from(mappa.values()).sort((a,b) => a.ragione.localeCompare(b.ragione));
+    clientiUnici = Array.from(mappa.values());
     filtraClienti();
 }
 
 function filtraClienti() {
     let searchText = document.getElementById('cercaCliente').value.toLowerCase();
+    
+    // Filtra prima
     let clientiFiltrati = clientiUnici.filter(c => 
         c.codice.toLowerCase().includes(searchText) || 
         c.ragione.toLowerCase().includes(searchText)
     );
+    
+    // ORDINA: prima quelli con scadenze, poi senza, poi alfabetico
+    clientiFiltrati.sort((a, b) => {
+        // Se solo uno ha scadenze, va prima quello con scadenze
+        if (a.hasScadenze && !b.hasScadenze) return -1;
+        if (!a.hasScadenze && b.hasScadenze) return 1;
+        // Se entrambi hanno scadenze o entrambi non hanno, ordine alfabetico
+        return a.ragione.localeCompare(b.ragione);
+    });
     
     let select = document.getElementById('selectClienteAgenti');
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
@@ -997,6 +991,7 @@ function filtraClienti() {
         if (c.hasScadenze && c.scadenze.length > 0) {
             opt.style.color = '#c0392b';
             opt.style.fontWeight = 'bold';
+            opt.textContent = `🔴 ${c.codice} - ${c.ragione}`;
         }
         select.appendChild(opt);
     }
@@ -1027,7 +1022,7 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
@@ -1110,8 +1105,6 @@ function filtraArticoli() {
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`;
         }
         html += `</tbody></table></div>`;
-    } else {
-        html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
     }
     
     if (filtrati.length > 0) {
@@ -1155,7 +1148,22 @@ function filtraArticoli() {
     });
 }
 
-// ==================== CARICA FILE (CORRETTO - IGNORA ZERI INIZIALI) ====================
+// ==================== CARICA FILE ====================
+function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
+    const baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
+    const regexNumero = /^([A-Z]+)(\d+)$/i;
+    const match = baseName.match(regexNumero);
+    
+    if (!match) return false;
+    if (match[1].toUpperCase() !== tipo) return false;
+    
+    const numeroFile = match[2];
+    const numeroAgente = parseInt(codiceAgente, 10);
+    const numeroFileParsed = parseInt(numeroFile, 10);
+    
+    return numeroFileParsed === numeroAgente;
+}
+
 async function caricaFile(files) {
     if (!agenteCorrente) {
         alert("❌ Seleziona prima un agente!");
@@ -1189,7 +1197,7 @@ async function caricaFile(files) {
     }
     
     if (errori.length > 0) {
-        alert(`❌ FILE NON VALIDI: ${errori.join(', ')}\n\nI file devono essere nominati come:\n📄 ORD${codAgente}.txt (o ORD${parseInt(codAgente,10)}.txt)\n📄 SCA${codAgente}.txt (o SCA${parseInt(codAgente,10)}.txt)\n\n📌 Esempio con codice "${codAgente}":\n   ORD${codAgente}.txt e SCA${codAgente}.txt\n   oppure ORD${parseInt(codAgente,10)}.txt e SCA${parseInt(codAgente,10)}.txt`);
+        alert(`❌ FILE NON VALIDI: ${errori.join(', ')}\n\nI file devono essere nominati come:\n📄 ORD${codAgente}.txt (o ORD${parseInt(codAgente,10)}.txt)\n📄 SCA${codAgente}.txt (o SCA${parseInt(codAgente,10)}.txt)`);
         return false;
     }
     
@@ -1278,8 +1286,8 @@ document.getElementById('btnCreaAgente').onclick = () => {
 document.getElementById('btnEliminaAgente').onclick = () => eliminaAgente();
 
 // ==================== AVVIO ====================
-Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(() => {
-    caricaAgenti();
+Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
+    caricaLogoSaved();
 });
 </script>
 </body>
