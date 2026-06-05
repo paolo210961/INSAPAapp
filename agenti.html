@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.52</title>
+    <title>inSAPA - Agenti vA.5.53</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -34,7 +34,7 @@
             border-radius: 12px;
             padding: 12px 20px;
             display: flex;
-align-items: center;
+            align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 15px;
@@ -497,7 +497,7 @@ align-items: center;
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.52 - Agenti (6 cifre, * = spazio, importi negativi)</div>
+<div class="version">vA.5.53 - Agenti (regex greedy per NOTA CREDITO)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -786,7 +786,6 @@ async function eliminaAgente() {
 }
 
 // ==================== CONVERSIONE IMPORTI ITALIANI ====================
-// REGOLA 4: Gestisce importi negativi con il segno - alla fine (es. "115,23-" -> -115.23)
 function convertiImportoItaliano(importoStr) {
     let isNegative = importoStr.endsWith('-');
     if (isNegative) {
@@ -872,25 +871,26 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA UNIVERSALE ====================
-// REGOLE IMPLEMENTATE:
-// 1. Codici a 6 cifre (es. "000049", "030275") - vengono mantenuti come stringa
-// 2. L'asterisco * viene trattato come uno spazio
-// 3. La descrizione può essere qualsiasi cosa (NOTA CREDITO, R.D., ecc.)
-// 4. Importi negativi con il segno - finale vengono convertiti correttamente
+// ==================== PARSER SCA - CON REGEX GREEDY (.+) ====================
+// La modifica chiave: uso (.+) invece di (.+?) per prendere tutta la descrizione
+// inclusi spazi multipli fino al numero documento
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
     
-    // REGOLA 1: Codice a 6 cifre \d{6}
+    // Cliente: codice a 6 cifre
     const reCliente = /^CLIENTE:\s+(\d{6})\s+(.*?)\s+Saldo\s+([\d\.,\-]+)/;
+    
+    // Scadenza: usa (.+) GREEDY per prendere tutta la descrizione
+    // Gestisce sia "R.D. n.11847..." che "NOTA CREDITO"
+    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.+)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
     
     for (let line of lines) {
         line = line.trim();
         if (line === "") continue;
         
-        // Salta linee di separazione e intestazioni
+        // Salta linee di separazione
         if (line.startsWith("===") || line.startsWith("---")) continue;
         if (line.startsWith("Scadenza") || line.startsWith("VOSTRO DARE")) continue;
         if (line.startsWith("TOTALE") || line.startsWith("AGENTE:")) continue;
@@ -901,9 +901,8 @@ function parseSCA(text) {
         // CERCA CLIENTE
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            let codice = mCliente[1];        // Mantiene le 6 cifre es: "000049"
+            let codice = mCliente[1];
             let ragione = mCliente[2].trim();
-            let saldo = mCliente[3];
             
             currentCliente = { 
                 codice: codice,
@@ -911,38 +910,36 @@ function parseSCA(text) {
                 scadenze: [] 
             };
             clienti.set(codice, currentCliente);
-            console.log(`Trovato cliente: ${codice} - ${ragione.substring(0, 50)}`);
+            console.log(`📌 Cliente: ${codice} - ${ragione.substring(0, 50)}`);
             continue;
         }
         
         // CERCA SCADENZA
         if (currentCliente) {
-            // REGOLA 2: Sostituisci * con spazio
+            // Sostituisci * con spazio (es. 31/01/2024*NOTA -> 31/01/2024 NOTA)
             let lineProcessed = line.replace(/\*/g, ' ');
-            
-            // REGOLA 3: Prende TUTTA la descrizione (qualunque essa sia)
-            const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
-            
             let mScad = lineProcessed.match(reScadenza);
+            
             if (mScad) {
-                let importoStr = mScad[5];
-                let importo = convertiImportoItaliano(importoStr);  // REGOLA 4: gestisce il - finale
+                let importo = convertiImportoItaliano(mScad[5]);
+                let descrizione = mScad[2].trim();
                 
                 currentCliente.scadenze.push({
                     scadenza: mScad[1],
-                    descrizione: mScad[2].trim(),
+                    descrizione: descrizione,
                     numDoc: mScad[3],
                     dataDoc: mScad[4],
                     importo: importo
                 });
                 
-                console.log(`  - ${mScad[1]} | ${mScad[2].substring(0, 35)} | € ${importo.toFixed(2)}`);
+                let tipoDoc = descrizione.includes("NOTA CREDITO") ? "📝 NOTA CREDITO" : "📄 R.D.";
+                console.log(`   ${tipoDoc} | ${mScad[1]} | € ${importo.toFixed(2)}`);
             }
         }
     }
     
     const clientiConScadenze = Array.from(clienti.values()).filter(c => c.scadenze.length > 0);
-    console.log(`Totale clienti con scadenze: ${clientiConScadenze.length}`);
+    console.log(`✅ Totale clienti con scadenze: ${clientiConScadenze.length}`);
     
     return clientiConScadenze;
 }
@@ -1018,8 +1015,8 @@ function aggiornaClienti() {
     
     clientiUnici = Array.from(mappa.values());
     
-    console.log("Clienti unici totali:", clientiUnici.length);
-    console.log("Clienti CON scadenze:", clientiUnici.filter(c => c.hasScadenze && c.scadenze.length > 0).length);
+    console.log(`📊 Clienti unici totali: ${clientiUnici.length}`);
+    console.log(`🔴 Clienti CON scadenze: ${clientiUnici.filter(c => c.hasScadenze && c.scadenze.length > 0).length}`);
     
     filtraClienti();
 }
@@ -1085,7 +1082,7 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> </table></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
             html += `<tr>
@@ -1287,11 +1284,11 @@ async function caricaFile(files) {
     
     if (ordText) {
         datiOrd = parseORD(ordText);
-        console.log("ORD parsato:", datiOrd.length, "clienti");
+        console.log("📄 ORD parsato:", datiOrd.length, "clienti");
     }
     if (scaText) {
         datiSca = parseSCA(scaText);
-        console.log("SCA parsato:", datiSca.length, "clienti");
+        console.log("📄 SCA parsato:", datiSca.length, "clienti");
     }
     
     await salvaDatiAgente();
