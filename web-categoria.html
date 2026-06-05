@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Home</title>
+    <title>inSAPA - Categoria</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -12,7 +12,7 @@
         
         .header {
             background: white;
-            padding: 20px 25px;
+            padding: 15px 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
@@ -29,26 +29,19 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            flex-wrap: wrap;
+            cursor: pointer;
         }
         .logo-rettangolo {
             width: 200px;
             height: 70px;
-            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: pointer;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
         
-        .admin-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
         .btn-admin {
             background: #f1c40f;
             color: #2c3e50;
@@ -57,185 +50,41 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem;
             transition: all 0.2s;
         }
-        .btn-admin:hover {
-            background: #e67e22;
-            color: white;
-            transform: translateY(-2px);
-        }
-        .btn-admin.active {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-salva {
-            background: #27ae60;
-            color: white;
-        }
+        .btn-admin:hover { background: #e67e22; color: white; }
+        .btn-admin.active { background: #27ae60; color: white; }
         
-        /* ========== STILI TESTA (INFO AZIENDA) ========== */
-        .info-azienda {
+        .categoria-header {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
-            padding: 50px 20px;
-            text-align: center;
-        }
-        .info-azienda h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-        .info-azienda p {
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        /* ========== SEZIONE TEAM ========== */
-        .team-section {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 20px;
-        }
-        .team-title {
-            text-align: center;
-            font-size: 2rem;
-            color: #2c3e50;
-            margin-bottom: 40px;
-        }
-        .team-grid {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-        }
-        .team-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 300px;
-            transition: transform 0.3s;
-            text-align: center;
-        }
-        .team-card:hover {
-            transform: translateY(-5px);
-        }
-        .team-foto {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            background: #ecf0f1;
-        }
-        .team-info {
-            padding: 20px;
-        }
-        .team-nome {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        .team-ruolo {
-            font-size: 0.9rem;
-            color: #3498db;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .team-telefono {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .team-telefono a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .btn-wa {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn-wa:hover {
-            background: #128C7E;
-        }
-        .team-email {
-            margin: 10px 0;
-        }
-        .team-email a {
-            color: #3498db;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
-        
-        /* ========== SEZIONE CONTATTI GENERALI ========== */
-        .contatti-generali {
-            background: #ecf0f1;
             padding: 40px 20px;
             text-align: center;
-            margin: 30px 0;
         }
-        .contatti-generali h3 {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
+        .categoria-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .social-links a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 1.1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: color 0.2s;
-        }
-        .social-links a:hover {
-            color: #3498db;
-        }
-        .email-generale {
-            margin-top: 15px;
-        }
-        .email-generale a {
-            color: #3498db;
-            text-decoration: none;
+        .categoria-header p {
             font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
-        /* ========== SEZIONE CATEGORIE ========== */
-        .categorie-container {
+        .articoli-container {
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
         }
-        .categorie-header {
+        .header-buttons {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             margin-bottom: 30px;
         }
-        .categorie-header h2 {
-            font-size: 1.8rem;
+        .header-buttons h2 {
+            font-size: 1.5rem;
             color: #2c3e50;
         }
         .btn-aggiungi {
@@ -246,50 +95,81 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            display: none;
+            margin-left: 10px;
+        }
+        .btn-aggiungi.show { display: inline-block; }
+        .btn-famiglia {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
             display: none;
         }
-        .btn-aggiungi:hover { background: #219a52; transform: translateY(-2px); }
-        .btn-aggiungi.show { display: block; }
+        .btn-famiglia.show { display: inline-block; }
         
-        .categorie-grid {
+        .famiglia-container {
+            margin-bottom: 40px;
+        }
+        .famiglia-titolo {
+            background: #ecf0f1;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .famiglia-titolo h3 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+        .famiglia-descrizione {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .articoli-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 25px;
         }
-        .categoria-card {
+        .articolo-card {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
+            transition: transform 0.3s;
             position: relative;
         }
-        .categoria-card:hover {
+        .articolo-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
-        .categoria-img {
+        .articolo-img {
             width: 100%;
             height: 200px;
             object-fit: cover;
             background: #ecf0f1;
         }
-        .categoria-info {
+        .articolo-info {
             padding: 15px;
         }
-        .categoria-nome {
-            font-size: 1.2rem;
+        .articolo-codice {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+        .articolo-descrizione {
+            font-size: 1rem;
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 8px;
-        }
-        .categoria-descrizione {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            line-height: 1.4;
         }
         .card-buttons {
             position: absolute;
@@ -298,9 +178,7 @@
             display: none;
             gap: 8px;
         }
-        .card-buttons.show {
-            display: flex;
-        }
+        .card-buttons.show { display: flex; }
         .card-btn {
             background: rgba(0,0,0,0.7);
             color: white;
@@ -310,13 +188,9 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1rem;
-            transition: all 0.2s;
-        }
-        .card-btn:hover {
-            background: #e74c3c;
-            transform: scale(1.1);
         }
         .card-btn.edit:hover { background: #3498db; }
+        .card-btn:hover { background: #e74c3c; }
         
         .modal-overlay {
             position: fixed;
@@ -354,7 +228,6 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            font-size: 0.9rem;
         }
         .modal-container textarea {
             min-height: 80px;
@@ -375,6 +248,13 @@
             border-radius: 8px;
             display: none;
         }
+        .select-famiglia {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
         .modal-buttons {
             display: flex;
             gap: 10px;
@@ -391,18 +271,6 @@
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
         
-        /* MODALE TEAM */
-        .modal-team {
-            max-width: 500px;
-        }
-        .modal-team input, .modal-team textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        
         .toast-message {
             position: fixed;
             bottom: 30px;
@@ -412,7 +280,6 @@
             padding: 12px 20px;
             border-radius: 8px;
             z-index: 2000;
-            font-weight: bold;
             animation: fadeOut 3s ease forwards;
         }
         @keyframes fadeOut {
@@ -437,6 +304,17 @@
             border-radius: 8px;
         }
         
+        .btn-torna {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-torna:hover { background: #7f8c8d; }
+        
         .info-imgur {
             font-size: 0.7rem;
             color: #7f8c8d;
@@ -448,7 +326,21 @@
             text-decoration: none;
         }
         
-        /* ========== PIEDE ========== */
+        @media (max-width: 1024px) {
+            .articoli-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .articoli-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .articolo-img { height: 150px; }
+            .categoria-header h1 { font-size: 1.5rem; }
+            .header-row { flex-direction: column; }
+            .header-buttons { flex-direction: column; gap: 10px; align-items: stretch; }
+            .btn-aggiungi, .btn-famiglia { width: 100%; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .articoli-grid { grid-template-columns: 1fr; }
+        }
+        
         footer {
             background: #2c3e50;
             color: white;
@@ -456,86 +348,44 @@
             padding: 30px 20px;
             margin-top: 50px;
         }
-        footer p {
-            margin: 5px 0;
-            font-size: 0.8rem;
-            color: #ccc;
-        }
-        
-        @media (max-width: 1024px) {
-            .categorie-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .categoria-img { height: 150px; }
-            .categoria-nome { font-size: 1rem; }
-            .info-azienda h1 { font-size: 1.8rem; }
-            .info-azienda p { font-size: 0.9rem; }
-            .header-row { flex-direction: column; }
-            .team-grid { gap: 20px; }
-            .team-card { width: 280px; }
-            .team-foto { height: 200px; }
-        }
-        @media (max-width: 480px) {
-            .categorie-grid { grid-template-columns: 1fr; }
-        }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area">
-            <div id="logoRettangolo" class="logo-rettangolo">
+        <div class="logo-area" id="btnHome">
+            <div class="logo-rettangolo" id="logoRettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
         </div>
-        <div class="admin-area">
+        <div>
+            <button id="btnTornaHome" class="btn-torna">◀ TORNA ALLA HOME</button>
             <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
-            <button id="btnSalvaGlobale" class="btn-admin btn-salva" style="display:none;">💾 SALVA TUTTO</button>
         </div>
     </div>
 </div>
 
-<!-- ========== INFO AZIENDA (caricata da file esterno) ========== -->
-<div id="infoAzienda" class="info-azienda">
-    <div class="loading">Caricamento informazioni...</div>
+<div id="categoriaHeader" class="categoria-header">
+    <h1 id="catNome">Caricamento...</h1>
+    <p id="catDescrizione"></p>
 </div>
 
-<!-- ========== SEZIONE TEAM ========== -->
-<div class="team-section">
-    <h2 class="team-title">👥 Il nostro team</h2>
-    <div id="teamGrid" class="team-grid">
-        <!-- I dati del team vengono caricati da Firebase -->
-        <div style="text-align: center; width: 100%;">Caricamento team...</div>
+<div class="articoli-container">
+    <div class="header-buttons">
+        <h2>📦 Articoli</h2>
+        <div>
+            <button id="btnAggiungiFamiglia" class="btn-famiglia">🏷️ NUOVA FAMIGLIA</button>
+            <button id="btnAggiungiArticolo" class="btn-aggiungi">➕ NUOVO ARTICOLO</button>
+        </div>
     </div>
-</div>
-
-<!-- ========== SEZIONE CONTATTI GENERALI ========== -->
-<div class="contatti-generali">
-    <h3>📱 Seguici e contattaci</h3>
-    <div class="social-links">
-        <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" id="facebookLink">📘 Facebook</a>
-    </div>
-    <div class="email-generale">
-        ✉️ <a href="mailto:insapasas@gmail.com" id="emailGeneraleLink">insapasas@gmail.com</a>
+    <div id="articoliContainer">
+        <div style="text-align: center; padding: 50px;">Caricamento articoli...</div>
     </div>
 </div>
 
-<!-- ========== SEZIONE CATEGORIE ========== -->
-<div class="categorie-container">
-    <div class="categorie-header">
-        <h2>📁 Le nostre categorie</h2>
-        <button id="btnAggiungiCategoria" class="btn-aggiungi">➕ NUOVA CATEGORIA</button>
-    </div>
-    <div id="categorieGrid" class="categorie-grid">
-        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">Caricamento categorie...</div>
-    </div>
-</div>
-
-<!-- ========== PIEDE (caricato da file esterno) ========== -->
-<footer id="footer">
-    <div class="loading">Caricamento footer...</div>
+<footer>
+    <p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p>
 </footer>
 
 <script>
@@ -555,9 +405,10 @@ const db = firebase.firestore();
 // ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
-let categorie = [];
-let currentEditCategoria = null;
-let teamData = [];
+let categoriaId = null;
+let categoria = null;
+let articoli = [];
+let famiglie = [];
 
 // ==================== LOGO ====================
 function caricaLogo() {
@@ -582,7 +433,7 @@ function caricaLogo() {
 }
 caricaLogo();
 
-// ==================== GESTIONE LINK PER LOGO (1 TAP, 2 TAP) ====================
+// ==================== GESTIONE LINK PER LOGO ====================
 let linkPrincipale = "";
 let linkSecondario = "";
 let lastTap = 0;
@@ -595,10 +446,8 @@ async function caricaLinkDaFile() {
             const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
-        } else {
-            console.warn("link.html non trovato");
         }
-    } catch(e) { console.warn("Errore caricamento link.html:", e); }
+    } catch(e) { console.warn("link.html non trovato"); }
 }
 
 function apriLinkPrincipale() {
@@ -606,7 +455,7 @@ function apriLinkPrincipale() {
         window.open(linkPrincipale, '_blank');
         showToast("🔗 Apertura link principale");
     } else {
-        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
+        showToast("⚠️ Link principale non configurato", true);
     }
 }
 
@@ -615,7 +464,7 @@ function apriLinkSecondario() {
         window.open(linkSecondario, '_blank');
         showToast("🔗 Apertura link secondario");
     } else {
-        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
+        showToast("⚠️ Link secondario non configurato", true);
     }
 }
 
@@ -638,199 +487,6 @@ logoSiti.addEventListener('click', (e) => {
     }
 });
 
-// ==================== CARICA TESTI TESTA E PIEDE DA FILE ESTERNO ====================
-async function caricaTestiDaFile() {
-    try {
-        const response = await fetch('web_testa_piede.html');
-        if (response.ok) {
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            const h1 = doc.querySelector('h1');
-            const p = doc.querySelector('p');
-            
-            let testataHtml = '';
-            if (h1) testataHtml += h1.outerHTML;
-            if (p) testataHtml += p.outerHTML;
-            
-            document.getElementById('infoAzienda').innerHTML = testataHtml;
-            
-            const footerContent = doc.querySelector('footer');
-            if (footerContent) {
-                document.getElementById('footer').innerHTML = footerContent.innerHTML;
-            }
-        } else {
-            console.warn("web_testa_piede.html non trovato");
-        }
-    } catch(e) {
-        console.warn("Errore caricamento web_testa_piede.html:", e);
-    }
-}
-
-// ==================== CARICA DATI TEAM DA FIRESTORE ====================
-async function caricaTeam() {
-    try {
-        const snapshot = await db.collection('web_team').orderBy('ordine', 'asc').get();
-        teamData = [];
-        snapshot.forEach(doc => {
-            teamData.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Se non ci sono dati, crea i default
-        if (teamData.length === 0) {
-            const defaultTeam = [
-                { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", ordine: 1, whatsapp: "+393383012348" },
-                { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", ordine: 2, whatsapp: "+393357491607" }
-            ];
-            for (const member of defaultTeam) {
-                await db.collection('web_team').add(member);
-            }
-            await caricaTeam();
-            return;
-        }
-        
-        visualizzaTeam();
-    } catch(e) {
-        console.error("Errore caricamento team:", e);
-        // Fallback manuale
-        teamData = [
-            { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", whatsapp: "+393383012348" },
-            { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", whatsapp: "+393357491607" }
-        ];
-        visualizzaTeam();
-    }
-}
-
-function visualizzaTeam() {
-    const grid = document.getElementById('teamGrid');
-    if (teamData.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>';
-        return;
-    }
-    
-    grid.innerHTML = teamData.map(member => `
-        <div class="team-card" data-id="${member.id}">
-            <img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'">
-            <div class="team-info">
-                <div class="team-nome">${escapeHtml(member.nome)}</div>
-                <div class="team-ruolo">${escapeHtml(member.ruolo)}</div>
-                <div class="team-telefono">
-                    📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
-                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a>
-                </div>
-                <div class="team-email">
-                    ✉️ <a href="mailto:${member.email}">${member.email}</a>
-                </div>
-                ${isAdminMode ? `
-                    <div style="margin-top: 10px;">
-                        <button class="card-btn edit" onclick="event.stopPropagation(); modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button>
-                        <button class="card-btn" onclick="event.stopPropagation(); eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `).join('');
-    
-    if (isAdminMode) {
-        const btnAggiungiMembro = document.createElement('button');
-        btnAggiungiMembro.className = 'btn-aggiungi show';
-        btnAggiungiMembro.style.margin = '20px auto 0';
-        btnAggiungiMembro.style.display = 'block';
-        btnAggiungiMembro.style.width = 'auto';
-        btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM';
-        btnAggiungiMembro.onclick = () => mostraModaleTeam(null);
-        if (!document.getElementById('btnAggiungiMembroTeam')) {
-            btnAggiungiMembro.id = 'btnAggiungiMembroTeam';
-            grid.parentNode.appendChild(btnAggiungiMembro);
-        }
-    } else {
-        const existingBtn = document.getElementById('btnAggiungiMembroTeam');
-        if (existingBtn) existingBtn.remove();
-    }
-}
-
-function mostraModaleTeam(membro = null) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container modal-team">
-            <h3>${membro ? '✏️ MODIFICA MEMBRO TEAM' : '➕ NUOVO MEMBRO TEAM'}</h3>
-            <label>📌 Nome *</label>
-            <input type="text" id="teamNome" value="${membro ? escapeHtml(membro.nome) : ''}" placeholder="es. Claudia">
-            <label>🎯 Ruolo *</label>
-            <input type="text" id="teamRuolo" value="${membro ? escapeHtml(membro.ruolo) : ''}" placeholder="es. Amministrazione">
-            <label>📞 Telefono</label>
-            <input type="text" id="teamTelefono" value="${membro ? escapeHtml(membro.telefono) : ''}" placeholder="es. +39 338 301 2348">
-            <label>📱 WhatsApp (numero con prefisso, senza spazi)</label>
-            <input type="text" id="teamWhatsapp" value="${membro ? escapeHtml(membro.whatsapp || '') : ''}" placeholder="es. 393383012348">
-            <label>✉️ Email</label>
-            <input type="email" id="teamEmail" value="${membro ? escapeHtml(membro.email) : ''}" placeholder="es. claudia@insapa.it">
-            <label>🖼️ Foto (nome file in icons/)</label>
-            <input type="text" id="teamFoto" value="${membro ? escapeHtml(membro.foto) : ''}" placeholder="es. claudia.jpg">
-            <label>🔢 Ordine</label>
-            <input type="number" id="teamOrdine" value="${membro ? (membro.ordine || 0) : teamData.length + 1}">
-            <div class="modal-buttons">
-                <button id="btnSalvaTeam" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnSalvaTeam').onclick = async () => {
-        const nome = document.getElementById('teamNome').value.trim();
-        const ruolo = document.getElementById('teamRuolo').value.trim();
-        const telefono = document.getElementById('teamTelefono').value.trim();
-        const whatsapp = document.getElementById('teamWhatsapp').value.trim();
-        const email = document.getElementById('teamEmail').value.trim();
-        const foto = document.getElementById('teamFoto').value.trim();
-        const ordine = parseInt(document.getElementById('teamOrdine').value) || 0;
-        
-        if (!nome || !ruolo) {
-            showToast("Inserisci nome e ruolo", true);
-            return;
-        }
-        
-        try {
-            if (membro) {
-                await db.collection('web_team').doc(membro.id).update({
-                    nome, ruolo, telefono, whatsapp, email, foto, ordine
-                });
-                showToast("✅ Membro aggiornato!");
-            } else {
-                await db.collection('web_team').add({
-                    nome, ruolo, telefono, whatsapp, email, foto, ordine
-                });
-                showToast("✅ Membro aggiunto!");
-            }
-            await caricaTeam();
-            modal.remove();
-        } catch(e) {
-            console.error(e);
-            showToast("Errore salvataggio", true);
-        }
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-async function modificaMembroTeam(id) {
-    const membro = teamData.find(m => m.id === id);
-    if (membro) mostraModaleTeam(membro);
-}
-
-async function eliminaMembroTeam(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questo membro dal team?")) return;
-    try {
-        await db.collection('web_team').doc(id).delete();
-        showToast("✅ Membro eliminato!");
-        await caricaTeam();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore eliminazione", true);
-    }
-}
-
 // ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
@@ -839,6 +495,16 @@ function showToast(message, isError = false) {
     toast.innerText = message;
     document.body.appendChild(toast);
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ==================== MODALITA' ADMIN ====================
@@ -863,7 +529,7 @@ function mostraModalePassword() {
             isAdminMode = true;
             localStorage.setItem('web_admin_mode', 'true');
             showToast("✅ Modalità admin attivata!");
-            aggiornaUIModalitaAdmin();
+            aggiornaUIAdmin();
             modal.remove();
         } else {
             showToast("❌ Password errata!", true);
@@ -876,116 +542,273 @@ function disattivaModalitaAdmin() {
     isAdminMode = false;
     localStorage.removeItem('web_admin_mode');
     showToast("🔒 Modalità admin disattivata");
-    aggiornaUIModalitaAdmin();
+    aggiornaUIAdmin();
 }
 
-function aggiornaUIModalitaAdmin() {
+function aggiornaUIAdmin() {
     const btnAdmin = document.getElementById('btnAdmin');
-    const btnSalvaGlobale = document.getElementById('btnSalvaGlobale');
-    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
+    const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
+    const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
     
     if (isAdminMode) {
         btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
         btnAdmin.classList.add('active');
-        btnSalvaGlobale.style.display = 'block';
-        btnAggiungiCategoria.classList.add('show');
+        btnAggiungiArticolo.classList.add('show');
+        btnAggiungiFamiglia.classList.add('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
+        document.querySelectorAll('.famiglia-card-buttons').forEach(btn => btn.classList.add('show'));
     } else {
         btnAdmin.textContent = "🔐 AREA ADMIN";
         btnAdmin.classList.remove('active');
-        btnSalvaGlobale.style.display = 'none';
-        btnAggiungiCategoria.classList.remove('show');
+        btnAggiungiArticolo.classList.remove('show');
+        btnAggiungiFamiglia.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
+        document.querySelectorAll('.famiglia-card-buttons').forEach(btn => btn.classList.remove('show'));
     }
-    // Ricarica team per mostrare/nascondere bottoni modifica
-    visualizzaTeam();
+    visualizzaArticoli();
 }
 
-// ==================== CARICA CATEGORIE ====================
-async function caricaCategorie() {
-    try {
-        const snapshot = await db.collection('web_categorie').orderBy('ordine', 'asc').get();
-        categorie = [];
-        snapshot.forEach(doc => {
-            categorie.push({ id: doc.id, ...doc.data() });
-        });
-        visualizzaCategorie();
-    } catch(e) {
-        console.error("Errore caricamento categorie:", e);
-        showToast("Errore caricamento categorie", true);
-    }
-}
-
-function visualizzaCategorie() {
-    const grid = document.getElementById('categorieGrid');
-    if (categorie.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessuna categoria presente. ' + (isAdminMode ? 'Clicca su "NUOVA CATEGORIA" per aggiungerne una.' : '') + '</div>';
+// ==================== CARICA CATEGORIA ====================
+async function caricaCategoria() {
+    const urlParams = new URLSearchParams(window.location.search);
+    categoriaId = urlParams.get('id');
+    
+    if (!categoriaId) {
+        document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
         return;
     }
     
-    grid.innerHTML = categorie.map(cat => `
-        <div class="categoria-card" data-id="${cat.id}">
-            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
-                <button class="card-btn edit" onclick="event.stopPropagation(); modificaCategoria('${cat.id}')">✏️</button>
-                <button class="card-btn" onclick="event.stopPropagation(); eliminaCategoria('${cat.id}')">🗑</button>
-            </div>
-            <img class="categoria-img" src="${cat.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${cat.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
-            <div class="categoria-info">
-                <div class="categoria-nome">${escapeHtml(cat.nome)}</div>
-                <div class="categoria-descrizione">${escapeHtml(cat.descrizione || '')}</div>
-            </div>
-        </div>
-    `).join('');
+    try {
+        const doc = await db.collection('web_categorie').doc(categoriaId).get();
+        if (doc.exists) {
+            categoria = { id: doc.id, ...doc.data() };
+            document.getElementById('catNome').innerText = categoria.nome;
+            document.getElementById('catDescrizione').innerText = categoria.descrizione || '';
+        } else {
+            document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
+        }
+    } catch(e) { console.error(e); }
+}
+
+// ==================== CARICA FAMIGLIE ====================
+async function caricaFamiglie() {
+    if (!categoriaId) return;
     
-    document.querySelectorAll('.categoria-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('card-btn')) return;
-            const id = card.dataset.id;
-            window.location.href = `web-categoria.html?id=${id}`;
+    try {
+        const snapshot = await db.collection('web_famiglie')
+            .where('categoriaId', '==', categoriaId)
+            .orderBy('ordine', 'asc')
+            .get();
+        famiglie = [];
+        snapshot.forEach(doc => {
+            famiglie.push({ id: doc.id, ...doc.data() });
         });
-    });
+    } catch(e) { console.error(e); }
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-// ==================== MODALE AGGIUNTA/MODIFICA CATEGORIA ====================
-function mostraModaleCategoria(categoria = null) {
-    currentEditCategoria = categoria;
+// ==================== CARICA ARTICOLI ====================
+async function caricaArticoli() {
+    if (!categoriaId) return;
     
+    try {
+        const snapshot = await db.collection('web_articoli')
+            .where('categoriaId', '==', categoriaId)
+            .get();
+        articoli = [];
+        snapshot.forEach(doc => {
+            articoli.push({ id: doc.id, ...doc.data() });
+        });
+        await caricaFamiglie();
+        visualizzaArticoli();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore caricamento articoli", true);
+    }
+}
+
+function visualizzaArticoli() {
+    const container = document.getElementById('articoliContainer');
+    
+    const articoliConFamiglia = articoli.filter(a => a.famigliaId && a.famigliaId !== '');
+    const articoliSenzaFamiglia = articoli.filter(a => !a.famigliaId || a.famigliaId === '');
+    
+    let html = '';
+    
+    for (const famiglia of famiglie) {
+        const articoliFamiglia = articoliConFamiglia.filter(a => a.famigliaId === famiglia.id);
+        if (articoliFamiglia.length === 0 && !isAdminMode) continue;
+        
+        html += `
+            <div class="famiglia-container" data-famiglia-id="${famiglia.id}">
+                <div class="famiglia-titolo">
+                    <div>
+                        <h3>📁 ${escapeHtml(famiglia.nome)}</h3>
+                        ${famiglia.descrizione ? `<div class="famiglia-descrizione">${escapeHtml(famiglia.descrizione)}</div>` : ''}
+                    </div>
+                    ${isAdminMode ? `
+                        <div class="famiglia-card-buttons">
+                            <button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')" style="background:#3498db;">✏️</button>
+                            <button class="card-btn" onclick="eliminaFamiglia('${famiglia.id}')" style="background:#e74c3c;">🗑</button>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="articoli-grid">
+                    ${articoliFamiglia.map(art => `
+                        <div class="articolo-card" data-id="${art.id}">
+                            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
+                                <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')">✏️</button>
+                                <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')">🗑</button>
+                            </div>
+                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+                            <div class="articolo-info">
+                                <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
+                                <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (articoliSenzaFamiglia.length > 0) {
+        html += `
+            <div class="famiglia-container">
+                <div class="famiglia-titolo">
+                    <h3>📦 SENZA FAMIGLIA</h3>
+                </div>
+                <div class="articoli-grid">
+                    ${articoliSenzaFamiglia.map(art => `
+                        <div class="articolo-card" data-id="${art.id}">
+                            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
+                                <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')">✏️</button>
+                                <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')">🗑</button>
+                            </div>
+                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+                            <div class="articolo-info">
+                                <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
+                                <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (articoli.length === 0 && famiglie.length === 0) {
+        html = '<div style="text-align: center; padding: 50px;">📭 Nessun articolo presente. ' + (isAdminMode ? 'Clicca su "NUOVO ARTICOLO" per aggiungerne uno.' : '') + '</div>';
+    }
+    
+    container.innerHTML = html;
+}
+
+// ==================== MODALE FAMIGLIA ====================
+function mostraModaleFamiglia(famiglia = null) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
         <div class="modal-container">
-            <h3>${categoria ? '✏️ MODIFICA CATEGORIA' : '➕ NUOVA CATEGORIA'}</h3>
-            <label>📌 Nome categoria *</label>
-            <input type="text" id="catNome" value="${categoria ? escapeHtml(categoria.nome) : ''}" placeholder="es. Motori">
+            <h3>${famiglia ? '✏️ MODIFICA FAMIGLIA' : '🏷️ NUOVA FAMIGLIA'}</h3>
+            <label>📌 Nome famiglia *</label>
+            <input type="text" id="famNome" value="${famiglia ? escapeHtml(famiglia.nome) : ''}" placeholder="es. Stoviglie">
             <label>📝 Descrizione</label>
-            <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
-            <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
-            <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
-            <div class="info-imgur">
-                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
-            </div>
+            <textarea id="famDescrizione" placeholder="Descrizione della famiglia...">${famiglia ? escapeHtml(famiglia.descrizione || '') : ''}</textarea>
             <label>🔢 Ordine</label>
-            <input type="number" id="catOrdine" value="${categoria ? (categoria.ordine || 0) : categorie.length + 1}" placeholder="0,1,2...">
+            <input type="number" id="famOrdine" value="${famiglia ? (famiglia.ordine || 0) : famiglie.length + 1}">
             <div class="modal-buttons">
-                <button id="btnSalvaCategoria" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnSalvaFamiglia" class="btn-salva-modal">💾 SALVA</button>
                 <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
     
-    const fotoUrlInput = document.getElementById('catFotoUrl');
+    document.getElementById('btnSalvaFamiglia').onclick = async () => {
+        const nome = document.getElementById('famNome').value.trim();
+        const descrizione = document.getElementById('famDescrizione').value;
+        const ordine = parseInt(document.getElementById('famOrdine').value) || 0;
+        
+        if (!nome) {
+            showToast("Inserisci il nome della famiglia", true);
+            return;
+        }
+        
+        try {
+            if (famiglia) {
+                await db.collection('web_famiglie').doc(famiglia.id).update({
+                    nome, descrizione, ordine
+                });
+                showToast("✅ Famiglia modificata!");
+            } else {
+                await db.collection('web_famiglie').add({
+                    categoriaId, nome, descrizione, ordine
+                });
+                showToast("✅ Famiglia aggiunta!");
+            }
+            await caricaArticoli();
+            modal.remove();
+        } catch(e) {
+            console.error(e);
+            showToast("Errore salvataggio famiglia", true);
+        }
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+async function modificaFamiglia(id) {
+    const famiglia = famiglie.find(f => f.id === id);
+    if (famiglia) mostraModaleFamiglia(famiglia);
+}
+
+async function eliminaFamiglia(id) {
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questa famiglia?\n\nGli articoli rimarranno senza famiglia!")) return;
+    
+    try {
+        const articoliFamiglia = articoli.filter(a => a.famigliaId === id);
+        for (const art of articoliFamiglia) {
+            await db.collection('web_articoli').doc(art.id).update({ famigliaId: '' });
+        }
+        await db.collection('web_famiglie').doc(id).delete();
+        showToast("✅ Famiglia eliminata!");
+        await caricaArticoli();
+    } catch(e) {
+        console.error(e);
+        showToast("Errore eliminazione famiglia", true);
+    }
+}
+
+// ==================== MODALE ARTICOLO ====================
+function mostraModaleArticolo(articolo = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-container">
+            <h3>${articolo ? '✏️ MODIFICA ARTICOLO' : '➕ NUOVO ARTICOLO'}</h3>
+            <label>🔢 Codice articolo *</label>
+            <input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice || '') : ''}" placeholder="es. MTR-001">
+            <label>📝 Descrizione *</label>
+            <textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione || '') : ''}</textarea>
+            <label>🏷️ Famiglia di appartenenza</label>
+            <select id="artFamiglia" class="select-famiglia">
+                <option value="">-- Nessuna famiglia --</option>
+                ${famiglie.map(f => `<option value="${f.id}" ${articolo && articolo.famigliaId === f.id ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
+            </select>
+            <label>🖼️ Immagine (URL da Imgur)</label>
+            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
+            <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
+            <div class="info-imgur">
+                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
+            </div>
+            <div class="modal-buttons">
+                <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const fotoUrlInput = document.getElementById('artFotoUrl');
     const anteprimaImg = document.getElementById('anteprimaImg');
     
     function aggiornaAnteprima() {
@@ -1001,84 +824,85 @@ function mostraModaleCategoria(categoria = null) {
     fotoUrlInput.addEventListener('input', aggiornaAnteprima);
     aggiornaAnteprima();
     
-    document.getElementById('btnSalvaCategoria').onclick = async () => {
-        const nome = document.getElementById('catNome').value.trim();
-        const descrizione = document.getElementById('catDescrizione').value;
-        const fotoUrl = document.getElementById('catFotoUrl').value.trim();
-        const ordine = parseInt(document.getElementById('catOrdine').value) || 0;
+    document.getElementById('btnSalvaArticolo').onclick = async () => {
+        const codice = document.getElementById('artCodice').value.trim();
+        const descrizione = document.getElementById('artDescrizione').value.trim();
+        const famigliaId = document.getElementById('artFamiglia').value;
+        const fotoUrl = document.getElementById('artFotoUrl').value.trim();
         
-        if (!nome) {
-            showToast("Inserisci il nome della categoria", true);
+        if (!codice) {
+            showToast("Inserisci il codice articolo", true);
+            return;
+        }
+        if (!descrizione) {
+            showToast("Inserisci la descrizione", true);
             return;
         }
         
         try {
-            if (categoria) {
-                await db.collection('web_categorie').doc(categoria.id).update({
-                    nome, descrizione, ordine, fotoUrl,
+            if (articolo) {
+                await db.collection('web_articoli').doc(articolo.id).update({
+                    codice, descrizione, famigliaId, fotoUrl,
                     ultimoAggiornamento: new Date().toISOString()
                 });
-                showToast("✅ Categoria modificata!");
+                showToast("✅ Articolo modificato!");
             } else {
-                await db.collection('web_categorie').add({
-                    nome, descrizione, ordine, fotoUrl: fotoUrl || '',
+                await db.collection('web_articoli').add({
+                    categoriaId, codice, descrizione, famigliaId: famigliaId || '', fotoUrl: fotoUrl || '',
                     creatoIl: new Date().toISOString()
                 });
-                showToast("✅ Categoria aggiunta!");
+                showToast("✅ Articolo aggiunto!");
             }
             
-            await caricaCategorie();
+            await caricaArticoli();
             modal.remove();
         } catch(e) {
             console.error(e);
-            showToast("Errore salvataggio categoria", true);
+            showToast("Errore salvataggio articolo", true);
         }
     };
     
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 }
 
-async function modificaCategoria(id) {
-    const cat = categorie.find(c => c.id === id);
-    if (cat) mostraModaleCategoria(cat);
+async function modificaArticolo(id) {
+    const art = articoli.find(a => a.id === id);
+    if (art) mostraModaleArticolo(art);
 }
 
-async function eliminaCategoria(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli e le famiglie associate!\n\nOperazione IRREVERSIBILE!")) return;
+async function eliminaArticolo(id) {
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questo articolo?\n\nOperazione IRREVERSIBILE!")) return;
     
     try {
-        const articoliSnap = await db.collection('web_articoli').where('categoriaId', '==', id).get();
-        const famiglieSnap = await db.collection('web_famiglie').where('categoriaId', '==', id).get();
-        const batch = db.batch();
-        articoliSnap.forEach(doc => batch.delete(doc.ref));
-        famiglieSnap.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        await db.collection('web_categorie').doc(id).delete();
-        showToast("✅ Categoria eliminata!");
-        await caricaCategorie();
+        await db.collection('web_articoli').doc(id).delete();
+        showToast("✅ Articolo eliminato!");
+        await caricaArticoli();
     } catch(e) {
         console.error(e);
-        showToast("Errore eliminazione categoria", true);
+        showToast("Errore eliminazione articolo", true);
     }
 }
 
 // ==================== EVENTI ====================
 document.getElementById('btnAdmin').onclick = () => {
-    if (isAdminMode) {
-        disattivaModalitaAdmin();
-    } else {
-        mostraModalePassword();
-    }
+    if (isAdminMode) disattivaModalitaAdmin();
+    else mostraModalePassword();
 };
 
-document.getElementById('btnAggiungiCategoria').onclick = () => {
-    if (isAdminMode) {
-        mostraModaleCategoria(null);
-    }
+document.getElementById('btnAggiungiArticolo').onclick = () => {
+    if (isAdminMode) mostraModaleArticolo(null);
 };
 
-document.getElementById('btnSalvaGlobale').onclick = async () => {
-    showToast("💾 Tutto già salvato su Firebase!");
+document.getElementById('btnAggiungiFamiglia').onclick = () => {
+    if (isAdminMode) mostraModaleFamiglia(null);
+};
+
+document.getElementById('btnTornaHome').onclick = () => {
+    window.location.href = 'web.html';
+};
+
+document.getElementById('btnHome').onclick = () => {
+    window.location.href = 'web.html';
 };
 
 // ==================== AVVIO ====================
@@ -1087,8 +911,8 @@ if (savedAdminMode === 'true') {
     isAdminMode = true;
 }
 
-Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaTeam(), caricaCategorie()]).then(() => {
-    aggiornaUIModalitaAdmin();
+Promise.all([caricaLinkDaFile(), caricaCategoria(), caricaArticoli()]).then(() => {
+    aggiornaUIAdmin();
 });
 </script>
 </body>
