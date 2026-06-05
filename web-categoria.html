@@ -6,6 +6,8 @@
     <title>inSAPA - Categoria</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- SortableJS per drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
@@ -111,19 +113,24 @@
         }
         .btn-famiglia.show { display: inline-block; }
         
+        /* Famiglia container */
         .famiglia-container {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            overflow: hidden;
         }
         .famiglia-titolo {
             background: #ecf0f1;
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 15px 20px;
+            cursor: grab;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
         }
+        .famiglia-titolo:active { cursor: grabbing; }
         .famiglia-titolo h3 {
             font-size: 1.3rem;
             color: #2c3e50;
@@ -133,54 +140,12 @@
             color: #7f8c8d;
             margin-top: 5px;
         }
-        .articoli-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-        }
-        .articolo-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-            position: relative;
-        }
-        .articolo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        }
-        .articolo-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background: #ecf0f1;
-        }
-        .articolo-info {
-            padding: 15px;
-        }
-        .articolo-codice {
-            font-size: 0.75rem;
-            color: #7f8c8d;
-            font-family: monospace;
-            margin-bottom: 5px;
-        }
-        .articolo-descrizione {
-            font-size: 1rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        .card-buttons {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: none;
+        .famiglia-buttons {
+            display: flex;
             gap: 8px;
         }
-        .card-buttons.show { display: flex; }
-        .card-btn {
-            background: rgba(0,0,0,0.7);
+        .famiglia-buttons .btn-move {
+            background: #3498db;
             color: white;
             border: none;
             width: 32px;
@@ -189,8 +154,110 @@
             cursor: pointer;
             font-size: 1rem;
         }
+        .famiglia-buttons .btn-move:hover { background: #2980b9; }
+        
+        /* Articoli dentro famiglia - NON DRAGGABILI */
+        .articoli-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .articolo-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            position: relative;
+            border: 1px solid #eee;
+        }
+        .articolo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .articolo-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #ecf0f1;
+        }
+        .articolo-info {
+            padding: 12px;
+        }
+        .articolo-codice {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+        .articolo-descrizione {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .articolo-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .card-btn {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
         .card-btn.edit:hover { background: #3498db; }
         .card-btn:hover { background: #e74c3c; }
+        .btn-move-article {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-move-article:hover { background: #2980b9; }
+        
+        /* Sezione senza famiglia - DRAGGABILE */
+        .senza-famiglia-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .senza-famiglia-titolo {
+            background: #ecf0f1;
+            padding: 15px 20px;
+        }
+        .senza-famiglia-titolo h3 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+        .senza-famiglia-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .senza-famiglia-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+            cursor: grab;
+        }
+        .senza-famiglia-item:active { cursor: grabbing; }
         
         .modal-overlay {
             position: fixed;
@@ -223,7 +290,7 @@
             margin: 15px 0 5px 0;
             color: #2c3e50;
         }
-        .modal-container input, .modal-container textarea {
+        .modal-container input, .modal-container textarea, .modal-container select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -247,13 +314,6 @@
             margin-top: 10px;
             border-radius: 8px;
             display: none;
-        }
-        .select-famiglia {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
         }
         .modal-buttons {
             display: flex;
@@ -280,6 +340,7 @@
             padding: 12px 20px;
             border-radius: 8px;
             z-index: 2000;
+            font-weight: bold;
             animation: fadeOut 3s ease forwards;
         }
         @keyframes fadeOut {
@@ -326,19 +387,30 @@
             text-decoration: none;
         }
         
+        /* Drag & drop style */
+        .sortable-drag {
+            opacity: 0.5;
+            background: #f1c40f;
+        }
+        .sortable-ghost {
+            opacity: 0.3;
+            background: #3498db;
+        }
+        
         @media (max-width: 1024px) {
-            .articoli-grid { grid-template-columns: repeat(3, 1fr); }
+            .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 768px) {
-            .articoli-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .articolo-img { height: 150px; }
             .categoria-header h1 { font-size: 1.5rem; }
             .header-row { flex-direction: column; }
             .header-buttons { flex-direction: column; gap: 10px; align-items: stretch; }
             .btn-aggiungi, .btn-famiglia { width: 100%; text-align: center; }
+            .famiglia-titolo { flex-direction: column; gap: 10px; align-items: flex-start; }
         }
         @media (max-width: 480px) {
-            .articoli-grid { grid-template-columns: 1fr; }
+            .articoli-grid, .senza-famiglia-grid { grid-template-columns: 1fr; }
         }
         
         footer {
@@ -379,9 +451,8 @@
             <button id="btnAggiungiArticolo" class="btn-aggiungi">➕ NUOVO ARTICOLO</button>
         </div>
     </div>
-    <div id="articoliContainer">
-        <div style="text-align: center; padding: 50px;">Caricamento articoli...</div>
-    </div>
+    <div id="famiglieContainer"></div>
+    <div id="senzaFamigliaContainer"></div>
 </div>
 
 <footer>
@@ -409,6 +480,15 @@ let categoriaId = null;
 let categoria = null;
 let articoli = [];
 let famiglie = [];
+let sortableFamiglie = null;
+let sortableSenzaFamiglia = null;
+let isMobile = false;
+
+// ==================== RILEVAZIONE MOBILE ====================
+function checkMobile() {
+    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return isMobile;
+}
 
 // ==================== LOGO ====================
 function caricaLogo() {
@@ -555,20 +635,21 @@ function aggiornaUIAdmin() {
         btnAdmin.classList.add('active');
         btnAggiungiArticolo.classList.add('show');
         btnAggiungiFamiglia.classList.add('show');
-        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
-        document.querySelectorAll('.famiglia-card-buttons').forEach(btn => btn.classList.add('show'));
     } else {
         btnAdmin.textContent = "🔐 AREA ADMIN";
         btnAdmin.classList.remove('active');
         btnAggiungiArticolo.classList.remove('show');
         btnAggiungiFamiglia.classList.remove('show');
-        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
-        document.querySelectorAll('.famiglia-card-buttons').forEach(btn => btn.classList.remove('show'));
+        // Distruggi Sortable se attivi
+        if (sortableFamiglie) sortableFamiglie.destroy();
+        if (sortableSenzaFamiglia) sortableSenzaFamiglia.destroy();
+        sortableFamiglie = null;
+        sortableSenzaFamiglia = null;
     }
     visualizzaArticoli();
 }
 
-// ==================== CARICA CATEGORIA ====================
+// ==================== CARICA DATI ====================
 async function caricaCategoria() {
     const urlParams = new URLSearchParams(window.location.search);
     categoriaId = urlParams.get('id');
@@ -590,10 +671,8 @@ async function caricaCategoria() {
     } catch(e) { console.error(e); }
 }
 
-// ==================== CARICA FAMIGLIE ====================
 async function caricaFamiglie() {
     if (!categoriaId) return;
-    
     try {
         const snapshot = await db.collection('web_famiglie')
             .where('categoriaId', '==', categoriaId)
@@ -606,10 +685,8 @@ async function caricaFamiglie() {
     } catch(e) { console.error(e); }
 }
 
-// ==================== CARICA ARTICOLI ====================
 async function caricaArticoli() {
     if (!categoriaId) return;
-    
     try {
         const snapshot = await db.collection('web_articoli')
             .where('categoriaId', '==', categoriaId)
@@ -626,39 +703,103 @@ async function caricaArticoli() {
     }
 }
 
+// ==================== SALVA ORDINE ====================
+async function salvaOrdineFamiglie(nuovoOrdine) {
+    for (let i = 0; i < nuovoOrdine.length; i++) {
+        const famigliaId = nuovoOrdine[i];
+        await db.collection('web_famiglie').doc(famigliaId).update({ ordine: i });
+    }
+    showToast("✅ Ordine famiglie salvato!");
+    await caricaFamiglie();
+    visualizzaArticoli();
+}
+
+async function salvaOrdineSenzaFamiglia(nuovoOrdine) {
+    for (let i = 0; i < nuovoOrdine.length; i++) {
+        const articoloId = nuovoOrdine[i];
+        await db.collection('web_articoli').doc(articoloId).update({ ordine: i });
+    }
+    showToast("✅ Ordine articoli salvato!");
+    await caricaArticoli();
+}
+
+// ==================== SPOSTA ARTICOLO SENZA FAMIGLIA CON FRECCIA ====================
+async function spostaArticolo(articoloId, direzione) {
+    const articoliSenza = articoli.filter(a => !a.famigliaId || a.famigliaId === '');
+    const index = articoliSenza.findIndex(a => a.id === articoloId);
+    if (index === -1) return;
+    
+    const nuovoIndex = direzione === 'su' ? index - 1 : index + 1;
+    if (nuovoIndex < 0 || nuovoIndex >= articoliSenza.length) return;
+    
+    const nuovoOrdine = [...articoliSenza];
+    [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]];
+    
+    for (let i = 0; i < nuovoOrdine.length; i++) {
+        await db.collection('web_articoli').doc(nuovoOrdine[i].id).update({ ordine: i });
+    }
+    showToast("✅ Articolo spostato!");
+    await caricaArticoli();
+}
+
+// ==================== SPOSTA FAMIGLIA CON FRECCIA ====================
+async function spostaFamiglia(famigliaId, direzione) {
+    const index = famiglie.findIndex(f => f.id === famigliaId);
+    if (index === -1) return;
+    
+    const nuovoIndex = direzione === 'su' ? index - 1 : index + 1;
+    if (nuovoIndex < 0 || nuovoIndex >= famiglie.length) return;
+    
+    const nuovoOrdine = [...famiglie];
+    [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]];
+    
+    for (let i = 0; i < nuovoOrdine.length; i++) {
+        await db.collection('web_famiglie').doc(nuovoOrdine[i].id).update({ ordine: i });
+    }
+    showToast("✅ Famiglia spostata!");
+    await caricaFamiglie();
+    visualizzaArticoli();
+}
+
+// ==================== VISUALIZZA ARTICOLI ====================
 function visualizzaArticoli() {
-    const container = document.getElementById('articoliContainer');
+    const famiglieContainer = document.getElementById('famiglieContainer');
+    const senzaFamigliaContainer = document.getElementById('senzaFamigliaContainer');
     
     const articoliConFamiglia = articoli.filter(a => a.famigliaId && a.famigliaId !== '');
-    const articoliSenzaFamiglia = articoli.filter(a => !a.famigliaId || a.famigliaId === '');
+    const articoliSenzaFamiglia = articoli.filter(a => !a.famigliaId || a.famigliaId === '')
+        .sort((a,b) => (a.ordine || 0) - (b.ordine || 0));
     
-    let html = '';
-    
+    // Visualizza famiglie
+    let famiglieHtml = '';
     for (const famiglia of famiglie) {
         const articoliFamiglia = articoliConFamiglia.filter(a => a.famigliaId === famiglia.id);
-        if (articoliFamiglia.length === 0 && !isAdminMode) continue;
         
-        html += `
-            <div class="famiglia-container" data-famiglia-id="${famiglia.id}">
+        famiglieHtml += `
+            <div class="famiglia-container" data-id="${famiglia.id}">
                 <div class="famiglia-titolo">
                     <div>
                         <h3>📁 ${escapeHtml(famiglia.nome)}</h3>
                         ${famiglia.descrizione ? `<div class="famiglia-descrizione">${escapeHtml(famiglia.descrizione)}</div>` : ''}
                     </div>
                     ${isAdminMode ? `
-                        <div class="famiglia-card-buttons">
-                            <button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')" style="background:#3498db;">✏️</button>
-                            <button class="card-btn" onclick="eliminaFamiglia('${famiglia.id}')" style="background:#e74c3c;">🗑</button>
+                        <div class="famiglia-buttons">
+                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'su')" ${famiglie.indexOf(famiglia) === 0 ? 'disabled style="opacity:0.5"' : ''}>⬆️</button>
+                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'giu')" ${famiglie.indexOf(famiglia) === famiglie.length-1 ? 'disabled style="opacity:0.5"' : ''}>⬇️</button>
+                            <button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')">✏️</button>
+                            <button class="card-btn" onclick="eliminaFamiglia('${famiglia.id}')">🗑</button>
                         </div>
                     ` : ''}
                 </div>
                 <div class="articoli-grid">
                     ${articoliFamiglia.map(art => `
-                        <div class="articolo-card" data-id="${art.id}">
-                            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
-                                <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')">✏️</button>
-                                <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')">🗑</button>
-                            </div>
+                        <div class="articolo-card">
+                            ${isAdminMode ? `
+                                <div style="position:absolute; top:5px; right:5px; display:flex; gap:3px;">
+                                    <button class="card-btn edit" onclick="modificaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">✏️</button>
+                                    <button class="card-btn" onclick="eliminaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">🗑</button>
+                                </div>
+                            ` : ''}
                             <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
                             <div class="articolo-info">
                                 <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
@@ -670,20 +811,27 @@ function visualizzaArticoli() {
             </div>
         `;
     }
+    famiglieContainer.innerHTML = famiglieHtml;
     
+    // Visualizza articoli senza famiglia
+    let senzaFamigliaHtml = '';
     if (articoliSenzaFamiglia.length > 0) {
-        html += `
-            <div class="famiglia-container">
-                <div class="famiglia-titolo">
+        senzaFamigliaHtml = `
+            <div class="senza-famiglia-container" id="senzaFamigliaList">
+                <div class="senza-famiglia-titolo">
                     <h3>📦 SENZA FAMIGLIA</h3>
                 </div>
-                <div class="articoli-grid">
-                    ${articoliSenzaFamiglia.map(art => `
-                        <div class="articolo-card" data-id="${art.id}">
-                            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
-                                <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')">✏️</button>
-                                <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')">🗑</button>
-                            </div>
+                <div class="senza-famiglia-grid" id="senzaFamigliaGrid">
+                    ${articoliSenzaFamiglia.map((art, idx) => `
+                        <div class="senza-famiglia-item" data-id="${art.id}">
+                            ${isAdminMode ? `
+                                <div style="position:absolute; top:5px; right:5px; display:flex; gap:3px; z-index:10;">
+                                    <button class="btn-move-article" onclick="event.stopPropagation(); spostaArticolo('${art.id}', 'su')" ${idx === 0 ? 'disabled style="opacity:0.5"' : ''}>⬆️</button>
+                                    <button class="btn-move-article" onclick="event.stopPropagation(); spostaArticolo('${art.id}', 'giu')" ${idx === articoliSenzaFamiglia.length-1 ? 'disabled style="opacity:0.5"' : ''}>⬇️</button>
+                                    <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">✏️</button>
+                                    <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">🗑</button>
+                                </div>
+                            ` : ''}
                             <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
                             <div class="articolo-info">
                                 <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
@@ -695,15 +843,50 @@ function visualizzaArticoli() {
             </div>
         `;
     }
+    senzaFamigliaContainer.innerHTML = senzaFamigliaHtml;
     
-    if (articoli.length === 0 && famiglie.length === 0) {
-        html = '<div style="text-align: center; padding: 50px;">📭 Nessun articolo presente. ' + (isAdminMode ? 'Clicca su "NUOVO ARTICOLO" per aggiungerne uno.' : '') + '</div>';
+    // Attiva Sortable solo su PC e in modalità admin
+    if (isAdminMode && !isMobile) {
+        // Sortable per famiglie
+        const famiglieElement = document.getElementById('famiglieContainer');
+        if (famiglieElement && !sortableFamiglie) {
+            sortableFamiglie = new Sortable(famiglieElement, {
+                animation: 300,
+                handle: '.famiglia-titolo',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: async function() {
+                    const nuoviOrdini = Array.from(famiglieElement.querySelectorAll('.famiglia-container'))
+                        .map(el => el.dataset.id);
+                    await salvaOrdineFamiglie(nuoviOrdini);
+                }
+            });
+        }
+        
+        // Sortable per articoli senza famiglia (solo su PC)
+        const senzaFamigliaGrid = document.getElementById('senzaFamigliaGrid');
+        if (senzaFamigliaGrid && !sortableSenzaFamiglia) {
+            sortableSenzaFamiglia = new Sortable(senzaFamigliaGrid, {
+                animation: 300,
+                handle: '.senza-famiglia-item',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: async function() {
+                    const nuoviOrdini = Array.from(senzaFamigliaGrid.querySelectorAll('.senza-famiglia-item'))
+                        .map(el => el.dataset.id);
+                    await salvaOrdineSenzaFamiglia(nuoviOrdini);
+                }
+            });
+        }
+    } else {
+        if (sortableFamiglie) sortableFamiglie.destroy();
+        if (sortableSenzaFamiglia) sortableSenzaFamiglia.destroy();
+        sortableFamiglie = null;
+        sortableSenzaFamiglia = null;
     }
-    
-    container.innerHTML = html;
 }
 
-// ==================== MODALE FAMIGLIA ====================
+// ==================== MODALI ====================
 function mostraModaleFamiglia(famiglia = null) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -736,14 +919,10 @@ function mostraModaleFamiglia(famiglia = null) {
         
         try {
             if (famiglia) {
-                await db.collection('web_famiglie').doc(famiglia.id).update({
-                    nome, descrizione, ordine
-                });
+                await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, ordine });
                 showToast("✅ Famiglia modificata!");
             } else {
-                await db.collection('web_famiglie').add({
-                    categoriaId, nome, descrizione, ordine
-                });
+                await db.collection('web_famiglie').add({ categoriaId, nome, descrizione, ordine });
                 showToast("✅ Famiglia aggiunta!");
             }
             await caricaArticoli();
@@ -763,7 +942,6 @@ async function modificaFamiglia(id) {
 
 async function eliminaFamiglia(id) {
     if (!confirm("⚠️ Sei sicuro di voler eliminare questa famiglia?\n\nGli articoli rimarranno senza famiglia!")) return;
-    
     try {
         const articoliFamiglia = articoli.filter(a => a.famigliaId === id);
         for (const art of articoliFamiglia) {
@@ -778,7 +956,6 @@ async function eliminaFamiglia(id) {
     }
 }
 
-// ==================== MODALE ARTICOLO ====================
 function mostraModaleArticolo(articolo = null) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -795,10 +972,10 @@ function mostraModaleArticolo(articolo = null) {
                 ${famiglie.map(f => `<option value="${f.id}" ${articolo && articolo.famigliaId === f.id ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
             </select>
             <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
+            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
             <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
             <div class="info-imgur">
-                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
+                📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto (.jpg)
             </div>
             <div class="modal-buttons">
                 <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
@@ -820,7 +997,6 @@ function mostraModaleArticolo(articolo = null) {
             anteprimaImg.style.display = 'none';
         }
     }
-    
     fotoUrlInput.addEventListener('input', aggiornaAnteprima);
     aggiornaAnteprima();
     
@@ -830,38 +1006,30 @@ function mostraModaleArticolo(articolo = null) {
         const famigliaId = document.getElementById('artFamiglia').value;
         const fotoUrl = document.getElementById('artFotoUrl').value.trim();
         
-        if (!codice) {
-            showToast("Inserisci il codice articolo", true);
-            return;
-        }
-        if (!descrizione) {
-            showToast("Inserisci la descrizione", true);
+        if (!codice || !descrizione) {
+            showToast("Compila codice e descrizione", true);
             return;
         }
         
         try {
             if (articolo) {
                 await db.collection('web_articoli').doc(articolo.id).update({
-                    codice, descrizione, famigliaId, fotoUrl,
-                    ultimoAggiornamento: new Date().toISOString()
+                    codice, descrizione, famigliaId, fotoUrl
                 });
                 showToast("✅ Articolo modificato!");
             } else {
                 await db.collection('web_articoli').add({
-                    categoriaId, codice, descrizione, famigliaId: famigliaId || '', fotoUrl: fotoUrl || '',
-                    creatoIl: new Date().toISOString()
+                    categoriaId, codice, descrizione, famigliaId: famigliaId || '', fotoUrl: fotoUrl || ''
                 });
                 showToast("✅ Articolo aggiunto!");
             }
-            
             await caricaArticoli();
             modal.remove();
         } catch(e) {
             console.error(e);
-            showToast("Errore salvataggio articolo", true);
+            showToast("Errore salvataggio", true);
         }
     };
-    
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 }
 
@@ -871,15 +1039,14 @@ async function modificaArticolo(id) {
 }
 
 async function eliminaArticolo(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questo articolo?\n\nOperazione IRREVERSIBILE!")) return;
-    
+    if (!confirm("⚠️ Eliminare questo articolo?")) return;
     try {
         await db.collection('web_articoli').doc(id).delete();
         showToast("✅ Articolo eliminato!");
         await caricaArticoli();
     } catch(e) {
         console.error(e);
-        showToast("Errore eliminazione articolo", true);
+        showToast("Errore eliminazione", true);
     }
 }
 
@@ -888,28 +1055,19 @@ document.getElementById('btnAdmin').onclick = () => {
     if (isAdminMode) disattivaModalitaAdmin();
     else mostraModalePassword();
 };
-
 document.getElementById('btnAggiungiArticolo').onclick = () => {
     if (isAdminMode) mostraModaleArticolo(null);
 };
-
 document.getElementById('btnAggiungiFamiglia').onclick = () => {
     if (isAdminMode) mostraModaleFamiglia(null);
 };
-
-document.getElementById('btnTornaHome').onclick = () => {
-    window.location.href = 'web.html';
-};
-
-document.getElementById('btnHome').onclick = () => {
-    window.location.href = 'web.html';
-};
+document.getElementById('btnTornaHome').onclick = () => window.location.href = 'web.html';
+document.getElementById('btnHome').onclick = () => window.location.href = 'web.html';
 
 // ==================== AVVIO ====================
+checkMobile();
 const savedAdminMode = localStorage.getItem('web_admin_mode');
-if (savedAdminMode === 'true') {
-    isAdminMode = true;
-}
+if (savedAdminMode === 'true') isAdminMode = true;
 
 Promise.all([caricaLinkDaFile(), caricaCategoria(), caricaArticoli()]).then(() => {
     aggiornaUIAdmin();
