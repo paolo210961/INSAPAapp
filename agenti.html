@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.56</title>
+    <title>inSAPA - Agenti vA.5.57</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.56 - Agenti (corruzione utente: asterisco solo dopo data, \s{2,})</div>
+<div class="version">vA.5.57 - Agenti (asterisco mirato + regex con \s+ e log finale)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -871,70 +871,54 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA (SOLO CORREZIONE UTENTE) ====================
+// ==================== PARSER SCA (modificato secondo richieste) ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
 
     const reCliente = /^CLIENTE:\s+(\d{6})\s+(.*?)\s+Saldo\s+([\d\.,\-]+)/;
-
-    // Gestisce anche date con asterisco attaccato:
-    // 31/01/2024*NOTA CREDITO
-    // 28/02/2026*R.D. n.11732...
-    const reScadenza =
-        /^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s{2,}(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)$/;
+    // Regex con \s+ (non \s{2,})
+    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.*?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
 
     for (let line of lines) {
-
+        // Asterisco → spazio (globale prima)
+        line = line.replace(/\*/g, ' ');
+        
+        // Se la data è seguita da * senza spazio (ora già sostituito, ma lo lasciamo per sicurezza)
+        line = line.replace(/^(\d{2}\/\d{2}\/\d{4})\*/, '$1 ');
+        
+        // eventuali altri asterischi (già fatta prima, ma ribadiamo)
+        line = line.replace(/\*/g, ' ');
+        
+        // Altri spazi anomali e BOM
         line = line.replace(/^\uFEFF/, '');
         line = line.replace(/\t/g, ' ');
-
-        // Se c'è l'asterisco subito dopo la data
-        line = line.replace(
-            /^(\d{2}\/\d{2}\/\d{4})\*/,
-            '$1 '
-        );
-
         line = line.trim();
-
+        
         if (line === "") continue;
-
+        
         if (line.startsWith("===") || line.startsWith("---")) continue;
         if (line.startsWith("Scadenza") || line.startsWith("VOSTRO DARE")) continue;
         if (line.startsWith("TOTALE") || line.startsWith("AGENTE:")) continue;
         if (line.startsWith("TUTTE") || line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
-
+        
         let mCliente = line.match(reCliente);
-
         if (mCliente) {
             let codice = mCliente[1];
             let ragione = mCliente[2].trim();
-
-            currentCliente = {
-                codice,
-                ragione,
-                scadenze: []
-            };
-
+            currentCliente = { codice, ragione, scadenze: [] };
             clienti.set(codice, currentCliente);
-
             console.log(`✅ CLIENTE: ${codice} - ${ragione}`);
-
             continue;
         }
-
+        
         if (currentCliente) {
-
             console.log("RIGA SCA:", line);
-
             let mScad = line.match(reScadenza);
-
             if (mScad) {
-
                 let importo = convertiImportoItaliano(mScad[5]);
-
                 currentCliente.scadenze.push({
                     scadenza: mScad[1],
                     descrizione: mScad[2].trim(),
@@ -942,24 +926,15 @@ function parseSCA(text) {
                     dataDoc: mScad[4],
                     importo: importo
                 });
-
-                console.log(
-                    `📅 ${mScad[1]} | ${mScad[2]} | Doc.${mScad[3]} | € ${importo.toFixed(2)}`
-                );
-
+                console.log(`📅 ${mScad[1]} | ${mScad[2]} | Doc.${mScad[3]} | € ${importo.toFixed(2)}`);
             } else {
-
                 console.warn("NO MATCH:", line);
-
             }
         }
     }
-
-    const result = Array.from(clienti.values())
-        .filter(c => c.scadenze.length > 0);
-
-    console.log(`📊 TOTALE clienti con scadenze: ${result.length}`);
-
+    
+    const result = Array.from(clienti.values()).filter(c => c.scadenze.length > 0);
+    console.log("CLIENTI SCA TROVATI:", result);
     return result;
 }
 
