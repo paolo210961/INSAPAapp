@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.52</title>
+    <title>inSAPA - Contabilità vC.5.53</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -230,7 +230,7 @@
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
 
-        /* main e sidebar */
+        /* main e sidebar: ora senza position sticky e senza comportamento mobile toggle */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         .sidebar {
             width: 380px;
@@ -238,9 +238,8 @@
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 200px;
             height: fit-content;
+            /* rimosso position: sticky e top */
         }
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .form-row .form-group { flex: 1; margin-bottom: 0; }
@@ -295,14 +294,17 @@
             .sticky-toolbar::-webkit-scrollbar { display: none; }
             .toolbar-btn { flex-shrink: 0; font-size: 0.7rem; padding: 10px 14px; white-space: nowrap; }
             .main-container { flex-direction: column; }
-            .sidebar { width: 100%; margin-bottom: 15px; padding: 15px; position: relative; max-height: 60px; overflow: hidden; transition: max-height 0.3s ease; cursor: pointer; border-bottom: 2px solid #3498db; }
-            .sidebar:before { content: "☰ MENU FILTRI ▼"; display: block; font-weight: bold; color: #3498db; margin-bottom: 10px; font-size: 1rem; }
-            .sidebar.open { max-height: 600px; overflow-y: auto; }
-            .sidebar.open:before { content: "☰ MENU FILTRI ▲"; }
+            /* Sidebar mobile: sempre visibile, senza comportamenti di toggle */
+            .sidebar {
+                width: 100%;
+                margin-bottom: 15px;
+                padding: 15px;
+                position: relative;
+                /* niente max-height, niente overflow hidden, niente pseudo-elemento */
+            }
             .form-row { flex-direction: column; gap: 10px; }
             .tabella { font-size: 0.7rem; min-width: 500px; }
             .logo-tooltip { display: none; }
-            .sidebar { position: relative; top: 0; }
         }
     </style>
 </head>
@@ -414,7 +416,7 @@
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></td></thead>
                         <tbody id="assClientiBody"></tbody>
                     </table>
                     <div id="assClientiActionButtons" class="action-buttons">
@@ -553,29 +555,27 @@ function setupImportField(fieldId) {
     }
 }
 
-// ==================== NUOVA FUNZIONE: SPOSTA RIGA SE DATA IN ALTRO MESE ====================
+// ==================== SPOSTA RIGA SE DATA IN ALTRO MESE ====================
 async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
-    // dataYMD è stringa "YYYY-MM-DD"
     if (!dataYMD) return false;
     const [annoStr, meseStr] = dataYMD.split('-');
     const annoDest = parseInt(annoStr);
     const meseDest = parseInt(meseStr) - 1; // 0-index
     if (isNaN(annoDest) || isNaN(meseDest)) return false;
-    if (annoDest === currentYear && meseDest === currentMonth) return false; // stesso mese, nulla da fare
+    if (annoDest === currentYear && meseDest === currentMonth) return false;
 
-    // Mese di destinazione diverso: spostiamo la riga
-    // 1. Recupera o crea il documento target
+    // Sposta
     const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
     const docSnap = await docRef.get();
     let targetData = {};
     if (docSnap.exists) {
         targetData = docSnap.data();
     } else {
-        // Crea nuovo documento vuoto per il mese di destinazione
+        const saldoPrec = await caricaSaldoMesePrecedente(annoDest, meseDest);
         targetData = {
             anno: annoDest,
             mese: meseDest,
-            saldoIniziale: 0,
+            saldoIniziale: saldoPrec,
             primaNota: [],
             contanti: [],
             fattureFornitori: [],
@@ -584,12 +584,8 @@ async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
             nextFatturaId: 1,
             ultimoAggiornamento: new Date().toISOString()
         };
-        // Calcola saldo iniziale dal mese precedente (se esiste)
-        let saldoPrec = await caricaSaldoMesePrecedente(annoDest, meseDest);
-        targetData.saldoIniziale = saldoPrec;
     }
 
-    // 2. Aggiungi la riga al target
     if (tipo === 'primanota') {
         targetData.primaNota = targetData.primaNota || [];
         targetData.primaNota.push(riga);
@@ -607,12 +603,9 @@ async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
         targetData.pagaDdt.push(riga);
     }
 
-    // 3. Salva il target
     await docRef.set(targetData);
 
-    // 4. Rimuovi la riga dall'array corrente (se presente)
-    //    Attenzione: la riga potrebbe essere già stata aggiunta all'array corrente (se la funzione viene chiamata dopo l'inserimento).
-    //    Dobbiamo rimuoverla dall'array corrente per evitare duplicati.
+    // Rimuovi dall'array corrente
     if (tipo === 'primanota') {
         const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
         if (idx !== -1) primaNota.splice(idx, 1);
@@ -630,15 +623,12 @@ async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
         if (idx !== -1) pagaDdt.splice(idx, 1);
     }
 
-    // 5. Salva il mese corrente (dopo la rimozione)
     await salvaStatoFirebase();
 
-    // 6. Cambia il mese corrente e ricarica i dati
     currentYear = annoDest;
     currentMonth = meseDest;
-    await caricaStatoFirebase(); // ricarica il nuovo mese
-    await popolaAnniMeseDinamici(); // aggiorna dropdown
-    // Forza la selezione dei dropdown sui nuovi valori
+    await caricaStatoFirebase();
+    await popolaAnniMeseDinamici();
     document.getElementById('annoSelect').value = currentYear;
     document.getElementById('meseSelect').value = currentMonth;
     aggiornaTabelle();
@@ -715,7 +705,7 @@ async function popolaAnniMeseDinamici() {
     try {
         const snapshot = await db.collection('contabilita').get();
         const anniSet = new Set();
-        const mesiMap = new Map(); // key: anno, value: Set di mesi
+        const mesiMap = new Map();
         snapshot.forEach(doc => {
             const data = doc.data();
             const anno = data.anno;
@@ -731,21 +721,17 @@ async function popolaAnniMeseDinamici() {
         for (let [anno, mesiSet] of mesiMap.entries()) {
             mesiDisponibiliPerAnno[anno] = Array.from(mesiSet).sort((a,b)=>a-b);
         }
-        // Se non ci sono anni, creiamo il mese corrente automaticamente
         if (anniDisponibili.length === 0) {
             const now = new Date();
             const annoCorrente = now.getFullYear();
             const meseCorrente = now.getMonth();
-            // Creiamo il documento vuoto per evitare loop
             await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).set({
                 anno: annoCorrente, mese: meseCorrente, saldoIniziale: 0,
                 primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
                 nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
             });
-            // Ora rileggi
-            return popolaAnniMeseDinamici(); // richiama ricorsivamente
+            return popolaAnniMeseDinamici();
         }
-        // Aggiorna select anno
         const annoSelect = document.getElementById('annoSelect');
         const oldAnno = annoSelect.value ? parseInt(annoSelect.value) : currentYear;
         annoSelect.innerHTML = '';
@@ -756,7 +742,6 @@ async function popolaAnniMeseDinamici() {
             if (a === oldAnno) opt.selected = true;
             annoSelect.appendChild(opt);
         }
-        // Aggiorna select mese in base all'anno selezionato
         const annoSelezionato = parseInt(annoSelect.value);
         const mesiDisponibili = mesiDisponibiliPerAnno[annoSelezionato] || [];
         const meseSelect = document.getElementById('meseSelect');
@@ -769,7 +754,6 @@ async function popolaAnniMeseDinamici() {
             if (m === oldMese) opt.selected = true;
             meseSelect.appendChild(opt);
         }
-        // Se il mese selezionato non è più valido, prendi il primo disponibile
         if (meseSelect.options.length === 0 && mesiDisponibili.length > 0) {
             const primoMese = mesiDisponibili[0];
             const opt = document.createElement('option');
@@ -777,7 +761,6 @@ async function popolaAnniMeseDinamici() {
             opt.textContent = mesiLista[primoMese];
             meseSelect.appendChild(opt);
         }
-        // Sincronizza currentYear, currentMonth con i valori selezionati
         const nuovoAnno = parseInt(annoSelect.value);
         const nuovoMese = parseInt(meseSelect.value);
         if (nuovoAnno !== currentYear || nuovoMese !== currentMonth) {
@@ -849,7 +832,6 @@ async function cancellaMeseCorrente() {
             currentMonth = parseInt(meseSelect.value);
             await caricaStatoFirebase();
         } else {
-            // Nessun dato: crea mese corrente
             const now = new Date();
             currentYear = now.getFullYear();
             currentMonth = now.getMonth();
@@ -1160,7 +1142,7 @@ function pulisciForm() {
     }
 }
 
-// MODIFICATA: ora chiama spostaRigaSeNecessario
+// ==================== AGGIUNTA E MODIFICA RIGHE CON SPOSTAMENTO ====================
 async function memorizzaNuovo() {
     if (currentScheda === 'primanota') {
         const data = document.getElementById('formDataPrimaNota')?.value;
@@ -1171,18 +1153,14 @@ async function memorizzaNuovo() {
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
         const nuovaRiga = { data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
-        // Prova a spostare subito: se la data è in altro mese, viene spostata e l'utente cambia mese
         const spostato = await spostaRigaSeNecessario(nuovaRiga, 'primanota', data);
         if (!spostato) {
-            // stesso mese: aggiungi normalmente
             primaNota.push(nuovaRiga);
             await salvaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
             showToast("✅ Riga aggiunta!");
         } else {
-            // la riga è già stata spostata e il contesto è cambiato (nuovo mese)
-            // Ricarichiamo tutto per sicurezza
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1237,7 +1215,6 @@ async function memorizzaNuovo() {
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
-        // Per ASS clienti la data di riferimento per lo spostamento è dataDoc (se presente) altrimenti dataIns
         const dataRif = dataDoc || getTodayDate();
         const spostato = await spostaRigaSeNecessario(nuovaRiga, 'assclienti', dataRif);
         if (!spostato) {
@@ -1462,7 +1439,6 @@ async function eliminaSelezionati(tipo) {
     await salvaStatoFirebase(); aggiornaTabelle(); showToast("Elementi eliminati");
 }
 
-// MODIFICATA: salva modifiche e poi controlla se la data modificata comporta spostamento
 async function salvaModificheSelezionate(tipo) {
     const checks = document.querySelectorAll(`#${getBodyId(tipo)} .row-check-${getClassPrefix(tipo)}:checked`);
     for (let i = 0; i < checks.length; i++) {
@@ -1472,14 +1448,12 @@ async function salvaModificheSelezionate(tipo) {
 }
 
 async function saveEditedRowWithMove(tipo, idx) {
-    let oldRiga = null;
     let newRiga = null;
     let dataRif = null;
 
     if (tipo === 'primanota') {
         const row = document.querySelector(`#primaNotaBody tr:nth-child(${idx+1})`);
         if (row) {
-            oldRiga = primaNota[idx];
             const newData = row.querySelector('.edit-data')?.value;
             const newDescrizione = row.querySelector('.edit-descrizione')?.value;
             const newAvere = parseNumber(row.querySelector('.edit-avere')?.value);
@@ -1492,7 +1466,6 @@ async function saveEditedRowWithMove(tipo, idx) {
     } else if (tipo === 'assclienti') {
         const row = document.querySelector(`#assClientiBody tr:nth-child(${idx+1})`);
         if (row) {
-            oldRiga = assClienti[idx];
             const newDataIns = row.querySelector('.edit-dataIns')?.value || getTodayDate();
             const newDescrizione = row.querySelector('.edit-descrizione')?.value || '';
             const newNome = row.querySelector('.edit-nome')?.value || '';
@@ -1505,7 +1478,6 @@ async function saveEditedRowWithMove(tipo, idx) {
     } else if (tipo === 'pagaddt') {
         const row = document.querySelector(`#pagaDdtBody tr:nth-child(${idx+1})`);
         if (row) {
-            oldRiga = pagaDdt[idx];
             const newNome = row.querySelector('.edit-nome')?.value || '';
             const newNumDoc = row.querySelector('.edit-numDoc')?.value || '';
             const newData = row.querySelector('.edit-data')?.value ? formatDate(row.querySelector('.edit-data')?.value) : '';
@@ -1514,17 +1486,13 @@ async function saveEditedRowWithMove(tipo, idx) {
             dataRif = newData;
         }
     } else {
-        // Per contanti e fornitori non gestiamo spostamento? (non hanno data? In realtà sì, ma per semplicità li lascio invariati)
-        // Se vuoi gestirli basta aggiungere la logica simile.
         return;
     }
 
     if (!newRiga) return;
 
-    // Verifica se la data è cambiata rispetto al mese corrente
     const spostato = await spostaRigaSeNecessario(newRiga, tipo, dataRif);
     if (!spostato) {
-        // stesso mese: aggiorna l'array locale
         if (tipo === 'primanota') primaNota[idx] = newRiga;
         else if (tipo === 'assclienti') assClienti[idx] = newRiga;
         else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
@@ -1532,21 +1500,16 @@ async function saveEditedRowWithMove(tipo, idx) {
         aggiornaTabelle();
         showToast("✅ Modifiche salvate!");
     } else {
-        // la riga è stata spostata, quindi viene rimossa dal mese corrente e l'utente è già stato portato al nuovo mese
-        // Ricarichiamo tutto
         await caricaStatoFirebase();
         aggiornaTabelle();
         showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
     }
 }
 
-// Manteniamo la vecchia saveEditedRow per compatibilità (non usata direttamente)
-function saveEditedRow(tipo, idx) { saveEditedRowWithMove(tipo, idx); }
-
 function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
 function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
 
-// ==================== HAMBURGER MENU & SIDEBAR MOBILE ====================
+// ==================== HAMBURGER MENU ====================
 const hamburgerBtn2 = document.getElementById('hamburgerBtn');
 const navGrid2 = document.getElementById('navGrid');
 if (hamburgerBtn2 && navGrid2) {
@@ -1554,10 +1517,7 @@ if (hamburgerBtn2 && navGrid2) {
     document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) { navGrid2.classList.remove('open'); } });
 }
 
-const sidebarElem = document.getElementById('sidebarContabilita');
-if (sidebarElem) {
-    sidebarElem.addEventListener('click', function(e) { if (window.innerWidth <= 768 && e.target === this) { this.classList.toggle('open'); } });
-}
+// Non c'è più il toggle per la sidebar (rimosso)
 
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) {
