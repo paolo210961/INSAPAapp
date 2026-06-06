@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.60</title>
+    <title>inSAPA - Agenti vA.5.61</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.60 - Parser SCA robusto (split su Euro)</div>
+<div class="version">vA.5.61 - Parser SCA definitivo (pulizia totale, normalizzazione codice)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -683,7 +683,7 @@ function parseORD(text) {
         let firstCoppiaStart = coppie[0].start;
         let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
         let tokens = descrizioneRaw.split(/\s+/);
-        let codice = parseInt(tokens[0], 10).toString();   // normalizza codice articolo
+        let codice = parseInt(tokens[0], 10).toString();
         let descrizione = tokens.slice(1).join(" ");
         
         let lastCoppiaEnd = coppie[coppie.length-1].end;
@@ -698,49 +698,59 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA ROBUSTO (split su Euro) ====================
+// ==================== PARSER SCA DEFINITIVO ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
 
-    const reCliente = /^CLIENTE:\s+(\d{6})\s+(.*?)\s+Saldo\s+([\d\.,\-]+)/;
+    // Regex cliente robusta (accetta qualsiasi numero di cifre, anche con segno meno nel saldo)
+    const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+(-?[\d\.,]+)/;
 
     for (let line of lines) {
-        // Pulizia riga
-        line = line.replace(/^\uFEFF/, '');
-        line = line.replace(/\f/g, ' ');
-        line = line.replace(/\t/g, ' ');
-        line = line.replace(/^(\d{2}\/\d{2}\/\d{4})\*/, '$1 ');
-        line = line.trim();
-        if (line === "") continue;
+        // 1. PULIZIA AGGRESSIVA PRIMA DI TUTTO
+        line = line
+            .replace(/\uFEFF/g, '')
+            .replace(/\f/g, ' ')
+            .replace(/\t/g, ' ')
+            .replace(/\*/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
 
-        // Salta intestazioni
-        if (line.startsWith("===") || line.startsWith("---")) continue;
-        if (line.startsWith("Scadenza") || line.startsWith("VOSTRO DARE")) continue;
-        if (line.startsWith("TOTALE") || line.startsWith("AGENTE:")) continue;
-        if (line.startsWith("TUTTE") || line.startsWith("inSAPA")) continue;
+        if (!line) continue;
+
+        // 2. FILTRI ROBUSTI
+        if (/^=+/.test(line)) continue;
+        if (/^-+/.test(line)) continue;
+        if (line.startsWith("Scadenza")) continue;
+        if (line.startsWith("VOSTRO DARE")) continue;
+        if (line.startsWith("TOTALE")) continue;
+        if (line.startsWith("AGENTE:")) continue;
+        if (line.startsWith("TUTTE")) continue;
+        if (line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
 
-        // Cliente
+        // DEBUG: stampa la linea prima di analizzarla
+        // console.log("LINE:", line);
+
+        // RICERCA CLIENTE
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            let codice = mCliente[1];
+            // Normalizzazione immediata del codice
+            let codiceRaw = mCliente[1];
+            let codice = parseInt(codiceRaw, 10).toString();
             let ragione = mCliente[2].trim();
             currentCliente = { codice, ragione, scadenze: [] };
             clienti.set(codice, currentCliente);
-            console.log(`✅ CLIENTE: ${codice} - ${ragione}`);
+            console.log("✅ CLIENTE TROVATO:", codice, ragione);
             continue;
         }
 
-        // Scadenza: metodo split robusto
+        // RICERCA SCADENZA (metodo split su "Euro")
         if (currentCliente) {
             let parts = line.split(/\s+/);
             let euroIndex = parts.findIndex(p => p.toLowerCase() === "euro");
-            if (euroIndex === -1) {
-                console.warn("NO EURO:", line);
-                continue;
-            }
+            if (euroIndex === -1) continue;
 
             let importoStr = parts[euroIndex + 1];
             let dataDoc = parts[euroIndex - 2];
@@ -763,7 +773,7 @@ function parseSCA(text) {
     }
 
     const result = Array.from(clienti.values());
-    console.log("CLIENTI SCA (tutti):", result.map(c => c.codice + " " + c.ragione));
+    console.log("CLIENTI SCA TOTALI:", result.length);
     return result;
 }
 
@@ -781,7 +791,7 @@ function inviaScadenzeWhatsApp(cliente) {
 }
 function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
-// ==================== GESTIONE CLIENTI (normalizzazione codici) ====================
+// ==================== GESTIONE CLIENTI ====================
 function aggiornaClienti() {
     let mappa = new Map();
     
@@ -797,8 +807,8 @@ function aggiornaClienti() {
     }
     
     for (let c of datiSca) {
-        let codiceNormalizzato = parseInt(c.codice, 10).toString();
-        let match = mappa.get(codiceNormalizzato) || mappa.get(c.codice);
+        let codiceNormalizzato = c.codice.toString();
+        let match = mappa.get(codiceNormalizzato);
         if (match) {
             match.hasScadenze = true;
             match.scadenze = c.scadenze;
