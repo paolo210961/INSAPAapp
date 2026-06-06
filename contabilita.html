@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.49</title>
+    <title>inSAPA - Contabilità vC.5.50</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -62,7 +62,6 @@
         }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
 
-        /* RIEPILOGO A DESTRA */
         .summary-header {
             display: flex;
             gap: 30px;
@@ -79,7 +78,6 @@
         .positive { color: #27ae60; }
         .negative { color: #e74c3c; }
 
-        /* FLOPPY A SINISTRA */
         .floppy-container {
             position: relative;
             display: flex;
@@ -132,7 +130,6 @@
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #f1c40f; color: #000000; }
 
-        /* SECONDA RIGA: nav + filtri (invariato) */
         .header-row-bottom {
             display: flex;
             justify-content: space-between;
@@ -311,7 +308,6 @@
 <body>
 <div id="appContainer">
     <div class="header">
-        <!-- PRIMA RIGA: LOGO | FLOPPY (SINISTRA) e RIEPILOGO (DESTRA) -->
         <div class="header-row-top">
             <div class="logo-area">
                 <div id="logoRettangolo" class="logo-rettangolo">
@@ -332,7 +328,6 @@
             </div>
             <div id="summaryHeader" class="summary-header"></div>
         </div>
-        <!-- SECONDA RIGA: MENU NAVIGAZIONE | FILTRI ANNO/MESE/SALDO (invariato) -->
         <div class="header-row-bottom">
             <div class="nav-box">
                 <button id="hamburgerBtn" class="hamburger-btn">☰</button>
@@ -1012,14 +1007,51 @@ async function riprendiMeseCorrente() {
     }
 }
 
-// ==================== ESPORTAZIONI ====================
+// ==================== ESPORTAZIONI (con modifiche richieste) ====================
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-    const sal = saldoIniziale + ta - td;
+    const saldo = saldoIniziale;
+    const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center;border-bottom:2px solid #3498db;padding-bottom:20px;margin-bottom:30px}.title{font-size:24px;font-weight:bold;color:#2c3e50}.periodo{font-size:16px;color:#666;margin-top:5px}.summary{background:#ecf0f1;padding:15px;border-radius:8px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}.summary-item{text-align:center}.summary-value{font-size:20px;font-weight:bold}.positive{color:#27ae60}.negative{color:#e74c3c}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#3498db;color:white}.text-right{text-align:right}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}.signature{text-align:right;margin-top:30px;font-style:italic}@media print{body{padding:20px}}</style></head><body><div class="header"><div class="title">REPORT RAGIONIERE</div><div class="periodo">${mn} ${anno}</div></div><div class="summary"><div class="summary-item"><div>📈 Totale Avere (Entrate)</div><div class="summary-value positive">${formatNumber(ta)} €</div></div><div class="summary-item"><div>📉 Totale Dare (Uscite)</div><div class="summary-value negative">${formatNumber(td)} €</div></div><div class="summary-item"><div>💰 Saldo Mese</div><div class="summary-value ${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</div></div></div><h3>📋 PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><div class="footer">Documento generato da inSAPA - ${new Date().toLocaleDateString('it-IT')}</div><div class="signature">Il Ragioniere<br>_________________________</div><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>
+        body{font-family:'Segoe UI',sans-serif;padding:40px}
+        .header{text-align:center;border-bottom:2px solid #3498db;padding-bottom:20px;margin-bottom:30px}
+        .title{font-size:24px;font-weight:bold;color:#2c3e50}
+        .periodo{font-size:16px;color:#666;margin-top:5px}
+        .summary{background:#ecf0f1;padding:15px;border-radius:8px;display:flex;justify-content:space-around;margin-bottom:30px;flex-wrap:wrap}
+        .summary-item{text-align:center}
+        .summary-value{font-size:20px;font-weight:bold}
+        .positive{color:#27ae60}
+        .negative{color:#e74c3c}
+        .saldo-iniziale{color:#3498db;font-weight:bold}
+        table{width:100%;border-collapse:collapse;margin-top:20px}
+        th,td{border:1px solid #ddd;padding:8px;text-align:left}
+        th{background:#3498db;color:white}
+        .text-right{text-align:right}
+        .footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #ddd;font-size:11px;color:#999}
+        .signature{text-align:right;margin-top:30px;font-style:italic}
+        .total-row{background:#e9ecef;font-weight:bold}
+        @media print{body{padding:20px}}
+    </style></head><body>
+    <div class="header"><div class="title">REPORT RAGIONIERE</div><div class="periodo">${mn} ${anno}</div></div>
+    <div class="summary">
+        <div class="summary-item"><div>💰 Saldo Iniziale</div><div class="summary-value saldo-iniziale">${formatNumber(saldo)} €</div></div>
+        <div class="summary-item"><div>📈 Totale Avere (Entrate)</div><div class="summary-value positive">${formatNumber(ta)} €</div></div>
+        <div class="summary-item"><div>📉 Totale Dare (Uscite)</div><div class="summary-value negative">${formatNumber(td)} €</div></div>
+        <div class="summary-item"><div>💰 Saldo Finale</div><div class="summary-value ${saldoFinale>=0?'positive':'negative'}">${formatNumber(saldoFinale)} €</div></div>
+    </div>
+    <h3>📋 PRIMA NOTA</h3>
+    <table>
+        <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
+    </table>
+    <div class="footer">Documento generato da inSAPA - ${new Date().toLocaleDateString('it-IT')}</div>
+    <div class="signature">Il Ragioniere<br>_________________________</div>
+    <script>window.onload=()=>window.print()<\/script>
+    </body></html>`);
     w.document.close();
 }
 
@@ -1030,9 +1062,49 @@ function esportaPDFMese() {
     const tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const tAss = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const tPaga = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-    const sal = saldoIniziale + ta - td;
+    const saldo = saldoIniziale;
+    const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}<td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3></td><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3></table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3></table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>
+        body{font-family:'Segoe UI',sans-serif;padding:40px}
+        .header{text-align:center}
+        .title{font-size:28px;font-weight:bold}
+        .summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}
+        .positive{color:green}
+        .negative{color:red}
+        .saldo-iniziale{color:#3498db;font-weight:bold}
+        table{width:100%;border-collapse:collapse;margin:20px 0}
+        th,td{border:1px solid #ddd;padding:8px}
+        th{background:#3498db;color:white}
+        .text-right{text-align:right}
+        .total-row{background:#e9ecef;font-weight:bold}
+    </style></head><body>
+    <div class="header"><div class="title">Report ${mn} ${anno}</div></div>
+    <div class="summary">
+        <div>💰 Saldo Iniziale: <span class="saldo-iniziale">${formatNumber(saldo)} €</span></div>
+        <div>📈 Entrate: ${formatNumber(ta)} €</div>
+        <div>📉 Uscite: ${formatNumber(td)} €</div>
+        <div>💵 Contanti: ${formatNumber(tc)} €</div>
+        <div>💰 Saldo Finale: <span class="${saldoFinale>=0?'positive':'negative'}">${formatNumber(saldoFinale)} €</span></div>
+        <div>📋 ASS Clienti: ${formatNumber(tAss)} €</div>
+        <div>📋 Paga DDT: ${formatNumber(tPaga)} €</div>
+    </div>
+    <h3>PRIMA NOTA</h3>
+    <table>
+        <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
+    </table>
+    <h3>CONTANTI</h3>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <h3>FORNITORI</h3>
+    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table>
+    <h3>ASS_CONT_CLIENTI</h3>
+    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table>
+    <h3>PAGA_DDT_CLIENTI</h3>
+    <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <script>window.onload=()=>window.print()<\/script>
+    </body></html>`);
     w.document.close();
 }
 
@@ -1061,10 +1133,21 @@ async function esportaReportAnno() {
 }
 
 function esportaCSV(perAnno) {
-    let rows = [["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]], dataE = [];
+    let rows = [];
+    if (!perAnno) {
+        // CSV mensile: aggiunge riga Saldo iniziale e totali
+        rows.push(["SALDO INIZIALE", "", "", "", formatNumber(saldoIniziale).replace(/\./g,','), ""]);
+    }
+    rows.push(["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]);
+    let dataE = [];
     if (perAnno) { for (let m = 0; m < 12; m++) { let saved = localStorage.getItem(`contabilita_${currentYear}_${m}`); if (saved) { try { let d = JSON.parse(saved); for (let r of (d.primaNota || [])) dataE.push(r); for (let r of (d.contanti || [])) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' }); } catch(e) {} } } }
     else { for (let r of primaNota) dataE.push(r); for (let r of contanti) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' }); }
     for (let r of dataE) rows.push([r.data||'', r.descrizione||'', r.avere ? r.avere.toString().replace('.',',') : '', r.dare ? r.dare.toString().replace('.',',') : '', r.incassoContanti ? r.incassoContanti.toString().replace('.',',') : '', r.verificato ? "Sì" : "No"]);
+    if (!perAnno) {
+        let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        rows.push(["TOTALI", "", "", formatNumber(ta).replace(/\./g,','), formatNumber(td).replace(/\./g,','), ""]);
+    }
     let blob = new Blob(["\uFEFF" + rows.map(r => r.join(";")).join("\n")], { type: "text/csv;charset=utf-8" });
     let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
