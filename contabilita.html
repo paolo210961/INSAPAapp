@@ -597,6 +597,7 @@ async function caricaStatoFirebase() {
                 saldoIniziale = 0;
             }
             primaNota = []; contanti = []; fattureFornitori = []; assClienti = []; pagaDdt = []; nextFatturaId = 1;
+            // Salva il nuovo mese vuoto automaticamente
             await salvaStatoFirebase();
         }
         document.getElementById('saldoInizialeHeader').value = saldoIniziale ? formatNumber(saldoIniziale) : '';
@@ -689,28 +690,13 @@ async function cambiaMeseDaSelect() {
     
     currentYear = nuovoAnno;
     currentMonth = nuovoMese;
-    
-    const docRef = db.collection('contabilita').doc(`${currentYear}_${currentMonth}`);
-    const doc = await docRef.get();
-    if (!doc.exists) {
-        const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
-        saldoIniziale = saldoPrec;
-        primaNota = [];
-        contanti = [];
-        fattureFornitori = [];
-        assClienti = [];
-        pagaDdt = [];
-        nextFatturaId = 1;
-        await salvaStatoFirebase();
-        showToast(`📅 Mese ${mesiLista[currentMonth]} ${currentYear} creato con saldo iniziale ${formatNumber(saldoPrec)} €`);
-    }
-    
     await caricaStatoFirebase();
     aggiornaRiepilogoHeader();
     aggiornaTabelle();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
-    // ==================== GESTIONE TABELLE E SCHEDE ====================
+
+// ==================== GESTIONE TABELLE ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -975,7 +961,6 @@ function pulisciForm() {
 }
 
 async function memorizzaNuovo() {
-    // Verifica che il mese selezionato sia quello corrente
     const selectedAnno = parseInt(document.getElementById('annoSelect').value);
     const selectedMese = parseInt(document.getElementById('meseSelect').value);
     if (selectedAnno !== currentYear || selectedMese !== currentMonth) {
@@ -1096,7 +1081,7 @@ async function cancellaAnnoCorrente() {
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
 
-// ==================== ESPORTAZIONI (invariate) ====================
+// ==================== ESPORTAZIONI (completi) ====================
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
@@ -1134,13 +1119,111 @@ function esportaReportRagioniere() {
     <h3>📋 PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td>}</tbody>}</table>...`);}
-        // La funzione è troppo lunga per essere riportata qui, ma nel file originale è completa.
-        // Per brevità, mantengo la struttura invariata.
+        <tbody>${primaNota.map((r,i) => `<tr><td><input type="checkbox"></td><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
+    </table>
+    <div class="footer">Documento generato da inSAPA - ${new Date().toLocaleDateString('it-IT')}</div>
+    <div class="signature">Il Ragioniere<br>_________________________</div>
+    <script>window.onload=()=>window.print()<\/script>
+    </body></html>`);
     w.document.close();
 }
-// Le altre esportazioni (esportaPDFMese, esportaReportAnno, esportaCSV) sono identiche alla vC.5.51.
-// Per motivi di spazio non le riscrivo, ma nel file completo sono presenti.
+
+function esportaPDFMese() {
+    const mn = mesiLista[currentMonth]; const anno = currentYear;
+    const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    const tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    const tAss = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    const tPaga = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+    const saldo = saldoIniziale;
+    const saldoFinale = saldo + ta - td;
+    const w = window.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>
+        body{font-family:'Segoe UI',sans-serif;padding:40px}
+        .header{text-align:center}
+        .title{font-size:28px;font-weight:bold}
+        .summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}
+        .positive{color:green}
+        .negative{color:red}
+        .saldo-iniziale{color:#3498db;font-weight:bold}
+        table{width:100%;border-collapse:collapse;margin:20px 0}
+        th,td{border:1px solid #ddd;padding:8px}
+        th{background:#3498db;color:white}
+        .text-right{text-align:right}
+        .total-row{background:#e9ecef;font-weight:bold}
+    </style></head><body>
+    <div class="header"><div class="title">Report ${mn} ${anno}</div></div>
+    <div class="summary">
+        <div>💰 Saldo Iniziale: <span class="saldo-iniziale">${formatNumber(saldo)} €</span></div>
+        <div>📈 Entrate: ${formatNumber(ta)} €</div>
+        <div>📉 Uscite: ${formatNumber(td)} €</div>
+        <div>💵 Contanti: ${formatNumber(tc)} €</div>
+        <div>💰 Saldo Finale: <span class="${saldoFinale>=0?'positive':'negative'}">${formatNumber(saldoFinale)} €</span></div>
+        <div>📋 ASS Clienti: ${formatNumber(tAss)} €</div>
+        <div>📋 Paga DDT: ${formatNumber(tPaga)} €</div>
+    </div>
+    <h3>PRIMA NOTA</h3>
+    <table>
+        <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead>
+        <tbody>${primaNota.map((r,i) => `<tr><td><input type="checkbox"></td><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
+    </table>
+    <h3>CONTANTI</h3>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td><input type="checkbox"></td><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <h3>FORNITORI</h3>
+    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td><input type="checkbox"></td><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table>
+    <h3>ASS_CONT_CLIENTI</h3>
+    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table>
+    <h3>PAGA_DDT_CLIENTI</h3>
+    <tr><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <script>window.onload=()=>window.print()<\/script>
+    </body></html>`);
+    w.document.close();
+}
+
+async function esportaReportAnno() {
+    const anno = currentYear;
+    let totaliAnno = { entrate: 0, uscite: 0, contanti: 0, assClienti: 0, pagaDdt: 0 };
+    const w = window.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{background:#2c3e50;color:white;display:flex;justify-content:space-around;padding:20px;margin:20px 0;flex-wrap:wrap}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:6px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report Annuale ${anno}</div></div>`);
+    for (let m = 0; m < 12; m++) {
+        try {
+            const doc = await db.collection('contabilita').doc(`${anno}_${m}`).get();
+            if (doc.exists) {
+                const data = doc.data();
+                const ta = (data.primaNota || []).reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+                const td = (data.primaNota || []).reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+                const tc = (data.contanti || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+                const tAss = (data.assClienti || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+                const tPaga = (data.pagaDdt || []).reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+                totaliAnno.entrate += ta; totaliAnno.uscite += td; totaliAnno.contanti += tc; totaliAnno.assClienti += tAss; totaliAnno.pagaDdt += tPaga;
+                w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Entrate: ${formatNumber(ta)} € | Uscite: ${formatNumber(td)} € | Contanti: ${formatNumber(tc)} € | ASS Clienti: ${formatNumber(tAss)} € | Paga DDT: ${formatNumber(tPaga)} €</div>`);
+            } else { w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Nessun dato</div>`); }
+        } catch(e) { w.document.write(`<h3>${mesiLista[m]} ${anno}</h3><div>Errore caricamento</div>`); }
+    }
+    w.document.write(`<div class="summary"><div>📈 Totale Entrate: ${formatNumber(totaliAnno.entrate)} €</div><div>📉 Totale Uscite: ${formatNumber(totaliAnno.uscite)} €</div><div>💵 Contanti: ${formatNumber(totaliAnno.contanti)} €</div><div>📋 ASS Clienti: ${formatNumber(totaliAnno.assClienti)} €</div><div>📋 Paga DDT: ${formatNumber(totaliAnno.pagaDdt)} €</div><div>💰 Saldo: ${formatNumber(totaliAnno.entrate - totaliAnno.uscite)} €</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.close();
+}
+
+function esportaCSV(perAnno) {
+    let rows = [];
+    if (!perAnno) {
+        rows.push(["SALDO INIZIALE", "", "", "", formatNumber(saldoIniziale).replace(/\./g,','), ""]);
+    }
+    rows.push(["Data","Descrizione","Avere","Dare","IncassoContanti","Verificato"]);
+    let dataE = [];
+    if (perAnno) { for (let m = 0; m < 12; m++) { let saved = localStorage.getItem(`contabilita_${currentYear}_${m}`); if (saved) { try { let d = JSON.parse(saved); for (let r of (d.primaNota || [])) dataE.push(r); for (let r of (d.contanti || [])) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' }); } catch(e) {} } } }
+    else { for (let r of primaNota) dataE.push(r); for (let r of contanti) dataE.push({ data: r.data, descrizione: r.descrizione, avere: '', dare: '', incassoContanti: r.importo, verificato: '' }); }
+    for (let r of dataE) rows.push([r.data||'', r.descrizione||'', r.avere ? r.avere.toString().replace('.',',') : '', r.dare ? r.dare.toString().replace('.',',') : '', r.incassoContanti ? r.incassoContanti.toString().replace('.',',') : '', r.verificato ? "Sì" : "No"]);
+    if (!perAnno) {
+        let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        rows.push(["TOTALI", "", "", formatNumber(ta).replace(/\./g,','), formatNumber(td).replace(/\./g,','), ""]);
+    }
+    let blob = new Blob(["\uFEFF" + rows.map(r => r.join(";")).join("\n")], { type: "text/csv;charset=utf-8" });
+    let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
+}
 
 // ==================== EVENT LISTENER E AVVIO ====================
 document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => { document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
@@ -1211,7 +1294,6 @@ function saveEditedRow(tipo, idx) {
 function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
 function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
 
-// ==================== HAMBURGER MENU & SIDEBAR MOBILE ====================
 const hamburgerBtn2 = document.getElementById('hamburgerBtn');
 const navGrid2 = document.getElementById('navGrid');
 if (hamburgerBtn2 && navGrid2) {
@@ -1233,7 +1315,6 @@ window.addEventListener('beforeunload', (e) => {
     }
 });
 
-// ==================== PULSANTI PRINCIPALI ====================
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
@@ -1250,11 +1331,9 @@ document.getElementById('btnSalvaModificaAssClienti').onclick = () => salvaModif
 document.getElementById('btnEliminaSelezionatiAssClienti').onclick = () => eliminaSelezionati('assclienti');
 document.getElementById('btnSalvaModificaPagaDdt').onclick = () => salvaModificheSelezionate('pagaddt');
 document.getElementById('btnEliminaSelezionatiPagaDdt').onclick = () => eliminaSelezionati('pagaddt');
-
 document.getElementById('btnCancellaMese').onclick = cancellaMeseCorrente;
 document.getElementById('btnCancellaAnno').onclick = cancellaAnnoCorrente;
 
-// Gestione dropdown dinamici e cambio mese
 document.getElementById('annoSelect').onchange = async () => {
     aggiornaMeseSelectTuttiMesi();
     await cambiaMeseDaSelect();
@@ -1270,7 +1349,6 @@ document.getElementById('saldoInizialeHeader').onchange = async e => {
 };
 setupImportField('saldoInizialeHeader');
 
-// Logout e navigazione
 document.getElementById('btnVaiAgenti').onclick = async () => {
     if (modificheNonSalvate) {
         const ok = await mostraModaleConferma(`Hai modifiche non salvate nel mese corrente. Vuoi salvare prima di andare agli agenti?`);
@@ -1286,7 +1364,6 @@ document.getElementById('navLogout').onclick = async () => {
     window.location.href = 'index.html';
 };
 
-// Cambio password
 let changePwdVisible = false;
 document.getElementById('navChangePwd').onclick = () => { if (!changePwdVisible) { document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; } };
 document.getElementById('btnAnnullaPassword').onclick = () => { document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false; };
@@ -1301,7 +1378,6 @@ document.getElementById('btnSalvaPassword').onclick = () => {
     document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false;
 };
 
-// Floppy disk dropdown
 const floppyBtn2 = document.getElementById('floppyBtn');
 const dropdownMenu2 = document.getElementById('dropdownMenu');
 function toggleDropdown() { dropdownMenu2.classList.toggle('show'); }
@@ -1314,10 +1390,8 @@ document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown();
 document.getElementById('dropdownCSVMese').onclick = () => { closeDropdown(); esportaCSV(false); };
 document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); esportaCSV(true); };
 
-// Carica file JSON (rimasto per compatibilità)
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 
-// Avvio
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
     const annoSelect = document.getElementById('annoSelect');
