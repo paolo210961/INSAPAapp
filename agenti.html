@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.58</title>
+    <title>inSAPA - Agenti vA.5.59</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.58 - Debug SCA (filtro rimosso, gestione asterisco e form feed)</div>
+<div class="version">vA.5.59 - Fix normalizzazione codici cliente (ORD/SCA)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -521,10 +521,8 @@ let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
 
-// ==================== LINK E LOGO DA FILE ESTERNI ====================
-let linkPrincipale = "";
-let linkSecondario = "";
-
+// ==================== LINK E LOGO ====================
+let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -534,75 +532,26 @@ async function caricaLinkDaFile() {
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
         }
-    } catch(e) { console.warn("Errore caricamento link.html:", e); }
+    } catch(e) { console.warn("Errore link.html:", e); }
 }
-
-function apriLinkPrincipale() {
-    if (linkPrincipale && linkPrincipale !== "") {
-        window.open(linkPrincipale, '_blank');
-        showToast("🔗 Apertura link principale");
-    } else {
-        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
-    }
-}
-
-function apriLinkSecondario() {
-    if (linkSecondario && linkSecondario !== "") {
-        window.open(linkSecondario, '_blank');
-        showToast("🔗 Apertura link secondario");
-    } else {
-        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
-    }
-}
-
+function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("🔗 Link principale"); } else showToast("⚠️ Link principale non configurato", true); }
+function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("🔗 Link secondario"); } else showToast("⚠️ Link secondario non configurato", true); }
 function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    
-    fetch('icons/logo.jpg').then(r => {
-        if (r.ok) {
-            logoImg.src = 'icons/logo.jpg';
-            logoImg.style.display = 'block';
-            logoSpan.style.display = 'none';
-        } else {
-            fetch('icons/logo.png').then(r2 => {
-                if (r2.ok) {
-                    logoImg.src = 'icons/logo.png';
-                    logoImg.style.display = 'block';
-                    logoSpan.style.display = 'none';
-                } else {
-                    logoImg.style.display = 'none';
-                    logoSpan.style.display = 'block';
-                }
-            }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
-        }
-    }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
-
 const logoDivElemAgenti = document.getElementById('logoRettangolo');
 let lastTapAgenti = 0;
-
 logoDivElemAgenti.addEventListener('click', (e) => {
     const now = new Date().getTime();
     const tapLength = now - lastTapAgenti;
-    if (tapLength < 300 && tapLength > 0) {
-        e.stopPropagation();
-        apriLinkSecondario();
-        lastTapAgenti = 0;
-    } else {
-        lastTapAgenti = now;
-        setTimeout(() => {
-            if (lastTapAgenti !== 0 && (new Date().getTime() - lastTapAgenti) > 300) {
-                apriLinkPrincipale();
-                lastTapAgenti = 0;
-            }
-        }, 300);
-    }
+    if (tapLength < 300 && tapLength > 0) { e.stopPropagation(); apriLinkSecondario(); lastTapAgenti = 0; }
+    else { lastTapAgenti = now; setTimeout(() => { if (lastTapAgenti !== 0 && (new Date().getTime() - lastTapAgenti) > 300) { apriLinkPrincipale(); lastTapAgenti = 0; } }, 300); }
 });
-
 caricaLogoSaved();
 
-// ==================== FUNZIONI UTILI ====================
+// ==================== UTILITIES ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -611,99 +560,39 @@ function showToast(message, isError = false) {
     document.body.appendChild(toast);
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
+function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
+function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
+function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
 
-function aggiornaAvvisoModifiche() {
-    const avviso = document.getElementById('avvisoModifiche');
-    if (modificheNonSalvate) avviso.classList.add('show');
-    else avviso.classList.remove('show');
-}
-
-function marcaModificheNonSalvate() {
-    modificheNonSalvate = true;
-    aggiornaAvvisoModifiche();
-}
-
-function resetModificheNonSalvate() {
-    modificheNonSalvate = false;
-    aggiornaAvvisoModifiche();
-}
-
-// ==================== FUNZIONI AGENTI ====================
-function normalizzaCodiceAgente(codice) {
-    if (!codice) return codice;
-    let num = parseInt(codice, 10);
-    if (!isNaN(num)) return num.toString();
-    return codice;
-}
-
+// ==================== GESTIONE AGENTI ====================
+function normalizzaCodiceAgente(codice) { let num = parseInt(codice, 10); return isNaN(num) ? codice : num.toString(); }
 async function caricaAgenti() {
     try {
         const snapshot = await db.collection('agenti_lista').get();
         agentiLista = [];
-        snapshot.forEach(doc => {
-            let data = doc.data();
-            data.codice = normalizzaCodiceAgente(data.codice);
-            agentiLista.push(data);
-        });
-        agentiLista.sort((a,b) => {
-            let aNum = parseInt(a.codice, 10);
-            let bNum = parseInt(b.codice, 10);
-            if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-            return a.codice.localeCompare(b.codice);
-        });
+        snapshot.forEach(doc => { let data = doc.data(); data.codice = normalizzaCodiceAgente(data.codice); agentiLista.push(data); });
+        agentiLista.sort((a,b) => { let aNum = parseInt(a.codice,10), bNum = parseInt(b.codice,10); if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum; return a.codice.localeCompare(b.codice); });
         aggiornaSelectAgenti();
-        
         const ultimoAgente = localStorage.getItem('ultimoAgenteSelezionato');
-        if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) {
-            document.getElementById('selectAgente').value = ultimoAgente;
-            selezionaAgente(ultimoAgente);
-        }
+        if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) { document.getElementById('selectAgente').value = ultimoAgente; selezionaAgente(ultimoAgente); }
     } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
-
 function aggiornaSelectAgenti() {
     let select = document.getElementById('selectAgente');
     let oldValue = select.value;
     select.innerHTML = '<option value="">-- Seleziona agente --</option>';
-    for (let a of agentiLista) {
-        let opt = document.createElement('option');
-        opt.value = a.codice;
-        opt.textContent = `${a.codice} - ${a.nome}`;
-        select.appendChild(opt);
-    }
-    if (oldValue && agentiLista.find(a => a.codice === oldValue)) {
-        select.value = oldValue;
-        selezionaAgente(oldValue);
-    }
+    for (let a of agentiLista) { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = `${a.codice} - ${a.nome}`; select.appendChild(opt); }
+    if (oldValue && agentiLista.find(a => a.codice === oldValue)) { select.value = oldValue; selezionaAgente(oldValue); }
 }
-
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
-    
     localStorage.setItem('ultimoAgenteSelezionato', codice);
-    
     try {
         let ordDoc = await db.collection('agenti_dati').doc(`ord_${codice}`).get();
         let scaDoc = await db.collection('agenti_dati').doc(`sca_${codice}`).get();
-        
-        if (!ordDoc.exists) {
-            let vecchioCodice = codice.padStart(4, '0');
-            ordDoc = await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).get();
-            if (ordDoc.exists) {
-                await db.collection('agenti_dati').doc(`ord_${codice}`).set(ordDoc.data());
-                await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).delete();
-            }
-        }
-        if (!scaDoc.exists) {
-            let vecchioCodice = codice.padStart(4, '0');
-            scaDoc = await db.collection('agenti_dati').doc(`sca_${vecchioCodice}`).get();
-            if (scaDoc.exists) {
-                await db.collection('agenti_dati').doc(`sca_${codice}`).set(scaDoc.data());
-                await db.collection('agenti_dati').doc(`sca_${vecchioCodice}`).delete();
-            }
-        }
-        
+        if (!ordDoc.exists) { let vecchioCodice = codice.padStart(4, '0'); ordDoc = await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).get(); if (ordDoc.exists) { await db.collection('agenti_dati').doc(`ord_${codice}`).set(ordDoc.data()); await db.collection('agenti_dati').doc(`ord_${vecchioCodice}`).delete(); } }
+        if (!scaDoc.exists) { let vecchioCodice = codice.padStart(4, '0'); scaDoc = await db.collection('agenti_dati').doc(`sca_${vecchioCodice}`).get(); if (scaDoc.exists) { await db.collection('agenti_dati').doc(`sca_${codice}`).set(scaDoc.data()); await db.collection('agenti_dati').doc(`sca_${vecchioCodice}`).delete(); } }
         datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
         datiSca = scaDoc.exists ? scaDoc.data().dati : [];
         document.getElementById('fileStatusInline').innerHTML = `ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
@@ -714,7 +603,6 @@ async function selezionaAgente(codice) {
         resetModificheNonSalvate();
     } catch(e) { alert("Errore caricamento dati: "+e.message); }
 }
-
 async function salvaDatiAgente() {
     if (!agenteCorrente) return;
     try {
@@ -725,80 +613,36 @@ async function salvaDatiAgente() {
         showToast("✅ Dati salvati!");
     } catch(e) { alert("Errore salvataggio: "+e.message); }
 }
-
 async function creaAgente(codice, nome) {
     if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
     let codiceNorm = normalizzaCodiceAgente(codice);
     if (agentiLista.find(a => a.codice === codiceNorm)) { alert("Codice già esistente!"); return false; }
-    try {
-        await db.collection('agenti_lista').doc(codiceNorm).set({ codice: codiceNorm, nome });
-        await caricaAgenti();
-        return true;
-    } catch(e) { alert("ERRORE: "+e.message); return false; }
+    try { await db.collection('agenti_lista').doc(codiceNorm).set({ codice: codiceNorm, nome }); await caricaAgenti(); return true; } catch(e) { alert("ERRORE: "+e.message); return false; }
 }
-
 async function eliminaAgente() {
-    if (!agenteCorrente) {
-        alert("Nessun agente selezionato!");
-        return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>⚠️ ATTENZIONE ⚠️</h3>
-            <p>Sei sicuro di voler eliminare l'agente:<br><strong>${agenteCorrente.codice} - ${agenteCorrente.nome}</strong>?</p>
-            <p style="color: #e74c3c; font-size: 0.8rem;">Questa operazione ELIMINERÀ PERMANENTEMENTE:<br>
-            - Tutti i dati ORD dell'agente<br>
-            - Tutti i dati SCA dell'agente</p>
-            <p style="font-size: 0.8rem;">L'operazione è IRREVERSIBILE!</p>
-            <div class="btn-group-modal">
-                <button id="btnConfermaElimina" class="btn-danger">🗑 CONFERMA ELIMINAZIONE</button>
-                <button id="btnAnnullaElimina" class="btn-primary">ANNULLA</button>
-            </div>
-        </div>
-    `;
+    if (!agenteCorrente) { alert("Nessun agente selezionato!"); return; }
+    const modal = document.createElement('div'); modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content"><h3>⚠️ ATTENZIONE ⚠️</h3><p>Sei sicuro di voler eliminare l'agente:<br><strong>${agenteCorrente.codice} - ${agenteCorrente.nome}</strong>?</p><p style="color:#e74c3c">Operazione IRREVERSIBILE!</p><div class="btn-group-modal"><button id="btnConfermaElimina" class="btn-danger">🗑 CONFERMA</button><button id="btnAnnullaElimina" class="btn-primary">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
     document.getElementById('btnConfermaElimina').onclick = async () => {
         try {
             await db.collection('agenti_lista').doc(agenteCorrente.codice).delete();
             await db.collection('agenti_dati').doc(`ord_${agenteCorrente.codice}`).delete();
             await db.collection('agenti_dati').doc(`sca_${agenteCorrente.codice}`).delete();
-            
-            showToast(`✅ Agente ${agenteCorrente.codice} eliminato con successo!`);
-            
-            agenteCorrente = null;
-            localStorage.removeItem('ultimoAgenteSelezionato');
-            datiOrd = [];
-            datiSca = [];
-            clientiUnici = [];
-            document.getElementById('dettaglioAgenti').innerHTML = '';
-            document.getElementById('fileStatusInline').innerHTML = '';
-            await caricaAgenti();
-            modal.remove();
-        } catch(e) {
-            alert("ERRORE durante l'eliminazione: "+e.message);
-        }
+            showToast(`✅ Agente ${agenteCorrente.codice} eliminato`);
+            agenteCorrente = null; localStorage.removeItem('ultimoAgenteSelezionato'); datiOrd = []; datiSca = []; clientiUnici = []; document.getElementById('dettaglioAgenti').innerHTML = ''; document.getElementById('fileStatusInline').innerHTML = ''; await caricaAgenti(); modal.remove();
+        } catch(e) { alert("ERRORE: "+e.message); }
     };
     document.getElementById('btnAnnullaElimina').onclick = () => modal.remove();
 }
 
-// ==================== CONVERSIONE IMPORTI ITALIANI ====================
+// ==================== CONVERSIONE IMPORTI ====================
 function convertiImportoItaliano(importoStr) {
     let isNegative = importoStr.endsWith('-');
-    if (isNegative) {
-        importoStr = importoStr.slice(0, -1);
-    }
-    
+    if (isNegative) importoStr = importoStr.slice(0, -1);
     let importoPulito = importoStr.replace(/\./g, '').replace(',', '.');
     let importo = parseFloat(importoPulito);
-    
-    if (isNegative && !isNaN(importo)) {
-        importo = -importo;
-    }
-    
+    if (isNegative && !isNaN(importo)) importo = -importo;
     return isNaN(importo) ? 0 : importo;
 }
 
@@ -826,80 +670,57 @@ function parseORD(text) {
         }
         
         if (!currentCliente) continue;
+        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
         
-        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || 
-            line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
-        
-        let coppie = [];
-        let match;
+        let coppie = [], match;
         while ((match = reCoppia.exec(line)) !== null) {
             let qta = parseFloat(match[1].replace(',', '.'));
             let data = match[2];
             coppie.push({ qta, data, start: match.index, end: match.index + match[0].length });
         }
-        
         if (coppie.length === 0) continue;
         
         let firstCoppiaStart = coppie[0].start;
         let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
         let tokens = descrizioneRaw.split(/\s+/);
-        let codice = tokens[0];
+        let codice = parseInt(tokens[0], 10).toString();   // 🔧 FIX: normalizza codice articolo
         let descrizione = tokens.slice(1).join(" ");
         
         let lastCoppiaEnd = coppie[coppie.length-1].end;
         let afterCoppie = line.substring(lastCoppiaEnd).trim();
         let numTokens = afterCoppie.split(/\s+/);
         let prezzo = 0, sconto1 = 0;
+        if (numTokens.length >= 2) { prezzo = parseFloat(numTokens[0].replace(',', '.')); sconto1 = parseFloat(numTokens[1].replace(',', '.')); }
         
-        if (numTokens.length >= 2) {
-            prezzo = parseFloat(numTokens[0].replace(',', '.'));
-            sconto1 = parseFloat(numTokens[1].replace(',', '.'));
-        }
-        
-        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - 
-                           new Date(a.data.split('/').reverse().join('-')));
-        
-        currentCliente.articoli.push({ 
-            codice, 
-            descrizione, 
-            coppie, 
-            prezzo, 
-            sconto1 
-        });
+        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+        currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
     }
-    
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA CON DEBUG (modifiche richieste) ====================
+// ==================== PARSER SCA (con debug, asterisco gestito) ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
 
     const reCliente = /^CLIENTE:\s+(\d{6})\s+(.*?)\s+Saldo\s+([\d\.,\-]+)/;
-    // Regex con $ alla fine
     const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)$/;
 
     for (let line of lines) {
-        // Pulizia riga secondo le nuove istruzioni
         line = line.replace(/^\uFEFF/, '');
-        line = line.replace(/\f/g, ' ');      // elimina carattere di form feed (cambio pagina)
+        line = line.replace(/\f/g, ' ');
         line = line.replace(/\t/g, ' ');
-        
-        // Se c'è l'asterisco subito dopo la data
         line = line.replace(/^(\d{2}\/\d{2}\/\d{4})\*/, '$1 ');
-        
         line = line.trim();
-        
         if (line === "") continue;
-        
+
         if (line.startsWith("===") || line.startsWith("---")) continue;
         if (line.startsWith("Scadenza") || line.startsWith("VOSTRO DARE")) continue;
         if (line.startsWith("TOTALE") || line.startsWith("AGENTE:")) continue;
         if (line.startsWith("TUTTE") || line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
-        
+
         let mCliente = line.match(reCliente);
         if (mCliente) {
             let codice = mCliente[1];
@@ -909,9 +730,8 @@ function parseSCA(text) {
             console.log(`✅ CLIENTE: ${codice} - ${ragione}`);
             continue;
         }
-        
+
         if (currentCliente) {
-            console.log("RIGA SCA:", line);
             let mScad = line.match(reScadenza);
             if (mScad) {
                 let importo = convertiImportoItaliano(mScad[5]);
@@ -928,8 +748,6 @@ function parseSCA(text) {
             }
         }
     }
-    
-    // DEBUG: non filtriamo più i clienti senza scadenze
     const result = Array.from(clienti.values());
     console.log("CLIENTI SCA:", result.map(c => c.codice + " " + c.ragione));
     return result;
@@ -937,50 +755,27 @@ function parseSCA(text) {
 
 // ==================== INVIO WHATSAPP ====================
 function inviaScadenzeWhatsApp(cliente) {
-    if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) {
-        alert("Nessuna scadenza da inviare per il cliente selezionato!");
-        return;
-    }
-    
-    let messaggio = `📅 *SCADENZE CLIENTE*\n`;
-    messaggio += `🏢 *${cliente.codice} - ${cliente.ragione}*\n`;
-    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    messaggio += `📋 *DETTAGLIO SCADENZE:*\n\n`;
-    
+    if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
+    let messaggio = `📅 *SCADENZE CLIENTE*\n🏢 *${cliente.codice} - ${cliente.ragione}*\n━━━━━━━━━━━━━━━━━━━━━\n\n📋 *DETTAGLIO SCADENZE:*\n\n`;
     let totale = 0;
     for (let s of cliente.scadenze) {
-        messaggio += `📆 Scadenza: ${s.scadenza}\n`;
-        if (s.descrizione) messaggio += `📝 Descrizione: ${s.descrizione}\n`;
-        messaggio += `📄 N.Documento: ${s.numDoc}\n`;
-        messaggio += `💰 Importo: € ${s.importo.toFixed(2)}\n`;
-        messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        messaggio += `📆 Scadenza: ${s.scadenza}\n📝 Descrizione: ${s.descrizione}\n📄 N.Documento: ${s.numDoc}\n💰 Importo: € ${s.importo.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━\n`;
         totale += s.importo;
     }
-    
-    messaggio += `\n💶 *TOTALE SCADENZE: € ${totale.toFixed(2)}*\n`;
-    messaggio += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    messaggio += `📱 Messaggio generato da inSAPA Agenti`;
-    
-    let url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
-    window.open(url, '_blank');
+    messaggio += `\n💶 *TOTALE SCADENZE: € ${totale.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━\n📱 Messaggio generato da inSAPA Agenti`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(messaggio)}`, '_blank');
 }
+function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
-function inviaScadenzeClienteCorrente() {
-    if (!clienteScadenzeCorrente) {
-        alert("Seleziona prima un cliente con scadenze!");
-        return;
-    }
-    inviaScadenzeWhatsApp(clienteScadenzeCorrente);
-}
-
-// ==================== GESTIONE CLIENTI ====================
+// ==================== GESTIONE CLIENTI (FIX NORMALIZZAZIONE) ====================
 function aggiornaClienti() {
     let mappa = new Map();
     
+    // Clienti da ORD (codice numerico senza zeri)
     for (let c of datiOrd) {
-        let codiceStr = c.codice.toString().padStart(6, '0');
-        mappa.set(codiceStr, { 
-            codice: codiceStr,
+        let codiceNorm = parseInt(c.codice, 10).toString();
+        mappa.set(codiceNorm, { 
+            codice: codiceNorm,
             ragione: c.ragione, 
             hasScadenze: false, 
             scadenze: [],
@@ -988,14 +783,16 @@ function aggiornaClienti() {
         });
     }
     
+    // Clienti da SCA (codice a 6 cifre) → normalizza e cerca match
     for (let c of datiSca) {
-        if (mappa.has(c.codice)) {
-            let existing = mappa.get(c.codice);
-            existing.hasScadenze = true;
-            existing.scadenze = c.scadenze;
+        let codiceNormalizzato = parseInt(c.codice, 10).toString();
+        let match = mappa.get(codiceNormalizzato) || mappa.get(c.codice);
+        if (match) {
+            match.hasScadenze = true;
+            match.scadenze = c.scadenze;
         } else {
-            mappa.set(c.codice, { 
-                codice: c.codice, 
+            mappa.set(codiceNormalizzato, { 
+                codice: codiceNormalizzato, 
                 ragione: c.ragione, 
                 hasScadenze: true, 
                 scadenze: c.scadenze,
@@ -1005,287 +802,124 @@ function aggiornaClienti() {
     }
     
     clientiUnici = Array.from(mappa.values());
-    
     console.log("📊 Clienti unici totali:", clientiUnici.length);
     console.log("🔴 Clienti CON scadenze:", clientiUnici.filter(c => c.hasScadenze && c.scadenze.length > 0).length);
-    
     filtraClienti();
 }
 
 function filtraClienti() {
     let searchText = document.getElementById('cercaCliente').value.toLowerCase();
-    
-    let clientiFiltrati = clientiUnici.filter(c => 
-        c.codice.toLowerCase().includes(searchText) || 
-        c.ragione.toLowerCase().includes(searchText)
-    );
-    
-    clientiFiltrati.sort((a, b) => {
-        const aHasScad = a.hasScadenze && a.scadenze && a.scadenze.length > 0;
-        const bHasScad = b.hasScadenze && b.scadenze && b.scadenze.length > 0;
-        
-        if (aHasScad && !bHasScad) return -1;
-        if (!aHasScad && bHasScad) return 1;
-        return a.ragione.localeCompare(b.ragione);
-    });
-    
+    let clientiFiltrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(searchText) || c.ragione.toLowerCase().includes(searchText));
+    clientiFiltrati.sort((a,b) => { let aHas = a.hasScadenze && a.scadenze.length; let bHas = b.hasScadenze && b.scadenze.length; if (aHas && !bHas) return -1; if (!aHas && bHas) return 1; return a.ragione.localeCompare(b.ragione); });
     let select = document.getElementById('selectClienteAgenti');
     select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
     for (let c of clientiFiltrati) {
         let opt = document.createElement('option');
         opt.value = c.codice;
-        
-        const hasScadenze = c.hasScadenze && c.scadenze && c.scadenze.length > 0;
-        if (hasScadenze) {
-            opt.style.color = '#c0392b';
-            opt.style.fontWeight = 'bold';
-            opt.textContent = `🔴 ${c.codice} - ${c.ragione} (${c.scadenze.length} scad.)`;
-        } else {
-            opt.textContent = `${c.codice} - ${c.ragione}`;
-        }
+        let hasScad = c.hasScadenze && c.scadenze.length;
+        if (hasScad) { opt.style.color = '#c0392b'; opt.style.fontWeight = 'bold'; opt.textContent = `🔴 ${c.codice} - ${c.ragione} (${c.scadenze.length} scad.)`; }
+        else opt.textContent = `${c.codice} - ${c.ragione}`;
         select.appendChild(opt);
     }
-    
-    if (clientiFiltrati.length === 0) {
-        document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
-    }
+    if (clientiFiltrati.length === 0) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
 }
 
 function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
-    
     clienteScadenzeCorrente = cliente;
-    
-    let containerArticoli = document.getElementById('dettaglioAgenti');
     let html = '';
-    
-    const hasScadenze = cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0;
+    let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
     if (hasScadenze) {
-        html += `<div class="scadenze-box">
-                    <div class="scadenze-header">
-                        <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
-                        <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
-                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
-                            </svg>
-                            Invia Scadenze
-                        </button>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> </table></thead><tbody>`;
+        html += `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-            html += `<tr>
-                        <td style="white-space:nowrap">${s.scadenza}</td>
-                        <td style="font-size:0.8rem">${s.descrizione || ''}</td>
-                        <td>${s.numDoc}</td>
-                        <td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td>
-                      </tr>`;
+            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="font-size:0.8rem">${s.descrizione || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
         }
         html += `</tbody></table></div>`;
-    } else {
-        html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
-    }
-    
-    if (cliente.ordini && cliente.ordini.length > 0) {
-        html += `<div class="scadenze-box">
-                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
+    } else html += `<div class="scadenze-box">Nessuna scadenza per ${cliente.ragione}</div>`;
+    if (cliente.ordini && cliente.ordini.length) {
+        html += `<div class="scadenze-box"><h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
         for (let art of cliente.ordini) {
             let storicoHtml = '';
-            if (art.coppie && art.coppie.length > 0) {
-                let mostrati = art.coppie.slice(0, 4);
-                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
-                                <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
-                for (let ord of mostrati) {
-                    storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
-                }
+            if (art.coppie && art.coppie.length) {
+                let mostrati = art.coppie.slice(0,4);
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+                for (let ord of mostrati) storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
                 storicoHtml += `</div>`;
-            } else {
-                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
-            }
-            
-            html += `<div class="articolo-item" data-codice="${art.codice}">
-                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
-                        <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
-                        ${storicoHtml}
-                    </div>`;
+            } else storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+            html += `<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storicoHtml}</div>`;
         }
         html += `</div>`;
-    } else {
-        html += `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
-    }
-    
-    containerArticoli.innerHTML = html;
-    
-    document.querySelectorAll('.articolo-item').forEach(el => {
-        el.onclick = (e) => {
-            e.stopPropagation();
-            let storicoDiv = el.querySelector('.storico-ordini');
-            if (storicoDiv) {
-                storicoDiv.classList.toggle('visible');
-            }
-        };
-    });
+    } else html += `<div class="scadenze-box">Nessun ordine per ${cliente.ragione}</div>`;
+    document.getElementById('dettaglioAgenti').innerHTML = html;
+    document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
 }
 
 function filtraArticoli() {
     let clienteCodice = document.getElementById('selectClienteAgenti').value;
     if (!clienteCodice) return;
-    
     let cliente = clientiUnici.find(c => c.codice === clienteCodice);
     if (!cliente || !cliente.ordini) return;
-    
     let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
-    let filtrati = cliente.ordini.filter(art => 
-        art.codice.toLowerCase().includes(searchText) || 
-        art.descrizione.toLowerCase().includes(searchText)
-    );
-    
-    let containerArticoli = document.getElementById('dettaglioAgenti');
+    let filtrati = cliente.ordini.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
     let html = '';
-    
-    const hasScadenze = cliente.hasScadenze && cliente.scadenze && cliente.scadenze.length > 0;
+    let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
     if (hasScadenze) {
-        html += `<div class="scadenze-box">
-                    <div class="scadenze-header">
-                        <h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
-                        <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
-                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/>
-                            </svg>
-                            Invia Scadenze
-                        </button>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> </tr></thead><tbody>`;
+        html += `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
         for (let s of cliente.scadenze) {
             let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-            html += `<tr>
-                        <td style="white-space:nowrap">${s.scadenza}</td>
-                        <td style="font-size:0.8rem">${s.descrizione || ''}</td>
-                        <td>${s.numDoc}</td>
-                        <td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td>
-                      </tr>`;
+            html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="font-size:0.8rem">${s.descrizione || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
         }
         html += `</tbody></table></div>`;
     }
-    
-    if (filtrati.length > 0) {
-        html += `<div class="scadenze-box">
-                    <h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
+    if (filtrati.length) {
+        html += `<div class="scadenze-box"><h3>📋 ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
         for (let art of filtrati) {
             let storicoHtml = '';
-            if (art.coppie && art.coppie.length > 0) {
-                let mostrati = art.coppie.slice(0, 4);
-                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">
-                                <strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
-                for (let ord of mostrati) {
-                    storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
-                }
+            if (art.coppie && art.coppie.length) {
+                let mostrati = art.coppie.slice(0,4);
+                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}"><strong>📋 STORICO ORDINI (ultimi 4):</strong><br>`;
+                for (let ord of mostrati) storicoHtml += `<span>📅 ${ord.data} → Q.tà: ${ord.qta}</span> `;
                 storicoHtml += `</div>`;
-            } else {
-                storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
-            }
-            
-            html += `<div class="articolo-item" data-codice="${art.codice}">
-                        <div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div>
-                        <div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>
-                        ${storicoHtml}
-                    </div>`;
+            } else storicoHtml = `<div class="storico-ordini" data-articolo="${art.codice}">📭 Nessun ordine registrato</div>`;
+            html += `<div class="articolo-item" data-codice="${art.codice}"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>€ ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storicoHtml}</div>`;
         }
         html += `</div>`;
-    } else {
-        html += `<div class="scadenze-box">Nessun articolo trovato per "${searchText}"</div>`;
-    }
-    
-    containerArticoli.innerHTML = html;
-    
-    document.querySelectorAll('.articolo-item').forEach(el => {
-        el.onclick = (e) => {
-            e.stopPropagation();
-            let storicoDiv = el.querySelector('.storico-ordini');
-            if (storicoDiv) {
-                storicoDiv.classList.toggle('visible');
-            }
-        };
-    });
+    } else html += `<div class="scadenze-box">Nessun articolo trovato per "${searchText}"</div>`;
+    document.getElementById('dettaglioAgenti').innerHTML = html;
+    document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
 }
 
 // ==================== CARICA FILE ====================
 function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
-    const baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
-    const regexNumero = /^([A-Z]+)(\d+)$/i;
-    const match = baseName.match(regexNumero);
-    
+    let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
+    let match = baseName.match(/^([A-Z]+)(\d+)$/i);
     if (!match) return false;
     if (match[1].toUpperCase() !== tipo) return false;
-    
-    const numeroFile = match[2];
-    const numeroAgente = parseInt(codiceAgente, 10);
-    const numeroFileParsed = parseInt(numeroFile, 10);
-    
-    return numeroFileParsed === numeroAgente;
+    return parseInt(match[2],10) === parseInt(codiceAgente,10);
 }
-
 async function caricaFile(files) {
-    if (!agenteCorrente) {
-        alert("❌ Seleziona prima un agente!");
-        return false;
-    }
-    
-    if (files.length !== 2) {
-        alert("❌ Devi selezionare ESATTAMENTE 2 file (ORD e SCA)!");
-        return false;
-    }
-    
+    if (!agenteCorrente) { alert("❌ Seleziona un agente!"); return false; }
+    if (files.length !== 2) { alert("❌ Servono ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
     let codAgente = agenteCorrente.codice;
     let trovati = { ord: false, sca: false };
-    let ordText = null, scaText = null;
-    let errori = [];
-    
+    let ordText = null, scaText = null, errori = [];
     for (let file of files) {
         let nome = file.name;
-        
-        if (nomeFileCorrisponde(nome, codAgente, 'ORD')) {
-            trovati.ord = true;
-            ordText = await file.text();
-        } 
-        else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) {
-            trovati.sca = true;
-            scaText = await file.text();
-        }
-        else {
-            errori.push(nome);
-        }
+        if (nomeFileCorrisponde(nome, codAgente, 'ORD')) { trovati.ord = true; ordText = await file.text(); }
+        else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) { trovati.sca = true; scaText = await file.text(); }
+        else errori.push(nome);
     }
-    
-    if (errori.length > 0) {
-        alert(`❌ FILE NON VALIDI: ${errori.join(', ')}\n\nI file devono essere nominati come:\n📄 ORD${codAgente}.txt (o ORD${parseInt(codAgente,10)}.txt)\n📄 SCA${codAgente}.txt (o SCA${parseInt(codAgente,10)}.txt)`);
-        return false;
-    }
-    
-    if (!trovati.ord || !trovati.sca) {
-        alert(`❌ FILE MANCANTI\n\nDevi selezionare ENTRAMBI i file:\n- ORD${codAgente}.txt (o ORD${parseInt(codAgente,10)}.txt)\n- SCA${codAgente}.txt (o SCA${parseInt(codAgente,10)}.txt)`);
-        return false;
-    }
-    
-    datiOrd = [];
-    datiSca = [];
-    
-    if (ordText) {
-        datiOrd = parseORD(ordText);
-        console.log("📄 ORD parsato:", datiOrd.length, "clienti");
-    }
-    if (scaText) {
-        datiSca = parseSCA(scaText);
-        console.log("📄 SCA parsato:", datiSca.length, "clienti");
-    }
-    
+    if (errori.length) { alert(`❌ FILE NON VALIDI: ${errori.join(', ')}`); return false; }
+    if (!trovati.ord || !trovati.sca) { alert(`❌ FILE MANCANTI: ORD${codAgente}.txt e SCA${codAgente}.txt`); return false; }
+    datiOrd = []; datiSca = [];
+    if (ordText) { datiOrd = parseORD(ordText); console.log("📄 ORD:", datiOrd.length, "clienti"); }
+    if (scaText) { datiSca = parseSCA(scaText); console.log("📄 SCA:", datiSca.length, "clienti"); }
     await salvaDatiAgente();
     aggiornaClienti();
     document.getElementById('fileStatusInline').innerHTML = `✅ ORD: ${datiOrd.length} | SCA: ${datiSca.length}`;
-    alert(`✅ CARICAMENTO COMPLETATO!\n\n📊 ORD: ${datiOrd.length} clienti\n📊 SCA: ${datiSca.length} clienti\n\nTotale clienti unici: ${clientiUnici.length}`);
+    alert(`✅ CARICAMENTO COMPLETATO!\n📊 ORD: ${datiOrd.length} clienti\n📊 SCA: ${datiSca.length} clienti\nTotale clienti unici: ${clientiUnici.length}`);
     return true;
 }
 
@@ -1293,68 +927,34 @@ async function caricaFile(files) {
 const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
 const navGridAgenti = document.getElementById('navGrid');
 if (hamburgerBtnAgenti && navGridAgenti) {
-    hamburgerBtnAgenti.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navGridAgenti.classList.toggle('open');
-    });
-    document.addEventListener('click', (e) => {
-        if (!navGridAgenti.contains(e.target) && !hamburgerBtnAgenti.contains(e.target)) {
-            navGridAgenti.classList.remove('open');
-        }
-    });
+    hamburgerBtnAgenti.addEventListener('click', (e) => { e.stopPropagation(); navGridAgenti.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if (!navGridAgenti.contains(e.target) && !hamburgerBtnAgenti.contains(e.target)) navGridAgenti.classList.remove('open'); });
 }
 
 // ==================== EVENTI ====================
-document.getElementById('selectAgente').onchange = (e) => { 
+document.getElementById('selectAgente').onchange = (e) => {
     if (e.target.value && modificheNonSalvate) {
-        if (confirm("⚠️ Ci sono modifiche non salvate. Vuoi salvare prima di cambiare agente?")) {
-            salvaDatiAgente().then(() => selezionaAgente(e.target.value));
-        } else {
-            selezionaAgente(e.target.value);
-        }
-    } else if (e.target.value) {
-        selezionaAgente(e.target.value);
-    }
+        if (confirm("⚠️ Modifiche non salvate. Salvare prima di cambiare?")) salvaDatiAgente().then(() => selezionaAgente(e.target.value));
+        else selezionaAgente(e.target.value);
+    } else if (e.target.value) selezionaAgente(e.target.value);
 };
-
 document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
-document.getElementById('cercaArticoloInline').oninput = () => {
-    let clienteCodice = document.getElementById('selectClienteAgenti').value;
-    if (clienteCodice) filtraArticoli();
-};
-
+document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if (c) filtraArticoli(); };
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
-
-document.getElementById('fileInput').onchange = async (e) => {
-    await caricaFile(Array.from(e.target.files));
-    e.target.value = '';
-};
-
+document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
     modal.innerHTML = `<div class="modal-content"><h3>➕ NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 01"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-primary">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    document.getElementById('btnConferma').onclick = async () => {
-        let cod = document.getElementById('nuovoCodice').value.trim();
-        let nom = document.getElementById('nuovoNome').value.trim();
-        if (cod && nom) {
-            if (await creaAgente(cod, nom)) {
-                alert(`Agente ${cod} - ${nom} creato!`);
-                modal.remove();
-            }
-        } else alert("Compila tutti i campi!");
-    };
+    document.getElementById('btnConferma').onclick = async () => { let cod = document.getElementById('nuovoCodice').value.trim(); let nom = document.getElementById('nuovoNome').value.trim(); if (cod && nom) { if (await creaAgente(cod, nom)) { alert(`Agente ${cod} - ${nom} creato!`); modal.remove(); } } else alert("Compila tutti i campi!"); };
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 };
-
 document.getElementById('btnEliminaAgente').onclick = () => eliminaAgente();
 
 // ==================== AVVIO ====================
-Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
-    caricaLogoSaved();
-});
+Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
 </script>
 </body>
 </html>
