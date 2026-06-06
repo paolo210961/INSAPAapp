@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.61</title>
+    <title>inSAPA - Agenti vA.5.62</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.61 - Parser SCA definitivo (pulizia totale, normalizzazione codice)</div>
+<div class="version">vA.5.62 - Parser SCA definitivo v2 (gestione asterisco, righe ===)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -698,67 +698,69 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA DEFINITIVO ====================
+// ==================== PARSER SCA DEFINITIVO v2 ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
 
-    // Regex cliente robusta (accetta qualsiasi numero di cifre, anche con segno meno nel saldo)
-    const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+(-?[\d\.,]+)/;
+    // Regex cliente: accetta codici con zeri iniziali, ragione con qualsiasi carattere
+    const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s{2,}Saldo\s+(-?[\d\.,]+)/;
 
     for (let line of lines) {
-        // 1. PULIZIA AGGRESSIVA PRIMA DI TUTTO
+        // 1. PULIZIA
         line = line
             .replace(/\uFEFF/g, '')
             .replace(/\f/g, ' ')
             .replace(/\t/g, ' ')
-            .replace(/\*/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
 
         if (!line) continue;
 
-        // 2. FILTRI ROBUSTI
+        // 2. FILTRI - NON filtrare le righe === perché potrebbero precedere clienti
         if (/^=+/.test(line)) continue;
         if (/^-+/.test(line)) continue;
         if (line.startsWith("Scadenza")) continue;
         if (line.startsWith("VOSTRO DARE")) continue;
-        if (line.startsWith("TOTALE")) continue;
+        if (line.startsWith("TOTALE") || line.startsWith("TOT.")) continue;
         if (line.startsWith("AGENTE:")) continue;
         if (line.startsWith("TUTTE")) continue;
         if (line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
-
-        // DEBUG: stampa la linea prima di analizzarla
-        // console.log("LINE:", line);
+        // NUOVO: salta righe di intestazione pagina (==...==)
+        if (/^==/.test(line)) continue;
 
         // RICERCA CLIENTE
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            // Normalizzazione immediata del codice
-            let codiceRaw = mCliente[1];
-            let codice = parseInt(codiceRaw, 10).toString();
+            let codice = parseInt(mCliente[1], 10).toString();
             let ragione = mCliente[2].trim();
             currentCliente = { codice, ragione, scadenze: [] };
             clienti.set(codice, currentCliente);
-            console.log("✅ CLIENTE TROVATO:", codice, ragione);
+            console.log("✅ CLIENTE:", codice, ragione);
             continue;
         }
 
-        // RICERCA SCADENZA (metodo split su "Euro")
+        // RICERCA SCADENZA
         if (currentCliente) {
+            // NUOVO: rimuovi il * che appare dopo la data (es. "31/01/2024*NOTA")
+            // Lo facciamo sostituendo il pattern data*testo con data testo
+            line = line.replace(/(\d{2}\/\d{2}\/\d{4})\*/, '$1 ');
+
             let parts = line.split(/\s+/);
             let euroIndex = parts.findIndex(p => p.toLowerCase() === "euro");
             if (euroIndex === -1) continue;
 
-            let importoStr = parts[euroIndex + 1];
-            let dataDoc = parts[euroIndex - 2];
-            let numDoc = parts[euroIndex - 3];
-            let scadenza = parts[0];
-            let descrizione = parts.slice(1, euroIndex - 3).join(" ");
-
+            // Estrazione campi
+            let importoStr = parts[euroIndex + 1] || '0';
+            // Gestione importo negativo con '-' finale (es. "115,23-")
             let importo = convertiImportoItaliano(importoStr);
+
+            let scadenza = parts[0] || '';
+            let dataDoc = parts[euroIndex - 1] || '';
+            let numDoc = parts[euroIndex - 2] || '';
+            let descrizione = parts.slice(1, euroIndex - 2).join(" ");
 
             currentCliente.scadenze.push({
                 scadenza,
@@ -768,7 +770,7 @@ function parseSCA(text) {
                 importo
             });
 
-            console.log(`📅 ${scadenza} | ${descrizione.substring(0, 40)} | Doc.${numDoc} | € ${importo.toFixed(2)}`);
+            console.log(`📅 ${scadenza} | Doc.${numDoc} | € ${importo.toFixed(2)}`);
         }
     }
 
@@ -853,7 +855,7 @@ function mostraDettaglioCliente(codice) {
     let html = '';
     let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
     if (hasScadenze) {
-        html += `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
+        html += `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> <table></thead><tbody>`;
         for (let s of cliente.scadenze) {
             let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
             html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="font-size:0.8rem">${s.descrizione || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
