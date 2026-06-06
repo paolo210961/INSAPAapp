@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.63</title>
+    <title>inSAPA - Agenti vA.5.64</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -100,6 +100,12 @@
             .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
             .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
+            /* miglioramento visualizzazione tabella su mobile */
+            .scadenze-box table, .scadenze-box thead, .scadenze-box tbody, .scadenze-box th, .scadenze-box td, .scadenze-box tr { display: block; }
+            .scadenze-box thead tr { position: absolute; top: -9999px; left: -9999px; }
+            .scadenze-box tr { border: 1px solid #ccc; margin-bottom: 10px; }
+            .scadenze-box td { border: none; position: relative; padding-left: 50%; text-align: left !important; }
+            .scadenze-box td:before { content: attr(data-label); position: absolute; left: 6px; width: 45%; padding-right: 10px; font-weight: bold; white-space: nowrap; }
         }
     </style>
 </head>
@@ -160,7 +166,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.63 - Fix parser SCA: regex pre-compressione spazi</div>
+<div class="version">vA.5.64 - Tabella scadenze con Data Doc (allineata)</div>
 
 <script>
 const firebaseConfig = {
@@ -337,31 +343,19 @@ function parseORD(text) {
 }
 
 // ==================== PARSER SCA v3 - FIX DEFINITIVO ====================
-// PROBLEMA RISOLTO: la pulizia replace(\s+, ' ') comprimeva i doppi spazi PRIMA della regex cliente,
-// rendendo impossibile distinguere fine ragione da parola "Saldo".
-// SOLUZIONE: applicare la regex cliente sulla riga CON spazi multipli ancora presenti,
-// poi comprimere gli spazi solo per il parsing delle scadenze.
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
-
-    // Regex cliente: usa lookahead su "Saldo" - funziona con qualsiasi numero di spazi
-    // perche' la riga NON e' ancora stata compressa quando applichiamo questa regex
     const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+-?/;
-
     for (let lineOriginale of lines) {
-        // STEP 1: pulizia base senza comprimere spazi
         let line = lineOriginale
             .replace(/\uFEFF/g, '')
             .replace(/\f/g, ' ')
             .replace(/\t/g, ' ')
             .replace(/\*/g, ' ')
             .trim();
-
         if (!line) continue;
-
-        // Filtri righe inutili
         if (/^=+/.test(line)) continue;
         if (/^-+/.test(line)) continue;
         if (line.startsWith("Scadenza")) continue;
@@ -371,8 +365,6 @@ function parseSCA(text) {
         if (line.startsWith("TUTTE")) continue;
         if (line.startsWith("inSAPA")) continue;
         if (line.startsWith("STAMPA")) continue;
-
-        // STEP 2: cerca cliente sulla riga con spazi originali ancora presenti
         let mCliente = line.match(reCliente);
         if (mCliente) {
             let codice = parseInt(mCliente[1], 10).toString();
@@ -382,29 +374,22 @@ function parseSCA(text) {
             console.log("CLIENTE:", codice, ragione);
             continue;
         }
-
-        // STEP 3: per le scadenze ORA comprimi gli spazi
         if (currentCliente) {
             line = line.replace(/\s+/g, ' ').trim();
             let parts = line.split(' ');
             let euroIndex = parts.findIndex(p => p.toLowerCase() === "euro");
             if (euroIndex === -1) continue;
-
             let scadenza = parts[0] || '';
-            // Valida formato data dd/mm/yyyy
             if (!/^\d{2}\/\d{2}\/\d{4}$/.test(scadenza)) continue;
-
             let importoStr = parts[euroIndex + 1] || '0';
             let importo = convertiImportoItaliano(importoStr);
             let dataDoc = parts[euroIndex - 1] || '';
             let numDoc = parts[euroIndex - 2] || '';
             let descrizione = parts.slice(1, euroIndex - 2).join(" ");
-
             currentCliente.scadenze.push({ scadenza, descrizione, numDoc, dataDoc, importo });
             console.log("SCAD:", scadenza, "Doc:", numDoc, "E:", importo.toFixed(2));
         }
     }
-
     const result = Array.from(clienti.values());
     console.log("CLIENTI SCA TOTALI:", result.length);
     return result;
@@ -415,7 +400,7 @@ function inviaScadenzeWhatsApp(cliente) {
     let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
     let totale = 0;
     for (let s of cliente.scadenze) {
-        messaggio += "Scadenza: " + s.scadenza + "\nDescrizione: " + s.descrizione + "\nN.Documento: " + s.numDoc + "\nImporto: EUR " + s.importo.toFixed(2) + "\n---\n";
+        messaggio += "Scadenza: " + s.scadenza + "\nData Doc: " + s.dataDoc + "\nN.Documento: " + s.numDoc + "\nImporto: EUR " + s.importo.toFixed(2) + "\n---\n";
         totale += s.importo;
     }
     messaggio += "\nTOTALE: EUR " + totale.toFixed(2) + "\nMessaggio generato da inSAPA Agenti";
@@ -457,13 +442,19 @@ function filtraClienti() {
     if (clientiFiltrati.length === 0) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
 }
 
+// Funzione per costruire la tabella con Data Doc al posto della descrizione
 function buildScadenzeHtml(cliente) {
-    let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
+    let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
     html += '<button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button>';
-    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
+    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
     for (let s of cliente.scadenze) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-        html += '<tr><td style="white-space:nowrap">' + s.scadenza + '</td><td style="font-size:0.8rem">' + (s.descrizione || '') + '</td><td>' + s.numDoc + '</td><td style="text-align:right" ' + classeImporto + '>' + s.importo.toFixed(2) + ' EUR</td></tr>';
+        html += '<tr>';
+        html += '<td style="white-space:nowrap" data-label="Scadenza">' + s.scadenza + '</td>';
+        html += '<td style="white-space:nowrap" data-label="Data Doc.">' + (s.dataDoc || '') + '</td>';
+        html += '<td data-label="N.Doc">' + s.numDoc + '</td>';
+        html += '<td style="text-align:right" ' + classeImporto + ' data-label="Importo">' + s.importo.toFixed(2) + ' €</td>';
+        html += '</tr>';
     }
     html += '</tbody></table></div>';
     return html;
