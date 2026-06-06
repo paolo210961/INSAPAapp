@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.52</title>
+    <title>inSAPA - Contabilità vC.5.51</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
 
+        /* HEADER a tre righe */
         .header {
             background: white;
             padding: 15px 25px;
@@ -129,6 +130,7 @@
         .positive { color: #27ae60; }
         .negative { color: #e74c3c; }
 
+        /* seconda riga: nav + filtri */
         .row2 {
             display: flex;
             justify-content: space-between;
@@ -199,6 +201,7 @@
             text-align: right;
         }
 
+        /* terza riga: toolbar */
         .sticky-toolbar {
             background: #f8f9fa;
             padding: 12px 20px;
@@ -227,6 +230,7 @@
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
 
+        /* main e sidebar (invariati) */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         .sidebar {
             width: 380px;
@@ -305,6 +309,7 @@
 <body>
 <div id="appContainer">
     <div class="header">
+        <!-- RIGA 1: LOGO | FLOPPY | RIEPILOGO -->
         <div class="row1">
             <div class="logo-area">
                 <div id="logoRettangolo" class="logo-rettangolo">
@@ -325,6 +330,8 @@
             </div>
             <div id="summaryHeader" class="summary-header"></div>
         </div>
+
+        <!-- RIGA 2: NAVIGAZIONE | FILTRI ANNO/MESE/SALDO -->
         <div class="row2">
             <div class="nav-box">
                 <button id="hamburgerBtn" class="hamburger-btn">☰</button>
@@ -341,6 +348,8 @@
                 <div><label>💰 Saldo iniziale (€)</label><input type="text" id="saldoInizialeHeader" class="import-field" placeholder="0,00" style="width:100px;"></div>
             </div>
         </div>
+
+        <!-- RIGA 3: TOOLBAR con 5 schede + bottoni cancella -->
         <div id="stickyToolbar" class="sticky-toolbar">
             <button id="toolbarPrimaNota" class="toolbar-btn active">📋 PRIMA NOTA</button>
             <button id="toolbarContanti" class="toolbar-btn">💵 CONTANTI</button>
@@ -377,7 +386,7 @@
                         <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
-                
+
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
@@ -389,7 +398,7 @@
                         <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
-                
+
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3>📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
@@ -405,7 +414,7 @@
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></td></thead>
                         <tbody id="assClientiBody"></tbody>
                     </table>
                     <div id="assClientiActionButtons" class="action-buttons">
@@ -461,7 +470,6 @@ let primaNota = [], contanti = [], fattureFornitori = [], assClienti = [], pagaD
 let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-let anniDisponibili = [];
 
 // ==================== LINK E LOGO ====================
 let linkPrincipale = "", linkSecondario = "";
@@ -502,23 +510,23 @@ function showToast(message, isError = false) {
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
 
-function formatNumber(n) { 
-    if (n === null || n === undefined || n === '') return ''; 
-    let num = parseFloat(n); 
-    return isNaN(num) ? '' : num.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+function formatNumber(n) {
+    if (n === null || n === undefined || n === '') return '';
+    let num = parseFloat(n);
+    return isNaN(num) ? '' : num.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
-function parseNumber(s) { 
-    if (!s || s === '') return 0; 
-    let clean = s.toString().replace(/\./g, '').replace(',', '.'); 
-    let num = parseFloat(clean); 
-    return isNaN(num) ? 0 : num; 
+function parseNumber(s) {
+    if (!s || s === '') return 0;
+    let clean = s.toString().replace(/\./g, '').replace(',', '.');
+    let num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
 }
 
-function formatDate(d) { 
-    if (!d) return ""; 
-    let x = new Date(d); 
-    return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`; 
+function formatDate(d) {
+    if (!d) return "";
+    let x = new Date(d);
+    return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`;
 }
 
 function formatDateInput(d) {
@@ -556,6 +564,8 @@ async function salvaStatoFirebase() {
         });
         resetModificheNonSalvate();
         showToast("✅ Dati salvati su Firebase!");
+        // Dopo salvataggio, aggiorniamo i dropdown dinamici perché potrebbero esserci nuovi mesi
+        await popolaAnniMeseDinamici();
     } catch(e) { showToast("Errore salvataggio!", true); }
 }
 
@@ -597,8 +607,6 @@ async function caricaStatoFirebase() {
                 saldoIniziale = 0;
             }
             primaNota = []; contanti = []; fattureFornitori = []; assClienti = []; pagaDdt = []; nextFatturaId = 1;
-            // Salva il nuovo mese vuoto automaticamente
-            await salvaStatoFirebase();
         }
         document.getElementById('saldoInizialeHeader').value = saldoIniziale ? formatNumber(saldoIniziale) : '';
         resetModificheNonSalvate();
@@ -607,18 +615,36 @@ async function caricaStatoFirebase() {
     } catch(e) { console.error("ERRORE caricamento: " + e.message); }
 }
 
-// ==================== DROPDOWN DINAMICI ====================
+// ==================== DROPDOWN DINAMICI ANNO/MESE ====================
+let anniDisponibili = [];
+let mesiDisponibiliPerAnno = {};
+
 async function popolaAnniMeseDinamici() {
     try {
         const snapshot = await db.collection('contabilita').get();
         const anniSet = new Set();
+        const mesiMap = new Map(); // key: anno, value: Set di mesi
         snapshot.forEach(doc => {
             const data = doc.data();
-            if (data.anno) anniSet.add(data.anno);
+            const anno = data.anno;
+            const mese = data.mese;
+            if (anno && mese !== undefined) {
+                anniSet.add(anno);
+                if (!mesiMap.has(anno)) mesiMap.set(anno, new Set());
+                mesiMap.get(anno).add(mese);
+            }
         });
-        if (anniSet.size === 0) anniSet.add(new Date().getFullYear());
         anniDisponibili = Array.from(anniSet).sort((a,b)=>a-b);
-        
+        mesiDisponibiliPerAnno = {};
+        for (let [anno, mesiSet] of mesiMap.entries()) {
+            mesiDisponibiliPerAnno[anno] = Array.from(mesiSet).sort((a,b)=>a-b);
+        }
+        // Se non ci sono anni, aggiungiamo l'anno corrente come default
+        if (anniDisponibili.length === 0) {
+            anniDisponibili = [currentYear];
+            mesiDisponibiliPerAnno[currentYear] = [currentMonth];
+        }
+        // Aggiorna select anno
         const annoSelect = document.getElementById('annoSelect');
         const oldAnno = annoSelect.value ? parseInt(annoSelect.value) : currentYear;
         annoSelect.innerHTML = '';
@@ -629,74 +655,145 @@ async function popolaAnniMeseDinamici() {
             if (a === oldAnno) opt.selected = true;
             annoSelect.appendChild(opt);
         }
-        aggiornaMeseSelectTuttiMesi();
-    } catch(e) { console.error(e); }
+        // Aggiorna select mese in base all'anno selezionato
+        const annoSelezionato = parseInt(annoSelect.value);
+        const mesiDisponibili = mesiDisponibiliPerAnno[annoSelezionato] || [];
+        const meseSelect = document.getElementById('meseSelect');
+        const oldMese = meseSelect.value ? parseInt(meseSelect.value) : currentMonth;
+        meseSelect.innerHTML = '';
+        for (let m of mesiDisponibili) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = mesiLista[m];
+            if (m === oldMese) opt.selected = true;
+            meseSelect.appendChild(opt);
+        }
+        // Se il mese selezionato non è più valido, prendi il primo disponibile
+        if (meseSelect.options.length === 0) {
+            const primoMese = mesiDisponibili[0] !== undefined ? mesiDisponibili[0] : currentMonth;
+            const opt = document.createElement('option');
+            opt.value = primoMese;
+            opt.textContent = mesiLista[primoMese];
+            meseSelect.appendChild(opt);
+        }
+        // Ora sincronizza currentYear, currentMonth con i valori selezionati
+        const nuovoAnno = parseInt(annoSelect.value);
+        const nuovoMese = parseInt(meseSelect.value);
+        if (nuovoAnno !== currentYear || nuovoMese !== currentMonth) {
+            currentYear = nuovoAnno;
+            currentMonth = nuovoMese;
+            await caricaStatoFirebase();
+        }
+    } catch(e) { console.error("Errore popolamento dropdown dinamici:", e); }
 }
 
-function aggiornaMeseSelectTuttiMesi() {
+async function aggiornaMeseSelectInBaseAnno() {
+    const annoSelect = document.getElementById('annoSelect');
+    const anno = parseInt(annoSelect.value);
+    const mesiDisponibili = mesiDisponibiliPerAnno[anno] || [];
     const meseSelect = document.getElementById('meseSelect');
-    const anno = parseInt(document.getElementById('annoSelect').value);
-    const currentMeseVal = meseSelect.value ? parseInt(meseSelect.value) : currentMonth;
+    const currentMese = meseSelect.value ? parseInt(meseSelect.value) : currentMonth;
     meseSelect.innerHTML = '';
-    for (let m = 0; m < 12; m++) {
+    for (let m of mesiDisponibili) {
         const opt = document.createElement('option');
         opt.value = m;
         opt.textContent = mesiLista[m];
-        if (m === currentMeseVal) opt.selected = true;
+        if (m === currentMese) opt.selected = true;
         meseSelect.appendChild(opt);
     }
+    if (meseSelect.options.length === 0) {
+        const primoMese = mesiDisponibili[0] !== undefined ? mesiDisponibili[0] : currentMonth;
+        const opt = document.createElement('option');
+        opt.value = primoMese;
+        opt.textContent = mesiLista[primoMese];
+        meseSelect.appendChild(opt);
+    }
+    // Forza il cambio mese se l'utente ha cambiato anno manualmente
+    await cambiaMeseDaSelect();
 }
 
-// ==================== GESTIONE CAMBIO MESE ====================
-function mostraModaleConferma(messaggio) {
-    return new Promise((resolve) => {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>⚠️ MODIFICHE NON SALVATE</h3>
-                <p>${messaggio}</p>
-                <p>Vuoi salvare prima di proseguire?</p>
-                <div class="modal-buttons">
-                    <button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button>
-                    <button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
-                    <button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
-        document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
-        document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
-    });
-}
-
+// ==================== GESTIONE CAMBIO MESE CON SALVATAGGIO AUTOMATICO ====================
 async function cambiaMeseDaSelect() {
     const nuovoAnno = parseInt(document.getElementById('annoSelect').value);
     const nuovoMese = parseInt(document.getElementById('meseSelect').value);
     if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
-    
     if (modificheNonSalvate) {
         const ok = await mostraModaleConferma(`Ci sono modifiche non salvate nel mese di <strong>${mesiLista[currentMonth]} ${currentYear}</strong>. Vuoi salvare prima di cambiare mese?`);
         if (!ok) {
+            // Ripristina i select ai valori correnti
             document.getElementById('annoSelect').value = currentYear;
             document.getElementById('meseSelect').value = currentMonth;
             return;
         }
         await salvaStatoFirebase();
-    } else {
+    }
+    // Salva automaticamente il mese corrente (anche se non ci sono modifiche, per sicurezza)
+    if (!modificheNonSalvate) {
         await salvaStatoFirebase();
     }
-    
     currentYear = nuovoAnno;
     currentMonth = nuovoMese;
     await caricaStatoFirebase();
-    aggiornaRiepilogoHeader();
-    aggiornaTabelle();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
 
-// ==================== GESTIONE TABELLE ====================
+// ==================== FUNZIONI DI CANCELLAZIONE ====================
+async function cancellaMeseCorrente() {
+    const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}? Questa operazione è IRREVERSIBILE.`);
+    if (!conferma) return;
+    try {
+        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).delete();
+        showToast(`🗑 Mese ${mesiLista[currentMonth]} ${currentYear} eliminato.`);
+        // Ricarica dropdown dinamici
+        await popolaAnniMeseDinamici();
+        // Ora carica il primo mese disponibile (se esiste) altrimenti crea un nuovo mese vuoto
+        const annoSelect = document.getElementById('annoSelect');
+        const meseSelect = document.getElementById('meseSelect');
+        if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
+            currentYear = parseInt(annoSelect.value);
+            currentMonth = parseInt(meseSelect.value);
+            await caricaStatoFirebase();
+        } else {
+            // Nessun dato: crea mese corrente
+            currentYear = new Date().getFullYear();
+            currentMonth = new Date().getMonth();
+            await caricaStatoFirebase();
+            await popolaAnniMeseDinamici();
+        }
+    } catch(e) { showToast("Errore durante l'eliminazione del mese", true); }
+}
+
+async function cancellaAnnoCorrente() {
+    const anno = currentYear;
+    const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati dell'anno ${anno}? Questa operazione è IRREVERSIBILE e cancellerà TUTTI i mesi di quell'anno.`);
+    if (!conferma) return;
+    try {
+        // Ottieni tutti i documenti con anno = anno
+        const snapshot = await db.collection('contabilita').where('anno', '==', anno).get();
+        const batch = db.batch();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        showToast(`🗑 Anno ${anno} eliminato completamente.`);
+        // Ricarica dropdown dinamici
+        await popolaAnniMeseDinamici();
+        // Carica il primo anno/mese disponibile
+        const annoSelect = document.getElementById('annoSelect');
+        const meseSelect = document.getElementById('meseSelect');
+        if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
+            currentYear = parseInt(annoSelect.value);
+            currentMonth = parseInt(meseSelect.value);
+            await caricaStatoFirebase();
+        } else {
+            // Nessun dato: crea mese corrente
+            currentYear = new Date().getFullYear();
+            currentMonth = new Date().getMonth();
+            await caricaStatoFirebase();
+            await popolaAnniMeseDinamici();
+        }
+    } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
+}
+
+// ==================== GESTIONE TABELLE, SCHEDE, FORM (invariato) ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -743,7 +840,7 @@ function aggiornaTabelle() {
             verCell.appendChild(verChk);
         });
     }
-    
+
     // Contanti
     const contantiBody = document.getElementById('contantiBody');
     if (contantiBody) {
@@ -760,7 +857,7 @@ function aggiornaTabelle() {
             const impCell = row.insertCell(4); impCell.className = 'text-right'; impCell.innerHTML = '<strong>' + formatNumber(item.importo) + ' €</strong>';
         });
     }
-    
+
     // Fornitori
     const fornitoriBody = document.getElementById('fornitoriBody');
     if (fornitoriBody) {
@@ -777,7 +874,7 @@ function aggiornaTabelle() {
             row.insertCell(4).innerHTML = item.numeroFattura || '';
         });
     }
-    
+
     // ASS Clienti
     const assClientiBody = document.getElementById('assClientiBody');
     if (assClientiBody) {
@@ -796,7 +893,7 @@ function aggiornaTabelle() {
             row.insertCell(6).innerHTML = item.dataDoc || '';
         });
     }
-    
+
     // Paga DDT
     const pagaDdtBody = document.getElementById('pagaDdtBody');
     if (pagaDdtBody) {
@@ -813,7 +910,7 @@ function aggiornaTabelle() {
             const impCell = row.insertCell(4); impCell.className = 'text-right'; impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
         });
     }
-    
+
     aggiornaPulsantiAzione();
     aggiornaRiepilogoHeader();
 }
@@ -961,13 +1058,6 @@ function pulisciForm() {
 }
 
 async function memorizzaNuovo() {
-    const selectedAnno = parseInt(document.getElementById('annoSelect').value);
-    const selectedMese = parseInt(document.getElementById('meseSelect').value);
-    if (selectedAnno !== currentYear || selectedMese !== currentMonth) {
-        showToast(`⚠️ Il mese visualizzato è ${mesiLista[currentMonth]} ${currentYear}. Per inserire in ${mesiLista[selectedMese]} ${selectedAnno}, cambia prima mese usando i filtri.`, true);
-        return;
-    }
-    
     if (currentScheda === 'primanota') {
         const data = document.getElementById('formDataPrimaNota')?.value;
         const descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
@@ -1032,56 +1122,30 @@ async function memorizzaNuovo() {
     }
 }
 
-// ==================== CANCELLAZIONE MESE E ANNO ====================
-async function cancellaMeseCorrente() {
-    const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}? Questa operazione è IRREVERSIBILE.`);
-    if (!conferma) return;
-    try {
-        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).delete();
-        showToast(`🗑 Mese ${mesiLista[currentMonth]} ${currentYear} eliminato.`);
-        await popolaAnniMeseDinamici();
-        const annoSelect = document.getElementById('annoSelect');
-        const meseSelect = document.getElementById('meseSelect');
-        if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
-            currentYear = parseInt(annoSelect.value);
-            currentMonth = parseInt(meseSelect.value);
-            await caricaStatoFirebase();
-        } else {
-            currentYear = new Date().getFullYear();
-            currentMonth = new Date().getMonth();
-            await caricaStatoFirebase();
-            await popolaAnniMeseDinamici();
-        }
-    } catch(e) { showToast("Errore durante l'eliminazione del mese", true); }
+function mostraModaleConferma(messaggio) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>⚠️ MODIFICHE NON SALVATE</h3>
+                <p>${messaggio}</p>
+                <p>Vuoi salvare prima di proseguire?</p>
+                <div class="modal-buttons">
+                    <button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button>
+                    <button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
+                    <button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
+        document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
+        document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
+    });
 }
 
-async function cancellaAnnoCorrente() {
-    const anno = currentYear;
-    const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati dell'anno ${anno}? Questa operazione è IRREVERSIBILE e cancellerà TUTTI i mesi di quell'anno.`);
-    if (!conferma) return;
-    try {
-        const snapshot = await db.collection('contabilita').where('anno', '==', anno).get();
-        const batch = db.batch();
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        showToast(`🗑 Anno ${anno} eliminato completamente.`);
-        await popolaAnniMeseDinamici();
-        const annoSelect = document.getElementById('annoSelect');
-        const meseSelect = document.getElementById('meseSelect');
-        if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
-            currentYear = parseInt(annoSelect.value);
-            currentMonth = parseInt(meseSelect.value);
-            await caricaStatoFirebase();
-        } else {
-            currentYear = new Date().getFullYear();
-            currentMonth = new Date().getMonth();
-            await caricaStatoFirebase();
-            await popolaAnniMeseDinamici();
-        }
-    } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
-}
-
-// ==================== ESPORTAZIONI (completi) ====================
+// ==================== ESPORTAZIONI (invariate) ====================
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
@@ -1119,7 +1183,7 @@ function esportaReportRagioniere() {
     <h3>📋 PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `<tr><td><input type="checkbox"></td><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
         <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
     </table>
     <div class="footer">Documento generato da inSAPA - ${new Date().toLocaleDateString('it-IT')}</div>
@@ -1166,17 +1230,17 @@ function esportaPDFMese() {
     <h3>PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `<tr><td><input type="checkbox"></td><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
         <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
     </table>
     <h3>CONTANTI</h3>
-    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td><input type="checkbox"></td><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
     <h3>FORNITORI</h3>
-    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td><input type="checkbox"></td><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table>
+    </table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table>
     <h3>ASS_CONT_CLIENTI</h3>
-    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></tr>
     <h3>PAGA_DDT_CLIENTI</h3>
-    <tr><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
     <script>window.onload=()=>window.print()<\/script>
     </body></html>`);
     w.document.close();
@@ -1225,7 +1289,7 @@ function esportaCSV(perAnno) {
     let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = perAnno ? `contabilita_${currentYear}_anno.csv` : `contabilita_${currentYear}_${String(currentMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
 
-// ==================== EVENT LISTENER E AVVIO ====================
+// ==================== ELIMINAZIONE RIGHE E ALTRE FUNZIONI (invariate) ====================
 document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => { document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllContanti')?.addEventListener('change', (e) => { document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllFornitori')?.addEventListener('change', (e) => { document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
@@ -1294,6 +1358,7 @@ function saveEditedRow(tipo, idx) {
 function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
 function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
 
+// ==================== HAMBURGER MENU & SIDEBAR MOBILE ====================
 const hamburgerBtn2 = document.getElementById('hamburgerBtn');
 const navGrid2 = document.getElementById('navGrid');
 if (hamburgerBtn2 && navGrid2) {
@@ -1315,6 +1380,7 @@ window.addEventListener('beforeunload', (e) => {
     }
 });
 
+// ==================== PULSANTI PRINCIPALI ====================
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
@@ -1331,11 +1397,14 @@ document.getElementById('btnSalvaModificaAssClienti').onclick = () => salvaModif
 document.getElementById('btnEliminaSelezionatiAssClienti').onclick = () => eliminaSelezionati('assclienti');
 document.getElementById('btnSalvaModificaPagaDdt').onclick = () => salvaModificheSelezionate('pagaddt');
 document.getElementById('btnEliminaSelezionatiPagaDdt').onclick = () => eliminaSelezionati('pagaddt');
+
+// Pulsanti di cancellazione mese/anno
 document.getElementById('btnCancellaMese').onclick = cancellaMeseCorrente;
 document.getElementById('btnCancellaAnno').onclick = cancellaAnnoCorrente;
 
+// Gestione dropdown dinamici e cambio mese
 document.getElementById('annoSelect').onchange = async () => {
-    aggiornaMeseSelectTuttiMesi();
+    await aggiornaMeseSelectInBaseAnno();
     await cambiaMeseDaSelect();
 };
 document.getElementById('meseSelect').onchange = async () => {
@@ -1349,6 +1418,7 @@ document.getElementById('saldoInizialeHeader').onchange = async e => {
 };
 setupImportField('saldoInizialeHeader');
 
+// Logout e navigazione
 document.getElementById('btnVaiAgenti').onclick = async () => {
     if (modificheNonSalvate) {
         const ok = await mostraModaleConferma(`Hai modifiche non salvate nel mese corrente. Vuoi salvare prima di andare agli agenti?`);
@@ -1364,6 +1434,7 @@ document.getElementById('navLogout').onclick = async () => {
     window.location.href = 'index.html';
 };
 
+// Cambio password
 let changePwdVisible = false;
 document.getElementById('navChangePwd').onclick = () => { if (!changePwdVisible) { document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; } };
 document.getElementById('btnAnnullaPassword').onclick = () => { document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false; };
@@ -1378,6 +1449,7 @@ document.getElementById('btnSalvaPassword').onclick = () => {
     document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false;
 };
 
+// Floppy disk dropdown
 const floppyBtn2 = document.getElementById('floppyBtn');
 const dropdownMenu2 = document.getElementById('dropdownMenu');
 function toggleDropdown() { dropdownMenu2.classList.toggle('show'); }
@@ -1390,10 +1462,13 @@ document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown();
 document.getElementById('dropdownCSVMese').onclick = () => { closeDropdown(); esportaCSV(false); };
 document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); esportaCSV(true); };
 
+// Carica file JSON (rimasto per compatibilità)
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 
+// Avvio
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
+    // Forza il caricamento del primo mese disponibile
     const annoSelect = document.getElementById('annoSelect');
     const meseSelect = document.getElementById('meseSelect');
     if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
