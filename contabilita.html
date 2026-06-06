@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.53</title>
+    <title>inSAPA - Contabilità vC.5.54</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -230,7 +230,7 @@
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
 
-        /* main e sidebar: ora senza position sticky e senza comportamento mobile toggle */
+        /* main e sidebar: bloccata sticky */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         .sidebar {
             width: 380px;
@@ -238,8 +238,9 @@
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 200px;  /* bloccato sotto l'header */
             height: fit-content;
-            /* rimosso position: sticky e top */
         }
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .form-row .form-group { flex: 1; margin-bottom: 0; }
@@ -294,13 +295,12 @@
             .sticky-toolbar::-webkit-scrollbar { display: none; }
             .toolbar-btn { flex-shrink: 0; font-size: 0.7rem; padding: 10px 14px; white-space: nowrap; }
             .main-container { flex-direction: column; }
-            /* Sidebar mobile: sempre visibile, senza comportamenti di toggle */
             .sidebar {
                 width: 100%;
                 margin-bottom: 15px;
                 padding: 15px;
-                position: relative;
-                /* niente max-height, niente overflow hidden, niente pseudo-elemento */
+                position: sticky;
+                top: 200px;  /* mantiene sticky anche su mobile */
             }
             .form-row { flex-direction: column; gap: 10px; }
             .tabella { font-size: 0.7rem; min-width: 500px; }
@@ -416,7 +416,7 @@
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></td></thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
                         <tbody id="assClientiBody"></tbody>
                     </table>
                     <div id="assClientiActionButtons" class="action-buttons">
@@ -555,16 +555,20 @@ function setupImportField(fieldId) {
     }
 }
 
-// ==================== SPOSTA RIGA SE DATA IN ALTRO MESE ====================
-async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
+// ==================== SPOSTA RIGA CON CONFERMA ====================
+async function spostaRigaConConferma(riga, tipo, dataYMD) {
     if (!dataYMD) return false;
     const [annoStr, meseStr] = dataYMD.split('-');
     const annoDest = parseInt(annoStr);
-    const meseDest = parseInt(meseStr) - 1; // 0-index
+    const meseDest = parseInt(meseStr) - 1;
     if (isNaN(annoDest) || isNaN(meseDest)) return false;
-    if (annoDest === currentYear && meseDest === currentMonth) return false;
+    if (annoDest === currentYear && meseDest === currentMonth) return false; // stesso mese, nessun alert
 
-    // Sposta
+    // Chiedi conferma all'utente
+    const conferma = confirm(`⚠️ Attenzione: la data appartiene a ${mesiLista[meseDest]} ${annoDest}, mentre sei su ${mesiLista[currentMonth]} ${currentYear}. Vuoi proseguire con l'inserimento e passare al mese/anno di destinazione?`);
+    if (!conferma) return false;
+
+    // Sposta la riga (crea il mese se necessario)
     const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
     const docSnap = await docRef.get();
     let targetData = {};
@@ -605,7 +609,8 @@ async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
 
     await docRef.set(targetData);
 
-    // Rimuovi dall'array corrente
+    // Rimuovi dall'array corrente SOLO se la riga era già stata aggiunta (caso modifica)
+    // Per nuovo inserimento, la riga non è ancora negli array.
     if (tipo === 'primanota') {
         const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
         if (idx !== -1) primaNota.splice(idx, 1);
@@ -623,8 +628,9 @@ async function spostaRigaSeNecessario(riga, tipo, dataYMD) {
         if (idx !== -1) pagaDdt.splice(idx, 1);
     }
 
-    await salvaStatoFirebase();
+    await salvaStatoFirebase(); // salva il mese corrente (senza la riga)
 
+    // Cambia mese corrente
     currentYear = annoDest;
     currentMonth = meseDest;
     await caricaStatoFirebase();
@@ -1142,7 +1148,7 @@ function pulisciForm() {
     }
 }
 
-// ==================== AGGIUNTA E MODIFICA RIGHE CON SPOSTAMENTO ====================
+// ==================== MEMORIZZA NUOVO CON CONFERMA ====================
 async function memorizzaNuovo() {
     if (currentScheda === 'primanota') {
         const data = document.getElementById('formDataPrimaNota')?.value;
@@ -1153,14 +1159,22 @@ async function memorizzaNuovo() {
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
         const nuovaRiga = { data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
-        const spostato = await spostaRigaSeNecessario(nuovaRiga, 'primanota', data);
+        const spostato = await spostaRigaConConferma(nuovaRiga, 'primanota', data);
         if (!spostato) {
-            primaNota.push(nuovaRiga);
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            pulisciForm();
-            showToast("✅ Riga aggiunta!");
+            // stesso mese o utente ha annullato
+            if (spostato === false && (data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
+                // stesso mese, inserisci
+                primaNota.push(nuovaRiga);
+                await salvaStatoFirebase();
+                aggiornaTabelle();
+                pulisciForm();
+                showToast("✅ Riga aggiunta!");
+            } else if (spostato === false) {
+                // utente ha annullato lo spostamento
+                showToast("Inserimento annullato.", true);
+            }
         } else {
+            // spostato: già cambiato mese, ricarica
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1173,13 +1187,17 @@ async function memorizzaNuovo() {
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { data: formatDate(data), descrizione: descrizione, importo: importo };
-        const spostato = await spostaRigaSeNecessario(nuovaRiga, 'contanti', data);
+        const spostato = await spostaRigaConConferma(nuovaRiga, 'contanti', data);
         if (!spostato) {
-            contanti.push(nuovaRiga);
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            pulisciForm();
-            showToast("✅ Incasso contanti aggiunto!");
+            if ((data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
+                contanti.push(nuovaRiga);
+                await salvaStatoFirebase();
+                aggiornaTabelle();
+                pulisciForm();
+                showToast("✅ Incasso contanti aggiunto!");
+            } else {
+                showToast("Inserimento annullato.", true);
+            }
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1192,14 +1210,18 @@ async function memorizzaNuovo() {
         const numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
         if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return; }
         const nuovaRiga = { data: formatDate(data), fornitore: fornitore, numeroFattura: numeroFattura };
-        const spostato = await spostaRigaSeNecessario(nuovaRiga, 'fornitori', data);
+        const spostato = await spostaRigaConConferma(nuovaRiga, 'fornitori', data);
         if (!spostato) {
-            fattureFornitori.push(nuovaRiga);
-            nextFatturaId++;
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            pulisciForm();
-            showToast("✅ Fattura fornitore aggiunta!");
+            if ((data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
+                fattureFornitori.push(nuovaRiga);
+                nextFatturaId++;
+                await salvaStatoFirebase();
+                aggiornaTabelle();
+                pulisciForm();
+                showToast("✅ Fattura fornitore aggiunta!");
+            } else {
+                showToast("Inserimento annullato.", true);
+            }
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1216,13 +1238,17 @@ async function memorizzaNuovo() {
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
         const dataRif = dataDoc || getTodayDate();
-        const spostato = await spostaRigaSeNecessario(nuovaRiga, 'assclienti', dataRif);
+        const spostato = await spostaRigaConConferma(nuovaRiga, 'assclienti', dataRif);
         if (!spostato) {
-            assClienti.push(nuovaRiga);
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            pulisciForm();
-            showToast("✅ Riga ASS Clienti aggiunta!");
+            if ((dataRif.split('-')[1]-1) === currentMonth && parseInt(dataRif.split('-')[0]) === currentYear) {
+                assClienti.push(nuovaRiga);
+                await salvaStatoFirebase();
+                aggiornaTabelle();
+                pulisciForm();
+                showToast("✅ Riga ASS Clienti aggiunta!");
+            } else {
+                showToast("Inserimento annullato.", true);
+            }
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1238,13 +1264,17 @@ async function memorizzaNuovo() {
         if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { nome: nome, numDoc: numDoc, data: data ? formatDate(data) : '', importo: importo };
-        const spostato = await spostaRigaSeNecessario(nuovaRiga, 'pagaddt', data);
+        const spostato = await spostaRigaConConferma(nuovaRiga, 'pagaddt', data);
         if (!spostato) {
-            pagaDdt.push(nuovaRiga);
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            pulisciForm();
-            showToast("✅ Riga Paga DDT aggiunta!");
+            if ((data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
+                pagaDdt.push(nuovaRiga);
+                await salvaStatoFirebase();
+                aggiornaTabelle();
+                pulisciForm();
+                showToast("✅ Riga Paga DDT aggiunta!");
+            } else {
+                showToast("Inserimento annullato.", true);
+            }
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1315,7 +1345,7 @@ function esportaReportRagioniere() {
     <h3>📋 PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</tr></tr>`).join('')}</tbody>
         <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
     </table>
     <div class="footer">Documento generato da inSAPA - ${new Date().toLocaleDateString('it-IT')}</div>
@@ -1362,17 +1392,50 @@ function esportaPDFMese() {
     <h3>PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
-        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
+        <tbody>${primaNota.map((r,i) => `tr
+<td>${i+1}</td>
+<td>${r.data||''}</td>
+<td>${r.descrizione||''}</td>
+<td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td>
+<td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td>
+<td>${r.verificato?'✅':''}</td>
+</tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td>
+<td class="text-right"><strong>${formatNumber(ta)} €</strong></td>
+<td class="text-right"><strong>${formatNumber(td)} €</strong></td>
+<td></td>
+</tr></tfoot>
     </table>
     <h3>CONTANTI</h3>
-    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr>
+<td>${i+1}</td>
+<td>${r.data||''}</td>
+<td>${r.descrizione||''}</td>
+<td class="text-right">${formatNumber(r.importo)} €</td>
+</tr>`).join('')}</tbody></table>
     <h3>FORNITORI</h3>
-    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr>
+<td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td>
+<td>${f.data||''}</td>
+<td>${f.fornitore||''}</td>
+<td>${f.numeroFattura||''}</td>
+</tr>`).join('')}</tbody></table>
     <h3>ASS_CONT_CLIENTI</h3>
-    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr>
+<td>${r.dataIns||''}</td>
+<td>${r.descrizione||''}</td>
+<td>${r.nome||''}</td>
+<td class="text-right">${formatNumber(r.importo)} €</td>
+<td>${r.numDoc||''}</td>
+<td>${r.dataDoc||''}</td>
+</tr>`).join('')}</tbody></table>
     <h3>PAGA_DDT_CLIENTI</h3>
-    <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr>
+<td>${r.nome||''}</td>
+<td>${r.numDoc||''}</td>
+<td>${r.data||''}</td>
+<td class="text-right">${formatNumber(r.importo)} €</td>
+</tr>`).join('')}</tbody></table>
     <script>window.onload=()=>window.print()<\/script>
     </body></html>`);
     w.document.close();
@@ -1491,14 +1554,20 @@ async function saveEditedRowWithMove(tipo, idx) {
 
     if (!newRiga) return;
 
-    const spostato = await spostaRigaSeNecessario(newRiga, tipo, dataRif);
+    const spostato = await spostaRigaConConferma(newRiga, tipo, dataRif);
     if (!spostato) {
-        if (tipo === 'primanota') primaNota[idx] = newRiga;
-        else if (tipo === 'assclienti') assClienti[idx] = newRiga;
-        else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
-        await salvaStatoFirebase();
-        aggiornaTabelle();
-        showToast("✅ Modifiche salvate!");
+        // stesso mese o annullato
+        const [annoRif, meseRif] = dataRif.split('-');
+        if (parseInt(annoRif) === currentYear && (parseInt(meseRif)-1) === currentMonth) {
+            if (tipo === 'primanota') primaNota[idx] = newRiga;
+            else if (tipo === 'assclienti') assClienti[idx] = newRiga;
+            else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
+            await salvaStatoFirebase();
+            aggiornaTabelle();
+            showToast("✅ Modifiche salvate!");
+        } else {
+            showToast("Modifica annullata.", true);
+        }
     } else {
         await caricaStatoFirebase();
         aggiornaTabelle();
@@ -1516,8 +1585,6 @@ if (hamburgerBtn2 && navGrid2) {
     hamburgerBtn2.addEventListener('click', (e) => { e.stopPropagation(); navGrid2.classList.toggle('open'); });
     document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) { navGrid2.classList.remove('open'); } });
 }
-
-// Non c'è più il toggle per la sidebar (rimosso)
 
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) {
