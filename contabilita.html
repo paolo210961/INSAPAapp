@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.46</title>
+    <title>inSAPA - Contabilità vC.5.47</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -63,12 +63,26 @@
         }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
 
+        .summary-header {
+            display: flex;
+            gap: 25px;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .summary-header span { font-weight: normal; margin-left: 5px; }
+        .positive { color: #27ae60; }
+        .negative { color: #e74c3c; }
+
         .floppy-container {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex: 1;
         }
         .floppy-btn {
             background: none;
@@ -182,39 +196,6 @@
         .toolbar-btn.active { background: #3498db; color: white; }
         .toolbar-btn.btn-yellow { background: #f1c40f; color: #2c3e50; }
         .toolbar-btn.btn-yellow:hover { background: #e67e22; color: white; }
-
-        .avviso-modifiche {
-            position: sticky;
-            top: 138px;
-            background: #e74c3c;
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-            z-index: 998;
-            display: none;
-            border-bottom: 2px solid #c0392b;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .avviso-modifiche.show { display: block; }
-
-        .sticky-summary {
-            position: sticky;
-            top: 180px;
-            background: white;
-            padding: 12px 20px;
-            border-bottom: 1px solid #ddd;
-            z-index: 997;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-        }
-        .summary-content {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            font-weight: bold;
-            color: #2c3e50;
-        }
 
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
 
@@ -344,7 +325,7 @@
             100% { opacity: 0; display: none; }
         }
         
-        .confirm-modal-overlay {
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -356,7 +337,7 @@
             align-items: center;
             z-index: 3000;
         }
-        .confirm-modal {
+        .modal-content {
             background: white;
             border-radius: 20px;
             padding: 25px;
@@ -365,21 +346,21 @@
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .confirm-modal h3 {
+        .modal-content h3 {
             margin: 0 0 15px 0;
             color: #e74c3c;
         }
-        .confirm-modal p {
+        .modal-content p {
             margin: 10px 0;
             color: #2c3e50;
         }
-        .confirm-modal-buttons {
+        .modal-buttons {
             display: flex;
             gap: 10px;
             margin-top: 20px;
             justify-content: center;
         }
-        .confirm-modal-buttons button {
+        .modal-buttons button {
             width: auto;
             padding: 10px 20px;
             margin: 0;
@@ -393,7 +374,8 @@
             .header-row { flex-direction: column; align-items: stretch; }
             .logo-rettangolo { width: 100%; margin: 0 auto; }
             .logo-area { justify-content: center; flex-direction: column; }
-            .floppy-container { order: 2; margin: 10px 0; }
+            .summary-header { order: 2; justify-content: center; margin: 10px 0; font-size: 0.7rem; gap: 15px; flex-wrap: wrap; }
+            .floppy-container { order: 3; }
             .dropdown-menu { left: 50%; transform: translateX(-50%); min-width: 200px; }
             .nav-box { position: relative; width: 100%; text-align: center; }
             .hamburger-btn { display: block; margin: 0 auto; }
@@ -454,11 +436,8 @@
                 white-space: nowrap;
             }
             .sticky-toolbar { top: 110px; }
-            .avviso-modifiche { top: 156px; font-size: 0.75rem; padding: 10px; }
-            .sticky-summary { top: 198px; }
             .tabella { font-size: 0.7rem; min-width: 500px; }
             .logo-tooltip { display: none; }
-            /* correzione sticky sidebar su mobile: non serve perché non è sticky */
             .sidebar { position: relative; top: 0; }
         }
     </style>
@@ -475,6 +454,9 @@
                 </div>
             </div>
             
+            <!-- Box riepilogo Avere/Dare/Saldo inserito qui -->
+            <div id="summaryHeader" class="summary-header"></div>
+
             <div class="floppy-container">
                 <button id="floppyBtn" class="floppy-btn">💾</button>
                 <div id="dropdownMenu" class="dropdown-menu">
@@ -507,16 +489,6 @@
         <button id="toolbarCaricaMese" class="toolbar-btn btn-yellow">📂 CARICA MESE</button>
         <button id="toolbarRiprendiCorrente" class="toolbar-btn btn-yellow">📅 RIPRENDI MESE CORRENTE</button>
     </div>
-
-    <div id="avvisoModifiche" class="avviso-modifiche">
-        ⚠️ ATTENZIONE: Hai modifiche non salvate! Premi il tasto "MEMORIZZA" (💾) prima di cambiare mese o uscire.
-    </div>
-
-    <div id="stickySummary" class="sticky-summary">
-        <div id="saldoInfo" class="summary-content"></div>
-    </div>
-
-    <div class="version" id="appVersion">vC.5.46 - Contabilità</div>
 
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
@@ -568,7 +540,7 @@
                             <tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr>
                         </thead>
                         <tbody id="primaNotaBody"></tbody>
-                    追赶
+                    </table>
                     <div id="primaNotaActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
@@ -580,7 +552,7 @@
                     <table class="tabella" id="tabellaContanti">
                         <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
-                    追赶
+                    </table>
                     <div id="contantiActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
@@ -660,10 +632,8 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-// ==================== LINK E LOGO DA FILE ESTERNI ====================
-let linkPrincipale = "";
-let linkSecondario = "";
-
+// ==================== LINK E LOGO ====================
+let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -675,51 +645,20 @@ async function caricaLinkDaFile() {
         }
     } catch(e) { console.warn("Errore caricamento link.html:", e); }
 }
-
-function apriLinkPrincipale() {
-    if (linkPrincipale && linkPrincipale !== "") {
-        window.open(linkPrincipale, '_blank');
-        showToast("🔗 Apertura link principale");
-    } else {
-        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
-    }
-}
-
-function apriLinkSecondario() {
-    if (linkSecondario && linkSecondario !== "") {
-        window.open(linkSecondario, '_blank');
-        showToast("🔗 Apertura link secondario");
-    } else {
-        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
-    }
-}
-
+function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("🔗 Link principale"); } else showToast("⚠️ Link principale non configurato", true); }
+function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("🔗 Link secondario"); } else showToast("⚠️ Link secondario non configurato", true); }
 function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    
     fetch('icons/logo.png').then(r => { if(r.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.jpg').then(r2 => { if(r2.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
-
 const logoDivElem = document.getElementById('logoRettangolo');
 let lastTap = 0;
-
 logoDivElem.addEventListener('click', (e) => {
     const now = new Date().getTime();
     const tapLength = now - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
-        e.stopPropagation();
-        apriLinkSecondario();
-        lastTap = 0;
-    } else {
-        lastTap = now;
-        setTimeout(() => {
-            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
-                apriLinkPrincipale();
-                lastTap = 0;
-            }
-        }, 300);
-    }
+    if (tapLength < 300 && tapLength > 0) { e.stopPropagation(); apriLinkSecondario(); lastTap = 0; }
+    else { lastTap = now; setTimeout(() => { if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) { apriLinkPrincipale(); lastTap = 0; } }, 300); }
 });
 
 // ==================== FUNZIONI UTILI ====================
@@ -759,20 +698,11 @@ function formatDateInput(d) {
 
 function getTodayDate() { return new Date().toISOString().slice(0, 10); }
 
-function aggiornaAvvisoModifiche() {
-    const avviso = document.getElementById('avvisoModifiche');
-    if (modificheNonSalvate) avviso.classList.add('show');
-    else avviso.classList.remove('show');
-}
-
 function marcaModificheNonSalvate() {
     modificheNonSalvate = true;
-    aggiornaAvvisoModifiche();
 }
-
 function resetModificheNonSalvate() {
     modificheNonSalvate = false;
-    aggiornaAvvisoModifiche();
 }
 
 function setupImportField(fieldId) {
@@ -846,31 +776,32 @@ async function caricaStatoFirebase() {
         }
         resetModificheNonSalvate();
         aggiornaTabelle();
-        aggiornaRiepilogo();
+        aggiornaRiepilogoHeader();
     } catch(e) { console.error("ERRORE caricamento: " + e.message); }
 }
 
 // ==================== GESTIONE TABELLE ====================
-function aggiornaRiepilogo() {
-    const summaryDiv = document.getElementById('saldoInfo');
+function aggiornaRiepilogoHeader() {
+    const summaryDiv = document.getElementById('summaryHeader');
+    if (!summaryDiv) return;
     if (currentScheda === 'primanota') {
         let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
         let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
         let sal = saldoIniziale + ta - td;
-        summaryDiv.innerHTML = `<div><strong>📈 Totale Avere:</strong> ${formatNumber(ta)} €</div>
-                                <div><strong>📉 Totale Dare:</strong> ${formatNumber(td)} €</div>
-                                <div><strong>💰 Saldo mese:</strong> ${formatNumber(sal)} €</div>`;
+        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div>
+                                <div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div>
+                                <div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div>`;
     } else if (currentScheda === 'contanti') {
         let tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        summaryDiv.innerHTML = `<div><strong>💵 Totale Incasso Contanti:</strong> ${formatNumber(tc)} €</div>`;
+        summaryDiv.innerHTML = `<div>💵 Incasso contanti: <span class="positive">${formatNumber(tc)} €</span></div>`;
     } else if (currentScheda === 'fornitori') {
-        summaryDiv.innerHTML = `<div><strong>📄 Numero fatture fornitori:</strong> ${fattureFornitori.length}</div>`;
+        summaryDiv.innerHTML = `<div>📄 Numero fatture fornitori: ${fattureFornitori.length}</div>`;
     } else if (currentScheda === 'assclienti') {
         let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        summaryDiv.innerHTML = `<div><strong>📋 Totale ASS_CONT_CLIENTI:</strong> ${formatNumber(tot)} €</div>`;
+        summaryDiv.innerHTML = `<div>📋 Totale ASS_CONT_CLIENTI: <span class="positive">${formatNumber(tot)} €</span></div>`;
     } else if (currentScheda === 'pagaddt') {
         let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        summaryDiv.innerHTML = `<div><strong>📋 Totale PAGA_DDT_CLIENTI:</strong> ${formatNumber(tot)} €</div>`;
+        summaryDiv.innerHTML = `<div>📋 Totale PAGA_DDT_CLIENTI: <span class="positive">${formatNumber(tot)} €</span></div>`;
     }
 }
 
@@ -968,7 +899,7 @@ function aggiornaTabelle() {
     }
     
     aggiornaPulsantiAzione();
-    aggiornaRiepilogo();
+    aggiornaRiepilogoHeader();
 }
 
 function makeRowEditable(tipo, idx, row) {
@@ -1090,11 +1021,8 @@ function pulisciForm() {
     if (currentScheda === 'primanota') {
         if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi;
         if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
-        // Reset dei campi importo (anche formattati)
-        const avereField = document.getElementById('formAvere');
-        const dareField = document.getElementById('formDare');
-        if (avereField) { avereField.value = ''; }
-        if (dareField) { dareField.value = ''; }
+        if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
+        if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
     } else if (currentScheda === 'contanti') {
         if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi;
         if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
@@ -1117,36 +1045,21 @@ function pulisciForm() {
     }
 }
 
-// ==================== GESTIONE DATI (con fix) ====================
+// ==================== GESTIONE DATI ====================
 async function memorizzaNuovo() {
     if (currentScheda === 'primanota') {
         const data = document.getElementById('formDataPrimaNota')?.value;
         const descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
         let avere = parseNumber(document.getElementById('formAvere')?.value);
         let dare = parseNumber(document.getElementById('formDare')?.value);
-        
-        // Controllo descrizione
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
-        // Controllo: non possono essere entrambi >0
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
-        // Controllo: almeno uno >0
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
-        
-        // Aggiungi la riga
-        primaNota.push({ 
-            data: formatDate(data), 
-            descrizione: descrizione, 
-            avere: avere || null, 
-            dare: dare || null, 
-            verificato: false 
-        });
-        
-        // Salva e aggiorna UI
+        primaNota.push({ data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false });
         await salvaStatoFirebase();
-        aggiornaTabelle();       // ricarica la tabella per mostrare la nuova riga
-        pulisciForm();           // resetta i campi
+        aggiornaTabelle();
+        pulisciForm();
         showToast("✅ Riga aggiunta!");
-        
     } else if (currentScheda === 'contanti') {
         const data = document.getElementById('formDataContanti')?.value;
         const descrizione = document.getElementById('formDescrizioneContanti')?.value;
@@ -1158,7 +1071,6 @@ async function memorizzaNuovo() {
         aggiornaTabelle();
         pulisciForm();
         showToast("✅ Incasso contanti aggiunto!");
-        
     } else if (currentScheda === 'fornitori') {
         const data = document.getElementById('formDataFornitori')?.value;
         const fornitore = document.getElementById('formFornitore')?.value.trim();
@@ -1170,7 +1082,6 @@ async function memorizzaNuovo() {
         aggiornaTabelle();
         pulisciForm();
         showToast("✅ Fattura fornitore aggiunta!");
-        
     } else if (currentScheda === 'assclienti') {
         const descrizione = document.getElementById('formDescrizioneAss')?.value;
         const nome = document.getElementById('formNomeAss')?.value.trim();
@@ -1179,19 +1090,11 @@ async function memorizzaNuovo() {
         const dataDoc = document.getElementById('formDataDocAss')?.value;
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        assClienti.push({ 
-            dataIns: getTodayDate(), 
-            descrizione: descrizione || '', 
-            nome: nome, 
-            importo: importo, 
-            numDoc: numDoc || '', 
-            dataDoc: dataDoc ? formatDate(dataDoc) : '' 
-        });
+        assClienti.push({ dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' });
         await salvaStatoFirebase();
         aggiornaTabelle();
         pulisciForm();
         showToast("✅ Riga ASS Clienti aggiunta!");
-        
     } else if (currentScheda === 'pagaddt') {
         const nome = document.getElementById('formNomePaga')?.value.trim();
         const numDoc = document.getElementById('formNumDocPaga')?.value.trim();
@@ -1208,42 +1111,39 @@ async function memorizzaNuovo() {
     }
 }
 
-// ==================== GESTIONE CAMBIO MESE ====================
-function mostraModaleConfermaCambioMese(nuovoAnno, nuovoMese) {
-    const modalEsistente = document.querySelector('.confirm-modal-overlay');
-    if (modalEsistente) modalEsistente.remove();
-    
-    const modal = document.createElement('div');
-    modal.className = 'confirm-modal-overlay';
-    modal.innerHTML = `
-        <div class="confirm-modal">
-            <h3>⚠️ MODIFICHE NON SALVATE</h3>
-            <p>Ci sono modifiche non salvate nel mese di <strong>${mesiLista[currentMonth]} ${currentYear}</strong>.</p>
-            <p>Vuoi salvare prima di cambiare mese?</p>
-            <div class="confirm-modal-buttons">
-                <button id="confirmSave" class="btn-confirm-save">💾 SALVA E CAMBIA</button>
-                <button id="confirmDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
-                <button id="confirmCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
+// ==================== GESTIONE CAMBIO MESE, USCITA, ECC. con modale ====================
+function mostraModaleConferma(azioneCallback, messaggio) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>⚠️ MODIFICHE NON SALVATE</h3>
+                <p>${messaggio}</p>
+                <p>Vuoi salvare prima di proseguire?</p>
+                <div class="modal-buttons">
+                    <button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button>
+                    <button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
+                    <button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
+                </div>
             </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('confirmSave').onclick = async () => {
-        await salvaStatoFirebase();
-        modal.remove();
-        await eseguiCambioMese(nuovoAnno, nuovoMese);
-    };
-    document.getElementById('confirmDiscard').onclick = async () => {
-        resetModificheNonSalvate();
-        modal.remove();
-        await eseguiCambioMese(nuovoAnno, nuovoMese);
-    };
-    document.getElementById('confirmCancel').onclick = () => {
-        document.getElementById('annoSelect').value = currentYear;
-        document.getElementById('meseSelect').value = currentMonth;
-        modal.remove();
-    };
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
+        document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
+        document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
+    });
+}
+
+async function cambiaMese() {
+    const nuovoAnno = parseInt(document.getElementById('annoSelect').value);
+    const nuovoMese = parseInt(document.getElementById('meseSelect').value);
+    if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
+    if (modificheNonSalvate) {
+        const ok = await mostraModaleConferma(null, `Ci sono modifiche non salvate nel mese di <strong>${mesiLista[currentMonth]} ${currentYear}</strong>. Vuoi salvare prima di cambiare mese?`);
+        if (!ok) { document.getElementById('annoSelect').value = currentYear; document.getElementById('meseSelect').value = currentMonth; return; }
+    }
+    await eseguiCambioMese(nuovoAnno, nuovoMese);
 }
 
 async function eseguiCambioMese(nuovoAnno, nuovoMese) {
@@ -1254,38 +1154,26 @@ async function eseguiCambioMese(nuovoAnno, nuovoMese) {
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
 
-async function cambiaMese() {
-    const nuovoAnno = parseInt(document.getElementById('annoSelect').value);
-    const nuovoMese = parseInt(document.getElementById('meseSelect').value);
-    if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
-    if (modificheNonSalvate) {
-        mostraModaleConfermaCambioMese(nuovoAnno, nuovoMese);
-    } else {
-        await eseguiCambioMese(nuovoAnno, nuovoMese);
-    }
-}
-
-async function riprendiMeseCorrente() { 
-    const ultimo = localStorage.getItem('ultimoMeseLavorato'); 
-    if (ultimo) { 
+async function riprendiMeseCorrente() {
+    const ultimo = localStorage.getItem('ultimoMeseLavorato');
+    if (ultimo) {
         const { anno, mese } = JSON.parse(ultimo);
         if (anno !== currentYear || mese !== currentMonth) {
             if (modificheNonSalvate) {
-                mostraModaleConfermaCambioMese(anno, mese);
-            } else {
-                currentYear = anno; 
-                currentMonth = mese; 
-                document.getElementById('annoSelect').value = anno; 
-                document.getElementById('meseSelect').value = mese; 
-                await caricaStatoFirebase(); 
-                showToast(`📅 Ripristinato mese: ${anno} - ${mesiLista[mese]}`);
+                const ok = await mostraModaleConferma(null, `Ci sono modifiche non salvate nel mese corrente. Vuoi salvare prima di ripristinare ${mesiLista[mese]} ${anno}?`);
+                if (!ok) return;
             }
+            currentYear = anno; currentMonth = mese;
+            document.getElementById('annoSelect').value = anno;
+            document.getElementById('meseSelect').value = mese;
+            await caricaStatoFirebase();
+            showToast(`📅 Ripristinato mese: ${anno} - ${mesiLista[mese]}`);
         } else {
             showToast(`Sei già su ${mesiLista[mese]} ${anno}`);
         }
-    } else { 
-        showToast("Nessun mese precedente trovato.", true); 
-    } 
+    } else {
+        showToast("Nessun mese precedente trovato.", true);
+    }
 }
 
 // ==================== ESPORTAZIONI ====================
@@ -1308,7 +1196,7 @@ function esportaPDFMese() {
     const tPaga = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
     const sal = saldoIniziale + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3></table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><tr><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report ${mn} ${anno}</title><style>body{font-family:'Segoe UI',sans-serif;padding:40px}.header{text-align:center}.title{font-size:28px;font-weight:bold}.summary{display:flex;justify-content:space-around;margin:20px 0;flex-wrap:wrap}.positive{color:green}.negative{color:red}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:8px}th{background:#3498db;color:white}.text-right{text-align:right}</style></head><body><div class="header"><div class="title">Report ${mn} ${anno}</div></div><div class="summary"><div>📈 Entrate: ${formatNumber(ta)} €</div><div>📉 Uscite: ${formatNumber(td)} €</div><div>💵 Contanti: ${formatNumber(tc)} €</div><div>💰 Saldo: ${formatNumber(sal)} €</div><div>📋 ASS Clienti: ${formatNumber(tAss)} €</div><div>📋 Paga DDT: ${formatNumber(tPaga)} €</div></div><h3>PRIMA NOTA</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead><tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody></table><h3>CONTANTI</h3><table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table><h3>FORNITORI</h3></table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table><h3>ASS_CONT_CLIENTI</h3><table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map((r,i) => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table><h3>PAGA_DDT_CLIENTI</h3><table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map((r,i) => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody><table><script>window.onload=()=>window.print()<\/script></body></html>`);
     w.document.close();
 }
 
@@ -1353,11 +1241,11 @@ document.getElementById('selectAllAssClienti')?.addEventListener('change', (e) =
 document.getElementById('selectAllPagaDdt')?.addEventListener('change', (e) => { document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 
 async function eliminaSelezionati(tipo) {
-    if (tipo === 'primanota') { const checks = document.querySelectorAll('#primaNotaBody .row-check-prima'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(primaNota[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) primaNota = nuovi; }
-    else if (tipo === 'contanti') { const checks = document.querySelectorAll('#contantiBody .row-check-contanti'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(contanti[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) contanti = nuovi; }
-    else if (tipo === 'fornitori') { const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(fattureFornitori[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) fattureFornitori = nuovi; }
-    else if (tipo === 'assclienti') { const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(assClienti[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) assClienti = nuovi; }
-    else if (tipo === 'pagaddt') { const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); const nuovi = []; for (let i = 0; i < checks.length; i++) if (!checks[i].checked) nuovi.push(pagaDdt[i]); if (confirm(`Eliminare ${checks.length - nuovi.length} righe?`)) pagaDdt = nuovi; }
+    if (tipo === 'primanota') { const checks = document.querySelectorAll('#primaNotaBody .row-check-prima:checked'); const nuovi = primaNota.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); if (confirm(`Eliminare ${checks.length} righe?`)) primaNota = nuovi; }
+    else if (tipo === 'contanti') { const checks = document.querySelectorAll('#contantiBody .row-check-contanti:checked'); const nuovi = contanti.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); if (confirm(`Eliminare ${checks.length} righe?`)) contanti = nuovi; }
+    else if (tipo === 'fornitori') { const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked'); const nuovi = fattureFornitori.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); if (confirm(`Eliminare ${checks.length} righe?`)) fattureFornitori = nuovi; }
+    else if (tipo === 'assclienti') { const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked'); const nuovi = assClienti.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); if (confirm(`Eliminare ${checks.length} righe?`)) assClienti = nuovi; }
+    else if (tipo === 'pagaddt') { const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked'); const nuovi = pagaDdt.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); if (confirm(`Eliminare ${checks.length} righe?`)) pagaDdt = nuovi; }
     await salvaStatoFirebase(); aggiornaTabelle(); showToast("Elementi eliminati");
 }
 
@@ -1444,7 +1332,7 @@ document.getElementById('toolbarAssClienti').onclick = () => setScheda('assclien
 document.getElementById('toolbarPagaDdt').onclick = () => setScheda('pagaddt');
 document.getElementById('toolbarCaricaMese').onclick = () => document.getElementById('fileCaricaMese').click();
 document.getElementById('toolbarRiprendiCorrente').onclick = riprendiMeseCorrente;
-document.getElementById('btnMemorizza').onclick = memorizzaNuovo;  // <-- agganciato alla nuova funzione
+document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
 document.getElementById('btnSalvaModificaPrima').onclick = () => salvaModificheSelezionate('primanota');
 document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
 document.getElementById('btnSalvaModificaContanti').onclick = () => salvaModificheSelezionate('contanti');
@@ -1461,28 +1349,19 @@ document.getElementById('annoSelect').onchange = cambiaMese;
 document.getElementById('meseSelect').onchange = cambiaMese;
 setupImportField('saldoIniziale');
 
-document.getElementById('btnVaiAgenti').onclick = () => { 
+document.getElementById('btnVaiAgenti').onclick = async () => {
     if (modificheNonSalvate) {
-        if (confirm("⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente.\n\nVuoi salvare prima di andare agli agenti?\n\n✅ OK = SALVA e vai\n❌ ANNULLA = NON salvare e vai")) {
-            salvaStatoFirebase().then(() => { window.location.href = 'agenti.html'; });
-        } else {
-            window.location.href = 'agenti.html';
-        }
-    } else {
-        window.location.href = 'agenti.html';
+        const ok = await mostraModaleConferma(null, `Hai modifiche non salvate nel mese corrente. Vuoi salvare prima di andare agli agenti?`);
+        if (!ok) return;
     }
+    window.location.href = 'agenti.html';
 };
-
-document.getElementById('navLogout').onclick = () => { 
+document.getElementById('navLogout').onclick = async () => {
     if (modificheNonSalvate) {
-        if (confirm("⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente.\n\nVuoi salvare prima di uscire?\n\n✅ OK = SALVA e esci\n❌ ANNULLA = NON salvare e esci")) {
-            salvaStatoFirebase().then(() => { window.location.href = 'index.html'; });
-        } else {
-            window.location.href = 'index.html';
-        }
-    } else {
-        window.location.href = 'index.html';
+        const ok = await mostraModaleConferma(null, `Hai modifiche non salvate nel mese corrente. Vuoi salvare prima di uscire?`);
+        if (!ok) return;
     }
+    window.location.href = 'index.html';
 };
 
 // ==================== CAMBIO PASSWORD ====================
