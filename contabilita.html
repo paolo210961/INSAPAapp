@@ -230,7 +230,7 @@
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
 
-        /* main e sidebar: bloccata sticky */
+        /* main e sidebar: sticky e bloccato */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         .sidebar {
             width: 380px;
@@ -239,7 +239,7 @@
             padding: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             position: sticky;
-            top: 200px;  /* bloccato sotto l'header */
+            top: 120px;
             height: fit-content;
         }
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
@@ -300,7 +300,7 @@
                 margin-bottom: 15px;
                 padding: 15px;
                 position: sticky;
-                top: 200px;  /* mantiene sticky anche su mobile */
+                top: 80px;
             }
             .form-row { flex-direction: column; gap: 10px; }
             .tabella { font-size: 0.7rem; min-width: 500px; }
@@ -539,6 +539,10 @@ function formatDateInput(d) {
 
 function getTodayDate() { return new Date().toISOString().slice(0, 10); }
 
+function getFirstDayOfMonth(year, month) {
+    return `${year}-${String(month+1).padStart(2,'0')}-01`;
+}
+
 function marcaModificheNonSalvate() { modificheNonSalvate = true; }
 function resetModificheNonSalvate() { modificheNonSalvate = false; }
 
@@ -555,20 +559,22 @@ function setupImportField(fieldId) {
     }
 }
 
-// ==================== SPOSTA RIGA CON CONFERMA ====================
-async function spostaRigaConConferma(riga, tipo, dataYMD) {
-    if (!dataYMD) return false;
+// ==================== SPOSTA RIGA SE DATA IN ALTRO MESE (CON CONFERMA) ====================
+async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
+    if (!dataYMD) return { spostato: false, annullato: false };
     const [annoStr, meseStr] = dataYMD.split('-');
     const annoDest = parseInt(annoStr);
     const meseDest = parseInt(meseStr) - 1;
-    if (isNaN(annoDest) || isNaN(meseDest)) return false;
-    if (annoDest === currentYear && meseDest === currentMonth) return false; // stesso mese, nessun alert
+    if (isNaN(annoDest) || isNaN(meseDest)) return { spostato: false, annullato: false };
+    if (annoDest === currentYear && meseDest === currentMonth) return { spostato: false, annullato: false };
 
-    // Chiedi conferma all'utente
-    const conferma = confirm(`⚠️ Attenzione: la data appartiene a ${mesiLista[meseDest]} ${annoDest}, mentre sei su ${mesiLista[currentMonth]} ${currentYear}. Vuoi proseguire con l'inserimento e passare al mese/anno di destinazione?`);
-    if (!conferma) return false;
+    // Mese diverso: chiedi conferma
+    const conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire con l'inserimento?`);
+    if (!conferma) {
+        return { spostato: false, annullato: true };
+    }
 
-    // Sposta la riga (crea il mese se necessario)
+    // Sposta la riga
     const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
     const docSnap = await docRef.get();
     let targetData = {};
@@ -609,8 +615,7 @@ async function spostaRigaConConferma(riga, tipo, dataYMD) {
 
     await docRef.set(targetData);
 
-    // Rimuovi dall'array corrente SOLO se la riga era già stata aggiunta (caso modifica)
-    // Per nuovo inserimento, la riga non è ancora negli array.
+    // Rimuovi dall'array corrente (se presente)
     if (tipo === 'primanota') {
         const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
         if (idx !== -1) primaNota.splice(idx, 1);
@@ -628,7 +633,7 @@ async function spostaRigaConConferma(riga, tipo, dataYMD) {
         if (idx !== -1) pagaDdt.splice(idx, 1);
     }
 
-    await salvaStatoFirebase(); // salva il mese corrente (senza la riga)
+    await salvaStatoFirebase();
 
     // Cambia mese corrente
     currentYear = annoDest;
@@ -639,7 +644,10 @@ async function spostaRigaConConferma(riga, tipo, dataYMD) {
     document.getElementById('meseSelect').value = currentMonth;
     aggiornaTabelle();
     aggiornaRiepilogoHeader();
-    return true;
+    // Aggiorna anche la data del form al primo del nuovo mese
+    aggiornaDataFormAlPrimoMese();
+    showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
+    return { spostato: true, annullato: false };
 }
 
 // ==================== FIREBASE OPERAZIONI ====================
@@ -700,7 +708,26 @@ async function caricaStatoFirebase() {
         resetModificheNonSalvate();
         aggiornaTabelle();
         aggiornaRiepilogoHeader();
+        // Imposta la data del form al primo giorno del mese corrente
+        aggiornaDataFormAlPrimoMese();
     } catch(e) { console.error("ERRORE caricamento: " + e.message); }
+}
+
+// Imposta il campo data del form al primo giorno del mese corrente
+function aggiornaDataFormAlPrimoMese() {
+    const primoGiorno = getFirstDayOfMonth(currentYear, currentMonth);
+    if (currentScheda === 'primanota' && document.getElementById('formDataPrimaNota')) {
+        document.getElementById('formDataPrimaNota').value = primoGiorno;
+    } else if (currentScheda === 'contanti' && document.getElementById('formDataContanti')) {
+        document.getElementById('formDataContanti').value = primoGiorno;
+    } else if (currentScheda === 'fornitori' && document.getElementById('formDataFornitori')) {
+        document.getElementById('formDataFornitori').value = primoGiorno;
+    } else if (currentScheda === 'assclienti' && document.getElementById('formDataDocAss')) {
+        // Per ASS clienti la data di default è la data odierna, non il primo del mese (scelta originale)
+        // Lasciamo invariato
+    } else if (currentScheda === 'pagaddt' && document.getElementById('formDataPaga')) {
+        document.getElementById('formDataPaga').value = primoGiorno;
+    }
 }
 
 // ==================== DROPDOWN DINAMICI ANNO/MESE ====================
@@ -1094,11 +1121,21 @@ function aggiornaForm() {
     if (currentScheda === 'primanota') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
         setupImportField('formAvere'); setupImportField('formDare');
+        // Imposta la data al primo giorno del mese corrente
+        if (document.getElementById('formDataPrimaNota')) {
+            document.getElementById('formDataPrimaNota').value = getFirstDayOfMonth(currentYear, currentMonth);
+        }
     } else if (currentScheda === 'contanti') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>`;
         setupImportField('formImportoContanti');
+        if (document.getElementById('formDataContanti')) {
+            document.getElementById('formDataContanti').value = getFirstDayOfMonth(currentYear, currentMonth);
+        }
     } else if (currentScheda === 'fornitori') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
+        if (document.getElementById('formDataFornitori')) {
+            document.getElementById('formDataFornitori').value = getFirstDayOfMonth(currentYear, currentMonth);
+        }
     } else if (currentScheda === 'assclienti') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div></div><div class="form-row"><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div><div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div></div><div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>`;
         setupImportField('formImportoAss');
@@ -1106,7 +1143,9 @@ function aggiornaForm() {
     } else if (currentScheda === 'pagaddt') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div><div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div></div><div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div></div>`;
         setupImportField('formImportoPaga');
-        if(document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = getTodayDate();
+        if(document.getElementById('formDataPaga')) {
+            document.getElementById('formDataPaga').value = getFirstDayOfMonth(currentYear, currentMonth);
+        }
     }
     const formInputs = fa.querySelectorAll('input, select, textarea');
     formInputs.forEach(input => {
@@ -1120,18 +1159,18 @@ function aggiornaForm() {
 }
 
 function pulisciForm() {
-    const oggi = getTodayDate();
+    const primoGiorno = getFirstDayOfMonth(currentYear, currentMonth);
     if (currentScheda === 'primanota') {
-        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = oggi;
+        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = primoGiorno;
         if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
         if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
         if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
     } else if (currentScheda === 'contanti') {
-        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = oggi;
+        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = primoGiorno;
         if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
         if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = '';
     } else if (currentScheda === 'fornitori') {
-        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = oggi;
+        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = primoGiorno;
         if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
         if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
     } else if (currentScheda === 'assclienti') {
@@ -1139,16 +1178,16 @@ function pulisciForm() {
         if (document.getElementById('formNomeAss')) document.getElementById('formNomeAss').value = '';
         if (document.getElementById('formImportoAss')) document.getElementById('formImportoAss').value = '';
         if (document.getElementById('formNumDocAss')) document.getElementById('formNumDocAss').value = '';
-        if (document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = oggi;
+        if (document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = getTodayDate();
     } else if (currentScheda === 'pagaddt') {
         if (document.getElementById('formNomePaga')) document.getElementById('formNomePaga').value = '';
         if (document.getElementById('formNumDocPaga')) document.getElementById('formNumDocPaga').value = '';
-        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = oggi;
+        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = primoGiorno;
         if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
     }
 }
 
-// ==================== MEMORIZZA NUOVO CON CONFERMA ====================
+// ==================== AGGIUNTA E MODIFICA RIGHE CON VERIFICA MESE ====================
 async function memorizzaNuovo() {
     if (currentScheda === 'primanota') {
         const data = document.getElementById('formDataPrimaNota')?.value;
@@ -1159,26 +1198,18 @@ async function memorizzaNuovo() {
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
         const nuovaRiga = { data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
-        const spostato = await spostaRigaConConferma(nuovaRiga, 'primanota', data);
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'primanota', data);
+        if (annullato) return;
         if (!spostato) {
-            // stesso mese o utente ha annullato
-            if (spostato === false && (data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
-                // stesso mese, inserisci
-                primaNota.push(nuovaRiga);
-                await salvaStatoFirebase();
-                aggiornaTabelle();
-                pulisciForm();
-                showToast("✅ Riga aggiunta!");
-            } else if (spostato === false) {
-                // utente ha annullato lo spostamento
-                showToast("Inserimento annullato.", true);
-            }
+            primaNota.push(nuovaRiga);
+            await salvaStatoFirebase();
+            aggiornaTabelle();
+            pulisciForm();
+            showToast("✅ Riga aggiunta!");
         } else {
-            // spostato: già cambiato mese, ricarica
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
-            showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
         }
     } else if (currentScheda === 'contanti') {
         const data = document.getElementById('formDataContanti')?.value;
@@ -1187,22 +1218,18 @@ async function memorizzaNuovo() {
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { data: formatDate(data), descrizione: descrizione, importo: importo };
-        const spostato = await spostaRigaConConferma(nuovaRiga, 'contanti', data);
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'contanti', data);
+        if (annullato) return;
         if (!spostato) {
-            if ((data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
-                contanti.push(nuovaRiga);
-                await salvaStatoFirebase();
-                aggiornaTabelle();
-                pulisciForm();
-                showToast("✅ Incasso contanti aggiunto!");
-            } else {
-                showToast("Inserimento annullato.", true);
-            }
+            contanti.push(nuovaRiga);
+            await salvaStatoFirebase();
+            aggiornaTabelle();
+            pulisciForm();
+            showToast("✅ Incasso contanti aggiunto!");
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
-            showToast(`✅ Incasso spostato a ${mesiLista[currentMonth]} ${currentYear}`);
         }
     } else if (currentScheda === 'fornitori') {
         const data = document.getElementById('formDataFornitori')?.value;
@@ -1210,23 +1237,19 @@ async function memorizzaNuovo() {
         const numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
         if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return; }
         const nuovaRiga = { data: formatDate(data), fornitore: fornitore, numeroFattura: numeroFattura };
-        const spostato = await spostaRigaConConferma(nuovaRiga, 'fornitori', data);
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'fornitori', data);
+        if (annullato) return;
         if (!spostato) {
-            if ((data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
-                fattureFornitori.push(nuovaRiga);
-                nextFatturaId++;
-                await salvaStatoFirebase();
-                aggiornaTabelle();
-                pulisciForm();
-                showToast("✅ Fattura fornitore aggiunta!");
-            } else {
-                showToast("Inserimento annullato.", true);
-            }
+            fattureFornitori.push(nuovaRiga);
+            nextFatturaId++;
+            await salvaStatoFirebase();
+            aggiornaTabelle();
+            pulisciForm();
+            showToast("✅ Fattura fornitore aggiunta!");
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
-            showToast(`✅ Fattura spostata a ${mesiLista[currentMonth]} ${currentYear}`);
         }
     } else if (currentScheda === 'assclienti') {
         const descrizione = document.getElementById('formDescrizioneAss')?.value;
@@ -1238,22 +1261,18 @@ async function memorizzaNuovo() {
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
         const dataRif = dataDoc || getTodayDate();
-        const spostato = await spostaRigaConConferma(nuovaRiga, 'assclienti', dataRif);
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'assclienti', dataRif);
+        if (annullato) return;
         if (!spostato) {
-            if ((dataRif.split('-')[1]-1) === currentMonth && parseInt(dataRif.split('-')[0]) === currentYear) {
-                assClienti.push(nuovaRiga);
-                await salvaStatoFirebase();
-                aggiornaTabelle();
-                pulisciForm();
-                showToast("✅ Riga ASS Clienti aggiunta!");
-            } else {
-                showToast("Inserimento annullato.", true);
-            }
+            assClienti.push(nuovaRiga);
+            await salvaStatoFirebase();
+            aggiornaTabelle();
+            pulisciForm();
+            showToast("✅ Riga ASS Clienti aggiunta!");
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
-            showToast(`✅ Riga ASS spostata a ${mesiLista[currentMonth]} ${currentYear}`);
         }
     } else if (currentScheda === 'pagaddt') {
         const nome = document.getElementById('formNomePaga')?.value.trim();
@@ -1264,22 +1283,18 @@ async function memorizzaNuovo() {
         if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { nome: nome, numDoc: numDoc, data: data ? formatDate(data) : '', importo: importo };
-        const spostato = await spostaRigaConConferma(nuovaRiga, 'pagaddt', data);
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'pagaddt', data);
+        if (annullato) return;
         if (!spostato) {
-            if ((data.split('-')[1]-1) === currentMonth && parseInt(data.split('-')[0]) === currentYear) {
-                pagaDdt.push(nuovaRiga);
-                await salvaStatoFirebase();
-                aggiornaTabelle();
-                pulisciForm();
-                showToast("✅ Riga Paga DDT aggiunta!");
-            } else {
-                showToast("Inserimento annullato.", true);
-            }
+            pagaDdt.push(nuovaRiga);
+            await salvaStatoFirebase();
+            aggiornaTabelle();
+            pulisciForm();
+            showToast("✅ Riga Paga DDT aggiunta!");
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
-            showToast(`✅ Riga Paga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
         }
     }
 }
@@ -1307,7 +1322,7 @@ function mostraModaleConferma(messaggio) {
     });
 }
 
-// ==================== ESPORTAZIONI ====================
+// ==================== ESPORTAZIONI (invariate) ====================
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
@@ -1345,7 +1360,7 @@ function esportaReportRagioniere() {
     <h3>📋 PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</tr></tr>`).join('')}</tbody>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere):'-'}</td><td class="text-right">${r.dare?formatNumber(r.dare):'-'}</td><td>${r.verificato?'✅':''}</td></tr>`).join('')}</tbody>
         <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
     </table>
     <div class="footer">Documento generato da inSAPA - ${new Date().toLocaleDateString('it-IT')}</div>
@@ -1392,50 +1407,17 @@ function esportaPDFMese() {
     <h3>PRIMA NOTA</h3>
     <table>
         <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>✅</th></tr></thead>
-        <tbody>${primaNota.map((r,i) => `tr
-<td>${i+1}</td>
-<td>${r.data||''}</td>
-<td>${r.descrizione||''}</td>
-<td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td>
-<td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td>
-<td>${r.verificato?'✅':''}</td>
-</tr>`).join('')}</tbody>
-        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td>
-<td class="text-right"><strong>${formatNumber(ta)} €</strong></td>
-<td class="text-right"><strong>${formatNumber(td)} €</strong></td>
-<td></td>
-</tr></tfoot>
+        <tbody>${primaNota.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${r.avere?formatNumber(r.avere)+' €':''}</td><td class="text-right">${r.dare?formatNumber(r.dare)+' €':''}</td><td>${r.verificato?'✅':''}</tr></tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTALI</strong></td><td class="text-right"><strong>${formatNumber(ta)} €</strong></td><td class="text-right"><strong>${formatNumber(td)} €</strong></td><td></td></tr></tfoot>
     </table>
     <h3>CONTANTI</h3>
-    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr>
-<td>${i+1}</td>
-<td>${r.data||''}</td>
-<td>${r.descrizione||''}</td>
-<td class="text-right">${formatNumber(r.importo)} €</td>
-</tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${contanti.map((r,i) => `<tr><td>${i+1}</td><td>${r.data||''}</td><td>${r.descrizione||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
     <h3>FORNITORI</h3>
-    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr>
-<td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td>
-<td>${f.data||''}</td>
-<td>${f.fornitore||''}</td>
-<td>${f.numeroFattura||''}</td>
-</tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>N°</th><th>Data</th><th>Fornitore</th><th>N.Fattura</th></tr></thead><tbody>${fattureFornitori.map((f,i) => `<tr><td>${nextFatturaId-fattureFornitori.length+i}/${anno}</td><td>${f.data||''}</td><td>${f.fornitore||''}</td><td>${f.numeroFattura||''}</td></tr>`).join('')}</tbody></table>
     <h3>ASS_CONT_CLIENTI</h3>
-    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr>
-<td>${r.dataIns||''}</td>
-<td>${r.descrizione||''}</td>
-<td>${r.nome||''}</td>
-<td class="text-right">${formatNumber(r.importo)} €</td>
-<td>${r.numDoc||''}</td>
-<td>${r.dataDoc||''}</td>
-</tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th>Importo</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody>${assClienti.map(r => `<tr><td>${r.dataIns||''}</td><td>${r.descrizione||''}</td><td>${r.nome||''}</td><td class="text-right">${formatNumber(r.importo)} €</td><td>${r.numDoc||''}</td><td>${r.dataDoc||''}</td></tr>`).join('')}</tbody></table>
     <h3>PAGA_DDT_CLIENTI</h3>
-    <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr>
-<td>${r.nome||''}</td>
-<td>${r.numDoc||''}</td>
-<td>${r.data||''}</td>
-<td class="text-right">${formatNumber(r.importo)} €</td>
-</tr>`).join('')}</tbody></table>
+    <table><thead><tr><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th>Importo</th></tr></thead><tbody>${pagaDdt.map(r => `<tr><td>${r.nome||''}</td><td>${r.numDoc||''}</td><td>${r.data||''}</td><td class="text-right">${formatNumber(r.importo)} €</td></tr>`).join('')}</tbody></table>
     <script>window.onload=()=>window.print()<\/script>
     </body></html>`);
     w.document.close();
@@ -1549,29 +1531,25 @@ async function saveEditedRowWithMove(tipo, idx) {
             dataRif = newData;
         }
     } else {
+        // per contanti e fornitori non gestiamo spostamento (se vuoi puoi estendere)
         return;
     }
 
     if (!newRiga) return;
 
-    const spostato = await spostaRigaConConferma(newRiga, tipo, dataRif);
+    // Prima di salvare, verifica se la nuova data è in un mese diverso
+    const { spostato, annullato } = await verificaESpostaRigaSeNecessario(newRiga, tipo, dataRif, 'modifica');
+    if (annullato) return;
     if (!spostato) {
-        // stesso mese o annullato
-        const [annoRif, meseRif] = dataRif.split('-');
-        if (parseInt(annoRif) === currentYear && (parseInt(meseRif)-1) === currentMonth) {
-            if (tipo === 'primanota') primaNota[idx] = newRiga;
-            else if (tipo === 'assclienti') assClienti[idx] = newRiga;
-            else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
-            await salvaStatoFirebase();
-            aggiornaTabelle();
-            showToast("✅ Modifiche salvate!");
-        } else {
-            showToast("Modifica annullata.", true);
-        }
+        if (tipo === 'primanota') primaNota[idx] = newRiga;
+        else if (tipo === 'assclienti') assClienti[idx] = newRiga;
+        else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
+        await salvaStatoFirebase();
+        aggiornaTabelle();
+        showToast("✅ Modifiche salvate!");
     } else {
         await caricaStatoFirebase();
         aggiornaTabelle();
-        showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
     }
 }
 
