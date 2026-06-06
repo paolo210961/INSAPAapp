@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.57</title>
+    <title>inSAPA - Agenti vA.5.58</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -497,7 +497,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
-<div class="version">vA.5.57 - Agenti (asterisco mirato + regex con \s+ e log finale)</div>
+<div class="version">vA.5.58 - Debug SCA (filtro rimosso, gestione asterisco e form feed)</div>
 
 <script>
 // ==================== FIREBASE ====================
@@ -871,29 +871,25 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA (modificato secondo richieste) ====================
+// ==================== PARSER SCA CON DEBUG (modifiche richieste) ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
     let currentCliente = null;
 
     const reCliente = /^CLIENTE:\s+(\d{6})\s+(.*?)\s+Saldo\s+([\d\.,\-]+)/;
-    // Regex con \s+ (non \s{2,})
-    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.*?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)/;
+    // Regex con $ alla fine
+    const reScadenza = /^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(\d+)\s+(\d{2}\/\d{2}\/\d{4})\s+Euro\s+([\d\.,\-]+)$/;
 
     for (let line of lines) {
-        // Asterisco → spazio (globale prima)
-        line = line.replace(/\*/g, ' ');
+        // Pulizia riga secondo le nuove istruzioni
+        line = line.replace(/^\uFEFF/, '');
+        line = line.replace(/\f/g, ' ');      // elimina carattere di form feed (cambio pagina)
+        line = line.replace(/\t/g, ' ');
         
-        // Se la data è seguita da * senza spazio (ora già sostituito, ma lo lasciamo per sicurezza)
+        // Se c'è l'asterisco subito dopo la data
         line = line.replace(/^(\d{2}\/\d{2}\/\d{4})\*/, '$1 ');
         
-        // eventuali altri asterischi (già fatta prima, ma ribadiamo)
-        line = line.replace(/\*/g, ' ');
-        
-        // Altri spazi anomali e BOM
-        line = line.replace(/^\uFEFF/, '');
-        line = line.replace(/\t/g, ' ');
         line = line.trim();
         
         if (line === "") continue;
@@ -933,8 +929,9 @@ function parseSCA(text) {
         }
     }
     
-    const result = Array.from(clienti.values()).filter(c => c.scadenze.length > 0);
-    console.log("CLIENTI SCA TROVATI:", result);
+    // DEBUG: non filtriamo più i clienti senza scadenze
+    const result = Array.from(clienti.values());
+    console.log("CLIENTI SCA:", result.map(c => c.codice + " " + c.ragione));
     return result;
 }
 
@@ -1076,7 +1073,7 @@ function mostraDettaglioCliente(codice) {
                         </button>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> <tr></thead><tbody>`;
+                    <thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Descrizione</th><th>N.Doc</th><th>Importo</th> </table></thead><tbody>`;
         for (let s of cliente.scadenze) {
             let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
             html += `<tr>
