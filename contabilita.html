@@ -7,255 +7,49 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        /* ========== STILI BASE (PC e mobile condivisi) ========== */
+        /* ========== STILI BASE ========== */
         * { box-sizing: border-box; }
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #eef2f5;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            background: white;
-            padding: 15px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-            z-index: 1000;
-        }
-        .row1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-        }
-        .logo-rettangolo {
-            width: 300px;
-            height: 80px;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
-            position: relative;
-        }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; display: flex; flex-direction: column; }
+        .header { background: white; padding: 15px 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0; z-index: 1000; }
+        .row1 { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 15px; }
+        .logo-area { display: flex; align-items: center; }
+        .logo-rettangolo { width: 300px; height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.5rem; }
-        .logo-tooltip {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2c3e50;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            white-space: nowrap;
-            z-index: 100;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+        .logo-tooltip { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; white-space: nowrap; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
-        .floppy-container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .floppy-btn {
-            background: none;
-            border: none;
-            font-size: 2.2rem;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.2s;
-            width: auto;
-            margin: 0;
-        }
+        .floppy-container { position: relative; display: flex; justify-content: center; align-items: center; }
+        .floppy-btn { background: none; border: none; font-size: 2.2rem; cursor: pointer; padding: 8px 16px; border-radius: 12px; transition: all 0.2s; width: auto; margin: 0; }
         .floppy-btn:hover { background: #f0f0f0; transform: scale(1.05); }
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            min-width: 260px;
-            z-index: 1001;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            margin-top: 8px;
-            border: 2px solid #3498db;
-        }
+        .dropdown-menu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); min-width: 260px; z-index: 1001; display: none; flex-direction: column; overflow: hidden; margin-top: 8px; border: 2px solid #3498db; }
         .dropdown-menu.show { display: flex; }
-        .dropdown-item {
-            background: white;
-            border: none;
-            padding: 12px 20px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: bold;
-            width: 100%;
-            margin: 0;
-            border-bottom: 1px solid #ddd;
-            transition: all 0.2s;
-            color: #000000;
-        }
+        .dropdown-item { background: white; border: none; padding: 12px 20px; text-align: left; cursor: pointer; font-size: 0.85rem; font-weight: bold; width: 100%; margin: 0; border-bottom: 1px solid #ddd; transition: all 0.2s; color: #000000; }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #f1c40f; color: #000000; }
-        .summary-header {
-            display: flex;
-            gap: 30px;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #2c3e50;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .summary-header div { font-weight: bold; font-size: 1.1rem; }
-        .summary-header span { font-weight: bold; margin-left: 5px; font-size: 1.1rem; }
+        .summary-header { display: flex; gap: 30px; background: #f8f9fa; padding: 10px 20px; border-radius: 40px; font-weight: bold; font-size: 1.1rem; color: #2c3e50; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .positive { color: #27ae60; }
         .negative { color: #e74c3c; }
-        .row2 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            background: #fff3cd;
-            border-radius: 16px;
-            padding: 12px 20px;
-            margin-bottom: 15px;
-        }
-        .nav-box {
-            background: #f1c40f;
-            border-radius: 16px;
-            padding: 5px 10px;
-        }
-        .hamburger-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: #2c3e50;
-        }
-        .nav-grid {
-            display: flex;
-            gap: 10px;
-        }
-        .nav-btn {
-            background: white;
-            color: #2c3e50;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-            width: auto;
-            margin: 0;
-        }
+        .row2 { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; background: #fff3cd; border-radius: 16px; padding: 12px 20px; margin-bottom: 15px; }
+        .nav-box { background: #f1c40f; border-radius: 16px; padding: 5px 10px; }
+        .hamburger-btn { display: none; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #2c3e50; }
+        .nav-grid { display: flex; gap: 10px; }
+        .nav-btn { background: white; color: #2c3e50; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; width: auto; margin: 0; }
         .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
-        .nav-btn.disabled {
-            background: #ecf0f1;
-            color: #95a5a6;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-        .filtri-rapidi {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .filtri-rapidi label {
-            font-weight: bold;
-            margin-right: 5px;
-            color: #2c3e50;
-        }
-        .filtri-rapidi select, .filtri-rapidi input {
-            width: auto;
-            padding: 5px 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            background: white;
-        }
-        .filtri-rapidi input {
-            width: 120px;
-            text-align: right;
-        }
-        .sticky-toolbar {
-            background: #f8f9fa;
-            padding: 12px 20px;
-            border-bottom: 2px solid #3498db;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .toolbar-btn {
-            background: #ecf0f1;
-            color: #2c3e50;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            width: auto;
-            margin: 0;
-        }
+        .nav-btn.disabled { background: #ecf0f1; color: #95a5a6; cursor: not-allowed; opacity: 0.8; }
+        .filtri-rapidi { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .filtri-rapidi label { font-weight: bold; margin-right: 5px; color: #2c3e50; }
+        .filtri-rapidi select, .filtri-rapidi input { width: auto; padding: 5px 8px; border-radius: 8px; border: 1px solid #ccc; background: white; }
+        .filtri-rapidi input { width: 120px; text-align: right; }
+        .sticky-toolbar { background: #f8f9fa; padding: 12px 20px; border-bottom: 2px solid #3498db; display: flex; gap: 12px; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .toolbar-btn { background: #ecf0f1; color: #2c3e50; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: all 0.2s; width: auto; margin: 0; }
         .toolbar-btn:hover { background: #bdc3c7; transform: translateY(-1px); }
         .toolbar-btn.active { background: #3498db; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
-        .main-container {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-        }
-        .sidebar {
-            width: 380px;
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-        .content-area {
-            flex: 1;
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            overflow-y: auto;
-            overflow-x: auto;
-        }
+        .main-container { display: flex; gap: 20px; padding: 20px; flex: 1; min-height: 0; overflow: hidden; }
+        .sidebar { width: 380px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex-shrink: 0; }
+        .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-y: auto; overflow-x: auto; }
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .form-row .form-group { flex: 1; margin-bottom: 0; }
         .form-group { margin-bottom: 15px; }
@@ -277,14 +71,11 @@
         .tabella td input[type="text"], .tabella td input[type="date"] { width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
         .edit-mode { background-color: #fffef5; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
-        footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .toast-message { position: fixed; bottom: 80px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 3000; }
         .modal-content { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .modal-content h3 { margin: 0 0 15px 0; color: #e74c3c; }
-        .modal-content p { margin: 10px 0; color: #2c3e50; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
         .modal-buttons button { width: auto; padding: 10px 20px; margin: 0; }
         .btn-confirm-save { background: #27ae60; }
@@ -292,100 +83,31 @@
         .btn-confirm-cancel { background: #95a5a6; }
         .highlight-row { background-color: #fff3cd !important; transition: background-color 0.5s ease; }
 
-        /* ========== SOLO MOBILE: layout compatto ========== */
+        /* ========== MOBILE LAYOUT ========== */
         @media (max-width: 768px) {
-            /* Nascondi i selettori classici e mostra la nuova barra mobile */
-            .row1 { flex-direction: column; align-items: stretch; }
-            .row2 { display: none !important; }   /* Nascondo anno/mese/saldo classici */
-            .filtri-rapidi { display: none; }
-            .summary-header { justify-content: center; margin: 10px 0; font-size: 0.9rem; gap: 15px; flex-wrap: wrap; }
-            .summary-header div, .summary-header span { font-size: 0.9rem; }
-            
-            /* Nuova barra mobile con 5 elementi in riga compatta */
-            .mobile-bar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 5px;
-                flex-wrap: nowrap;
-                margin-bottom: 10px;
-                background: transparent;
-            }
-            .logo-area { flex-shrink: 0; }
-            .logo-rettangolo { width: 44px; height: 44px; }
-            .logo-rettangolo span { font-size: 1.5rem; }
-            .icon-btn {
-                background: none;
-                border: none;
-                font-size: 1.8rem;
-                cursor: pointer;
-                padding: 0;
-                width: 44px;
-                height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 12px;
-                transition: background 0.2s;
-            }
-            .icon-btn:active { background: #e0e0e0; }
-            /* Colori specifici */
-            .hamburger-container .icon-btn { color: #0066cc; font-weight: bold; }
-            .dropdown-item { font-weight: bold !important; color: #000000 !important; }
-            .modal-content, 
-            .modal-content h3,
-            .modal-content p,
-            .modal-content label,
-            .modal-content .form-group,
-            .modal-content input,
-            .modal-content select,
-            .modal-content button {
-                font-weight: bold !important;
-                color: #000000 !important;
-            }
-            .modal-content button { color: #000000 !important; }
-            
-            /* Menu hamburger a tendina */
-            .nav-box { position: relative; width: auto; text-align: center; background: transparent; padding: 0; }
-            .hamburger-btn { display: none; }
-            .nav-grid {
-                display: none;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                left: auto;
-                background: white;
-                border-radius: 12px;
-                padding: 10px;
-                margin-top: 5px;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                min-width: 180px;
-            }
+            .row1 .floppy-container { display: none !important; }
+            .summary-header { display: none !important; }
+            .row2 { display: none !important; }
+            .mobile-bar { display: flex !important; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 15px; background: transparent; }
+            .mobile-bar .logo-area { width: 100%; display: flex; justify-content: center; }
+            .mobile-bar .logo-rettangolo { width: 80px; height: 80px; }
+            .mobile-bar .logo-rettangolo span { font-size: 2.2rem; }
+            .mobile-bar .floppy-container { margin: 0 auto; }
+            .mobile-bar .floppy-btn { font-size: 2.5rem; background: #f1f3f4; border-radius: 60px; padding: 8px 20px; }
+            .icon-row { display: flex; justify-content: space-around; align-items: center; width: 100%; gap: 20px; margin-top: 5px; }
+            .icon-btn { background: none; border: none; font-size: 2rem; cursor: pointer; padding: 8px; border-radius: 50px; transition: background 0.2s; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+            .icon-btn:active { background: #e0e0e0; transform: scale(0.96); }
+            .hamburger-container { position: relative; }
+            .nav-grid { display: none; flex-direction: column; position: absolute; top: 110%; right: 0; left: auto; background: white; border-radius: 16px; padding: 12px; z-index: 1100; box-shadow: 0 8px 20px rgba(0,0,0,0.2); min-width: 200px; gap: 8px; }
             .nav-grid.open { display: flex; }
-            .nav-btn { width: 100%; text-align: center; }
-            
-            /* Barra orizzontale scorrevole */
-            .sticky-toolbar {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-                justify-content: flex-start;
-                gap: 8px;
-                padding: 10px 15px;
-                -webkit-overflow-scrolling: touch;
-            }
+            .nav-grid .nav-btn { width: 100%; text-align: center; background: #f8f9fa; font-size: 1rem; padding: 10px; }
+            .sticky-toolbar { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; gap: 8px; padding: 10px 15px; -webkit-overflow-scrolling: touch; }
             .sticky-toolbar::-webkit-scrollbar { display: none; }
-            .toolbar-btn {
-                flex-shrink: 0;
-                font-size: 0.7rem;
-                padding: 10px 14px;
-                white-space: nowrap;
-            }
-            .main-container { flex-direction: column; overflow: auto; }
-            .sidebar { width: 100%; margin-bottom: 15px; padding: 15px; }
-            .content-area { max-height: none; overflow-y: visible; }
-            .form-row { flex-direction: column; gap: 10px; }
+            .toolbar-btn { flex-shrink: 0; font-size: 0.75rem; padding: 10px 14px; white-space: nowrap; }
+            .main-container { flex-direction: column-reverse; overflow-y: auto; gap: 15px; }
+            .sidebar { width: 100%; margin-bottom: 0; padding: 16px; order: 2; border-radius: 20px; }
+            .content-area { order: 1; max-height: none; overflow-y: visible; padding: 16px; }
+            .form-row { flex-direction: column; gap: 12px; }
             .tabella { font-size: 0.7rem; min-width: 500px; }
             .logo-tooltip { display: none; }
         }
@@ -394,7 +116,6 @@
 <body>
 <div id="appContainer" style="display: flex; flex-direction: column; height: 100%;">
     <div class="header">
-        <!-- BARRA PC (originale) -->
         <div class="row1">
             <div class="logo-area">
                 <div id="logoRettangolo" class="logo-rettangolo">
@@ -415,36 +136,29 @@
             </div>
             <div id="summaryHeader" class="summary-header"></div>
         </div>
-        
-        <!-- BARRA MOBILE (visibile solo su mobile) con 5 elementi: LOGO, FLOPPY, HAMBURGER, DATA, SALDI -->
         <div class="mobile-bar" style="display: none;">
             <div class="logo-area">
-                <div class="logo-rettangolo" style="width:44px; height:44px;">
+                <div id="logoRettangoloMobile" class="logo-rettangolo" style="width:80px; height:80px;">
                     <img id="logoImmobile" style="display:none; max-width:100%; max-height:100%;">
                     <span id="logoSpanMobile">🏢</span>
                 </div>
             </div>
             <div class="floppy-container">
-                <button id="floppyBtnMobile" class="icon-btn">💾</button>
-                <!-- stesso dropdown del floppy desktop, riutilizzo -->
+                <button id="floppyBtnMobile" class="floppy-btn">💾</button>
             </div>
-            <div class="hamburger-container">
-                <button id="hamburgerIconMobile" class="icon-btn">☰</button>
-                <div id="navGridMobile" class="nav-grid">
-                    <button id="btnVaiAgentiMobile" class="nav-btn">👥 AGENTI</button>
-                    <button id="navChangePwdMobile" class="nav-btn">🔑 CAMBIA PASSWORD</button>
-                    <button id="navLogoutMobile" class="nav-btn">🚪 ESCI</button>
+            <div class="icon-row">
+                <button id="dataIconBtn" class="icon-btn">📅</button>
+                <button id="saldiIconBtn" class="icon-btn">💰</button>
+                <div class="hamburger-container">
+                    <button id="hamburgerIconMobile" class="icon-btn">☰</button>
+                    <div id="navGridMobile" class="nav-grid">
+                        <button id="btnVaiAgentiMobile" class="nav-btn">👥 AGENTI</button>
+                        <button id="navChangePwdMobile" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                        <button id="navLogoutMobile" class="nav-btn">🚪 ESCI</button>
+                    </div>
                 </div>
             </div>
-            <div class="data-icon-container">
-                <button id="dataIconBtn" class="icon-btn">📅</button>
-            </div>
-            <div class="saldi-icon-container">
-                <button id="saldiIconBtn" class="icon-btn">💰</button>
-            </div>
         </div>
-        
-        <!-- ROW2 originale (selettori anno/mese/saldo) - su PC visibile, su mobile nascosto -->
         <div class="row2">
             <div class="nav-box">
                 <button id="hamburgerBtn" class="hamburger-btn">☰</button>
@@ -461,7 +175,6 @@
                 <div><label>💰 Saldo iniziale (€)</label><input type="text" id="saldoInizialeHeader" class="import-field" placeholder="0,00" style="width:100px;"></div>
             </div>
         </div>
-        
         <div id="stickyToolbar" class="sticky-toolbar">
             <button id="toolbarPrimaNota" class="toolbar-btn active">📋 PRIMA NOTA</button>
             <button id="toolbarContanti" class="toolbar-btn">💵 CONTANTI</button>
@@ -483,79 +196,20 @@
         </div>
         <div class="content-area">
             <div id="contabilitaContainer">
-                <!-- tabelle identiche -->
-                <div id="tabellaPrimaNotaContainer" class="scadenze-box">
-                    <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
-                    <table class="tabella" id="tabellaPrimaNota">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead>
-                        <tbody id="primaNotaBody"></tbody>
-                    </table>
-                    <div id="primaNotaActionButtons" class="action-buttons">
-                        <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
-                        <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
-                    </div>
-                </div>
-                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
-                    <h3>💵 INCASSO CONTANTI</h3>
-                    <table class="tabella" id="tabellaContanti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
-                        <tbody id="contantiBody"></tbody>
-                    </table>
-                    <div id="contantiActionButtons" class="action-buttons">
-                        <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
-                        <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
-                    </div>
-                </div>
-                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
-                    <h3>📄 FATTURE FORNITORI</h3>
-                    <table class="tabella" id="tabellaFornitori">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
-                        <tbody id="fornitoriBody"></tbody>
-                    </table>
-                    <div id="fornitoriActionButtons" class="action-buttons">
-                        <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
-                        <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button>
-                    </div>
-                </div>
-                <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
-                    <h3>📋 ASS_CONT_CLIENTI</h3>
-                    <table class="tabella" id="tabellaAssClienti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
-                        <tbody id="assClientiBody"></tbody>
-                    </table>
-                    <div id="assClientiActionButtons" class="action-buttons">
-                        <button id="btnSalvaModificaAssClienti" class="btn-success">✅ SALVA</button>
-                        <button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button>
-                    </div>
-                </div>
-                <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
-                    <h3>📋 PAGA_DDT_CLIENTI</h3>
-                    <table class="tabella" id="tabellaPagaDdt">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
-                        <tbody id="pagaDdtBody"></tbody>
-                    </table>
-                    <div id="pagaDdtActionButtons" class="action-buttons">
-                        <button id="btnSalvaModificaPagaDdt" class="btn-success">✅ SALVA</button>
-                        <button id="btnEliminaSelezionatiPagaDdt" class="btn-danger">🗑 ELIMINA</button>
-                    </div>
-                </div>
+                <div id="tabellaPrimaNotaContainer" class="scadenze-box"><h3>📋 PRIMA NOTA - Movimenti del periodo</h3><table class="tabella" id="tabellaPrimaNota"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead><tbody id="primaNotaBody"></tbody></table><div id="primaNotaActionButtons" class="action-buttons"><button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;"><h3>💵 INCASSO CONTANTI</h3><table class="tabella" id="tabellaContanti"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead><tbody id="contantiBody"></tbody></table><div id="contantiActionButtons" class="action-buttons"><button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;"><h3>📄 FATTURE FORNITORI</h3><table class="tabella" id="tabellaFornitori"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead><tbody id="fornitoriBody"></tbody></table><div id="fornitoriActionButtons" class="action-buttons"><button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;"><h3>📋 ASS_CONT_CLIENTI</h3><table class="tabella" id="tabellaAssClienti"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead><tbody id="assClientiBody"></tbody></table><div id="assClientiActionButtons" class="action-buttons"><button id="btnSalvaModificaAssClienti" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button></div></div>
+                <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;"><h3>📋 PAGA_DDT_CLIENTI</h3><table class="tabella" id="tabellaPagaDdt"><thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead><tbody id="pagaDdtBody"></tbody></table><div id="pagaDdtActionButtons" class="action-buttons"><button id="btnSalvaModificaPagaDdt" class="btn-success">✅ SALVA</button><button id="btnEliminaSelezionatiPagaDdt" class="btn-danger">🗑 ELIMINA</button></div></div>
             </div>
-            <div id="changePwdContainer" style="display: none;">
-                <div class="scadenze-box">
-                    <h3>🔑 Cambia Password Amministratore</h3>
-                    <div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div>
-                    <div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div>
-                    <button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button>
-                    <button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button>
-                </div>
-            </div>
+            <div id="changePwdContainer" style="display: none;"><div class="scadenze-box"><h3>🔑 Cambia Password Amministratore</h3><div class="form-group"><label>Nuova Password</label><input type="password" id="nuovaPassword"></div><div class="form-group"><label>Conferma Password</label><input type="password" id="confermaPassword"></div><button id="btnSalvaPassword" class="btn-success">💾 Salva nuova password</button><button id="btnAnnullaPassword" class="btn-danger" style="margin-top:10px;">◀ TORNA INDIETRO</button></div></div>
         </div>
     </div>
     <footer>Logo: 1 tap→Link1 | 2 tap→Link2</footer>
 </div>
 
 <script>
-// ==================== FIREBASE CONFIG (invariata) ====================
+// ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -567,7 +221,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI GLOBALI (invariate) ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let currentYear = 2026, currentMonth = 4, currentScheda = 'primanota';
 let primaNota = [], contanti = [], fattureFornitori = [], assClienti = [], pagaDdt = [];
@@ -575,7 +228,7 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-// ==================== LINK E LOGO (invariati) ====================
+// ==================== LINK E LOGO ====================
 let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
@@ -586,7 +239,7 @@ async function caricaLinkDaFile() {
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
         }
-    } catch(e) { console.warn("Errore caricamento link.html:", e); }
+    } catch(e) { console.warn(e); }
 }
 function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("🔗 Link principale"); } else showToast("⚠️ Link principale non configurato", true); }
 function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("🔗 Link secondario"); } else showToast("⚠️ Link secondario non configurato", true); }
@@ -604,7 +257,7 @@ logoDivElem.addEventListener('click', (e) => {
     else { lastTap = now; setTimeout(() => { if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) { apriLinkPrincipale(); lastTap = 0; } }, 300); }
 });
 
-// ==================== FUNZIONI UTILI (invariate) ====================
+// ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -613,27 +266,10 @@ function showToast(message, isError = false) {
     document.body.appendChild(toast);
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
-function formatNumber(n) {
-    if (n === null || n === undefined || n === '') return '';
-    let num = parseFloat(n);
-    return isNaN(num) ? '' : num.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-}
-function parseNumber(s) {
-    if (!s || s === '') return 0;
-    let clean = s.toString().replace(/\./g, '').replace(',', '.');
-    let num = parseFloat(clean);
-    return isNaN(num) ? 0 : num;
-}
-function formatDate(d) {
-    if (!d) return "";
-    let x = new Date(d);
-    return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`;
-}
-function formatDateInput(d) {
-    if (!d) return "";
-    let x = new Date(d);
-    return `${x.getFullYear()}-${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
-}
+function formatNumber(n) { if (n === null || n === undefined || n === '') return ''; let num = parseFloat(n); return isNaN(num) ? '' : num.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+function parseNumber(s) { if (!s || s === '') return 0; let clean = s.toString().replace(/\./g, '').replace(',', '.'); let num = parseFloat(clean); return isNaN(num) ? 0 : num; }
+function formatDate(d) { if (!d) return ""; let x = new Date(d); return `${x.getDate().toString().padStart(2, '0')}/${(x.getMonth() + 1).toString().padStart(2, '0')}/${x.getFullYear()}`; }
+function formatDateInput(d) { if (!d) return ""; let x = new Date(d); return `${x.getFullYear()}-${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`; }
 function getTodayDate() { return new Date().toISOString().slice(0, 10); }
 function getFirstDayOfMonth(year, month) { return `${year}-${String(month+1).padStart(2,'0')}-01`; }
 function marcaModificheNonSalvate() { modificheNonSalvate = true; }
@@ -642,16 +278,11 @@ function setupImportField(fieldId) {
     const field = document.getElementById(fieldId);
     if (field) {
         field.addEventListener('focus', function() { this.select(); });
-        field.addEventListener('blur', function() {
-            let val = parseNumber(this.value);
-            if (val !== 0 && !isNaN(val)) this.value = formatNumber(val);
-            else if (this.value === '' || this.value === '0' || this.value === '0,00') this.value = '';
-        });
+        field.addEventListener('blur', function() { let val = parseNumber(this.value); if (val !== 0 && !isNaN(val)) this.value = formatNumber(val); else if (this.value === '' || this.value === '0' || this.value === '0,00') this.value = ''; });
         field.addEventListener('input', () => marcaModificheNonSalvate());
     }
 }
 
-// ==================== ORDINAMENTO (invariato) ====================
 function parseDateDDMMYYYY(dateStr) {
     if (!dateStr) return null;
     const parts = dateStr.split('/');
@@ -677,18 +308,16 @@ function ordinaTuttiGliArray() {
     primaNota = ordinaArrayPerData(primaNota, 'data');
     contanti = ordinaArrayPerData(contanti, 'data');
     fattureFornitori = ordinaArrayPerData(fattureFornitori, 'data');
-    assClienti = assClienti.slice().sort((a, b) => {
-        const dataA = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns);
-        const dataB = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns);
-        if (!dataA && !dataB) return 0;
-        if (!dataA) return 1;
-        if (!dataB) return -1;
-        return dataA - dataB;
+    assClienti = assClienti.slice().sort((a,b) => {
+        const da = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns);
+        const db = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns);
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        return da - db;
     });
     pagaDdt = ordinaArrayPerData(pagaDdt, 'data');
 }
-
-// ==================== DATE FUTURE E SPOSTAMENTO (invariati) ====================
 function getTodayDateObject() {
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -782,8 +411,6 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     setTimeout(() => evidenziaRigaPerValori(tipo, riga), 300);
     return { spostato: true, annullato: false };
 }
-
-// ==================== FIREBASE OPERAZIONI (invariate) ====================
 async function salvaStatoFirebase() {
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -836,7 +463,7 @@ async function caricaStatoFirebase() {
         aggiornaTabelle();
         aggiornaRiepilogoHeader();
         aggiornaDataFormAlPrimoMese();
-    } catch(e) { console.error("ERRORE caricamento: " + e.message); }
+    } catch(e) { console.error(e); }
 }
 function aggiornaDataFormAlPrimoMese() {
     const today = getTodayDateObject();
@@ -846,8 +473,6 @@ function aggiornaDataFormAlPrimoMese() {
     else if (currentScheda === 'fornitori' && document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = defaultDate;
     else if (currentScheda === 'pagaddt' && document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = defaultDate;
 }
-
-// ==================== DROPDOWN DINAMICI ANNO/MESE (invariati) ====================
 let anniDisponibili = [];
 let mesiDisponibiliPerAnno = {};
 async function popolaAnniMeseDinamici() {
@@ -917,7 +542,7 @@ async function popolaAnniMeseDinamici() {
             currentMonth = nuovoMese;
             await caricaStatoFirebase();
         }
-    } catch(e) { console.error("Errore popolamento dropdown dinamici:", e); }
+    } catch(e) { console.error(e); }
 }
 async function aggiornaMeseSelectInBaseAnno() {
     const annoSelect = document.getElementById('annoSelect');
@@ -981,14 +606,11 @@ function mostraModaleSalvaRigaPrimaDiCambiareMese() {
         document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
     });
 }
-
-// ==================== CANCELLAZIONE MESE/ANNO (invariata) ====================
 async function cancellaMeseCorrente() {
-    const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}? Questa operazione è IRREVERSIBILE.`);
-    if (!conferma) return;
+    if (!confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}?`)) return;
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).delete();
-        showToast(`🗑 Mese ${mesiLista[currentMonth]} ${currentYear} eliminato.`);
+        showToast(`🗑 Mese eliminato.`);
         await popolaAnniMeseDinamici();
         const annoSelect = document.getElementById('annoSelect');
         const meseSelect = document.getElementById('meseSelect');
@@ -1004,18 +626,17 @@ async function cancellaMeseCorrente() {
             await caricaStatoFirebase();
             await popolaAnniMeseDinamici();
         }
-    } catch(e) { showToast("Errore durante l'eliminazione del mese", true); }
+    } catch(e) { showToast("Errore", true); }
 }
 async function cancellaAnnoCorrente() {
     const anno = currentYear;
-    const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati dell'anno ${anno}? Questa operazione è IRREVERSIBILE e cancellerà TUTTI i mesi di quell'anno.`);
-    if (!conferma) return;
+    if (!confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati dell'anno ${anno}?`)) return;
     try {
         const snapshot = await db.collection('contabilita').where('anno', '==', anno).get();
         const batch = db.batch();
         snapshot.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
-        showToast(`🗑 Anno ${anno} eliminato completamente.`);
+        showToast(`🗑 Anno ${anno} eliminato.`);
         await popolaAnniMeseDinamici();
         const annoSelect = document.getElementById('annoSelect');
         const meseSelect = document.getElementById('meseSelect');
@@ -1031,10 +652,8 @@ async function cancellaAnnoCorrente() {
             await caricaStatoFirebase();
             await popolaAnniMeseDinamici();
         }
-    } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
+    } catch(e) { showToast("Errore", true); }
 }
-
-// ==================== GESTIONE TABELLE, SCHEDE, FORM (invariate) ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -1164,15 +783,11 @@ function makeRowEditable(tipo, idx, row) {
     }
     row.querySelectorAll('.import-field').forEach(f => {
         f.addEventListener('focus', function() { this.select(); });
-        f.addEventListener('blur', function() {
-            let val = parseNumber(this.value);
-            if (val !== 0 && !isNaN(val)) this.value = formatNumber(val);
-            else if (this.value === '' || this.value === '0' || this.value === '0,00') this.value = '';
-        });
+        f.addEventListener('blur', function() { let val = parseNumber(this.value); if (val !== 0 && !isNaN(val)) this.value = formatNumber(val); else if (this.value === '' || this.value === '0' || this.value === '0,00') this.value = ''; });
         f.addEventListener('input', () => marcaModificheNonSalvate());
     });
 }
-function aggiornaPulsantiAzione() { /* come prima, invariato */ 
+function aggiornaPulsantiAzione() {
     let hasSelected = false;
     if (currentScheda === 'primanota') {
         hasSelected = document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length > 0;
@@ -1201,7 +816,7 @@ function aggiornaPulsantiAzione() { /* come prima, invariato */
         if (selectAll) { const allChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
     }
 }
-function setScheda(s) { /* invariato */ 
+function setScheda(s) {
     currentScheda = s;
     document.getElementById('tabellaPrimaNotaContainer').style.display = s === 'primanota' ? 'block' : 'none';
     document.getElementById('tabellaContantiContainer').style.display = s === 'contanti' ? 'block' : 'none';
@@ -1216,7 +831,7 @@ function setScheda(s) { /* invariato */
     aggiornaForm();
     aggiornaTabelle();
 }
-function aggiornaForm() { /* invariato */ 
+function aggiornaForm() {
     const fa = document.getElementById('formArea');
     if (currentScheda === 'primanota') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
@@ -1243,7 +858,7 @@ function aggiornaForm() { /* invariato */
     });
     pulisciForm();
 }
-function pulisciForm() { /* invariato */ 
+function pulisciForm() {
     const today = getTodayDateObject();
     const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDate() : getFirstDayOfMonth(currentYear, currentMonth);
     if (currentScheda === 'primanota') {
@@ -1272,7 +887,7 @@ function pulisciForm() { /* invariato */
         if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
     }
 }
-function evidenziaRigaPerValori(tipo, riga) { /* invariato */ 
+function evidenziaRigaPerValori(tipo, riga) {
     let tableBodyId = '';
     if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
     else if (tipo === 'contanti') tableBodyId = 'contantiBody';
@@ -1319,8 +934,6 @@ function evidenziaRigaPerValori(tipo, riga) { /* invariato */
         }
     }
 }
-
-// ==================== MEMORIZZA NUOVO (invariato) ====================
 async function memorizzaNuovo() {
     let dataYMD = null;
     if (currentScheda === 'primanota') {
@@ -1329,8 +942,8 @@ async function memorizzaNuovo() {
         let avere = parseNumber(document.getElementById('formAvere')?.value);
         let dare = parseNumber(document.getElementById('formDare')?.value);
         if (!descrizione) { showToast("Inserisci descrizione", true); return false; }
-        if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return false; }
-        if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return false; }
+        if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare", true); return false; }
+        if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo", true); return false; }
         const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
         const dataInput = new Date(dataYMD + "T00:00:00");
         if (!(await verificaDataInserimento(dataInput, dataYMD))) return false;
@@ -1369,9 +982,7 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
-            const today = getTodayDateObject();
-            const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('contanti', nuovaRiga), 300);
+            setTimeout(() => evidenziaRigaPerValori('contanti', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Incasso contanti aggiunto!");
             return true;
@@ -1397,9 +1008,7 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
-            const today = getTodayDateObject();
-            const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('fornitori', nuovaRiga), 300);
+            setTimeout(() => evidenziaRigaPerValori('fornitori', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Fattura fornitore aggiunta!");
             return true;
@@ -1428,9 +1037,7 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
-            const today = getTodayDateObject();
-            const dataOggetto = new Date(dataRif + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('assclienti', nuovaRiga), 300);
+            setTimeout(() => evidenziaRigaPerValori('assclienti', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Riga ASS Clienti aggiunta!");
             return true;
@@ -1458,9 +1065,7 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
-            const today = getTodayDateObject();
-            const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('pagaddt', nuovaRiga), 300);
+            setTimeout(() => evidenziaRigaPerValori('pagaddt', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Riga Paga DDT aggiunta!");
             return true;
@@ -1490,16 +1095,14 @@ function mostraModaleConferma(messaggio) {
         document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
     });
 }
-
-// ==================== ESPORTAZIONI (invariate) ====================
-function esportaReportRagioniere() {
+function esportaReportRagioniere() { /* stessa implementazione originale */ 
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><td><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1548,14 +1151,14 @@ async function esportaReportAnno() {
     w.document.close();
 }
 function esportaCSV(perAnno) {
+    if (perAnno) { showToast("CSV annuale non implementato", true); return; }
     let dataToExport = [];
-    if (perAnno) { showToast("Esportazione CSV annuale non completamente implementata in demo", true); return; }
     if (currentScheda === 'primanota') dataToExport = primaNota.map(r => ({ ...r, tipo: 'PrimaNota' }));
     else if (currentScheda === 'contanti') dataToExport = contanti.map(r => ({ ...r, tipo: 'Contanti' }));
     else if (currentScheda === 'fornitori') dataToExport = fattureFornitori.map(r => ({ ...r, tipo: 'Fornitori' }));
     else if (currentScheda === 'assclienti') dataToExport = assClienti.map(r => ({ ...r, tipo: 'AssClienti' }));
     else if (currentScheda === 'pagaddt') dataToExport = pagaDdt.map(r => ({ ...r, tipo: 'PagaDdt' }));
-    if (dataToExport.length === 0) { showToast("Nessun dato da esportare", true); return; }
+    if (dataToExport.length === 0) { showToast("Nessun dato", true); return; }
     const headers = Object.keys(dataToExport[0]);
     const csvRows = [headers.join(',')];
     for (const row of dataToExport) {
@@ -1570,17 +1173,14 @@ function esportaCSV(perAnno) {
     URL.revokeObjectURL(link.href);
     showToast("CSV esportato");
 }
-
-// ==================== ELIMINAZIONE RIGHE E MODIFICHE (invariate) ====================
+// Selettori e bottoni (originali)
 document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => { document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllContanti')?.addEventListener('change', (e) => { document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllFornitori')?.addEventListener('change', (e) => { document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllAssClienti')?.addEventListener('change', (e) => { document.querySelectorAll('#assClientiBody .row-check-assclienti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllPagaDdt')?.addEventListener('change', (e) => { document.querySelectorAll('#pagaDdtBody .row-check-pagaddt').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
-
 async function eliminaSelezionati(tipo) {
-    let conferma = confirm(`Eliminare definitivamente le righe selezionate?`);
-    if (!conferma) return;
+    if (!confirm(`Eliminare definitivamente le righe selezionate?`)) return;
     if (tipo === 'primanota') { const checks = document.querySelectorAll('#primaNotaBody .row-check-prima:checked'); const nuovi = primaNota.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); primaNota = nuovi; }
     else if (tipo === 'contanti') { const checks = document.querySelectorAll('#contantiBody .row-check-contanti:checked'); const nuovi = contanti.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); contanti = nuovi; }
     else if (tipo === 'fornitori') { const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked'); const nuovi = fattureFornitori.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); fattureFornitori = nuovi; if (fattureFornitori.length === 0) nextFatturaId = 1; }
@@ -1659,61 +1259,30 @@ async function saveEditedRowWithMove(tipo, idx) {
 function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
 function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
 
-// ==================== MENU HAMBURGER E MODALI MOBILE ====================
-const mobileBar = document.querySelector('.mobile-bar');
-const floppyBtnMobile = document.getElementById('floppyBtnMobile');
-const hamburgerIconMobile = document.getElementById('hamburgerIconMobile');
-const navGridMobile = document.getElementById('navGridMobile');
-const dataIconBtn = document.getElementById('dataIconBtn');
-const saldiIconBtn = document.getElementById('saldiIconBtn');
-
+// Mobile gestione
 function toggleMobileLayout() {
     const isMobile = window.innerWidth <= 768;
     const row2 = document.querySelector('.row2');
     const mobileBarElem = document.querySelector('.mobile-bar');
-    if (isMobile) {
-        if (row2) row2.style.display = 'none';
-        if (mobileBarElem) mobileBarElem.style.display = 'flex';
-    } else {
-        if (row2) row2.style.display = 'flex';
-        if (mobileBarElem) mobileBarElem.style.display = 'none';
-    }
+    if (isMobile) { if (row2) row2.style.display = 'none'; if (mobileBarElem) mobileBarElem.style.display = 'flex'; }
+    else { if (row2) row2.style.display = 'flex'; if (mobileBarElem) mobileBarElem.style.display = 'none'; }
 }
 window.addEventListener('resize', toggleMobileLayout);
 toggleMobileLayout();
-
-if (floppyBtnMobile) {
-    floppyBtnMobile.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const dropdown = document.getElementById('dropdownMenu');
-        dropdown.classList.toggle('show');
-    });
+const floppyBtnMobile = document.getElementById('floppyBtnMobile');
+const dropdownMenuGlobal = document.getElementById('dropdownMenu');
+if (floppyBtnMobile && dropdownMenuGlobal) {
+    floppyBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenuGlobal.classList.toggle('show'); });
 }
-if (hamburgerIconMobile && navGridMobile) {
-    hamburgerIconMobile.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navGridMobile.classList.toggle('open');
-    });
-    document.addEventListener('click', (e) => {
-        if (!navGridMobile.contains(e.target) && !hamburgerIconMobile.contains(e.target)) {
-            navGridMobile.classList.remove('open');
-        }
-    });
+const hamburgerIconMobile = document.getElementById('hamburgerIconMobile');
+const navGridMobileElem = document.getElementById('navGridMobile');
+if (hamburgerIconMobile && navGridMobileElem) {
+    hamburgerIconMobile.addEventListener('click', (e) => { e.stopPropagation(); navGridMobileElem.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if (!navGridMobileElem.contains(e.target) && !hamburgerIconMobile.contains(e.target)) navGridMobileElem.classList.remove('open'); });
 }
-document.getElementById('btnVaiAgentiMobile')?.addEventListener('click', async () => {
-    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Salvare?`); if (!ok) return; }
-    window.location.href = 'agenti.html';
-});
-document.getElementById('navChangePwdMobile')?.addEventListener('click', () => {
-    document.getElementById('contabilitaContainer').style.display = 'none';
-    document.getElementById('changePwdContainer').style.display = 'block';
-});
-document.getElementById('navLogoutMobile')?.addEventListener('click', async () => {
-    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Salvare?`); if (!ok) return; }
-    window.location.href = 'index.html';
-});
-
-// MODALE DATA (mobile) - già presente nel codice, la riutilizzo
+document.getElementById('btnVaiAgentiMobile')?.addEventListener('click', async () => { if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Salvare?`); if (!ok) return; } window.location.href = 'agenti.html'; });
+document.getElementById('navChangePwdMobile')?.addEventListener('click', () => { document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; });
+document.getElementById('navLogoutMobile')?.addEventListener('click', async () => { if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Salvare?`); if (!ok) return; } window.location.href = 'index.html'; });
 function mostraModaleData() {
     let anniHtml = '', mesiHtml = '';
     for (let a of anniDisponibili) anniHtml += `<option value="${a}" ${a === currentYear ? 'selected' : ''}>${a}</option>`;
@@ -1769,10 +1338,8 @@ function mostraModaleSaldi() {
     document.body.appendChild(modal);
     document.getElementById('modalSaldiClose').onclick = () => modal.remove();
 }
-if (dataIconBtn) dataIconBtn.addEventListener('click', mostraModaleData);
-if (saldiIconBtn) saldiIconBtn.addEventListener('click', mostraModaleSaldi);
-
-// ==================== PULSANTI PRINCIPALI (PC) ====================
+document.getElementById('dataIconBtn')?.addEventListener('click', mostraModaleData);
+document.getElementById('saldiIconBtn')?.addEventListener('click', mostraModaleSaldi);
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
@@ -1791,21 +1358,12 @@ document.getElementById('btnSalvaModificaPagaDdt').onclick = () => salvaModifich
 document.getElementById('btnEliminaSelezionatiPagaDdt').onclick = () => eliminaSelezionati('pagaddt');
 document.getElementById('btnCancellaMese').onclick = cancellaMeseCorrente;
 document.getElementById('btnCancellaAnno').onclick = cancellaAnnoCorrente;
-
 document.getElementById('annoSelect').onchange = async () => { await aggiornaMeseSelectInBaseAnno(); await cambiaMeseDaSelect(); };
 document.getElementById('meseSelect').onchange = async () => { await cambiaMeseDaSelect(); };
 document.getElementById('saldoInizialeHeader').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); marcaModificheNonSalvate(); };
 setupImportField('saldoInizialeHeader');
-
-document.getElementById('btnVaiAgenti').onclick = async () => {
-    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di andare agli agenti?`); if (!ok) return; }
-    window.location.href = 'agenti.html';
-};
-document.getElementById('navLogout').onclick = async () => {
-    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di uscire?`); if (!ok) return; }
-    window.location.href = 'index.html';
-};
-
+document.getElementById('btnVaiAgenti').onclick = async () => { if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di andare agli agenti?`); if (!ok) return; } window.location.href = 'agenti.html'; };
+document.getElementById('navLogout').onclick = async () => { if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di uscire?`); if (!ok) return; } window.location.href = 'index.html'; };
 let changePwdVisible = false;
 document.getElementById('navChangePwd').onclick = () => { if (!changePwdVisible) { document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; } };
 document.getElementById('btnAnnullaPassword').onclick = () => { document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false; };
@@ -1819,31 +1377,35 @@ document.getElementById('btnSalvaPassword').onclick = () => {
     document.getElementById('nuovaPassword').value = ''; document.getElementById('confermaPassword').value = '';
     document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false;
 };
-
 const floppyBtn = document.getElementById('floppyBtn');
-const dropdownMenu = document.getElementById('dropdownMenu');
-floppyBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
-document.addEventListener('click', (e) => { if (!floppyBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.remove('show'); });
-document.getElementById('dropdownReportRagioniere').onclick = () => { dropdownMenu.classList.remove('show'); esportaReportRagioniere(); };
-document.getElementById('dropdownReportMese').onclick = () => { dropdownMenu.classList.remove('show'); esportaPDFMese(); };
-document.getElementById('dropdownReportAnno').onclick = () => { dropdownMenu.classList.remove('show'); esportaReportAnno(); };
-document.getElementById('dropdownCSVMese').onclick = () => { dropdownMenu.classList.remove('show'); esportaCSV(false); };
-document.getElementById('dropdownCSVAnno').onclick = () => { dropdownMenu.classList.remove('show'); esportaCSV(true); };
-
+const dropdownMenu2 = document.getElementById('dropdownMenu');
+floppyBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu2.classList.toggle('show'); });
+document.addEventListener('click', (e) => { if (!floppyBtn.contains(e.target) && !dropdownMenu2.contains(e.target)) dropdownMenu2.classList.remove('show'); });
+document.getElementById('dropdownReportRagioniere').onclick = () => { dropdownMenu2.classList.remove('show'); esportaReportRagioniere(); };
+document.getElementById('dropdownReportMese').onclick = () => { dropdownMenu2.classList.remove('show'); esportaPDFMese(); };
+document.getElementById('dropdownReportAnno').onclick = () => { dropdownMenu2.classList.remove('show'); esportaReportAnno(); };
+document.getElementById('dropdownCSVMese').onclick = () => { dropdownMenu2.classList.remove('show'); esportaCSV(false); };
+document.getElementById('dropdownCSVAnno').onclick = () => { dropdownMenu2.classList.remove('show'); esportaCSV(true); };
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; ordinaTuttiGliArray(); document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
-
 const hamburgerBtn2 = document.getElementById('hamburgerBtn');
 const navGrid2 = document.getElementById('navGrid');
 if (hamburgerBtn2 && navGrid2) {
     hamburgerBtn2.addEventListener('click', (e) => { e.stopPropagation(); navGrid2.classList.toggle('open'); });
     document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) navGrid2.classList.remove('open'); });
 }
-
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) { const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci."; e.preventDefault(); e.returnValue = message; return message; }
 });
-
-// AVVIO
+const logoMobileDiv = document.getElementById('logoRettangoloMobile');
+if (logoMobileDiv) {
+    let lastTapMobile = 0;
+    logoMobileDiv.addEventListener('click', (e) => {
+        const now = new Date().getTime();
+        const tapLength = now - lastTapMobile;
+        if (tapLength < 300 && tapLength > 0) { e.stopPropagation(); apriLinkSecondario(); lastTapMobile = 0; }
+        else { lastTapMobile = now; setTimeout(() => { if (lastTapMobile !== 0 && (new Date().getTime() - lastTapMobile) > 300) { apriLinkPrincipale(); lastTapMobile = 0; } }, 300); }
+    });
+}
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
     const now = new Date();
