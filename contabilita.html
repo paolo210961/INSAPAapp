@@ -289,7 +289,6 @@
         .btn-confirm-save { background: #27ae60; }
         .btn-confirm-discard { background: #e74c3c; }
         .btn-confirm-cancel { background: #95a5a6; }
-        /* evidenziazione riga inserita */
         .highlight-row {
             background-color: #fff3cd !important;
             transition: background-color 0.5s ease;
@@ -548,6 +547,46 @@ function setupImportField(fieldId) {
     }
 }
 
+// ==================== ORDINAMENTO CRONOLOGICO ====================
+function parseDateDDMMYYYY(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+    return new Date(year, month, day);
+}
+
+function ordinaArrayPerData(array, campoData) {
+    if (!array || !array.length) return array;
+    return array.slice().sort((a, b) => {
+        const dateA = parseDateDDMMYYYY(a[campoData]);
+        const dateB = parseDateDDMMYYYY(b[campoData]);
+        if (!dateA && !dateB) return 0;
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        return dateA - dateB;
+    });
+}
+
+function ordinaTuttiGliArray() {
+    primaNota = ordinaArrayPerData(primaNota, 'data');
+    contanti = ordinaArrayPerData(contanti, 'data');
+    fattureFornitori = ordinaArrayPerData(fattureFornitori, 'data');
+    // Per assClienti: usa dataDoc se esiste, altrimenti dataIns
+    assClienti = assClienti.slice().sort((a, b) => {
+        const dataA = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns);
+        const dataB = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns);
+        if (!dataA && !dataB) return 0;
+        if (!dataA) return 1;
+        if (!dataB) return -1;
+        return dataA - dataB;
+    });
+    pagaDdt = ordinaArrayPerData(pagaDdt, 'data');
+}
+
 // ==================== NUOVE FUNZIONI PER CONTROLLO DATE ====================
 function getTodayDateObject() {
     const today = new Date();
@@ -561,14 +600,11 @@ function isLastDayOfMonth(date) {
     return date.getDate() === lastDay;
 }
 function isValidFutureDateForInsert(inputDate, today) {
-    // Restituisce true se la data è consentita nonostante sia futura rispetto a oggi
-    if (inputDate <= today) return true; // non è futura
-    // Se è futura:
+    if (inputDate <= today) return true;
     if (!isLastDayOfMonth(today)) {
         showToast("❌ Non puoi inserire dati futuri. Oggi non è l'ultimo giorno del mese.", true);
         return false;
     }
-    // Oggi è l'ultimo giorno del mese: consentiamo solo date del mese successivo
     const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     const nextMonthLastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
     if (inputDate >= nextMonthFirstDay && inputDate <= nextMonthLastDay) {
@@ -578,7 +614,7 @@ function isValidFutureDateForInsert(inputDate, today) {
     return false;
 }
 
-// ==================== SPOSTA RIGA CON CONFERMA (invariata) ====================
+// ==================== SPOSTA RIGA CON CONFERMA ====================
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
     if (!dataYMD) return { spostato: false, annullato: false };
     const [annoStr, meseStr] = dataYMD.split('-');
@@ -604,18 +640,30 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     if (tipo === 'primanota') {
         targetData.primaNota = targetData.primaNota || [];
         targetData.primaNota.push(riga);
+        targetData.primaNota = ordinaArrayPerData(targetData.primaNota, 'data');
     } else if (tipo === 'contanti') {
         targetData.contanti = targetData.contanti || [];
         targetData.contanti.push(riga);
+        targetData.contanti = ordinaArrayPerData(targetData.contanti, 'data');
     } else if (tipo === 'fornitori') {
         targetData.fattureFornitori = targetData.fattureFornitori || [];
         targetData.fattureFornitori.push(riga);
+        targetData.fattureFornitori = ordinaArrayPerData(targetData.fattureFornitori, 'data');
     } else if (tipo === 'assclienti') {
         targetData.assClienti = targetData.assClienti || [];
         targetData.assClienti.push(riga);
+        targetData.assClienti = targetData.assClienti.slice().sort((a,b) => {
+            const da = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns);
+            const db = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns);
+            if (!da && !db) return 0;
+            if (!da) return 1;
+            if (!db) return -1;
+            return da - db;
+        });
     } else if (tipo === 'pagaddt') {
         targetData.pagaDdt = targetData.pagaDdt || [];
         targetData.pagaDdt.push(riga);
+        targetData.pagaDdt = ordinaArrayPerData(targetData.pagaDdt, 'data');
     }
     await docRef.set(targetData);
     if (tipo === 'primanota') {
@@ -692,14 +740,10 @@ async function caricaStatoFirebase() {
             nextFatturaId = data.nextFatturaId || 1;
         } else {
             const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
-            if (saldoPrec !== 0) {
-                saldoIniziale = saldoPrec;
-                showToast(`💰 Saldo iniziale caricato dal mese precedente: ${formatNumber(saldoPrec)} €`);
-            } else {
-                saldoIniziale = 0;
-            }
+            saldoIniziale = saldoPrec !== 0 ? saldoPrec : 0;
             primaNota = []; contanti = []; fattureFornitori = []; assClienti = []; pagaDdt = []; nextFatturaId = 1;
         }
+        ordinaTuttiGliArray();
         document.getElementById('saldoInizialeHeader').value = saldoIniziale ? formatNumber(saldoIniziale) : '';
         resetModificheNonSalvate();
         aggiornaTabelle();
@@ -708,7 +752,6 @@ async function caricaStatoFirebase() {
     } catch(e) { console.error("ERRORE caricamento: " + e.message); }
 }
 function aggiornaDataFormAlPrimoMese() {
-    // La data di default ora dipende: se il mese corrente corrisponde al mese reale, usa oggi; altrimenti primo giorno del mese.
     const today = getTodayDateObject();
     const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDate() : getFirstDayOfMonth(currentYear, currentMonth);
     if (currentScheda === 'primanota' && document.getElementById('formDataPrimaNota')) {
@@ -821,7 +864,6 @@ async function cambiaMeseDaSelect() {
     const nuovoAnno = parseInt(document.getElementById('annoSelect').value);
     const nuovoMese = parseInt(document.getElementById('meseSelect').value);
     if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
-    // CONFERMA se il nuovo mese è antecedente al mese reale
     const today = getTodayDateObject();
     const isPrecedente = (nuovoAnno < today.getFullYear()) || (nuovoAnno === today.getFullYear() && nuovoMese < today.getMonth());
     if (isPrecedente) {
@@ -1157,9 +1199,8 @@ function pulisciForm() {
     }
 }
 
-// ==================== MEMORIZZA NUOVO CON VERIFICA DATE ====================
+// ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO ====================
 async function memorizzaNuovo() {
-    let dataInput = null;
     let dataYMD = null;
     if (currentScheda === 'primanota') {
         dataYMD = document.getElementById('formDataPrimaNota')?.value;
@@ -1170,12 +1211,13 @@ async function memorizzaNuovo() {
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
         const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
-        dataInput = new Date(dataYMD + "T00:00:00");
+        const dataInput = new Date(dataYMD + "T00:00:00");
         if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'primanota', dataYMD);
         if (annullato) return;
         if (!spostato) {
             primaNota.push(nuovaRiga);
+            ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1193,12 +1235,13 @@ async function memorizzaNuovo() {
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, importo: importo };
-        dataInput = new Date(dataYMD + "T00:00:00");
+        const dataInput = new Date(dataYMD + "T00:00:00");
         if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'contanti', dataYMD);
         if (annullato) return;
         if (!spostato) {
             contanti.push(nuovaRiga);
+            ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1215,13 +1258,14 @@ async function memorizzaNuovo() {
         const numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
         if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return; }
         const nuovaRiga = { data: formatDate(dataYMD), fornitore: fornitore, numeroFattura: numeroFattura };
-        dataInput = new Date(dataYMD + "T00:00:00");
+        const dataInput = new Date(dataYMD + "T00:00:00");
         if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'fornitori', dataYMD);
         if (annullato) return;
         if (!spostato) {
             fattureFornitori.push(nuovaRiga);
             nextFatturaId++;
+            ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1241,13 +1285,14 @@ async function memorizzaNuovo() {
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
         const dataRif = dataDoc || getTodayDate();
-        dataInput = new Date(dataRif + "T00:00:00");
+        const dataInput = new Date(dataRif + "T00:00:00");
         if (!(await verificaDataInserimento(dataInput, dataRif))) return;
         const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'assclienti', dataRif);
         if (annullato) return;
         if (!spostato) {
             assClienti.push(nuovaRiga);
+            ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1266,13 +1311,14 @@ async function memorizzaNuovo() {
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        dataInput = new Date(dataYMD + "T00:00:00");
+        const dataInput = new Date(dataYMD + "T00:00:00");
         if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
         const nuovaRiga = { nome: nome, numDoc: numDoc, data: dataYMD ? formatDate(dataYMD) : '', importo: importo };
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'pagaddt', dataYMD);
         if (annullato) return;
         if (!spostato) {
             pagaDdt.push(nuovaRiga);
+            ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
@@ -1289,7 +1335,6 @@ async function memorizzaNuovo() {
 async function verificaDataInserimento(dataObj, dataYMD) {
     const today = getTodayDateObject();
     if (dataObj < today) {
-        // data passata
         return confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?");
     } else if (dataObj > today) {
         return isValidFutureDateForInsert(dataObj, today);
@@ -1297,7 +1342,6 @@ async function verificaDataInserimento(dataObj, dataYMD) {
     return true;
 }
 
-// Evidenzia l'ultima riga aggiunta nella tabella corrente
 function evidenziaUltimaRiga(tipo) {
     let tableBodyId = '';
     if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
@@ -1312,7 +1356,6 @@ function evidenziaUltimaRiga(tipo) {
         setTimeout(() => {
             lastRow.classList.remove('highlight-row');
         }, 5000);
-        // Scorri la tabella per mostrare l'ultima riga
         lastRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
@@ -1364,7 +1407,8 @@ function generaTabellaHTML(data, headers) {
     data.forEach(row => {
         html += "<tr>";
         headers.forEach(h => {
-            let val = row[h.toLowerCase().replace(/ /g,'').replace(/\./g,'').replace(/è/g,'e')] || row[h.toLowerCase().replace(/ /g,'')] || '';
+            let key = h.toLowerCase().replace(/ /g,'').replace(/\./g,'').replace(/è/g,'e');
+            let val = row[key] || row[h.toLowerCase().replace(/ /g,'')] || '';
             if (h.includes('€')) val = formatNumber(val) + ' €';
             html += `<td>${val}</td>`;
         });
@@ -1443,7 +1487,10 @@ async function eliminaSelezionati(tipo) {
     else if (tipo === 'fornitori') { const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked'); const nuovi = fattureFornitori.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); fattureFornitori = nuovi; if (fattureFornitori.length === 0) nextFatturaId = 1; }
     else if (tipo === 'assclienti') { const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked'); const nuovi = assClienti.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); assClienti = nuovi; }
     else if (tipo === 'pagaddt') { const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked'); const nuovi = pagaDdt.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); pagaDdt = nuovi; }
-    await salvaStatoFirebase(); aggiornaTabelle(); showToast("Elementi eliminati");
+    ordinaTuttiGliArray();
+    await salvaStatoFirebase(); 
+    aggiornaTabelle(); 
+    showToast("Elementi eliminati");
 }
 async function salvaModificheSelezionate(tipo) {
     const checks = document.querySelectorAll(`#${getBodyId(tipo)} .row-check-${getClassPrefix(tipo)}:checked`);
@@ -1491,7 +1538,6 @@ async function saveEditedRowWithMove(tipo, idx) {
         }
     } else { return; }
     if (!newRiga) return;
-    // Controllo date anche in modifica
     const today = getTodayDateObject();
     const inputDate = new Date(dataRif + "T00:00:00");
     if (inputDate < today) {
@@ -1505,6 +1551,7 @@ async function saveEditedRowWithMove(tipo, idx) {
         if (tipo === 'primanota') primaNota[idx] = newRiga;
         else if (tipo === 'assclienti') assClienti[idx] = newRiga;
         else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
+        ordinaTuttiGliArray();
         await salvaStatoFirebase();
         aggiornaTabelle();
         showToast("✅ Modifiche salvate!");
@@ -1610,7 +1657,7 @@ document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown();
 document.getElementById('dropdownCSVMese').onclick = () => { closeDropdown(); esportaCSV(false); };
 document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); esportaCSV(true); };
 
-document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
+document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; ordinaTuttiGliArray(); document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 
 // Avvio
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
