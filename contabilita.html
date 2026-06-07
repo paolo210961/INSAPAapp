@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
+        /* ========== STILI BASE (PC e mobile condivisi) ========== */
         * { box-sizing: border-box; }
         html, body {
             height: 100%;
@@ -291,43 +292,55 @@
         .btn-confirm-cancel { background: #95a5a6; }
         .highlight-row { background-color: #fff3cd !important; transition: background-color 0.5s ease; }
 
-        /* ========== MODIFICHE SOLO MOBILE ========== */
+        /* ========== SOLO MOBILE: layout compatto con icone Data/Saldi ========== */
         @media (max-width: 768px) {
-            /* Layout mobile come nell'ultima versione (con icone data/saldi) */
+            /* Nascondi i selettori classici e mostra la nuova barra mobile */
             .row1 { flex-direction: column; align-items: stretch; }
-            .logo-rettangolo { width: 100%; margin: 0 auto; }
+            .row2 { flex-direction: column; align-items: stretch; }
+            .filtri-rapidi { display: none; }  /* nascondo anno/mese/saldo classici */
             .summary-header { justify-content: center; margin: 10px 0; font-size: 0.9rem; gap: 15px; flex-wrap: wrap; }
             .summary-header div, .summary-header span { font-size: 0.9rem; }
-            .floppy-container { text-align: center; }
-            .row2 { flex-direction: column; align-items: stretch; }
-            .nav-box { position: relative; width: 100%; text-align: center; }
-            .hamburger-btn { 
-                display: block; 
-                margin: 0 auto; 
-                color: #0066cc !important;  /* A) BLU INTENSO */
+            
+            /* Nuova barra mobile con logo, floppy, hamburger, icone data/saldi */
+            .mobile-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 10px;
+                flex-wrap: nowrap;
+            }
+            .logo-area { flex-shrink: 0; }
+            .logo-rettangolo { width: 50px; height: 50px; }
+            .logo-rettangolo span { font-size: 1.8rem; }
+            .floppy-container { order: 2; }
+            .hamburger-container { order: 3; }
+            .data-icon-container { order: 4; }
+            .saldi-icon-container { order: 5; }
+            .icon-btn {
+                background: none;
+                border: none;
+                font-size: 1.8rem;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 12px;
+                width: 50px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            /* A) hamburger blu intenso */
+            .hamburger-container .icon-btn {
+                color: #0066cc !important;
                 font-weight: bold;
             }
-            .nav-grid { display: none; flex-direction: column; position: absolute; top: 100%; right: 0; left: 0; background: #f1c40f; border-radius: 12px; padding: 10px; margin-top: 5px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-            .nav-grid.open { display: flex; }
-            .nav-btn { width: 100%; text-align: center; }
-            .filtri-rapidi { justify-content: flex-start; gap: 10px; margin-top: 10px; }
-            .sticky-toolbar { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; gap: 8px; padding: 10px 15px; -webkit-overflow-scrolling: touch; }
-            .sticky-toolbar::-webkit-scrollbar { display: none; }
-            .toolbar-btn { flex-shrink: 0; font-size: 0.7rem; padding: 10px 14px; white-space: nowrap; }
-            .main-container { flex-direction: column; overflow: auto; }
-            .sidebar { width: 100%; margin-bottom: 15px; padding: 15px; position: static; flex-shrink: 0; }
-            .content-area { max-height: none; overflow-y: visible; }
-            .form-row { flex-direction: column; gap: 10px; }
-            .tabella { font-size: 0.7rem; min-width: 500px; }
-            .logo-tooltip { display: none; }
-
-            /* B) Voci menu floppy in grassetto nero */
+            /* B) voci dropdown floppy in grassetto nero */
             .dropdown-item {
                 font-weight: bold !important;
                 color: #000000 !important;
             }
-
-            /* C) Modali: tutte le scritte in grassetto nero */
+            /* C) testi modali in grassetto nero */
             .modal-content, 
             .modal-content h3,
             .modal-content p,
@@ -339,19 +352,30 @@
                 font-weight: bold !important;
                 color: #000000 !important;
             }
-            /* Pulsanti modali mantengono il loro colore di sfondo ma testo nero grassetto */
-            .modal-content .btn-success,
-            .modal-content .btn-danger,
-            .modal-content .btn-primary {
-                color: #000000 !important;
-                font-weight: bold !important;
-            }
+            .modal-content button { color: #000000 !important; } /* pulsanti modali testo nero */
+            
+            .nav-box { position: relative; width: 100%; text-align: center; background: transparent; padding: 0; }
+            .hamburger-btn { display: none; } /* nascondo quello vecchio, uso icona */
+            .nav-grid { display: none; flex-direction: column; position: absolute; top: 100%; right: 0; left: auto; background: white; border-radius: 12px; padding: 10px; margin-top: 5px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; }
+            .nav-grid.open { display: flex; }
+            .nav-btn { width: 100%; text-align: center; }
+            
+            .sticky-toolbar { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; gap: 8px; padding: 10px 15px; -webkit-overflow-scrolling: touch; }
+            .sticky-toolbar::-webkit-scrollbar { display: none; }
+            .toolbar-btn { flex-shrink: 0; font-size: 0.7rem; padding: 10px 14px; white-space: nowrap; }
+            .main-container { flex-direction: column; overflow: auto; }
+            .sidebar { width: 100%; margin-bottom: 15px; padding: 15px; position: static; flex-shrink: 0; }
+            .content-area { max-height: none; overflow-y: visible; }
+            .form-row { flex-direction: column; gap: 10px; }
+            .tabella { font-size: 0.7rem; min-width: 500px; }
+            .logo-tooltip { display: none; }
         }
     </style>
 </head>
 <body>
 <div id="appContainer" style="display: flex; flex-direction: column; height: 100%;">
     <div class="header">
+        <!-- BARRA PC (originale) -->
         <div class="row1">
             <div class="logo-area">
                 <div id="logoRettangolo" class="logo-rettangolo">
@@ -372,6 +396,34 @@
             </div>
             <div id="summaryHeader" class="summary-header"></div>
         </div>
+        <!-- BARRA MOBILE (sostituisce row2 e filtri) - visibile solo su mobile -->
+        <div class="mobile-bar" style="display: none;">
+            <div class="logo-area">
+                <div class="logo-rettangolo" style="width:50px; height:50px;">
+                    <img id="logoImmobile" style="display:none; max-width:100%; max-height:100%;">
+                    <span id="logoSpanMobile">🏢</span>
+                </div>
+            </div>
+            <div class="floppy-container">
+                <button id="floppyBtnMobile" class="icon-btn">💾</button>
+                <!-- stesso dropdown del floppy desktop, riutilizzo -->
+            </div>
+            <div class="hamburger-container">
+                <button id="hamburgerIconMobile" class="icon-btn">☰</button>
+                <div id="navGridMobile" class="nav-grid">
+                    <button id="btnVaiAgentiMobile" class="nav-btn">👥 AGENTI</button>
+                    <button id="navChangePwdMobile" class="nav-btn">🔑 CAMBIA PASSWORD</button>
+                    <button id="navLogoutMobile" class="nav-btn">🚪 ESCI</button>
+                </div>
+            </div>
+            <div class="data-icon-container">
+                <button id="dataIconBtn" class="icon-btn">📅</button>
+            </div>
+            <div class="saldi-icon-container">
+                <button id="saldiIconBtn" class="icon-btn">💰</button>
+            </div>
+        </div>
+        <!-- ROW2 originale (selettori anno/mese/saldo) - su PC visibile, su mobile nascosto -->
         <div class="row2">
             <div class="nav-box">
                 <button id="hamburgerBtn" class="hamburger-btn">☰</button>
@@ -409,6 +461,7 @@
         </div>
         <div class="content-area">
             <div id="contabilitaContainer">
+                <!-- stesse tabelle di sempre -->
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
@@ -480,7 +533,7 @@
 </div>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
+// ==================== FIREBASE CONFIG (invariata) ====================
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -492,7 +545,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI GLOBALI ====================
+// ==================== VARIABILI GLOBALI (invariate) ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let currentYear = 2026, currentMonth = 4, currentScheda = 'primanota';
 let primaNota = [], contanti = [], fattureFornitori = [], assClienti = [], pagaDdt = [];
@@ -500,7 +553,7 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-// ==================== LINK E LOGO ====================
+// ==================== LINK E LOGO (invariati) ====================
 let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
@@ -529,7 +582,7 @@ logoDivElem.addEventListener('click', (e) => {
     else { lastTap = now; setTimeout(() => { if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) { apriLinkPrincipale(); lastTap = 0; } }, 300); }
 });
 
-// ==================== FUNZIONI UTILI ====================
+// ==================== FUNZIONI UTILI (invariate) ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -560,9 +613,7 @@ function formatDateInput(d) {
     return `${x.getFullYear()}-${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
 }
 function getTodayDate() { return new Date().toISOString().slice(0, 10); }
-function getFirstDayOfMonth(year, month) {
-    return `${year}-${String(month+1).padStart(2,'0')}-01`;
-}
+function getFirstDayOfMonth(year, month) { return `${year}-${String(month+1).padStart(2,'0')}-01`; }
 function marcaModificheNonSalvate() { modificheNonSalvate = true; }
 function resetModificheNonSalvate() { modificheNonSalvate = false; }
 function setupImportField(fieldId) {
@@ -578,7 +629,7 @@ function setupImportField(fieldId) {
     }
 }
 
-// ==================== ORDINAMENTO CRONOLOGICO ====================
+// ==================== ORDINAMENTO CRONOLOGICO (invariato) ====================
 function parseDateDDMMYYYY(dateStr) {
     if (!dateStr) return null;
     const parts = dateStr.split('/');
@@ -589,7 +640,6 @@ function parseDateDDMMYYYY(dateStr) {
     if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
     return new Date(year, month, day);
 }
-
 function ordinaArrayPerData(array, campoData) {
     if (!array || !array.length) return array;
     return array.slice().sort((a, b) => {
@@ -601,7 +651,6 @@ function ordinaArrayPerData(array, campoData) {
         return dateA - dateB;
     });
 }
-
 function ordinaTuttiGliArray() {
     primaNota = ordinaArrayPerData(primaNota, 'data');
     contanti = ordinaArrayPerData(contanti, 'data');
@@ -617,7 +666,7 @@ function ordinaTuttiGliArray() {
     pagaDdt = ordinaArrayPerData(pagaDdt, 'data');
 }
 
-// ==================== NUOVE FUNZIONI PER CONTROLLO DATE ====================
+// ==================== DATE FUTURE E SPOSTAMENTO RIGHE (invariati) ====================
 function getTodayDateObject() {
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -637,14 +686,10 @@ function isValidFutureDateForInsert(inputDate, today) {
     }
     const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     const nextMonthLastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-    if (inputDate >= nextMonthFirstDay && inputDate <= nextMonthLastDay) {
-        return true;
-    }
+    if (inputDate >= nextMonthFirstDay && inputDate <= nextMonthLastDay) return true;
     showToast("❌ A fine mese puoi inserire solo date del mese successivo.", true);
     return false;
 }
-
-// ==================== CALCOLO SALDO FINALE MESE PRECEDENTE (RICORSIVO) ====================
 async function calcolaSaldoFinaleMese(anno, mese) {
     const docRef = db.collection('contabilita').doc(`${anno}_${mese}`);
     const docSnap = await docRef.get();
@@ -662,8 +707,6 @@ async function calcolaSaldoFinaleMese(anno, mese) {
     const totaleDare = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     return saldoIniz + totaleAvere - totaleDare;
 }
-
-// ==================== SPOSTA RIGA CON GESTIONE NUOVI MESI/ANNI ====================
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
     if (!dataYMD) return { spostato: false, annullato: false };
     const [annoStr, meseStr] = dataYMD.split('-');
@@ -671,19 +714,16 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     const meseDest = parseInt(meseStr) - 1;
     if (isNaN(annoDest) || isNaN(meseDest)) return { spostato: false, annullato: false };
     if (annoDest === currentYear && meseDest === currentMonth) return { spostato: false, annullato: false };
-    
     const today = getTodayDateObject();
     const isFuture = (annoDest > today.getFullYear()) || (annoDest === today.getFullYear() && meseDest > today.getMonth());
     const isLastDay = isLastDayOfMonth(today);
     const isNextMonth = (annoDest === today.getFullYear() && meseDest === today.getMonth() + 1);
     const skipConfirm = (isLastDay && isNextMonth) || isFuture;
-    
     let conferma = true;
     if (!skipConfirm) {
-        conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire con l'inserimento?`);
+        conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire?`);
     }
     if (!conferma) return { spostato: false, annullato: true };
-    
     const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
     const docSnap = await docRef.get();
     let targetData = {};
@@ -693,61 +733,20 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
         let annoPrec = annoDest, mesePrec = meseDest - 1;
         if (mesePrec < 0) { mesePrec = 11; annoPrec = annoDest - 1; }
         const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
-        targetData = {
-            anno: annoDest, mese: meseDest, saldoIniziale: saldoPrec,
-            primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
-            nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
-        };
+        targetData = { anno: annoDest, mese: meseDest, saldoIniziale: saldoPrec, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() };
     }
-    
-    if (tipo === 'primanota') {
-        targetData.primaNota = targetData.primaNota || [];
-        targetData.primaNota.push(riga);
-        targetData.primaNota = ordinaArrayPerData(targetData.primaNota, 'data');
-    } else if (tipo === 'contanti') {
-        targetData.contanti = targetData.contanti || [];
-        targetData.contanti.push(riga);
-        targetData.contanti = ordinaArrayPerData(targetData.contanti, 'data');
-    } else if (tipo === 'fornitori') {
-        targetData.fattureFornitori = targetData.fattureFornitori || [];
-        targetData.fattureFornitori.push(riga);
-        targetData.fattureFornitori = ordinaArrayPerData(targetData.fattureFornitori, 'data');
-    } else if (tipo === 'assclienti') {
-        targetData.assClienti = targetData.assClienti || [];
-        targetData.assClienti.push(riga);
-        targetData.assClienti = targetData.assClienti.slice().sort((a,b) => {
-            const da = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns);
-            const db = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns);
-            if (!da && !db) return 0;
-            if (!da) return 1;
-            if (!db) return -1;
-            return da - db;
-        });
-    } else if (tipo === 'pagaddt') {
-        targetData.pagaDdt = targetData.pagaDdt || [];
-        targetData.pagaDdt.push(riga);
-        targetData.pagaDdt = ordinaArrayPerData(targetData.pagaDdt, 'data');
-    }
+    if (tipo === 'primanota') { targetData.primaNota = targetData.primaNota || []; targetData.primaNota.push(riga); targetData.primaNota = ordinaArrayPerData(targetData.primaNota, 'data'); }
+    else if (tipo === 'contanti') { targetData.contanti = targetData.contanti || []; targetData.contanti.push(riga); targetData.contanti = ordinaArrayPerData(targetData.contanti, 'data'); }
+    else if (tipo === 'fornitori') { targetData.fattureFornitori = targetData.fattureFornitori || []; targetData.fattureFornitori.push(riga); targetData.fattureFornitori = ordinaArrayPerData(targetData.fattureFornitori, 'data'); }
+    else if (tipo === 'assclienti') { targetData.assClienti = targetData.assClienti || []; targetData.assClienti.push(riga); targetData.assClienti = targetData.assClienti.slice().sort((a,b) => { const da = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns); const db = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns); if (!da && !db) return 0; if (!da) return 1; if (!db) return -1; return da - db; }); }
+    else if (tipo === 'pagaddt') { targetData.pagaDdt = targetData.pagaDdt || []; targetData.pagaDdt.push(riga); targetData.pagaDdt = ordinaArrayPerData(targetData.pagaDdt, 'data'); }
     await docRef.set(targetData);
-    
-    if (tipo === 'primanota') {
-        const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
-        if (idx !== -1) primaNota.splice(idx, 1);
-    } else if (tipo === 'contanti') {
-        const idx = contanti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
-        if (idx !== -1) contanti.splice(idx, 1);
-    } else if (tipo === 'fornitori') {
-        const idx = fattureFornitori.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
-        if (idx !== -1) fattureFornitori.splice(idx, 1);
-    } else if (tipo === 'assclienti') {
-        const idx = assClienti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
-        if (idx !== -1) assClienti.splice(idx, 1);
-    } else if (tipo === 'pagaddt') {
-        const idx = pagaDdt.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
-        if (idx !== -1) pagaDdt.splice(idx, 1);
-    }
+    if (tipo === 'primanota') { const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) primaNota.splice(idx, 1); }
+    else if (tipo === 'contanti') { const idx = contanti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) contanti.splice(idx, 1); }
+    else if (tipo === 'fornitori') { const idx = fattureFornitori.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) fattureFornitori.splice(idx, 1); }
+    else if (tipo === 'assclienti') { const idx = assClienti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) assClienti.splice(idx, 1); }
+    else if (tipo === 'pagaddt') { const idx = pagaDdt.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) pagaDdt.splice(idx, 1); }
     await salvaStatoFirebase();
-    
     currentYear = annoDest;
     currentMonth = meseDest;
     await caricaStatoFirebase();
@@ -762,7 +761,7 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     return { spostato: true, annullato: false };
 }
 
-// ==================== FIREBASE OPERAZIONI ====================
+// ==================== FIREBASE OPERAZIONI (invariate) ====================
 async function salvaStatoFirebase() {
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -820,18 +819,13 @@ async function caricaStatoFirebase() {
 function aggiornaDataFormAlPrimoMese() {
     const today = getTodayDateObject();
     const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDate() : getFirstDayOfMonth(currentYear, currentMonth);
-    if (currentScheda === 'primanota' && document.getElementById('formDataPrimaNota')) {
-        document.getElementById('formDataPrimaNota').value = defaultDate;
-    } else if (currentScheda === 'contanti' && document.getElementById('formDataContanti')) {
-        document.getElementById('formDataContanti').value = defaultDate;
-    } else if (currentScheda === 'fornitori' && document.getElementById('formDataFornitori')) {
-        document.getElementById('formDataFornitori').value = defaultDate;
-    } else if (currentScheda === 'pagaddt' && document.getElementById('formDataPaga')) {
-        document.getElementById('formDataPaga').value = defaultDate;
-    }
+    if (currentScheda === 'primanota' && document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = defaultDate;
+    else if (currentScheda === 'contanti' && document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = defaultDate;
+    else if (currentScheda === 'fornitori' && document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = defaultDate;
+    else if (currentScheda === 'pagaddt' && document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = defaultDate;
 }
 
-// ==================== DROPDOWN DINAMICI ====================
+// ==================== DROPDOWN DINAMICI ANNO/MESE (invariati) ====================
 let anniDisponibili = [];
 let mesiDisponibiliPerAnno = {};
 async function popolaAnniMeseDinamici() {
@@ -947,55 +941,26 @@ async function cambiaMeseDaSelect() {
             return;
         }
         await caricaStatoFirebase();
-        if (currentYear === nuovoAnno && currentMonth === nuovoMese) {
-            return;
-        }
+        if (currentYear === nuovoAnno && currentMonth === nuovoMese) return;
     }
     currentYear = nuovoAnno;
     currentMonth = nuovoMese;
     await caricaStatoFirebase();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
-
 function mostraModaleSalvaRigaPrimaDiCambiareMese() {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>⚠️ MODIFICHE NON SALVATE</h3>
-                <p>Ci sono dati non ancora memorizzati nel mese corrente.</p>
-                <p>Vuoi salvare questa registrazione prima di cambiare mese?</p>
-                <div class="modal-buttons">
-                    <button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button>
-                    <button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
-                    <button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
-                </div>
-            </div>
-        `;
+        modal.innerHTML = `<div class="modal-content"><h3>⚠️ MODIFICHE NON SALVATE</h3><p>Ci sono dati non ancora memorizzati nel mese corrente.</p><p>Vuoi salvare questa registrazione prima di cambiare mese?</p><div class="modal-buttons"><button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button><button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button><button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button></div></div>`;
         document.body.appendChild(modal);
-        const saveBtn = document.getElementById('modalSave');
-        const discardBtn = document.getElementById('modalDiscard');
-        const cancelBtn = document.getElementById('modalCancel');
-        saveBtn.onclick = async () => {
-            modal.remove();
-            const success = await memorizzaNuovo();
-            resolve(success ? true : false);
-        };
-        discardBtn.onclick = () => {
-            modal.remove();
-            resetModificheNonSalvate();
-            pulisciForm();
-            resolve(true);
-        };
-        cancelBtn.onclick = () => {
-            modal.remove();
-            resolve(false);
-        };
+        document.getElementById('modalSave').onclick = async () => { modal.remove(); const success = await memorizzaNuovo(); resolve(success ? true : false); };
+        document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); pulisciForm(); resolve(true); };
+        document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
     });
 }
 
-// ==================== FUNZIONI DI CANCELLAZIONE ====================
+// ==================== CANCELLAZIONE MESE/ANNO (invariata) ====================
 async function cancellaMeseCorrente() {
     const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}? Questa operazione è IRREVERSIBILE.`);
     if (!conferma) return;
@@ -1013,11 +978,7 @@ async function cancellaMeseCorrente() {
             const now = new Date();
             currentYear = now.getFullYear();
             currentMonth = now.getMonth();
-            await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
-                anno: currentYear, mese: currentMonth, saldoIniziale: 0,
-                primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
-                nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
-            });
+            await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({ anno: currentYear, mese: currentMonth, saldoIniziale: 0, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() });
             await caricaStatoFirebase();
             await popolaAnniMeseDinamici();
         }
@@ -1044,18 +1005,14 @@ async function cancellaAnnoCorrente() {
             const now = new Date();
             currentYear = now.getFullYear();
             currentMonth = now.getMonth();
-            await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
-                anno: currentYear, mese: currentMonth, saldoIniziale: 0,
-                primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
-                nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
-            });
+            await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({ anno: currentYear, mese: currentMonth, saldoIniziale: 0, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() });
             await caricaStatoFirebase();
             await popolaAnniMeseDinamici();
         }
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
 
-// ==================== GESTIONE TABELLE, SCHEDE, FORM ====================
+// ==================== GESTIONE TABELLE, SCHEDE, FORM (invariate) ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -1063,9 +1020,7 @@ function aggiornaRiepilogoHeader() {
         let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
         let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
         let sal = saldoIniziale + ta - td;
-        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div>
-                                <div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div>
-                                <div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div>`;
+        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div><div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div><div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div>`;
     } else if (currentScheda === 'contanti') {
         let tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
         summaryDiv.innerHTML = `<div>💵 Incasso contanti: <span class="positive">${formatNumber(tc)} €</span></div>`;
@@ -1085,19 +1040,17 @@ function aggiornaTabelle() {
         primaBody.innerHTML = '';
         primaNota.forEach((item, idx) => {
             const row = primaBody.insertRow();
-            const chkCell = row.insertCell(0);
             const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-prima';
             chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('primanota', idx, row); else aggiornaTabelle(); };
-            chkCell.appendChild(chk);
+            row.insertCell(0).appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
             row.insertCell(2).innerHTML = item.data || '';
             row.insertCell(3).innerHTML = item.descrizione || '';
             row.insertCell(4).innerHTML = item.avere ? '<strong>' + formatNumber(item.avere) + ' €</strong>' : '';
             row.insertCell(5).innerHTML = item.dare ? '<strong>' + formatNumber(item.dare) + ' €</strong>' : '';
-            const verCell = row.insertCell(6);
             const verChk = document.createElement('input'); verChk.type = 'checkbox'; verChk.checked = item.verificato === true;
             verChk.onchange = async () => { item.verificato = verChk.checked; await salvaStatoFirebase(); };
-            verCell.appendChild(verChk);
+            row.insertCell(6).appendChild(verChk);
         });
     }
     const contantiBody = document.getElementById('contantiBody');
@@ -1105,10 +1058,9 @@ function aggiornaTabelle() {
         contantiBody.innerHTML = '';
         contanti.forEach((item, idx) => {
             const row = contantiBody.insertRow();
-            const chkCell = row.insertCell(0);
             const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-contanti';
             chk.onchange = () => aggiornaPulsantiAzione();
-            chkCell.appendChild(chk);
+            row.insertCell(0).appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (idx + 1) + '</strong>';
             row.insertCell(2).innerHTML = item.data || '';
             row.insertCell(3).innerHTML = item.descrizione || '';
@@ -1120,10 +1072,9 @@ function aggiornaTabelle() {
         fornitoriBody.innerHTML = '';
         fattureFornitori.forEach((item, idx) => {
             const row = fornitoriBody.insertRow();
-            const chkCell = row.insertCell(0);
             const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-fornitori';
             chk.onchange = () => aggiornaPulsantiAzione();
-            chkCell.appendChild(chk);
+            row.insertCell(0).appendChild(chk);
             row.insertCell(1).innerHTML = '<strong>' + (nextFatturaId - fattureFornitori.length + idx) + '/' + currentYear + '</strong>';
             row.insertCell(2).innerHTML = item.data || '';
             row.insertCell(3).innerHTML = item.fornitore || '';
@@ -1135,10 +1086,9 @@ function aggiornaTabelle() {
         assClientiBody.innerHTML = '';
         assClienti.forEach((item, idx) => {
             const row = assClientiBody.insertRow();
-            const chkCell = row.insertCell(0);
             const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-assclienti';
             chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('assclienti', idx, row); else aggiornaTabelle(); };
-            chkCell.appendChild(chk);
+            row.insertCell(0).appendChild(chk);
             row.insertCell(1).innerHTML = item.dataIns || '';
             row.insertCell(2).innerHTML = item.descrizione || '';
             row.insertCell(3).innerHTML = item.nome || '';
@@ -1152,10 +1102,9 @@ function aggiornaTabelle() {
         pagaDdtBody.innerHTML = '';
         pagaDdt.forEach((item, idx) => {
             const row = pagaDdtBody.insertRow();
-            const chkCell = row.insertCell(0);
             const chk = document.createElement('input'); chk.type = 'checkbox'; chk.className = 'row-check-pagaddt';
             chk.onchange = () => { aggiornaPulsantiAzione(); if(chk.checked) makeRowEditable('pagaddt', idx, row); else aggiornaTabelle(); };
-            chkCell.appendChild(chk);
+            row.insertCell(0).appendChild(chk);
             row.insertCell(1).innerHTML = item.nome || '';
             row.insertCell(2).innerHTML = item.numDoc || '';
             row.insertCell(3).innerHTML = item.data || '';
@@ -1301,8 +1250,6 @@ function pulisciForm() {
         if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
     }
 }
-
-// ==================== EVIDENZIAZIONE RIGA PER VALORI ====================
 function evidenziaRigaPerValori(tipo, riga) {
     let tableBodyId = '';
     if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
@@ -1320,39 +1267,27 @@ function evidenziaRigaPerValori(tipo, riga) {
             const descCell = row.cells[3]?.innerText;
             const avereCell = row.cells[4]?.innerText.replace(' €', '').trim();
             const dareCell = row.cells[5]?.innerText.replace(' €', '').trim();
-            if (dataCell === riga.data && descCell === riga.descrizione &&
-                (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) &&
-                (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === ''))) {
-                match = true;
-            }
+            if (dataCell === riga.data && descCell === riga.descrizione && (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) && (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === ''))) match = true;
         } else if (tipo === 'contanti') {
             const dataCell = row.cells[2]?.innerText;
             const descCell = row.cells[3]?.innerText;
             const impCell = row.cells[4]?.innerText.replace(' €', '').trim();
-            if (dataCell === riga.data && descCell === riga.descrizione && impCell === formatNumber(riga.importo)) {
-                match = true;
-            }
+            if (dataCell === riga.data && descCell === riga.descrizione && impCell === formatNumber(riga.importo)) match = true;
         } else if (tipo === 'fornitori') {
             const dataCell = row.cells[2]?.innerText;
             const fornitoreCell = row.cells[3]?.innerText;
             const numFatCell = row.cells[4]?.innerText;
-            if (dataCell === riga.data && fornitoreCell === riga.fornitore && numFatCell === riga.numeroFattura) {
-                match = true;
-            }
+            if (dataCell === riga.data && fornitoreCell === riga.fornitore && numFatCell === riga.numeroFattura) match = true;
         } else if (tipo === 'assclienti') {
             const nomeCell = row.cells[3]?.innerText;
             const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
             const numDocCell = row.cells[5]?.innerText;
-            if (nomeCell === riga.nome && importoCell === formatNumber(riga.importo) && numDocCell === riga.numDoc) {
-                match = true;
-            }
+            if (nomeCell === riga.nome && importoCell === formatNumber(riga.importo) && numDocCell === riga.numDoc) match = true;
         } else if (tipo === 'pagaddt') {
             const nomeCell = row.cells[1]?.innerText;
             const numDocCell = row.cells[2]?.innerText;
             const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
-            if (nomeCell === riga.nome && numDocCell === riga.numDoc && importoCell === formatNumber(riga.importo)) {
-                match = true;
-            }
+            if (nomeCell === riga.nome && numDocCell === riga.numDoc && importoCell === formatNumber(riga.importo)) match = true;
         }
         if (match) {
             row.classList.add('highlight-row');
@@ -1363,7 +1298,7 @@ function evidenziaRigaPerValori(tipo, riga) {
     }
 }
 
-// ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO ====================
+// ==================== MEMORIZZA NUOVO (invariato, con verifica date) ====================
 async function memorizzaNuovo() {
     let dataYMD = null;
     if (currentScheda === 'primanota') {
@@ -1386,9 +1321,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             const today = getTodayDateObject();
             const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) {
-                setTimeout(() => evidenziaRigaPerValori('primanota', nuovaRiga), 300);
-            }
+            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('primanota', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Riga aggiunta!");
             return true;
@@ -1416,9 +1349,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             const today = getTodayDateObject();
             const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) {
-                setTimeout(() => evidenziaRigaPerValori('contanti', nuovaRiga), 300);
-            }
+            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('contanti', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Incasso contanti aggiunto!");
             return true;
@@ -1446,9 +1377,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             const today = getTodayDateObject();
             const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) {
-                setTimeout(() => evidenziaRigaPerValori('fornitori', nuovaRiga), 300);
-            }
+            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('fornitori', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Fattura fornitore aggiunta!");
             return true;
@@ -1479,9 +1408,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             const today = getTodayDateObject();
             const dataOggetto = new Date(dataRif + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) {
-                setTimeout(() => evidenziaRigaPerValori('assclienti', nuovaRiga), 300);
-            }
+            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('assclienti', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Riga ASS Clienti aggiunta!");
             return true;
@@ -1511,9 +1438,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             const today = getTodayDateObject();
             const dataOggetto = new Date(dataYMD + "T00:00:00");
-            if (dataOggetto < today || dataOggetto > today) {
-                setTimeout(() => evidenziaRigaPerValori('pagaddt', nuovaRiga), 300);
-            }
+            if (dataOggetto < today || dataOggetto > today) setTimeout(() => evidenziaRigaPerValori('pagaddt', nuovaRiga), 300);
             pulisciForm();
             showToast("✅ Riga Paga DDT aggiunta!");
             return true;
@@ -1526,33 +1451,17 @@ async function memorizzaNuovo() {
     }
     return false;
 }
-
 async function verificaDataInserimento(dataObj, dataYMD) {
     const today = getTodayDateObject();
-    if (dataObj < today) {
-        return confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?");
-    } else if (dataObj > today) {
-        return isValidFutureDateForInsert(dataObj, today);
-    }
+    if (dataObj < today) return confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?");
+    else if (dataObj > today) return isValidFutureDateForInsert(dataObj, today);
     return true;
 }
-
 function mostraModaleConferma(messaggio) {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>⚠️ MODIFICHE NON SALVATE</h3>
-                <p>${messaggio}</p>
-                <p>Vuoi salvare prima di proseguire?</p>
-                <div class="modal-buttons">
-                    <button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button>
-                    <button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
-                    <button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
-                </div>
-            </div>
-        `;
+        modal.innerHTML = `<div class="modal-content"><h3>⚠️ MODIFICHE NON SALVATE</h3><p>${messaggio}</p><p>Vuoi salvare prima di proseguire?</p><div class="modal-buttons"><button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button><button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button><button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button></div></div>`;
         document.body.appendChild(modal);
         document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
         document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
@@ -1568,7 +1477,7 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><tr><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1600,10 +1509,7 @@ async function esportaReportAnno() {
     if (snapshot.empty) { showToast("Nessun dato per l'anno selezionato", true); return; }
     let html = `<html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:monospace;padding:20px;} .mese{margin-top:30px;border-top:2px solid #000;}</style></head><body><h1>Report Annuale ${anno}</h1>`;
     const mesiOrdinati = [];
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        mesiOrdinati.push({ mese: data.mese, data: data });
-    });
+    snapshot.forEach(doc => { const data = doc.data(); mesiOrdinati.push({ mese: data.mese, data: data }); });
     mesiOrdinati.sort((a,b) => a.mese - b.mese);
     for (let m of mesiOrdinati) {
         const d = m.data;
@@ -1621,10 +1527,7 @@ async function esportaReportAnno() {
 }
 function esportaCSV(perAnno) {
     let dataToExport = [];
-    if (perAnno) {
-        showToast("Esportazione CSV annuale non completamente implementata in demo", true);
-        return;
-    }
+    if (perAnno) { showToast("Esportazione CSV annuale non completamente implementata in demo", true); return; }
     if (currentScheda === 'primanota') dataToExport = primaNota.map(r => ({ ...r, tipo: 'PrimaNota' }));
     else if (currentScheda === 'contanti') dataToExport = contanti.map(r => ({ ...r, tipo: 'Contanti' }));
     else if (currentScheda === 'fornitori') dataToExport = fattureFornitori.map(r => ({ ...r, tipo: 'Fornitori' }));
@@ -1634,10 +1537,7 @@ function esportaCSV(perAnno) {
     const headers = Object.keys(dataToExport[0]);
     const csvRows = [headers.join(',')];
     for (const row of dataToExport) {
-        const values = headers.map(header => {
-            const val = row[header] || '';
-            return `"${String(val).replace(/"/g, '""')}"`;
-        });
+        const values = headers.map(header => `"${String(row[header] || '').replace(/"/g, '""')}"`);
         csvRows.push(values.join(','));
     }
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
@@ -1649,7 +1549,7 @@ function esportaCSV(perAnno) {
     showToast("CSV esportato");
 }
 
-// ==================== ELIMINAZIONE RIGHE E MODIFICHE ====================
+// ==================== ELIMINAZIONE RIGHE E MODIFICHE (invariate) ====================
 document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => { document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllContanti')?.addEventListener('change', (e) => { document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllFornitori')?.addEventListener('change', (e) => { document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
@@ -1717,11 +1617,8 @@ async function saveEditedRowWithMove(tipo, idx) {
     if (!newRiga) return;
     const today = getTodayDateObject();
     const inputDate = new Date(dataRif + "T00:00:00");
-    if (inputDate < today) {
-        if (!confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?")) return;
-    } else if (inputDate > today) {
-        if (!isValidFutureDateForInsert(inputDate, today)) return;
-    }
+    if (inputDate < today) { if (!confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?")) return; }
+    else if (inputDate > today) { if (!isValidFutureDateForInsert(inputDate, today)) return; }
     const { spostato, annullato } = await verificaESpostaRigaSeNecessario(newRiga, tipo, dataRif, 'modifica');
     if (annullato) return;
     if (!spostato) {
@@ -1740,24 +1637,125 @@ async function saveEditedRowWithMove(tipo, idx) {
 function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
 function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
 
-// ==================== HAMBURGER MENU ====================
-const hamburgerBtn2 = document.getElementById('hamburgerBtn');
-const navGrid2 = document.getElementById('navGrid');
-if (hamburgerBtn2 && navGrid2) {
-    hamburgerBtn2.addEventListener('click', (e) => { e.stopPropagation(); navGrid2.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) { navGrid2.classList.remove('open'); } });
-}
+// ==================== MENU HAMBURGER E MODALI MOBILE ====================
+// Riferimenti agli elementi mobile
+const mobileBar = document.querySelector('.mobile-bar');
+const floppyBtnMobile = document.getElementById('floppyBtnMobile');
+const hamburgerIconMobile = document.getElementById('hamburgerIconMobile');
+const navGridMobile = document.getElementById('navGridMobile');
+const dataIconBtn = document.getElementById('dataIconBtn');
+const saldiIconBtn = document.getElementById('saldiIconBtn');
 
-window.addEventListener('beforeunload', (e) => {
-    if (modificheNonSalvate) {
-        const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci.";
-        e.preventDefault();
-        e.returnValue = message;
-        return message;
+// Mostra mobile bar solo su mobile (media query gestita da CSS, ma nascondiamo di default e mostriamo tramite JS in base a larghezza)
+function toggleMobileLayout() {
+    const isMobile = window.innerWidth <= 768;
+    const row2 = document.querySelector('.row2');
+    const mobileBarElem = document.querySelector('.mobile-bar');
+    if (isMobile) {
+        if (row2) row2.style.display = 'none';
+        if (mobileBarElem) mobileBarElem.style.display = 'flex';
+    } else {
+        if (row2) row2.style.display = 'flex';
+        if (mobileBarElem) mobileBarElem.style.display = 'none';
     }
+}
+window.addEventListener('resize', toggleMobileLayout);
+toggleMobileLayout();
+
+// floppy mobile: riutilizza il menu dropdown esistente
+if (floppyBtnMobile) {
+    floppyBtnMobile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.classList.toggle('show');
+    });
+}
+// hamburger mobile
+if (hamburgerIconMobile && navGridMobile) {
+    hamburgerIconMobile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navGridMobile.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+        if (!navGridMobile.contains(e.target) && !hamburgerIconMobile.contains(e.target)) {
+            navGridMobile.classList.remove('open');
+        }
+    });
+}
+// pulsanti nav mobile
+document.getElementById('btnVaiAgentiMobile')?.addEventListener('click', async () => {
+    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Salvare?`); if (!ok) return; }
+    window.location.href = 'agenti.html';
+});
+document.getElementById('navChangePwdMobile')?.addEventListener('click', () => {
+    document.getElementById('contabilitaContainer').style.display = 'none';
+    document.getElementById('changePwdContainer').style.display = 'block';
+});
+document.getElementById('navLogoutMobile')?.addEventListener('click', async () => {
+    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Salvare?`); if (!ok) return; }
+    window.location.href = 'index.html';
 });
 
-// ==================== PULSANTI PRINCIPALI ====================
+// MODALE DATA (mobile)
+function mostraModaleData() {
+    let anniHtml = '', mesiHtml = '';
+    for (let a of anniDisponibili) anniHtml += `<option value="${a}" ${a === currentYear ? 'selected' : ''}>${a}</option>`;
+    const mesiDisponibili = mesiDisponibiliPerAnno[currentYear] || [];
+    for (let m of mesiDisponibili) mesiHtml += `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${mesiLista[m]}</option>`;
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content"><h3>📅 Seleziona Periodo e Saldo Iniziale</h3><div class="form-group"><label>Anno</label><select id="modalAnno">${anniHtml}</select></div><div class="form-group"><label>Mese</label><select id="modalMese">${mesiHtml}</select></div><div class="form-group"><label>Saldo iniziale (€)</label><input type="text" id="modalSaldoIniziale" value="${formatNumber(saldoIniziale)}" class="import-field"></div><div class="modal-buttons"><button id="modalDataOk" class="btn-success">OK</button><button id="modalDataCancel" class="btn-danger">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    setupImportField('modalSaldoIniziale');
+    document.getElementById('modalAnno').addEventListener('change', (e) => {
+        const anno = parseInt(e.target.value);
+        const mesi = mesiDisponibiliPerAnno[anno] || [];
+        const meseSelect = document.getElementById('modalMese');
+        meseSelect.innerHTML = '';
+        for (let m of mesi) { const opt = document.createElement('option'); opt.value = m; opt.textContent = mesiLista[m]; if (m === currentMonth && anno === currentYear) opt.selected = true; meseSelect.appendChild(opt); }
+    });
+    document.getElementById('modalDataOk').onclick = async () => {
+        const nuovoAnno = parseInt(document.getElementById('modalAnno').value);
+        const nuovoMese = parseInt(document.getElementById('modalMese').value);
+        const nuovoSaldo = parseNumber(document.getElementById('modalSaldoIniziale').value);
+        if (nuovoAnno !== currentYear || nuovoMese !== currentMonth) await cambiaMeseDaSelectCustom(nuovoAnno, nuovoMese);
+        if (Math.abs(saldoIniziale - nuovoSaldo) > 0.01) { saldoIniziale = nuovoSaldo; await salvaStatoFirebase(); aggiornaTabelle(); showToast("Saldo iniziale aggiornato"); }
+        modal.remove();
+    };
+    document.getElementById('modalDataCancel').onclick = () => modal.remove();
+}
+async function cambiaMeseDaSelectCustom(anno, mese) {
+    if (anno === currentYear && mese === currentMonth) return;
+    const today = getTodayDateObject();
+    if (anno !== today.getFullYear() || mese !== today.getMonth()) {
+        const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
+        if (!conferma) return;
+    }
+    if (modificheNonSalvate) {
+        const salvaRiga = await mostraModaleSalvaRigaPrimaDiCambiareMese();
+        if (salvaRiga === false) return;
+        await caricaStatoFirebase();
+        if (currentYear === anno && currentMonth === mese) return;
+    }
+    currentYear = anno;
+    currentMonth = mese;
+    await caricaStatoFirebase();
+    showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
+}
+function mostraModaleSaldi() {
+    const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    const saldoFinale = saldoIniziale + ta - td;
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content"><h3>💰 Riepilogo Saldi</h3><p><strong>Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'}">${formatNumber(saldoFinale)} €</span></p><div class="modal-buttons"><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+}
+if (dataIconBtn) dataIconBtn.addEventListener('click', mostraModaleData);
+if (saldiIconBtn) saldiIconBtn.addEventListener('click', mostraModaleSaldi);
+
+// ==================== PULSANTI PRINCIPALI (PC) ====================
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
@@ -1774,37 +1772,20 @@ document.getElementById('btnSalvaModificaAssClienti').onclick = () => salvaModif
 document.getElementById('btnEliminaSelezionatiAssClienti').onclick = () => eliminaSelezionati('assclienti');
 document.getElementById('btnSalvaModificaPagaDdt').onclick = () => salvaModificheSelezionate('pagaddt');
 document.getElementById('btnEliminaSelezionatiPagaDdt').onclick = () => eliminaSelezionati('pagaddt');
-
 document.getElementById('btnCancellaMese').onclick = cancellaMeseCorrente;
 document.getElementById('btnCancellaAnno').onclick = cancellaAnnoCorrente;
 
-document.getElementById('annoSelect').onchange = async () => {
-    await aggiornaMeseSelectInBaseAnno();
-    await cambiaMeseDaSelect();
-};
-document.getElementById('meseSelect').onchange = async () => {
-    await cambiaMeseDaSelect();
-};
-document.getElementById('saldoInizialeHeader').onchange = async e => {
-    saldoIniziale = parseNumber(e.target.value);
-    await salvaStatoFirebase();
-    aggiornaTabelle();
-    marcaModificheNonSalvate();
-};
+document.getElementById('annoSelect').onchange = async () => { await aggiornaMeseSelectInBaseAnno(); await cambiaMeseDaSelect(); };
+document.getElementById('meseSelect').onchange = async () => { await cambiaMeseDaSelect(); };
+document.getElementById('saldoInizialeHeader').onchange = async e => { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); marcaModificheNonSalvate(); };
 setupImportField('saldoInizialeHeader');
 
 document.getElementById('btnVaiAgenti').onclick = async () => {
-    if (modificheNonSalvate) {
-        const ok = await mostraModaleConferma(`Hai modifiche non salvate nel mese corrente. Vuoi salvare prima di andare agli agenti?`);
-        if (!ok) return;
-    }
+    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di andare agli agenti?`); if (!ok) return; }
     window.location.href = 'agenti.html';
 };
 document.getElementById('navLogout').onclick = async () => {
-    if (modificheNonSalvate) {
-        const ok = await mostraModaleConferma(`Hai modifiche non salvate nel mese corrente. Vuoi salvare prima di uscire?`);
-        if (!ok) return;
-    }
+    if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di uscire?`); if (!ok) return; }
     window.location.href = 'index.html';
 };
 
@@ -1822,21 +1803,30 @@ document.getElementById('btnSalvaPassword').onclick = () => {
     document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false;
 };
 
-const floppyBtn2 = document.getElementById('floppyBtn');
-const dropdownMenu2 = document.getElementById('dropdownMenu');
-function toggleDropdown() { dropdownMenu2.classList.toggle('show'); }
-function closeDropdown() { dropdownMenu2.classList.remove('show'); }
-floppyBtn2.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
-document.addEventListener('click', (e) => { if (!floppyBtn2.contains(e.target) && !dropdownMenu2.contains(e.target)) { closeDropdown(); } });
-document.getElementById('dropdownReportRagioniere').onclick = () => { closeDropdown(); esportaReportRagioniere(); };
-document.getElementById('dropdownReportMese').onclick = () => { closeDropdown(); esportaPDFMese(); };
-document.getElementById('dropdownReportAnno').onclick = () => { closeDropdown(); esportaReportAnno(); };
-document.getElementById('dropdownCSVMese').onclick = () => { closeDropdown(); esportaCSV(false); };
-document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); esportaCSV(true); };
+const floppyBtn = document.getElementById('floppyBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+floppyBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
+document.addEventListener('click', (e) => { if (!floppyBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.remove('show'); });
+document.getElementById('dropdownReportRagioniere').onclick = () => { dropdownMenu.classList.remove('show'); esportaReportRagioniere(); };
+document.getElementById('dropdownReportMese').onclick = () => { dropdownMenu.classList.remove('show'); esportaPDFMese(); };
+document.getElementById('dropdownReportAnno').onclick = () => { dropdownMenu.classList.remove('show'); esportaReportAnno(); };
+document.getElementById('dropdownCSVMese').onclick = () => { dropdownMenu.classList.remove('show'); esportaCSV(false); };
+document.getElementById('dropdownCSVAnno').onclick = () => { dropdownMenu.classList.remove('show'); esportaCSV(true); };
 
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; ordinaTuttiGliArray(); document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 
-// ==================== AVVIO: POSIZIONAMENTO SUL MESE/ANNO CORRENTE ====================
+const hamburgerBtn2 = document.getElementById('hamburgerBtn');
+const navGrid2 = document.getElementById('navGrid');
+if (hamburgerBtn2 && navGrid2) {
+    hamburgerBtn2.addEventListener('click', (e) => { e.stopPropagation(); navGrid2.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) navGrid2.classList.remove('open'); });
+}
+
+window.addEventListener('beforeunload', (e) => {
+    if (modificheNonSalvate) { const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci."; e.preventDefault(); e.returnValue = message; return message; }
+});
+
+// AVVIO
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
     const now = new Date();
@@ -1846,52 +1836,22 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     const meseSelect = document.getElementById('meseSelect');
     let annoTrovato = false;
     for (let i = 0; i < annoSelect.options.length; i++) {
-        if (parseInt(annoSelect.options[i].value) === annoCorrente) {
-            annoSelect.selectedIndex = i;
-            annoTrovato = true;
-            break;
-        }
+        if (parseInt(annoSelect.options[i].value) === annoCorrente) { annoSelect.selectedIndex = i; annoTrovato = true; break; }
     }
     if (!annoTrovato) {
-        currentYear = annoCorrente;
-        currentMonth = meseCorrente;
-        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
-            anno: currentYear, mese: currentMonth, saldoIniziale: 0,
-            primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
-            nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
-        });
+        currentYear = annoCorrente; currentMonth = meseCorrente;
+        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({ anno: currentYear, mese: currentMonth, saldoIniziale: 0, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() });
         await popolaAnniMeseDinamici();
-        for (let i = 0; i < annoSelect.options.length; i++) {
-            if (parseInt(annoSelect.options[i].value) === currentYear) {
-                annoSelect.selectedIndex = i;
-                break;
-            }
-        }
+        for (let i = 0; i < annoSelect.options.length; i++) { if (parseInt(annoSelect.options[i].value) === currentYear) { annoSelect.selectedIndex = i; break; } }
     }
     await aggiornaMeseSelectInBaseAnno();
     let meseTrovato = false;
-    for (let j = 0; j < meseSelect.options.length; j++) {
-        if (parseInt(meseSelect.options[j].value) === meseCorrente) {
-            meseSelect.selectedIndex = j;
-            meseTrovato = true;
-            break;
-        }
-    }
+    for (let j = 0; j < meseSelect.options.length; j++) { if (parseInt(meseSelect.options[j].value) === meseCorrente) { meseSelect.selectedIndex = j; meseTrovato = true; break; } }
     if (!meseTrovato) {
-        currentYear = annoCorrente;
-        currentMonth = meseCorrente;
-        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
-            anno: currentYear, mese: currentMonth, saldoIniziale: 0,
-            primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
-            nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
-        });
+        currentYear = annoCorrente; currentMonth = meseCorrente;
+        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({ anno: currentYear, mese: currentMonth, saldoIniziale: 0, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() });
         await popolaAnniMeseDinamici();
-        for (let j = 0; j < meseSelect.options.length; j++) {
-            if (parseInt(meseSelect.options[j].value) === meseCorrente) {
-                meseSelect.selectedIndex = j;
-                break;
-            }
-        }
+        for (let j = 0; j < meseSelect.options.length; j++) { if (parseInt(meseSelect.options[j].value) === meseCorrente) { meseSelect.selectedIndex = j; break; } }
     }
     currentYear = parseInt(annoSelect.value);
     currentMonth = parseInt(meseSelect.value);
