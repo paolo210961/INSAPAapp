@@ -392,7 +392,7 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th><tr></thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiActionButtons" class="action-buttons">
@@ -613,7 +613,7 @@ function isValidFutureDateForInsert(inputDate, today) {
     return false;
 }
 
-// ==================== SPOSTA RIGA CON CONFERMA ====================
+// ==================== SPOSTA RIGA CON CONFERMA (con silenzioso a fine mese) ====================
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
     if (!dataYMD) return { spostato: false, annullato: false };
     const [annoStr, meseStr] = dataYMD.split('-');
@@ -621,8 +621,19 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     const meseDest = parseInt(meseStr) - 1;
     if (isNaN(annoDest) || isNaN(meseDest)) return { spostato: false, annullato: false };
     if (annoDest === currentYear && meseDest === currentMonth) return { spostato: false, annullato: false };
-    const conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire con l'inserimento?`);
+    
+    // Se oggi è l'ultimo giorno del mese e la data di inserimento è nel mese successivo, non chiedere conferma
+    const today = getTodayDateObject();
+    const isLastDay = isLastDayOfMonth(today);
+    const isNextMonth = (annoDest === today.getFullYear() && meseDest === today.getMonth() + 1);
+    const skipConfirm = (isLastDay && isNextMonth);
+    
+    let conferma = true;
+    if (!skipConfirm) {
+        conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire con l'inserimento?`);
+    }
     if (!conferma) return { spostato: false, annullato: true };
+    
     const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
     const docSnap = await docRef.get();
     let targetData = {};
@@ -1788,7 +1799,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
         }
     }
     if (!annoTrovato) {
-        // Se l'anno corrente non esiste, lo creiamo implicitamente quando carichiamo lo stato
         currentYear = annoCorrente;
         currentMonth = meseCorrente;
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -1797,7 +1807,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
             nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
         });
         await popolaAnniMeseDinamici();
-        // Ora seleziona l'anno appena creato
         for (let i = 0; i < annoSelect.options.length; i++) {
             if (parseInt(annoSelect.options[i].value) === currentYear) {
                 annoSelect.selectedIndex = i;
@@ -1805,8 +1814,7 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
             }
         }
     }
-    // Ora seleziona il mese corrente (dopo che l'anno è stato impostato)
-    await aggiornaMeseSelectInBaseAnno(); // popola meseSelect in base all'anno selezionato
+    await aggiornaMeseSelectInBaseAnno();
     let meseTrovato = false;
     for (let j = 0; j < meseSelect.options.length; j++) {
         if (parseInt(meseSelect.options[j].value) === meseCorrente) {
@@ -1816,7 +1824,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
         }
     }
     if (!meseTrovato) {
-        // Se il mese corrente non esiste, lo creiamo
         currentYear = annoCorrente;
         currentMonth = meseCorrente;
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -1825,7 +1832,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
             nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
         });
         await popolaAnniMeseDinamici();
-        // Riprova selezione
         for (let j = 0; j < meseSelect.options.length; j++) {
             if (parseInt(meseSelect.options[j].value) === meseCorrente) {
                 meseSelect.selectedIndex = j;
@@ -1833,7 +1839,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
             }
         }
     }
-    // Ora aggiorna currentYear e currentMonth in base ai dropdown selezionati
     currentYear = parseInt(annoSelect.value);
     currentMonth = parseInt(meseSelect.value);
     await caricaStatoFirebase();
