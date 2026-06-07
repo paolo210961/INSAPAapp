@@ -8,12 +8,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
-        /* Impostazione base: html e body occupano tutta l'altezza e bloccano lo scroll globale */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* impedisce scroll sulla pagina */
+            overflow: hidden;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,13 +20,11 @@
             display: flex;
             flex-direction: column;
         }
-
-        /* HEADER (3 righe) - sticky in alto */
         .header {
             background: white;
             padding: 15px 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex-shrink: 0; /* non si comprime */
+            flex-shrink: 0;
             z-index: 1000;
         }
         .row1 {
@@ -72,7 +69,6 @@
             transition: opacity 0.3s;
         }
         .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
-
         .floppy-container {
             position: relative;
             display: flex;
@@ -124,7 +120,6 @@
         }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #f1c40f; color: #000000; }
-
         .summary-header {
             display: flex;
             gap: 30px;
@@ -140,7 +135,6 @@
         .summary-header span { font-weight: bold; margin-left: 5px; font-size: 1.1rem; }
         .positive { color: #27ae60; }
         .negative { color: #e74c3c; }
-
         .row2 {
             display: flex;
             justify-content: space-between;
@@ -210,7 +204,6 @@
             width: 120px;
             text-align: right;
         }
-
         .sticky-toolbar {
             background: #f8f9fa;
             padding: 12px 20px;
@@ -237,18 +230,14 @@
         .toolbar-btn.active { background: #3498db; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
-
-        /* MAIN CONTAINER: occupa tutto lo spazio restante, usa flex per affiancare sidebar e area contenuto */
         .main-container {
             display: flex;
             gap: 20px;
             padding: 20px;
             flex: 1;
-            min-height: 0;   /* necessario per flex overflow */
+            min-height: 0;
             overflow: hidden;
         }
-
-        /* Sidebar sinistra: fissa, non scrolla, senza overflow */
         .sidebar {
             width: 380px;
             background: white;
@@ -256,10 +245,7 @@
             padding: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             flex-shrink: 0;
-            /* nessun overflow, rimane ferma */
         }
-
-        /* Area destra: scrollabile verticalmente */
         .content-area {
             flex: 1;
             background: white;
@@ -269,8 +255,6 @@
             overflow-y: auto;
             overflow-x: auto;
         }
-
-        /* Stili interni (tabelle, scadenze-box, form, ecc.) invariati */
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .form-row .form-group { flex: 1; margin-bottom: 0; }
         .form-group { margin-bottom: 15px; }
@@ -305,8 +289,11 @@
         .btn-confirm-save { background: #27ae60; }
         .btn-confirm-discard { background: #e74c3c; }
         .btn-confirm-cancel { background: #95a5a6; }
-
-        /* Responsive: su mobile la sidebar rimane sopra, content-area sotto e scrollabile */
+        /* evidenziazione riga inserita */
+        .highlight-row {
+            background-color: #fff3cd !important;
+            transition: background-color 0.5s ease;
+        }
         @media (max-width: 768px) {
             .row1 { flex-direction: column; align-items: stretch; }
             .logo-rettangolo { width: 100%; margin: 0 auto; }
@@ -324,17 +311,8 @@
             .sticky-toolbar::-webkit-scrollbar { display: none; }
             .toolbar-btn { flex-shrink: 0; font-size: 0.7rem; padding: 10px 14px; white-space: nowrap; }
             .main-container { flex-direction: column; overflow: auto; }
-            .sidebar {
-                width: 100%;
-                margin-bottom: 15px;
-                padding: 15px;
-                position: static;
-                flex-shrink: 0;
-            }
-            .content-area {
-                max-height: none;
-                overflow-y: visible;
-            }
+            .sidebar { width: 100%; margin-bottom: 15px; padding: 15px; position: static; flex-shrink: 0; }
+            .content-area { max-height: none; overflow-y: visible; }
             .form-row { flex-direction: column; gap: 10px; }
             .tabella { font-size: 0.7rem; min-width: 500px; }
             .logo-tooltip { display: none; }
@@ -344,7 +322,6 @@
 <body>
 <div id="appContainer" style="display: flex; flex-direction: column; height: 100%;">
     <div class="header">
-        <!-- RIGA 1: LOGO | FLOPPY | RIEPILOGO -->
         <div class="row1">
             <div class="logo-area">
                 <div id="logoRettangolo" class="logo-rettangolo">
@@ -365,8 +342,6 @@
             </div>
             <div id="summaryHeader" class="summary-header"></div>
         </div>
-
-        <!-- RIGA 2: NAVIGAZIONE | FILTRI ANNO/MESE/SALDO -->
         <div class="row2">
             <div class="nav-box">
                 <button id="hamburgerBtn" class="hamburger-btn">☰</button>
@@ -383,8 +358,6 @@
                 <div><label>💰 Saldo iniziale (€)</label><input type="text" id="saldoInizialeHeader" class="import-field" placeholder="0,00" style="width:100px;"></div>
             </div>
         </div>
-
-        <!-- RIGA 3: TOOLBAR con 5 schede + bottoni cancella -->
         <div id="stickyToolbar" class="sticky-toolbar">
             <button id="toolbarPrimaNota" class="toolbar-btn active">📋 PRIMA NOTA</button>
             <button id="toolbarContanti" class="toolbar-btn">💵 CONTANTI</button>
@@ -395,7 +368,6 @@
             <button id="btnCancellaAnno" class="toolbar-btn btn-delete">🗑 CANCELLA ANNO</button>
         </div>
     </div>
-
     <div class="main-container">
         <div id="sidebarContabilita" class="sidebar">
             <div id="formArea"></div>
@@ -405,15 +377,12 @@
             <hr>
             <input type="file" id="fileCaricaMese" accept=".json" style="display: none;">
         </div>
-
         <div class="content-area">
             <div id="contabilitaContainer">
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
-                        <thead>
-                            <tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead>
                         <tbody id="primaNotaBody"></tbody>
                     </table>
                     <div id="primaNotaActionButtons" class="action-buttons">
@@ -421,7 +390,6 @@
                         <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
-
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
@@ -433,7 +401,6 @@
                         <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
-
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3>📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
@@ -445,7 +412,6 @@
                         <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
-
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
@@ -457,7 +423,6 @@
                         <button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
-
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
@@ -485,7 +450,7 @@
 </div>
 
 <script>
-// ==================== FIREBASE CONFIG (invariata) ====================
+// ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -505,7 +470,7 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-// ==================== LINK E LOGO (invariati) ====================
+// ==================== LINK E LOGO ====================
 let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
@@ -534,7 +499,7 @@ logoDivElem.addEventListener('click', (e) => {
     else { lastTap = now; setTimeout(() => { if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) { apriLinkPrincipale(); lastTap = 0; } }, 300); }
 });
 
-// ==================== FUNZIONI UTILI (invariate) ====================
+// ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -581,6 +546,36 @@ function setupImportField(fieldId) {
         });
         field.addEventListener('input', () => marcaModificheNonSalvate());
     }
+}
+
+// ==================== NUOVE FUNZIONI PER CONTROLLO DATE ====================
+function getTodayDateObject() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return today;
+}
+function isLastDayOfMonth(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    return date.getDate() === lastDay;
+}
+function isValidFutureDateForInsert(inputDate, today) {
+    // Restituisce true se la data è consentita nonostante sia futura rispetto a oggi
+    if (inputDate <= today) return true; // non è futura
+    // Se è futura:
+    if (!isLastDayOfMonth(today)) {
+        showToast("❌ Non puoi inserire dati futuri. Oggi non è l'ultimo giorno del mese.", true);
+        return false;
+    }
+    // Oggi è l'ultimo giorno del mese: consentiamo solo date del mese successivo
+    const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const nextMonthLastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+    if (inputDate >= nextMonthFirstDay && inputDate <= nextMonthLastDay) {
+        return true;
+    }
+    showToast("❌ A fine mese puoi inserire solo date del mese successivo.", true);
+    return false;
 }
 
 // ==================== SPOSTA RIGA CON CONFERMA (invariata) ====================
@@ -653,7 +648,7 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     return { spostato: true, annullato: false };
 }
 
-// ==================== FIREBASE OPERAZIONI (invariate) ====================
+// ==================== FIREBASE OPERAZIONI ====================
 async function salvaStatoFirebase() {
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -713,19 +708,21 @@ async function caricaStatoFirebase() {
     } catch(e) { console.error("ERRORE caricamento: " + e.message); }
 }
 function aggiornaDataFormAlPrimoMese() {
-    const primoGiorno = getFirstDayOfMonth(currentYear, currentMonth);
+    // La data di default ora dipende: se il mese corrente corrisponde al mese reale, usa oggi; altrimenti primo giorno del mese.
+    const today = getTodayDateObject();
+    const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDate() : getFirstDayOfMonth(currentYear, currentMonth);
     if (currentScheda === 'primanota' && document.getElementById('formDataPrimaNota')) {
-        document.getElementById('formDataPrimaNota').value = primoGiorno;
+        document.getElementById('formDataPrimaNota').value = defaultDate;
     } else if (currentScheda === 'contanti' && document.getElementById('formDataContanti')) {
-        document.getElementById('formDataContanti').value = primoGiorno;
+        document.getElementById('formDataContanti').value = defaultDate;
     } else if (currentScheda === 'fornitori' && document.getElementById('formDataFornitori')) {
-        document.getElementById('formDataFornitori').value = primoGiorno;
+        document.getElementById('formDataFornitori').value = defaultDate;
     } else if (currentScheda === 'pagaddt' && document.getElementById('formDataPaga')) {
-        document.getElementById('formDataPaga').value = primoGiorno;
+        document.getElementById('formDataPaga').value = defaultDate;
     }
 }
 
-// ==================== DROPDOWN DINAMICI (invariati) ====================
+// ==================== DROPDOWN DINAMICI ====================
 let anniDisponibili = [];
 let mesiDisponibiliPerAnno = {};
 async function popolaAnniMeseDinamici() {
@@ -824,6 +821,17 @@ async function cambiaMeseDaSelect() {
     const nuovoAnno = parseInt(document.getElementById('annoSelect').value);
     const nuovoMese = parseInt(document.getElementById('meseSelect').value);
     if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
+    // CONFERMA se il nuovo mese è antecedente al mese reale
+    const today = getTodayDateObject();
+    const isPrecedente = (nuovoAnno < today.getFullYear()) || (nuovoAnno === today.getFullYear() && nuovoMese < today.getMonth());
+    if (isPrecedente) {
+        const conferma = confirm(`⚠️ Stai lavorando nel mese di ${mesiLista[nuovoMese]} ${nuovoAnno}, che è antecedente al mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
+        if (!conferma) {
+            document.getElementById('annoSelect').value = currentYear;
+            document.getElementById('meseSelect').value = currentMonth;
+            return;
+        }
+    }
     if (modificheNonSalvate) {
         const ok = await mostraModaleConferma(`Ci sono modifiche non salvate nel mese di <strong>${mesiLista[currentMonth]} ${currentYear}</strong>. Vuoi salvare prima di cambiare mese?`);
         if (!ok) {
@@ -842,7 +850,7 @@ async function cambiaMeseDaSelect() {
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
 
-// ==================== FUNZIONI DI CANCELLAZIONE (invariate) ====================
+// ==================== FUNZIONI DI CANCELLAZIONE ====================
 async function cancellaMeseCorrente() {
     const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}? Questa operazione è IRREVERSIBILE.`);
     if (!conferma) return;
@@ -902,7 +910,7 @@ async function cancellaAnnoCorrente() {
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
 
-// ==================== GESTIONE TABELLE, SCHEDE, FORM (invariate) ====================
+// ==================== GESTIONE TABELLE, SCHEDE, FORM ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -1097,30 +1105,17 @@ function aggiornaForm() {
     if (currentScheda === 'primanota') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
         setupImportField('formAvere'); setupImportField('formDare');
-        if (document.getElementById('formDataPrimaNota')) {
-            document.getElementById('formDataPrimaNota').value = getFirstDayOfMonth(currentYear, currentMonth);
-        }
     } else if (currentScheda === 'contanti') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>`;
         setupImportField('formImportoContanti');
-        if (document.getElementById('formDataContanti')) {
-            document.getElementById('formDataContanti').value = getFirstDayOfMonth(currentYear, currentMonth);
-        }
     } else if (currentScheda === 'fornitori') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
-        if (document.getElementById('formDataFornitori')) {
-            document.getElementById('formDataFornitori').value = getFirstDayOfMonth(currentYear, currentMonth);
-        }
     } else if (currentScheda === 'assclienti') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div></div><div class="form-row"><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div><div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div></div><div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>`;
         setupImportField('formImportoAss');
-        if(document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = getTodayDate();
     } else if (currentScheda === 'pagaddt') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div><div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div></div><div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div></div>`;
         setupImportField('formImportoPaga');
-        if(document.getElementById('formDataPaga')) {
-            document.getElementById('formDataPaga').value = getFirstDayOfMonth(currentYear, currentMonth);
-        }
     }
     const formInputs = fa.querySelectorAll('input, select, textarea');
     formInputs.forEach(input => {
@@ -1133,18 +1128,19 @@ function aggiornaForm() {
     pulisciForm();
 }
 function pulisciForm() {
-    const primoGiorno = getFirstDayOfMonth(currentYear, currentMonth);
+    const today = getTodayDateObject();
+    const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDate() : getFirstDayOfMonth(currentYear, currentMonth);
     if (currentScheda === 'primanota') {
-        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = primoGiorno;
+        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = defaultDate;
         if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
         if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
         if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
     } else if (currentScheda === 'contanti') {
-        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = primoGiorno;
+        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = defaultDate;
         if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
         if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = '';
     } else if (currentScheda === 'fornitori') {
-        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = primoGiorno;
+        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = defaultDate;
         if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
         if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
     } else if (currentScheda === 'assclienti') {
@@ -1156,23 +1152,27 @@ function pulisciForm() {
     } else if (currentScheda === 'pagaddt') {
         if (document.getElementById('formNomePaga')) document.getElementById('formNomePaga').value = '';
         if (document.getElementById('formNumDocPaga')) document.getElementById('formNumDocPaga').value = '';
-        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = primoGiorno;
+        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = defaultDate;
         if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
     }
 }
 
-// ==================== MEMORIZZA NUOVO CON VERIFICA ====================
+// ==================== MEMORIZZA NUOVO CON VERIFICA DATE ====================
 async function memorizzaNuovo() {
+    let dataInput = null;
+    let dataYMD = null;
     if (currentScheda === 'primanota') {
-        const data = document.getElementById('formDataPrimaNota')?.value;
+        dataYMD = document.getElementById('formDataPrimaNota')?.value;
         const descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
         let avere = parseNumber(document.getElementById('formAvere')?.value);
         let dare = parseNumber(document.getElementById('formDare')?.value);
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
         if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
-        const nuovaRiga = { data: formatDate(data), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
-        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'primanota', data);
+        const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
+        dataInput = new Date(dataYMD + "T00:00:00");
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'primanota', dataYMD);
         if (annullato) return;
         if (!spostato) {
             primaNota.push(nuovaRiga);
@@ -1180,19 +1180,22 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             pulisciForm();
             showToast("✅ Riga aggiunta!");
+            evidenziaUltimaRiga('primanota');
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
         }
     } else if (currentScheda === 'contanti') {
-        const data = document.getElementById('formDataContanti')?.value;
+        dataYMD = document.getElementById('formDataContanti')?.value;
         const descrizione = document.getElementById('formDescrizioneContanti')?.value;
         let importo = parseNumber(document.getElementById('formImportoContanti')?.value);
         if (!descrizione) { showToast("Inserisci descrizione", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        const nuovaRiga = { data: formatDate(data), descrizione: descrizione, importo: importo };
-        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'contanti', data);
+        const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, importo: importo };
+        dataInput = new Date(dataYMD + "T00:00:00");
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'contanti', dataYMD);
         if (annullato) return;
         if (!spostato) {
             contanti.push(nuovaRiga);
@@ -1200,18 +1203,21 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             pulisciForm();
             showToast("✅ Incasso contanti aggiunto!");
+            evidenziaUltimaRiga('contanti');
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
         }
     } else if (currentScheda === 'fornitori') {
-        const data = document.getElementById('formDataFornitori')?.value;
+        dataYMD = document.getElementById('formDataFornitori')?.value;
         const fornitore = document.getElementById('formFornitore')?.value.trim();
         const numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
         if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return; }
-        const nuovaRiga = { data: formatDate(data), fornitore: fornitore, numeroFattura: numeroFattura };
-        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'fornitori', data);
+        const nuovaRiga = { data: formatDate(dataYMD), fornitore: fornitore, numeroFattura: numeroFattura };
+        dataInput = new Date(dataYMD + "T00:00:00");
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'fornitori', dataYMD);
         if (annullato) return;
         if (!spostato) {
             fattureFornitori.push(nuovaRiga);
@@ -1220,6 +1226,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             pulisciForm();
             showToast("✅ Fattura fornitore aggiunta!");
+            evidenziaUltimaRiga('fornitori');
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1233,8 +1240,10 @@ async function memorizzaNuovo() {
         const dataDoc = document.getElementById('formDataDocAss')?.value;
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
         const dataRif = dataDoc || getTodayDate();
+        dataInput = new Date(dataRif + "T00:00:00");
+        if (!(await verificaDataInserimento(dataInput, dataRif))) return;
+        const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'assclienti', dataRif);
         if (annullato) return;
         if (!spostato) {
@@ -1243,6 +1252,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             pulisciForm();
             showToast("✅ Riga ASS Clienti aggiunta!");
+            evidenziaUltimaRiga('assclienti');
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1251,13 +1261,15 @@ async function memorizzaNuovo() {
     } else if (currentScheda === 'pagaddt') {
         const nome = document.getElementById('formNomePaga')?.value.trim();
         const numDoc = document.getElementById('formNumDocPaga')?.value.trim();
-        const data = document.getElementById('formDataPaga')?.value;
+        dataYMD = document.getElementById('formDataPaga')?.value;
         const importo = parseNumber(document.getElementById('formImportoPaga')?.value);
         if (!nome) { showToast("Inserisci il nome", true); return; }
         if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
         if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
-        const nuovaRiga = { nome: nome, numDoc: numDoc, data: data ? formatDate(data) : '', importo: importo };
-        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'pagaddt', data);
+        dataInput = new Date(dataYMD + "T00:00:00");
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        const nuovaRiga = { nome: nome, numDoc: numDoc, data: dataYMD ? formatDate(dataYMD) : '', importo: importo };
+        const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'pagaddt', dataYMD);
         if (annullato) return;
         if (!spostato) {
             pagaDdt.push(nuovaRiga);
@@ -1265,6 +1277,7 @@ async function memorizzaNuovo() {
             aggiornaTabelle();
             pulisciForm();
             showToast("✅ Riga Paga DDT aggiunta!");
+            evidenziaUltimaRiga('pagaddt');
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
@@ -1272,6 +1285,38 @@ async function memorizzaNuovo() {
         }
     }
 }
+
+async function verificaDataInserimento(dataObj, dataYMD) {
+    const today = getTodayDateObject();
+    if (dataObj < today) {
+        // data passata
+        return confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?");
+    } else if (dataObj > today) {
+        return isValidFutureDateForInsert(dataObj, today);
+    }
+    return true;
+}
+
+// Evidenzia l'ultima riga aggiunta nella tabella corrente
+function evidenziaUltimaRiga(tipo) {
+    let tableBodyId = '';
+    if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
+    else if (tipo === 'contanti') tableBodyId = 'contantiBody';
+    else if (tipo === 'fornitori') tableBodyId = 'fornitoriBody';
+    else if (tipo === 'assclienti') tableBodyId = 'assClientiBody';
+    else if (tipo === 'pagaddt') tableBodyId = 'pagaDdtBody';
+    const tbody = document.getElementById(tableBodyId);
+    if (tbody && tbody.rows.length > 0) {
+        const lastRow = tbody.rows[tbody.rows.length - 1];
+        lastRow.classList.add('highlight-row');
+        setTimeout(() => {
+            lastRow.classList.remove('highlight-row');
+        }, 5000);
+        // Scorri la tabella per mostrare l'ultima riga
+        lastRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
 function mostraModaleConferma(messaggio) {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
@@ -1295,7 +1340,7 @@ function mostraModaleConferma(messaggio) {
     });
 }
 
-// ==================== ESPORTAZIONI (accorciate per brevità ma identiche) ====================
+// ==================== ESPORTAZIONI (invariate) ====================
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
@@ -1303,14 +1348,87 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>...stile...</style></head><body>...contenuto...</body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
-function esportaPDFMese() { /* identica */ }
-async function esportaReportAnno() { /* identica */ }
-function esportaCSV(perAnno) { /* identica */ }
+function esportaPDFMese() {
+    const w = window.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Mese ${mesiLista[currentMonth]} ${currentYear}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Mese ${mesiLista[currentMonth]} ${currentYear}</h1><h2>Prima Nota</h2>${generaTabellaHTML(primaNota,['Data','Descrizione','Avere','Dare'])}<h2>Contanti</h2>${generaTabellaHTML(contanti,['Data','Descrizione','Incasso'])}<h2>Fornitori</h2>${generaTabellaHTML(fattureFornitori,['Data','Fornitore','N.Fattura'])}<h2>ASS_CONT_CLIENTI</h2>${generaTabellaHTML(assClienti,['Data Ins.','Descrizione','Nome','Importo','N° Doc.','Data Doc.'])}<h2>PAGA_DDT_CLIENTI</h2>${generaTabellaHTML(pagaDdt,['Nome','N° Fat/DDT','Data','Importo'])}</body></html>`);
+    w.document.close();
+}
+function generaTabellaHTML(data, headers) {
+    if (!data.length) return "<p>Nessun dato</p>";
+    let html = "<table><thead><tr>";
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += "</tr></thead><tbody>";
+    data.forEach(row => {
+        html += "<tr>";
+        headers.forEach(h => {
+            let val = row[h.toLowerCase().replace(/ /g,'').replace(/\./g,'').replace(/è/g,'e')] || row[h.toLowerCase().replace(/ /g,'')] || '';
+            if (h.includes('€')) val = formatNumber(val) + ' €';
+            html += `<td>${val}</td>`;
+        });
+        html += "</tr>";
+    });
+    html += "</tbody></table>";
+    return html;
+}
+async function esportaReportAnno() {
+    const anno = currentYear;
+    const snapshot = await db.collection('contabilita').where('anno', '==', anno).get();
+    if (snapshot.empty) { showToast("Nessun dato per l'anno selezionato", true); return; }
+    let html = `<html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:monospace;padding:20px;} .mese{margin-top:30px;border-top:2px solid #000;}</style></head><body><h1>Report Annuale ${anno}</h1>`;
+    const mesiOrdinati = [];
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        mesiOrdinati.push({ mese: data.mese, data: data });
+    });
+    mesiOrdinati.sort((a,b) => a.mese - b.mese);
+    for (let m of mesiOrdinati) {
+        const d = m.data;
+        const saldoIniz = d.saldoIniziale || 0;
+        const prima = d.primaNota || [];
+        const ta = prima.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        const td = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        const saldoFinale = saldoIniz + ta - td;
+        html += `<div class="mese"><h2>${mesiLista[d.mese]} ${anno}</h2><p>Saldo iniziale: ${formatNumber(saldoIniz)} €</p><p>Totale Avere: ${formatNumber(ta)} €</p><p>Totale Dare: ${formatNumber(td)} €</p><p>Saldo finale: ${formatNumber(saldoFinale)} €</p></div>`;
+    }
+    html += `</body></html>`;
+    const w = window.open();
+    w.document.write(html);
+    w.document.close();
+}
+function esportaCSV(perAnno) {
+    let dataToExport = [];
+    if (perAnno) {
+        showToast("Esportazione CSV annuale non completamente implementata in demo", true);
+        return;
+    }
+    if (currentScheda === 'primanota') dataToExport = primaNota.map(r => ({ ...r, tipo: 'PrimaNota' }));
+    else if (currentScheda === 'contanti') dataToExport = contanti.map(r => ({ ...r, tipo: 'Contanti' }));
+    else if (currentScheda === 'fornitori') dataToExport = fattureFornitori.map(r => ({ ...r, tipo: 'Fornitori' }));
+    else if (currentScheda === 'assclienti') dataToExport = assClienti.map(r => ({ ...r, tipo: 'AssClienti' }));
+    else if (currentScheda === 'pagaddt') dataToExport = pagaDdt.map(r => ({ ...r, tipo: 'PagaDdt' }));
+    if (dataToExport.length === 0) { showToast("Nessun dato da esportare", true); return; }
+    const headers = Object.keys(dataToExport[0]);
+    const csvRows = [headers.join(',')];
+    for (const row of dataToExport) {
+        const values = headers.map(header => {
+            const val = row[header] || '';
+            return `"${String(val).replace(/"/g, '""')}"`;
+        });
+        csvRows.push(values.join(','));
+    }
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${currentScheda}_${currentYear}_${currentMonth}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showToast("CSV esportato");
+}
 
-// ==================== ELIMINAZIONE RIGHE E MODIFICHE (invariate) ====================
+// ==================== ELIMINAZIONE RIGHE E MODIFICHE ====================
 document.getElementById('selectAllPrimaNota')?.addEventListener('change', (e) => { document.querySelectorAll('#primaNotaBody .row-check-prima').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllContanti')?.addEventListener('change', (e) => { document.querySelectorAll('#contantiBody .row-check-contanti').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
 document.getElementById('selectAllFornitori')?.addEventListener('change', (e) => { document.querySelectorAll('#fornitoriBody .row-check-fornitori').forEach(c => c.checked = e.target.checked); aggiornaPulsantiAzione(); marcaModificheNonSalvate(); });
@@ -1373,6 +1491,14 @@ async function saveEditedRowWithMove(tipo, idx) {
         }
     } else { return; }
     if (!newRiga) return;
+    // Controllo date anche in modifica
+    const today = getTodayDateObject();
+    const inputDate = new Date(dataRif + "T00:00:00");
+    if (inputDate < today) {
+        if (!confirm("⚠️ Stai inserendo una data passata. Vuoi continuare?")) return;
+    } else if (inputDate > today) {
+        if (!isValidFutureDateForInsert(inputDate, today)) return;
+    }
     const { spostato, annullato } = await verificaESpostaRigaSeNecessario(newRiga, tipo, dataRif, 'modifica');
     if (annullato) return;
     if (!spostato) {
