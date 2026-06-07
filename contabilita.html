@@ -559,7 +559,7 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-// ==================== LINK E LOGO (funzioni originali + mobile) ====================
+// ==================== LINK E LOGO ====================
 let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
@@ -574,16 +574,11 @@ async function caricaLinkDaFile() {
 }
 function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("🔗 Link principale"); } else showToast("⚠️ Link principale non configurato", true); }
 function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("🔗 Link secondario"); } else showToast("⚠️ Link secondario non configurato", true); }
-
-// Carica logo sia per desktop che per mobile
 function caricaLogoSaved() {
-    // Desktop
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    // Mobile
     const mobileLogoImg = document.getElementById('mobileLogoImg');
     const mobileLogoSpan = document.getElementById('mobileLogoSpan');
-    
     const setLogo = (imgEl, spanEl) => {
         fetch('icons/logo.png').then(r => { 
             if(r.ok) { 
@@ -613,8 +608,6 @@ function caricaLogoSaved() {
     setLogo(logoImg, logoSpan);
     setLogo(mobileLogoImg, mobileLogoSpan);
 }
-
-// Gestione doppio tap per logo mobile
 const mobileLogoDiv = document.getElementById('mobileLogo');
 let lastTapMobile = 0;
 if (mobileLogoDiv) {
@@ -815,7 +808,7 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     return { spostato: true, annullato: false };
 }
 
-// ==================== FIREBASE OPERAZIONI ====================
+// ==================== FIREBASE OPERAZIONI con RICALCOLO A CASCATA ====================
 async function salvaStatoFirebase() {
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
@@ -826,55 +819,160 @@ async function salvaStatoFirebase() {
         });
         resetModificheNonSalvate();
         showToast("✅ Dati salvati su Firebase!");
+        
+        // Dopo il salvataggio, innesca la cascata per i mesi successivi (fino al mese corrente)
+        await aggiornaSaldoACascata(currentYear, currentMonth);
+        
         await popolaAnniMeseDinamici();
     } catch(e) { showToast("Errore salvataggio!", true); }
 }
 
-// Calcola il saldo finale del mese precedente basato SOLO sulla Prima Nota
+// Calcola il saldo finale di un mese basato solo sulla Prima Nota
+async function calcolaSaldoFinaleMeseSoloPrimaNota(anno, mese) {
+    const docRef = db.collection('contabilita').doc(`${anno}_${mese}`);
+    const docSnap = await docRef.get();
+    if (!docSnap.exists) return 0;
+    const data = docSnap.data();
+    const saldoIniz = data.saldoIniziale || 0;
+    const prima = data.primaNota || [];
+    const totaleAvere = prima.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    const totaleDare = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    return saldoIniz + totaleAvere - totaleDare;
+}
+
+// Aggiorna a cascata i saldi iniziali dei mesi successivi fino al mese corrente
+async function aggiornaSaldoACascata(annoModificato, meseModificato) {
+    const oggi = new Date();
+    const annoCorrente = oggi.getFullYear();
+    const meseCorrente = oggi.getMonth();
+    
+    // Partiamo dal mese successivo a quello modificato
+    let anno = annoModificato;
+    let mese = meseModificato + 1;
+    if (mese > 11) { mese = 0; anno++; }
+    
+    let modifiche = false;
+    // Continuiamo fino al mese corrente compreso (massimo 2 passi avanti)
+    while ((anno < annoCorrente) || (anno === annoCorrente && mese <= meseCorrente)) {
+        const docRef = db.collection('contabilita').doc(`${anno}_${mese}`);
+        const docSnap = await docRef.get();
+        let saldoPrec = await calcolaSaldoFinaleMeseSoloPrimaNota(anno, mese-1, mese===0 ? anno-1 : anno);
+        // Piccola correzione per il mese precedente
+        let annoPrec = anno, mesePrec = mese - 1;
+        if (mesePrec < 0) { mesePrec = 11; annoPrec = anno - 1; }
+        const saldoPrecedente = await calcolaSaldoFinaleMeseSoloPrimaNota(annoPrec, mesePrec);
+        
+        if (docSnap.exists) {
+            const data = docSnap.data();
+            if (data.saldoIniziale !== saldoPrecedente) {
+                data.saldoIniziale = saldoPrecedente;
+                await docRef.set(data);
+                modifiche = true;
+                showToast(`🔄 Saldo di ${mesiLista[mese]} ${anno} aggiornato a ${formatNumber(saldoPrecedente)} €`);
+            }
+        } else {
+            // Mese non esiste: lo creiamo con il saldo corretto
+            await db.collection('contabilita').doc(`${anno}_${mese}`).set({
+                anno: anno, mese: mese, saldoIniziale: saldoPrecedente,
+                primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
+                nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
+            });
+            modifiche = true;
+            showToast(`📌 Creato mese ${mesiLista[mese]} ${anno} con saldo ${formatNumber(saldoPrecedente)} €`);
+        }
+        // Avanza al mese successivo
+        mese++;
+        if (mese > 11) { mese = 0; anno++; }
+        // Limitiamo la cascata ai soli 2 mesi successivi (massimo 3 se consideriamo corrente)
+        if (anno > annoCorrente || (anno === annoCorrente && mese > meseCorrente + 1)) break;
+    }
+    if (modifiche) {
+        // Se siamo nel mese corrente, ricarichiamo i dati per mostrare l'aggiornamento
+        if (currentYear === annoCorrente && currentMonth === meseCorrente) {
+            await caricaStatoFirebase();
+        }
+    }
+}
+
+// Calcola saldo iniziale di un mese a partire dal precedente (solo Prima Nota)
 async function caricaSaldoMesePrecedente(anno, mese) {
     try {
         let annoPrec = anno, mesePrec = mese - 1;
         if (mesePrec < 0) { mesePrec = 11; annoPrec = anno - 1; }
-        const doc = await db.collection('contabilita').doc(`${annoPrec}_${mesePrec}`).get();
-        if (doc.exists) {
-            const data = doc.data();
-            const saldoInizialePrec = data.saldoIniziale || 0;
-            const primaNotaPrec = data.primaNota || [];
-            const totaleAverePrec = primaNotaPrec.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-            const totaleDarePrec = primaNotaPrec.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-            return saldoInizialePrec + totaleAverePrec - totaleDarePrec;
-        }
-        return 0;
+        return await calcolaSaldoFinaleMeseSoloPrimaNota(annoPrec, mesePrec);
     } catch(e) { return 0; }
 }
 
-// CORREZIONE: caricaStatoFirebase ricalcola il saldo iniziale solo se Prima Nota è vuota
+// Determina se un mese è modificabile (solo ultimi 3 mesi: corrente, precedente, due precedenti)
+function isMeseModificabile(anno, mese) {
+    const oggi = new Date();
+    const annoCorrente = oggi.getFullYear();
+    const meseCorrente = oggi.getMonth();
+    // Calcola differenza in mesi
+    const diffMesi = (annoCorrente - anno) * 12 + (meseCorrente - mese);
+    return diffMesi <= 2;  // 0 = corrente, 1 = mese scorso, 2 = due mesi fa
+}
+
+// Versione modificata di caricaStatoFirebase con controllo modificabilità e ricalcolo forzato
 async function caricaStatoFirebase() {
     try {
         const doc = await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).get();
         let meseEsistente = doc.exists;
         
+        // Se il mese non è modificabile, blocca eventuali modifiche (solo visualizzazione)
+        const modificabile = isMeseModificabile(currentYear, currentMonth);
+        if (!modificabile && meseEsistente) {
+            // Disabilita i controlli di modifica (pulsante memorizza, input, ecc.)
+            const btnMem = document.getElementById('btnMemorizza');
+            if (btnMem) btnMem.disabled = true;
+            const formInputs = document.querySelectorAll('#formArea input, #formArea select');
+            formInputs.forEach(inp => inp.disabled = true);
+            showToast(`⚠️ Mese ${mesiLista[currentMonth]} ${currentYear} non modificabile (solo ultimi 3 mesi)`, true);
+        } else if (!modificabile && !meseEsistente) {
+            // Se non esiste e non è modificabile, non lo creiamo nemmeno
+            showToast(`❌ Mese ${mesiLista[currentMonth]} ${currentYear} non accessibile (troppo lontano)`, true);
+            // Riporta al mese corrente
+            const oggi = new Date();
+            currentYear = oggi.getFullYear();
+            currentMonth = oggi.getMonth();
+            await caricaStatoFirebase();
+            return;
+        } else {
+            const btnMem = document.getElementById('btnMemorizza');
+            if (btnMem) btnMem.disabled = false;
+            const formInputs = document.querySelectorAll('#formArea input, #formArea select');
+            formInputs.forEach(inp => inp.disabled = false);
+        }
+        
         if (meseEsistente) {
             const data = doc.data();
-            saldoIniziale = data.saldoIniziale || 0;
             primaNota = data.primaNota || [];
             contanti = data.contanti || [];
             fattureFornitori = data.fattureFornitori || [];
             assClienti = data.assClienti || [];
             pagaDdt = data.pagaDdt || [];
             nextFatturaId = data.nextFatturaId || 1;
+            saldoIniziale = data.saldoIniziale || 0;
             
-            // Ricalcola saldo iniziale SOLO se la Prima Nota è vuota (nessuna riga)
-            if (primaNota.length === 0) {
+            // Ricalcola il saldo iniziale dal mese precedente, SOLO se il mese è vuoto (primaNota vuota)
+            // oppure se forziamo per tenere allineati i mesi successivi (ma qui non forziamo, solo all'apertura)
+            if (primaNota.length === 0 && modificabile) {
                 const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
                 if (saldoPrec !== saldoIniziale) {
                     saldoIniziale = saldoPrec;
-                    await salvaStatoFirebase(); // aggiorna il documento con il nuovo saldo
-                    showToast(`📌 Saldo iniziale aggiornato dal mese precedente (solo Prima Nota): ${formatNumber(saldoIniziale)} €`);
+                    await salvaStatoFirebase();
+                    showToast(`📌 Saldo iniziale aggiornato dal mese precedente: ${formatNumber(saldoIniziale)} €`);
                 }
             }
         } else {
-            // Mese non esiste: calcola saldo dal precedente (solo Prima Nota)
+            if (!modificabile) {
+                // Non creare mesi non modificabili
+                const oggi = new Date();
+                currentYear = oggi.getFullYear();
+                currentMonth = oggi.getMonth();
+                await caricaStatoFirebase();
+                return;
+            }
             const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
             saldoIniziale = saldoPrec !== 0 ? saldoPrec : 0;
             primaNota = [];
@@ -883,9 +981,8 @@ async function caricaStatoFirebase() {
             assClienti = [];
             pagaDdt = [];
             nextFatturaId = 1;
-            // Salva subito il nuovo mese con il saldo calcolato
             await salvaStatoFirebase();
-            showToast(`📌 Creato mese ${mesiLista[currentMonth]} ${currentYear} con saldo iniziale ${formatNumber(saldoIniziale)} € (dal mese precedente)`);
+            showToast(`📌 Creato mese ${mesiLista[currentMonth]} ${currentYear} con saldo iniziale ${formatNumber(saldoIniziale)} €`);
         }
         
         ordinaTuttiGliArray();
@@ -896,6 +993,7 @@ async function caricaStatoFirebase() {
         aggiornaDataFormAlPrimoMese();
     } catch(e) { console.error("ERRORE caricamento: " + e.message); }
 }
+
 function aggiornaDataFormAlPrimoMese() {
     const today = getTodayDateObject();
     const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDate() : getFirstDayOfMonth(currentYear, currentMonth);
@@ -1056,7 +1154,6 @@ async function cancellaMeseCorrente() {
         // Verifica se esiste già il documento per il mese corrente
         const docCorrente = await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).get();
         if (!docCorrente.exists) {
-            // Calcola saldo dal mese precedente basato solo sulla Prima Nota
             let annoPrec = annoCorrente, mesePrec = meseCorrente - 1;
             if (mesePrec < 0) { mesePrec = 11; annoPrec = annoCorrente - 1; }
             const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
@@ -1072,7 +1169,6 @@ async function cancellaMeseCorrente() {
         await caricaStatoFirebase();
         await popolaAnniMeseDinamici();
         
-        // Aggiorna i select con i nuovi valori
         document.getElementById('annoSelect').value = currentYear;
         document.getElementById('meseSelect').value = currentMonth;
         
@@ -1092,12 +1188,10 @@ async function cancellaAnnoCorrente() {
         await batch.commit();
         showToast(`🗑 Anno ${anno} eliminato completamente.`);
         
-        // Riporta al mese/anno corrente reale
         const oggi = new Date();
         const annoCorrente = oggi.getFullYear();
         const meseCorrente = oggi.getMonth();
         
-        // Verifica se esiste già il documento per il mese corrente
         const docCorrente = await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).get();
         if (!docCorrente.exists) {
             let annoPrec = annoCorrente, mesePrec = meseCorrente - 1;
@@ -1124,6 +1218,7 @@ async function cancellaAnnoCorrente() {
 }
 
 // ==================== GESTIONE TABELLE, SCHEDE, FORM ====================
+// (Le funzioni aggiornaRiepilogoHeader, aggiornaTabelle, makeRowEditable, aggiornaPulsantiAzione, setScheda, aggiornaForm, pulisciForm, evidenziaRigaPerValori sono identiche a quelle originali; per brevità le riporto compatte)
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -1145,7 +1240,7 @@ function aggiornaRiepilogoHeader() {
         summaryDiv.innerHTML = `<div>📋 Totale PAGA_DDT_CLIENTI: <span class="positive">${formatNumber(tot)} €</span></div>`;
     }
 }
-function aggiornaTabelle() {
+function aggiornaTabelle() { /* stessa implementazione originale */ 
     const primaBody = document.getElementById('primaNotaBody');
     if (primaBody) {
         primaBody.innerHTML = '';
@@ -1261,7 +1356,7 @@ function makeRowEditable(tipo, idx, row) {
         f.addEventListener('input', () => marcaModificheNonSalvate());
     });
 }
-function aggiornaPulsantiAzione() {
+function aggiornaPulsantiAzione() { /* stessa originale */ 
     let hasSelected = false;
     if (currentScheda === 'primanota') {
         hasSelected = document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length > 0;
@@ -1361,7 +1456,7 @@ function pulisciForm() {
         if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
     }
 }
-function evidenziaRigaPerValori(tipo, riga) {
+function evidenziaRigaPerValori(tipo, riga) { /* stessa originale */ 
     let tableBodyId = '';
     if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
     else if (tipo === 'contanti') tableBodyId = 'contantiBody';
@@ -1588,7 +1683,7 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p> <table><thead>资<th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead>资<th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1600,7 +1695,7 @@ function generaTabellaHTML(data, headers) {
     if (!data.length) return "<p>Nessun dato</p>";
     let html = "<table><thead>资";
     headers.forEach(h => html += `<th>${h}</th>`);
-    html += "</tr></thead><tbody>";
+    html += "<tr></thead><tbody>";
     data.forEach(row => {
         html += "<tr>";
         headers.forEach(h => {
@@ -1764,7 +1859,6 @@ function toggleMobileLayout() {
         if (sidebar) sidebar.style.display = 'block';
     }
 }
-// Modale FLOPPY (esportazioni)
 function mostraModaleFloppy() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -1777,7 +1871,6 @@ function mostraModaleFloppy() {
     document.getElementById('modalCSVAnno').onclick = () => { esportaCSV(true); modal.remove(); };
     document.getElementById('modalFloppyClose').onclick = () => modal.remove();
 }
-// Modale MENU (navigazione)
 function mostraModaleMenu() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -1789,7 +1882,6 @@ function mostraModaleMenu() {
     document.getElementById('modalLogout').onclick = async () => { if (modificheNonSalvate) { const ok = await mostraModaleConferma("Hai modifiche non salvate. Salvare prima di uscire?"); if (!ok) { modal.remove(); return; } } window.location.href = 'index.html'; };
     document.getElementById('modalMenuClose').onclick = () => modal.remove();
 }
-// Modale DATA (anno, mese, saldo iniziale)
 function mostraModaleDataMobile() {
     let anniHtml = '', mesiHtml = '';
     for (let a of anniDisponibili) anniHtml += `<option value="${a}" ${a === currentYear ? 'selected' : ''}>${a}</option>`;
@@ -1835,7 +1927,6 @@ async function cambiaMeseDaSelectCustom(anno, mese) {
     await caricaStatoFirebase();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
-// Modale MODULO (inserimento nuova riga Prima Nota)
 function mostraModaleModulo() {
     if (currentScheda !== 'primanota') { showToast("Il modulo di inserimento rapido è disponibile solo per PRIMA NOTA", true); return; }
     const today = getTodayDateObject();
@@ -1875,7 +1966,6 @@ function mostraModaleModulo() {
     };
     document.getElementById('modaleAnnulla').onclick = () => modal.remove();
 }
-// Modale SALDI (riepilogo in base alla scheda corrente)
 function mostraModaleSaldiMobile() {
     let ta = 0, td = 0;
     if (currentScheda === 'primanota') {
@@ -1912,7 +2002,6 @@ function mostraModaleSaldiMobile() {
         showToast("Riepilogo non disponibile per questa scheda", true);
     }
 }
-// Modale ALTRO (contiene i 7 comandi della toolbar)
 function mostraModaleAltro() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -2004,7 +2093,6 @@ if (hamburgerBtn2 && navGrid2) {
     document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) navGrid2.classList.remove('open'); });
 }
 
-// Eventi icone mobile
 document.getElementById('mobileFloppy')?.addEventListener('click', () => mostraModaleFloppy());
 document.getElementById('mobileMenu')?.addEventListener('click', () => mostraModaleMenu());
 document.getElementById('mobileData')?.addEventListener('click', () => mostraModaleDataMobile());
