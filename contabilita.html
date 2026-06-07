@@ -692,6 +692,8 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     aggiornaRiepilogoHeader();
     aggiornaDataFormAlPrimoMese();
     showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
+    // Evidenzia la riga spostata nel nuovo mese
+    setTimeout(() => evidenziaRigaPerValori(tipo, riga), 300);
     return { spostato: true, annullato: false };
 }
 
@@ -864,9 +866,9 @@ async function cambiaMeseDaSelect() {
     const nuovoMese = parseInt(document.getElementById('meseSelect').value);
     if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
     const today = getTodayDateObject();
-    const isPrecedente = (nuovoAnno < today.getFullYear()) || (nuovoAnno === today.getFullYear() && nuovoMese < today.getMonth());
-    if (isPrecedente) {
-        const conferma = confirm(`⚠️ Stai lavorando nel mese di ${mesiLista[nuovoMese]} ${nuovoAnno}, che è antecedente al mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
+    // Alert se si esce dal mese/anno corrente (qualunque mese diverso da oggi)
+    if (nuovoAnno !== today.getFullYear() || nuovoMese !== today.getMonth()) {
+        const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
         if (!conferma) {
             document.getElementById('annoSelect').value = currentYear;
             document.getElementById('meseSelect').value = currentMonth;
@@ -874,31 +876,23 @@ async function cambiaMeseDaSelect() {
         }
     }
     if (modificheNonSalvate) {
-        // Mostra modale personalizzata per salvare la riga corrente
         const salvaRiga = await mostraModaleSalvaRigaPrimaDiCambiareMese();
         if (salvaRiga === false) {
-            // Annulla: ripristina i selettori e esci
             document.getElementById('annoSelect').value = currentYear;
             document.getElementById('meseSelect').value = currentMonth;
             return;
         }
-        // Se salvaRiga === true, la riga è stata salvata (o eventualmente spostata) e possiamo proseguire
-        // Se la riga è stata spostata, il mese corrente potrebbe essere già cambiato, quindi controlliamo
-        // Ricarichiamo lo stato per sicurezza
         await caricaStatoFirebase();
-        // Se dopo il salvataggio il mese corrente è già quello desiderato, usciamo
         if (currentYear === nuovoAnno && currentMonth === nuovoMese) {
             return;
         }
     }
-    // Se non ci sono modifiche non salvate o dopo aver salvato, procedi con cambio mese
     currentYear = nuovoAnno;
     currentMonth = nuovoMese;
     await caricaStatoFirebase();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
 }
 
-// Funzione che mostra la modale per salvare la riga corrente prima di cambiare mese
 function mostraModaleSalvaRigaPrimaDiCambiareMese() {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
@@ -921,25 +915,18 @@ function mostraModaleSalvaRigaPrimaDiCambiareMese() {
         const cancelBtn = document.getElementById('modalCancel');
         saveBtn.onclick = async () => {
             modal.remove();
-            // Tentativo di salvare la riga corrente
-            const success = await memorizzaNuovo();  // Ora restituisce true/false
-            // Se il salvataggio è stato annullato o fallito, non procedere
-            if (success) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
+            const success = await memorizzaNuovo();
+            resolve(success ? true : false);
         };
         discardBtn.onclick = () => {
             modal.remove();
             resetModificheNonSalvate();
-            // Pulisce il form senza salvare
             pulisciForm();
-            resolve(true);  // Prosegui con cambio mese (non salva)
+            resolve(true);
         };
         cancelBtn.onclick = () => {
             modal.remove();
-            resolve(false); // Annulla cambio mese
+            resolve(false);
         };
     });
 }
@@ -1251,6 +1238,68 @@ function pulisciForm() {
     }
 }
 
+// ==================== EVIDENZIAZIONE RIGA PER VALORI ====================
+function evidenziaRigaPerValori(tipo, riga) {
+    let tableBodyId = '';
+    if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
+    else if (tipo === 'contanti') tableBodyId = 'contantiBody';
+    else if (tipo === 'fornitori') tableBodyId = 'fornitoriBody';
+    else if (tipo === 'assclienti') tableBodyId = 'assClientiBody';
+    else if (tipo === 'pagaddt') tableBodyId = 'pagaDdtBody';
+    const tbody = document.getElementById(tableBodyId);
+    if (!tbody) return;
+    // Cerca la riga che corrisponde ai valori principali (data, descrizione, importi)
+    for (let i = 0; i < tbody.rows.length; i++) {
+        const row = tbody.rows[i];
+        let match = false;
+        if (tipo === 'primanota') {
+            const dataCell = row.cells[2]?.innerText;
+            const descCell = row.cells[3]?.innerText;
+            const avereCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            const dareCell = row.cells[5]?.innerText.replace(' €', '').trim();
+            if (dataCell === riga.data && descCell === riga.descrizione &&
+                (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) &&
+                (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === ''))) {
+                match = true;
+            }
+        } else if (tipo === 'contanti') {
+            const dataCell = row.cells[2]?.innerText;
+            const descCell = row.cells[3]?.innerText;
+            const impCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            if (dataCell === riga.data && descCell === riga.descrizione && impCell === formatNumber(riga.importo)) {
+                match = true;
+            }
+        } else if (tipo === 'fornitori') {
+            const dataCell = row.cells[2]?.innerText;
+            const fornitoreCell = row.cells[3]?.innerText;
+            const numFatCell = row.cells[4]?.innerText;
+            if (dataCell === riga.data && fornitoreCell === riga.fornitore && numFatCell === riga.numeroFattura) {
+                match = true;
+            }
+        } else if (tipo === 'assclienti') {
+            const nomeCell = row.cells[3]?.innerText;
+            const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            const numDocCell = row.cells[5]?.innerText;
+            if (nomeCell === riga.nome && importoCell === formatNumber(riga.importo) && numDocCell === riga.numDoc) {
+                match = true;
+            }
+        } else if (tipo === 'pagaddt') {
+            const nomeCell = row.cells[1]?.innerText;
+            const numDocCell = row.cells[2]?.innerText;
+            const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            if (nomeCell === riga.nome && numDocCell === riga.numDoc && importoCell === formatNumber(riga.importo)) {
+                match = true;
+            }
+        }
+        if (match) {
+            row.classList.add('highlight-row');
+            setTimeout(() => row.classList.remove('highlight-row'), 5000);
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            break;
+        }
+    }
+}
+
 // ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO (restituisce true/false) ====================
 async function memorizzaNuovo() {
     let dataYMD = null;
@@ -1272,15 +1321,22 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
+            // Evidenzia la riga se la data non è oggi (ma stesso mese/anno)
+            const today = getTodayDateObject();
+            const dataOggetto = new Date(dataYMD + "T00:00:00");
+            if (dataOggetto < today || dataOggetto > today) {
+                setTimeout(() => evidenziaRigaPerValori('primanota', nuovaRiga), 300);
+            } else {
+                // Se è la data di oggi, evidenzia comunque l'ultima riga? meglio non farlo
+            }
             pulisciForm();
             showToast("✅ Riga aggiunta!");
-            evidenziaUltimaRiga('primanota');
             return true;
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
-            return true;  // spostato in un altro mese, consideriamo comunque salvato
+            return true;
         }
     } else if (currentScheda === 'contanti') {
         dataYMD = document.getElementById('formDataContanti')?.value;
@@ -1298,9 +1354,13 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
+            const today = getTodayDateObject();
+            const dataOggetto = new Date(dataYMD + "T00:00:00");
+            if (dataOggetto < today || dataOggetto > today) {
+                setTimeout(() => evidenziaRigaPerValori('contanti', nuovaRiga), 300);
+            }
             pulisciForm();
             showToast("✅ Incasso contanti aggiunto!");
-            evidenziaUltimaRiga('contanti');
             return true;
         } else {
             await caricaStatoFirebase();
@@ -1324,9 +1384,13 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
+            const today = getTodayDateObject();
+            const dataOggetto = new Date(dataYMD + "T00:00:00");
+            if (dataOggetto < today || dataOggetto > today) {
+                setTimeout(() => evidenziaRigaPerValori('fornitori', nuovaRiga), 300);
+            }
             pulisciForm();
             showToast("✅ Fattura fornitore aggiunta!");
-            evidenziaUltimaRiga('fornitori');
             return true;
         } else {
             await caricaStatoFirebase();
@@ -1353,9 +1417,13 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
+            const today = getTodayDateObject();
+            const dataOggetto = new Date(dataRif + "T00:00:00");
+            if (dataOggetto < today || dataOggetto > today) {
+                setTimeout(() => evidenziaRigaPerValori('assclienti', nuovaRiga), 300);
+            }
             pulisciForm();
             showToast("✅ Riga ASS Clienti aggiunta!");
-            evidenziaUltimaRiga('assclienti');
             return true;
         } else {
             await caricaStatoFirebase();
@@ -1381,9 +1449,13 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
+            const today = getTodayDateObject();
+            const dataOggetto = new Date(dataYMD + "T00:00:00");
+            if (dataOggetto < today || dataOggetto > today) {
+                setTimeout(() => evidenziaRigaPerValori('pagaddt', nuovaRiga), 300);
+            }
             pulisciForm();
             showToast("✅ Riga Paga DDT aggiunta!");
-            evidenziaUltimaRiga('pagaddt');
             return true;
         } else {
             await caricaStatoFirebase();
@@ -1403,24 +1475,6 @@ async function verificaDataInserimento(dataObj, dataYMD) {
         return isValidFutureDateForInsert(dataObj, today);
     }
     return true;
-}
-
-function evidenziaUltimaRiga(tipo) {
-    let tableBodyId = '';
-    if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
-    else if (tipo === 'contanti') tableBodyId = 'contantiBody';
-    else if (tipo === 'fornitori') tableBodyId = 'fornitoriBody';
-    else if (tipo === 'assclienti') tableBodyId = 'assClientiBody';
-    else if (tipo === 'pagaddt') tableBodyId = 'pagaDdtBody';
-    const tbody = document.getElementById(tableBodyId);
-    if (tbody && tbody.rows.length > 0) {
-        const lastRow = tbody.rows[tbody.rows.length - 1];
-        lastRow.classList.add('highlight-row');
-        setTimeout(() => {
-            lastRow.classList.remove('highlight-row');
-        }, 5000);
-        lastRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
 }
 
 function mostraModaleConferma(messaggio) {
@@ -1454,7 +1508,7 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1722,17 +1776,58 @@ document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); es
 
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; ordinaTuttiGliArray(); document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 
-// Avvio
+// Avvio: posizionamento sul mese/anno corrente del computer
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
+    // Imposta la data corrente del computer
+    const now = new Date();
+    const annoCorrente = now.getFullYear();
+    const meseCorrente = now.getMonth();
+    // Se il mese/anno corrente esiste nei dropdown, selezionalo; altrimenti verrà creato automaticamente da caricaStatoFirebase
     const annoSelect = document.getElementById('annoSelect');
     const meseSelect = document.getElementById('meseSelect');
-    if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
-        currentYear = parseInt(annoSelect.value);
-        currentMonth = parseInt(meseSelect.value);
-    } else {
-        currentYear = new Date().getFullYear();
-        currentMonth = new Date().getMonth();
+    let found = false;
+    for (let i = 0; i < annoSelect.options.length; i++) {
+        if (parseInt(annoSelect.options[i].value) === annoCorrente) {
+            annoSelect.selectedIndex = i;
+            // Ora controlla se il mese esiste tra le opzioni
+            await aggiornaMeseSelectInBaseAnno(); // questo popola meseSelect in base all'anno
+            for (let j = 0; j < meseSelect.options.length; j++) {
+                if (parseInt(meseSelect.options[j].value) === meseCorrente) {
+                    meseSelect.selectedIndex = j;
+                    found = true;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    if (!found) {
+        // Se il mese corrente non esiste, lo creeremo con caricaStatoFirebase
+        // Impostiamo manualmente currentYear e currentMonth
+        currentYear = annoCorrente;
+        currentMonth = meseCorrente;
+        // Forziamo la creazione del documento
+        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
+            anno: currentYear, mese: currentMonth, saldoIniziale: 0,
+            primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
+            nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
+        });
+        await popolaAnniMeseDinamici();
+        // Ora seleziona nei dropdown
+        for (let i = 0; i < annoSelect.options.length; i++) {
+            if (parseInt(annoSelect.options[i].value) === currentYear) {
+                annoSelect.selectedIndex = i;
+                await aggiornaMeseSelectInBaseAnno();
+                for (let j = 0; j < meseSelect.options.length; j++) {
+                    if (parseInt(meseSelect.options[j].value) === currentMonth) {
+                        meseSelect.selectedIndex = j;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
     }
     await caricaStatoFirebase();
     setScheda('primanota');
