@@ -394,7 +394,7 @@
                     <table class="tabella" id="tabellaContanti">
                         <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
-                    </table>
+                    <tr>
                     <div id="contantiActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
@@ -613,7 +613,27 @@ function isValidFutureDateForInsert(inputDate, today) {
     return false;
 }
 
-// ==================== SPOSTA RIGA CON CONFERMA (con silenzioso a fine mese) ====================
+// ==================== CALCOLO SALDO FINALE MESE PRECEDENTE (RICORSIVO) ====================
+async function calcolaSaldoFinaleMese(anno, mese) {
+    const docRef = db.collection('contabilita').doc(`${anno}_${mese}`);
+    const docSnap = await docRef.get();
+    if (!docSnap.exists) {
+        // Se il mese non esiste, prova con il mese precedente (per determinare il saldo iniziale)
+        let annoPrec = anno, mesePrec = mese - 1;
+        if (mesePrec < 0) { mesePrec = 11; annoPrec = anno - 1; }
+        if (annoPrec < 2020) return 0; // limite per evitare loop infinito
+        const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
+        return saldoPrec;
+    }
+    const data = docSnap.data();
+    const saldoIniz = data.saldoIniziale || 0;
+    const prima = data.primaNota || [];
+    const totaleAvere = prima.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    const totaleDare = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    return saldoIniz + totaleAvere - totaleDare;
+}
+
+// ==================== SPOSTA RIGA CON GESTIONE NUOVI MESI/ANNI ====================
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
     if (!dataYMD) return { spostato: false, annullato: false };
     const [annoStr, meseStr] = dataYMD.split('-');
@@ -622,11 +642,11 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     if (isNaN(annoDest) || isNaN(meseDest)) return { spostato: false, annullato: false };
     if (annoDest === currentYear && meseDest === currentMonth) return { spostato: false, annullato: false };
     
-    // Se oggi è l'ultimo giorno del mese e la data di inserimento è nel mese successivo, non chiedere conferma
     const today = getTodayDateObject();
+    const isFuture = (annoDest > today.getFullYear()) || (annoDest === today.getFullYear() && meseDest > today.getMonth());
     const isLastDay = isLastDayOfMonth(today);
     const isNextMonth = (annoDest === today.getFullYear() && meseDest === today.getMonth() + 1);
-    const skipConfirm = (isLastDay && isNextMonth);
+    const skipConfirm = (isLastDay && isNextMonth) || isFuture;
     
     let conferma = true;
     if (!skipConfirm) {
@@ -640,13 +660,18 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     if (docSnap.exists) {
         targetData = docSnap.data();
     } else {
-        const saldoPrec = await caricaSaldoMesePrecedente(annoDest, meseDest);
+        // Calcola il saldo iniziale del nuovo mese come saldo finale del mese precedente
+        let annoPrec = annoDest, mesePrec = meseDest - 1;
+        if (mesePrec < 0) { mesePrec = 11; annoPrec = annoDest - 1; }
+        const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
         targetData = {
             anno: annoDest, mese: meseDest, saldoIniziale: saldoPrec,
             primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
             nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
         };
     }
+    
+    // Aggiunge la riga all'array corretto e ordina
     if (tipo === 'primanota') {
         targetData.primaNota = targetData.primaNota || [];
         targetData.primaNota.push(riga);
@@ -676,6 +701,8 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
         targetData.pagaDdt = ordinaArrayPerData(targetData.pagaDdt, 'data');
     }
     await docRef.set(targetData);
+    
+    // Rimuove la riga dall'array corrente se presente
     if (tipo === 'primanota') {
         const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga));
         if (idx !== -1) primaNota.splice(idx, 1);
@@ -693,6 +720,8 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
         if (idx !== -1) pagaDdt.splice(idx, 1);
     }
     await salvaStatoFirebase();
+    
+    // Cambia il mese corrente
     currentYear = annoDest;
     currentMonth = meseDest;
     await caricaStatoFirebase();
@@ -1789,7 +1818,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     const meseCorrente = now.getMonth();
     const annoSelect = document.getElementById('annoSelect');
     const meseSelect = document.getElementById('meseSelect');
-    // Seleziona l'anno corrente se esiste tra le opzioni
     let annoTrovato = false;
     for (let i = 0; i < annoSelect.options.length; i++) {
         if (parseInt(annoSelect.options[i].value) === annoCorrente) {
