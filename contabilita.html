@@ -575,7 +575,6 @@ function ordinaTuttiGliArray() {
     primaNota = ordinaArrayPerData(primaNota, 'data');
     contanti = ordinaArrayPerData(contanti, 'data');
     fattureFornitori = ordinaArrayPerData(fattureFornitori, 'data');
-    // Per assClienti: usa dataDoc se esiste, altrimenti dataIns
     assClienti = assClienti.slice().sort((a, b) => {
         const dataA = a.dataDoc ? parseDateDDMMYYYY(a.dataDoc) : parseDateDDMMYYYY(a.dataIns);
         const dataB = b.dataDoc ? parseDateDDMMYYYY(b.dataDoc) : parseDateDDMMYYYY(b.dataIns);
@@ -875,21 +874,74 @@ async function cambiaMeseDaSelect() {
         }
     }
     if (modificheNonSalvate) {
-        const ok = await mostraModaleConferma(`Ci sono modifiche non salvate nel mese di <strong>${mesiLista[currentMonth]} ${currentYear}</strong>. Vuoi salvare prima di cambiare mese?`);
-        if (!ok) {
+        // Mostra modale personalizzata per salvare la riga corrente
+        const salvaRiga = await mostraModaleSalvaRigaPrimaDiCambiareMese();
+        if (salvaRiga === false) {
+            // Annulla: ripristina i selettori e esci
             document.getElementById('annoSelect').value = currentYear;
             document.getElementById('meseSelect').value = currentMonth;
             return;
         }
-        await salvaStatoFirebase();
+        // Se salvaRiga === true, la riga è stata salvata (o eventualmente spostata) e possiamo proseguire
+        // Se la riga è stata spostata, il mese corrente potrebbe essere già cambiato, quindi controlliamo
+        // Ricarichiamo lo stato per sicurezza
+        await caricaStatoFirebase();
+        // Se dopo il salvataggio il mese corrente è già quello desiderato, usciamo
+        if (currentYear === nuovoAnno && currentMonth === nuovoMese) {
+            return;
+        }
     }
-    if (!modificheNonSalvate) {
-        await salvaStatoFirebase();
-    }
+    // Se non ci sono modifiche non salvate o dopo aver salvato, procedi con cambio mese
     currentYear = nuovoAnno;
     currentMonth = nuovoMese;
     await caricaStatoFirebase();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
+}
+
+// Funzione che mostra la modale per salvare la riga corrente prima di cambiare mese
+function mostraModaleSalvaRigaPrimaDiCambiareMese() {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>⚠️ MODIFICHE NON SALVATE</h3>
+                <p>Ci sono dati non ancora memorizzati nel mese corrente.</p>
+                <p>Vuoi salvare questa registrazione prima di cambiare mese?</p>
+                <div class="modal-buttons">
+                    <button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button>
+                    <button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button>
+                    <button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const saveBtn = document.getElementById('modalSave');
+        const discardBtn = document.getElementById('modalDiscard');
+        const cancelBtn = document.getElementById('modalCancel');
+        saveBtn.onclick = async () => {
+            modal.remove();
+            // Tentativo di salvare la riga corrente
+            const success = await memorizzaNuovo();  // Ora restituisce true/false
+            // Se il salvataggio è stato annullato o fallito, non procedere
+            if (success) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        };
+        discardBtn.onclick = () => {
+            modal.remove();
+            resetModificheNonSalvate();
+            // Pulisce il form senza salvare
+            pulisciForm();
+            resolve(true);  // Prosegui con cambio mese (non salva)
+        };
+        cancelBtn.onclick = () => {
+            modal.remove();
+            resolve(false); // Annulla cambio mese
+        };
+    });
 }
 
 // ==================== FUNZIONI DI CANCELLAZIONE ====================
@@ -1199,7 +1251,7 @@ function pulisciForm() {
     }
 }
 
-// ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO ====================
+// ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO (restituisce true/false) ====================
 async function memorizzaNuovo() {
     let dataYMD = null;
     if (currentScheda === 'primanota') {
@@ -1207,14 +1259,14 @@ async function memorizzaNuovo() {
         const descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
         let avere = parseNumber(document.getElementById('formAvere')?.value);
         let dare = parseNumber(document.getElementById('formDare')?.value);
-        if (!descrizione) { showToast("Inserisci descrizione", true); return; }
-        if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return; }
-        if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return; }
+        if (!descrizione) { showToast("Inserisci descrizione", true); return false; }
+        if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare sulla stessa riga", true); return false; }
+        if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo (Avere o Dare)", true); return false; }
         const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, avere: avere || null, dare: dare || null, verificato: false };
         const dataInput = new Date(dataYMD + "T00:00:00");
-        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return false;
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'primanota', dataYMD);
-        if (annullato) return;
+        if (annullato) return false;
         if (!spostato) {
             primaNota.push(nuovaRiga);
             ordinaTuttiGliArray();
@@ -1223,22 +1275,24 @@ async function memorizzaNuovo() {
             pulisciForm();
             showToast("✅ Riga aggiunta!");
             evidenziaUltimaRiga('primanota');
+            return true;
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
+            return true;  // spostato in un altro mese, consideriamo comunque salvato
         }
     } else if (currentScheda === 'contanti') {
         dataYMD = document.getElementById('formDataContanti')?.value;
         const descrizione = document.getElementById('formDescrizioneContanti')?.value;
         let importo = parseNumber(document.getElementById('formImportoContanti')?.value);
-        if (!descrizione) { showToast("Inserisci descrizione", true); return; }
-        if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
+        if (!descrizione) { showToast("Inserisci descrizione", true); return false; }
+        if (importo <= 0) { showToast("Inserisci importo valido", true); return false; }
         const nuovaRiga = { data: formatDate(dataYMD), descrizione: descrizione, importo: importo };
         const dataInput = new Date(dataYMD + "T00:00:00");
-        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return false;
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'contanti', dataYMD);
-        if (annullato) return;
+        if (annullato) return false;
         if (!spostato) {
             contanti.push(nuovaRiga);
             ordinaTuttiGliArray();
@@ -1247,21 +1301,23 @@ async function memorizzaNuovo() {
             pulisciForm();
             showToast("✅ Incasso contanti aggiunto!");
             evidenziaUltimaRiga('contanti');
+            return true;
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
+            return true;
         }
     } else if (currentScheda === 'fornitori') {
         dataYMD = document.getElementById('formDataFornitori')?.value;
         const fornitore = document.getElementById('formFornitore')?.value.trim();
         const numeroFattura = document.getElementById('formNumeroFattura')?.value.trim();
-        if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return; }
+        if (!fornitore || !numeroFattura) { showToast("Compila tutti i campi", true); return false; }
         const nuovaRiga = { data: formatDate(dataYMD), fornitore: fornitore, numeroFattura: numeroFattura };
         const dataInput = new Date(dataYMD + "T00:00:00");
-        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return false;
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'fornitori', dataYMD);
-        if (annullato) return;
+        if (annullato) return false;
         if (!spostato) {
             fattureFornitori.push(nuovaRiga);
             nextFatturaId++;
@@ -1271,10 +1327,12 @@ async function memorizzaNuovo() {
             pulisciForm();
             showToast("✅ Fattura fornitore aggiunta!");
             evidenziaUltimaRiga('fornitori');
+            return true;
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
+            return true;
         }
     } else if (currentScheda === 'assclienti') {
         const descrizione = document.getElementById('formDescrizioneAss')?.value;
@@ -1282,14 +1340,14 @@ async function memorizzaNuovo() {
         const importo = parseNumber(document.getElementById('formImportoAss')?.value);
         const numDoc = document.getElementById('formNumDocAss')?.value.trim();
         const dataDoc = document.getElementById('formDataDocAss')?.value;
-        if (!nome) { showToast("Inserisci il nome", true); return; }
-        if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
+        if (!nome) { showToast("Inserisci il nome", true); return false; }
+        if (importo <= 0) { showToast("Inserisci importo valido", true); return false; }
         const dataRif = dataDoc || getTodayDate();
         const dataInput = new Date(dataRif + "T00:00:00");
-        if (!(await verificaDataInserimento(dataInput, dataRif))) return;
+        if (!(await verificaDataInserimento(dataInput, dataRif))) return false;
         const nuovaRiga = { dataIns: getTodayDate(), descrizione: descrizione || '', nome: nome, importo: importo, numDoc: numDoc || '', dataDoc: dataDoc ? formatDate(dataDoc) : '' };
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'assclienti', dataRif);
-        if (annullato) return;
+        if (annullato) return false;
         if (!spostato) {
             assClienti.push(nuovaRiga);
             ordinaTuttiGliArray();
@@ -1298,24 +1356,26 @@ async function memorizzaNuovo() {
             pulisciForm();
             showToast("✅ Riga ASS Clienti aggiunta!");
             evidenziaUltimaRiga('assclienti');
+            return true;
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
+            return true;
         }
     } else if (currentScheda === 'pagaddt') {
         const nome = document.getElementById('formNomePaga')?.value.trim();
         const numDoc = document.getElementById('formNumDocPaga')?.value.trim();
         dataYMD = document.getElementById('formDataPaga')?.value;
         const importo = parseNumber(document.getElementById('formImportoPaga')?.value);
-        if (!nome) { showToast("Inserisci il nome", true); return; }
-        if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return; }
-        if (importo <= 0) { showToast("Inserisci importo valido", true); return; }
+        if (!nome) { showToast("Inserisci il nome", true); return false; }
+        if (!numDoc) { showToast("Inserisci N° Fat/DDT", true); return false; }
+        if (importo <= 0) { showToast("Inserisci importo valido", true); return false; }
         const dataInput = new Date(dataYMD + "T00:00:00");
-        if (!(await verificaDataInserimento(dataInput, dataYMD))) return;
+        if (!(await verificaDataInserimento(dataInput, dataYMD))) return false;
         const nuovaRiga = { nome: nome, numDoc: numDoc, data: dataYMD ? formatDate(dataYMD) : '', importo: importo };
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'pagaddt', dataYMD);
-        if (annullato) return;
+        if (annullato) return false;
         if (!spostato) {
             pagaDdt.push(nuovaRiga);
             ordinaTuttiGliArray();
@@ -1324,12 +1384,15 @@ async function memorizzaNuovo() {
             pulisciForm();
             showToast("✅ Riga Paga DDT aggiunta!");
             evidenziaUltimaRiga('pagaddt');
+            return true;
         } else {
             await caricaStatoFirebase();
             aggiornaTabelle();
             pulisciForm();
+            return true;
         }
     }
+    return false;
 }
 
 async function verificaDataInserimento(dataObj, dataYMD) {
@@ -1391,7 +1454,7 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1586,7 +1649,7 @@ document.getElementById('toolbarContanti').onclick = () => setScheda('contanti')
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
 document.getElementById('toolbarAssClienti').onclick = () => setScheda('assclienti');
 document.getElementById('toolbarPagaDdt').onclick = () => setScheda('pagaddt');
-document.getElementById('btnMemorizza').onclick = memorizzaNuovo;
+document.getElementById('btnMemorizza').onclick = async () => { await memorizzaNuovo(); };
 document.getElementById('btnSalvaModificaPrima').onclick = () => salvaModificheSelezionate('primanota');
 document.getElementById('btnEliminaSelezionatiPrima').onclick = () => eliminaSelezionati('primanota');
 document.getElementById('btnSalvaModificaContanti').onclick = () => salvaModificheSelezionate('contanti');
