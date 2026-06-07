@@ -683,8 +683,7 @@ function setupImportField(fieldId) {
         field.addEventListener('input', () => marcaModificheNonSalvate());
     }
 }
-
-// ==================== ORDINAMENTO ====================
+    // ==================== ORDINAMENTO ====================
 function parseDateDDMMYYYY(dateStr) {
     if (!dateStr) return null;
     const parts = dateStr.split('/');
@@ -720,7 +719,8 @@ function ordinaTuttiGliArray() {
     });
     pagaDdt = ordinaArrayPerData(pagaDdt, 'data');
 }
-    // ==================== DATE FUTURE E SPOSTAMENTO ====================
+
+// ==================== DATE FUTURE E SPOSTAMENTO ====================
 function getTodayDateObject() {
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -1014,30 +1014,47 @@ function mostraModaleSalvaRigaPrimaDiCambiareMese() {
     });
 }
 
-// ==================== CANCELLAZIONE MESE/ANNO ====================
+// ==================== CANCELLAZIONE MESE/ANNO (MODIFICATA: riporta al mese/anno corrente) ====================
 async function cancellaMeseCorrente() {
     const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati del mese di ${mesiLista[currentMonth]} ${currentYear}? Questa operazione è IRREVERSIBILE.`);
     if (!conferma) return;
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).delete();
         showToast(`🗑 Mese ${mesiLista[currentMonth]} ${currentYear} eliminato.`);
-        await popolaAnniMeseDinamici();
-        const annoSelect = document.getElementById('annoSelect');
-        const meseSelect = document.getElementById('meseSelect');
-        if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
-            currentYear = parseInt(annoSelect.value);
-            currentMonth = parseInt(meseSelect.value);
-            await caricaStatoFirebase();
-        } else {
-            const now = new Date();
-            currentYear = now.getFullYear();
-            currentMonth = now.getMonth();
-            await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({ anno: currentYear, mese: currentMonth, saldoIniziale: 0, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() });
-            await caricaStatoFirebase();
-            await popolaAnniMeseDinamici();
+        
+        // Riporta al mese/anno corrente reale
+        const oggi = new Date();
+        const annoCorrente = oggi.getFullYear();
+        const meseCorrente = oggi.getMonth();
+        
+        // Verifica se esiste già il documento per il mese corrente
+        const docCorrente = await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).get();
+        if (!docCorrente.exists) {
+            // Calcola saldo dal mese precedente
+            let annoPrec = annoCorrente, mesePrec = meseCorrente - 1;
+            if (mesePrec < 0) { mesePrec = 11; annoPrec = annoCorrente - 1; }
+            const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
+            await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).set({
+                anno: annoCorrente, mese: meseCorrente, saldoIniziale: saldoPrec,
+                primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
+                nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
+            });
         }
+        
+        currentYear = annoCorrente;
+        currentMonth = meseCorrente;
+        await caricaStatoFirebase();
+        await popolaAnniMeseDinamici();
+        
+        // Aggiorna i select con i nuovi valori
+        document.getElementById('annoSelect').value = currentYear;
+        document.getElementById('meseSelect').value = currentMonth;
+        
+        aggiornaTabelle();
+        showToast(`📅 Ora sei nel mese corrente: ${mesiLista[currentMonth]} ${currentYear}`);
     } catch(e) { showToast("Errore durante l'eliminazione del mese", true); }
 }
+
 async function cancellaAnnoCorrente() {
     const anno = currentYear;
     const conferma = confirm(`⚠️ ATTENZIONE! Sei sicuro di voler eliminare TUTTI i dati dell'anno ${anno}? Questa operazione è IRREVERSIBILE e cancellerà TUTTI i mesi di quell'anno.`);
@@ -1048,21 +1065,35 @@ async function cancellaAnnoCorrente() {
         snapshot.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
         showToast(`🗑 Anno ${anno} eliminato completamente.`);
-        await popolaAnniMeseDinamici();
-        const annoSelect = document.getElementById('annoSelect');
-        const meseSelect = document.getElementById('meseSelect');
-        if (annoSelect.options.length > 0 && meseSelect.options.length > 0) {
-            currentYear = parseInt(annoSelect.value);
-            currentMonth = parseInt(meseSelect.value);
-            await caricaStatoFirebase();
-        } else {
-            const now = new Date();
-            currentYear = now.getFullYear();
-            currentMonth = now.getMonth();
-            await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({ anno: currentYear, mese: currentMonth, saldoIniziale: 0, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() });
-            await caricaStatoFirebase();
-            await popolaAnniMeseDinamici();
+        
+        // Riporta al mese/anno corrente reale
+        const oggi = new Date();
+        const annoCorrente = oggi.getFullYear();
+        const meseCorrente = oggi.getMonth();
+        
+        // Verifica se esiste già il documento per il mese corrente
+        const docCorrente = await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).get();
+        if (!docCorrente.exists) {
+            let annoPrec = annoCorrente, mesePrec = meseCorrente - 1;
+            if (mesePrec < 0) { mesePrec = 11; annoPrec = annoCorrente - 1; }
+            const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
+            await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).set({
+                anno: annoCorrente, mese: meseCorrente, saldoIniziale: saldoPrec,
+                primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
+                nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
+            });
         }
+        
+        currentYear = annoCorrente;
+        currentMonth = meseCorrente;
+        await caricaStatoFirebase();
+        await popolaAnniMeseDinamici();
+        
+        document.getElementById('annoSelect').value = currentYear;
+        document.getElementById('meseSelect').value = currentMonth;
+        
+        aggiornaTabelle();
+        showToast(`📅 Ora sei nel mese corrente: ${mesiLista[currentMonth]} ${currentYear}`);
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
 
@@ -1541,9 +1572,9 @@ function esportaPDFMese() {
 }
 function generaTabellaHTML(data, headers) {
     if (!data.length) return "<p>Nessun dato</p>";
-    let html = "<table><thead><tr>";
+    let html = "<table><thead>资";
     headers.forEach(h => html += `<th>${h}</th>`);
-    html += "</tr></thead><tbody>";
+    html += "</table></thead><tbody>";
     data.forEach(row => {
         html += "<tr>";
         headers.forEach(h => {
