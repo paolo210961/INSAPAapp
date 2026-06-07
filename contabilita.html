@@ -392,7 +392,7 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th><tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiActionButtons" class="action-buttons">
@@ -692,7 +692,6 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     aggiornaRiepilogoHeader();
     aggiornaDataFormAlPrimoMese();
     showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
-    // Evidenzia la riga spostata nel nuovo mese
     setTimeout(() => evidenziaRigaPerValori(tipo, riga), 300);
     return { spostato: true, annullato: false };
 }
@@ -866,7 +865,6 @@ async function cambiaMeseDaSelect() {
     const nuovoMese = parseInt(document.getElementById('meseSelect').value);
     if (nuovoAnno === currentYear && nuovoMese === currentMonth) return;
     const today = getTodayDateObject();
-    // Alert se si esce dal mese/anno corrente (qualunque mese diverso da oggi)
     if (nuovoAnno !== today.getFullYear() || nuovoMese !== today.getMonth()) {
         const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
         if (!conferma) {
@@ -1248,7 +1246,6 @@ function evidenziaRigaPerValori(tipo, riga) {
     else if (tipo === 'pagaddt') tableBodyId = 'pagaDdtBody';
     const tbody = document.getElementById(tableBodyId);
     if (!tbody) return;
-    // Cerca la riga che corrisponde ai valori principali (data, descrizione, importi)
     for (let i = 0; i < tbody.rows.length; i++) {
         const row = tbody.rows[i];
         let match = false;
@@ -1300,7 +1297,7 @@ function evidenziaRigaPerValori(tipo, riga) {
     }
 }
 
-// ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO (restituisce true/false) ====================
+// ==================== MEMORIZZA NUOVO CON VERIFICA DATE E ORDINAMENTO ====================
 async function memorizzaNuovo() {
     let dataYMD = null;
     if (currentScheda === 'primanota') {
@@ -1321,13 +1318,10 @@ async function memorizzaNuovo() {
             ordinaTuttiGliArray();
             await salvaStatoFirebase();
             aggiornaTabelle();
-            // Evidenzia la riga se la data non è oggi (ma stesso mese/anno)
             const today = getTodayDateObject();
             const dataOggetto = new Date(dataYMD + "T00:00:00");
             if (dataOggetto < today || dataOggetto > today) {
                 setTimeout(() => evidenziaRigaPerValori('primanota', nuovaRiga), 300);
-            } else {
-                // Se è la data di oggi, evidenzia comunque l'ultima riga? meglio non farlo
             }
             pulisciForm();
             showToast("✅ Riga aggiunta!");
@@ -1776,59 +1770,72 @@ document.getElementById('dropdownCSVAnno').onclick = () => { closeDropdown(); es
 
 document.getElementById('fileCaricaMese').onchange = async (e) => { if(e.target.files[0]){ let f=e.target.files[0]; let r=new FileReader(); r.onload=async ev=>{ try{ let d=JSON.parse(ev.target.result); currentYear=d.anno; currentMonth=d.mese; saldoIniziale=d.saldoIniziale||0; primaNota=d.primaNota||[]; contanti=d.contanti||[]; fattureFornitori=d.fattureFornitori||[]; assClienti=d.assClienti||[]; pagaDdt=d.pagaDdt||[]; nextFatturaId=d.nextFatturaId||1; ordinaTuttiGliArray(); document.getElementById('annoSelect').value=currentYear; document.getElementById('meseSelect').value=currentMonth; document.getElementById('saldoInizialeHeader').value=saldoIniziale ? formatNumber(saldoIniziale) : ''; await salvaStatoFirebase(); aggiornaTabelle(); alert(`File caricato: ${currentYear} - ${mesiLista[currentMonth]}`); }catch(err){alert("Errore caricamento");} }; r.readAsText(f); } };
 
-// Avvio: posizionamento sul mese/anno corrente del computer
+// ==================== AVVIO: POSIZIONAMENTO SUL MESE/ANNO CORRENTE ====================
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
-    // Imposta la data corrente del computer
     const now = new Date();
     const annoCorrente = now.getFullYear();
     const meseCorrente = now.getMonth();
-    // Se il mese/anno corrente esiste nei dropdown, selezionalo; altrimenti verrà creato automaticamente da caricaStatoFirebase
     const annoSelect = document.getElementById('annoSelect');
     const meseSelect = document.getElementById('meseSelect');
-    let found = false;
+    // Seleziona l'anno corrente se esiste tra le opzioni
+    let annoTrovato = false;
     for (let i = 0; i < annoSelect.options.length; i++) {
         if (parseInt(annoSelect.options[i].value) === annoCorrente) {
             annoSelect.selectedIndex = i;
-            // Ora controlla se il mese esiste tra le opzioni
-            await aggiornaMeseSelectInBaseAnno(); // questo popola meseSelect in base all'anno
-            for (let j = 0; j < meseSelect.options.length; j++) {
-                if (parseInt(meseSelect.options[j].value) === meseCorrente) {
-                    meseSelect.selectedIndex = j;
-                    found = true;
-                    break;
-                }
-            }
+            annoTrovato = true;
             break;
         }
     }
-    if (!found) {
-        // Se il mese corrente non esiste, lo creeremo con caricaStatoFirebase
-        // Impostiamo manualmente currentYear e currentMonth
+    if (!annoTrovato) {
+        // Se l'anno corrente non esiste, lo creiamo implicitamente quando carichiamo lo stato
         currentYear = annoCorrente;
         currentMonth = meseCorrente;
-        // Forziamo la creazione del documento
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
             anno: currentYear, mese: currentMonth, saldoIniziale: 0,
             primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
             nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
         });
         await popolaAnniMeseDinamici();
-        // Ora seleziona nei dropdown
+        // Ora seleziona l'anno appena creato
         for (let i = 0; i < annoSelect.options.length; i++) {
             if (parseInt(annoSelect.options[i].value) === currentYear) {
                 annoSelect.selectedIndex = i;
-                await aggiornaMeseSelectInBaseAnno();
-                for (let j = 0; j < meseSelect.options.length; j++) {
-                    if (parseInt(meseSelect.options[j].value) === currentMonth) {
-                        meseSelect.selectedIndex = j;
-                        break;
-                    }
-                }
                 break;
             }
         }
     }
+    // Ora seleziona il mese corrente (dopo che l'anno è stato impostato)
+    await aggiornaMeseSelectInBaseAnno(); // popola meseSelect in base all'anno selezionato
+    let meseTrovato = false;
+    for (let j = 0; j < meseSelect.options.length; j++) {
+        if (parseInt(meseSelect.options[j].value) === meseCorrente) {
+            meseSelect.selectedIndex = j;
+            meseTrovato = true;
+            break;
+        }
+    }
+    if (!meseTrovato) {
+        // Se il mese corrente non esiste, lo creiamo
+        currentYear = annoCorrente;
+        currentMonth = meseCorrente;
+        await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
+            anno: currentYear, mese: currentMonth, saldoIniziale: 0,
+            primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [],
+            nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString()
+        });
+        await popolaAnniMeseDinamici();
+        // Riprova selezione
+        for (let j = 0; j < meseSelect.options.length; j++) {
+            if (parseInt(meseSelect.options[j].value) === meseCorrente) {
+                meseSelect.selectedIndex = j;
+                break;
+            }
+        }
+    }
+    // Ora aggiorna currentYear e currentMonth in base ai dropdown selezionati
+    currentYear = parseInt(annoSelect.value);
+    currentMonth = parseInt(meseSelect.value);
     await caricaStatoFirebase();
     setScheda('primanota');
 });
