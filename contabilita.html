@@ -637,7 +637,7 @@ if (mobileLogoDiv) {
     });
 }
 
-// ==================== FUNZIONI UTILI (invariate) ====================
+// ==================== FUNZIONI UTILI ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -829,6 +829,8 @@ async function salvaStatoFirebase() {
         await popolaAnniMeseDinamici();
     } catch(e) { showToast("Errore salvataggio!", true); }
 }
+
+// Calcola il saldo finale del mese precedente basato SOLO sulla Prima Nota
 async function caricaSaldoMesePrecedente(anno, mese) {
     try {
         let annoPrec = anno, mesePrec = mese - 1;
@@ -845,7 +847,8 @@ async function caricaSaldoMesePrecedente(anno, mese) {
         return 0;
     } catch(e) { return 0; }
 }
-// CORREZIONE: caricaStatoFirebase ora ricalcola il saldo iniziale per i mesi vuoti
+
+// CORREZIONE: caricaStatoFirebase ricalcola il saldo iniziale solo se Prima Nota è vuota
 async function caricaStatoFirebase() {
     try {
         const doc = await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).get();
@@ -861,18 +864,17 @@ async function caricaStatoFirebase() {
             pagaDdt = data.pagaDdt || [];
             nextFatturaId = data.nextFatturaId || 1;
             
-            // Se il mese è completamente vuoto (nessuna riga e saldo=0), ricalcola dal precedente
-            const totaleMovimenti = primaNota.length + contanti.length + fattureFornitori.length + assClienti.length + pagaDdt.length;
-            if (saldoIniziale === 0 && totaleMovimenti === 0) {
+            // Ricalcola saldo iniziale SOLO se la Prima Nota è vuota (nessuna riga)
+            if (primaNota.length === 0) {
                 const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
-                if (saldoPrec !== 0) {
+                if (saldoPrec !== saldoIniziale) {
                     saldoIniziale = saldoPrec;
                     await salvaStatoFirebase(); // aggiorna il documento con il nuovo saldo
-                    showToast(`📌 Saldo iniziale aggiornato dal mese precedente: ${formatNumber(saldoIniziale)} €`);
+                    showToast(`📌 Saldo iniziale aggiornato dal mese precedente (solo Prima Nota): ${formatNumber(saldoIniziale)} €`);
                 }
             }
         } else {
-            // Mese non esiste: calcola saldo dal precedente (anche risalendo)
+            // Mese non esiste: calcola saldo dal precedente (solo Prima Nota)
             const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
             saldoIniziale = saldoPrec !== 0 ? saldoPrec : 0;
             primaNota = [];
@@ -883,7 +885,7 @@ async function caricaStatoFirebase() {
             nextFatturaId = 1;
             // Salva subito il nuovo mese con il saldo calcolato
             await salvaStatoFirebase();
-            showToast(`📌 Creato mese ${mesiLista[currentMonth]} ${currentYear} con saldo iniziale ${formatNumber(saldoIniziale)} €`);
+            showToast(`📌 Creato mese ${mesiLista[currentMonth]} ${currentYear} con saldo iniziale ${formatNumber(saldoIniziale)} € (dal mese precedente)`);
         }
         
         ordinaTuttiGliArray();
@@ -1054,7 +1056,7 @@ async function cancellaMeseCorrente() {
         // Verifica se esiste già il documento per il mese corrente
         const docCorrente = await db.collection('contabilita').doc(`${annoCorrente}_${meseCorrente}`).get();
         if (!docCorrente.exists) {
-            // Calcola saldo dal mese precedente
+            // Calcola saldo dal mese precedente basato solo sulla Prima Nota
             let annoPrec = annoCorrente, mesePrec = meseCorrente - 1;
             if (mesePrec < 0) { mesePrec = 11; annoPrec = annoCorrente - 1; }
             const saldoPrec = await calcolaSaldoFinaleMese(annoPrec, mesePrec);
@@ -1586,7 +1588,7 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead>资<th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p> <table><thead>资<th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1598,7 +1600,7 @@ function generaTabellaHTML(data, headers) {
     if (!data.length) return "<p>Nessun dato</p>";
     let html = "<table><thead>资";
     headers.forEach(h => html += `<th>${h}</th>`);
-    html += "</table></thead><tbody>";
+    html += "</tr></thead><tbody>";
     data.forEach(row => {
         html += "<tr>";
         headers.forEach(h => {
