@@ -715,7 +715,7 @@ async function verificaDataInserimento(dataYMD, targetYear, targetMonth) {
     }
     return true;
 }
-// ==================== UTILITIES ====================
+    // ==================== UTILITIES ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
@@ -865,7 +865,7 @@ async function caricaSaldoMesePrecedente(anno, mese) {
     if (mesePrec < 0) { mesePrec = 11; annoPrec = anno - 1; }
     return await calcolaSaldoFinaleMeseSoloPrimaNota(annoPrec, mesePrec);
 }
-async function salvaStatoFirebase() {
+async function salvaStatoFirebase(noRicalcolo = false) {
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).set({
             anno: currentYear, mese: currentMonth, saldoIniziale: saldoIniziale,
@@ -875,8 +875,13 @@ async function salvaStatoFirebase() {
         });
         resetModificheNonSalvate();
         showToast("✅ Dati salvati su Firebase!");
-        await ricalcolaTuttiISaldi();
-        await popolaAnniMeseDinamici();
+        if (!noRicalcolo) {
+            await ricalcolaTuttiISaldi();
+            await popolaAnniMeseDinamici();
+        } else {
+            // Aggiorna solo i dropdown senza ricalcolare i saldi (per evitare sovrascritture)
+            await popolaAnniMeseDinamici();
+        }
     } catch(e) { showToast("Errore salvataggio!", true); }
 }
 function convertiDateArray(arr, campiData) {
@@ -909,7 +914,7 @@ async function caricaStatoFirebase() {
                 const saldoPrec = await caricaSaldoMesePrecedente(currentYear, currentMonth);
                 if (Math.abs(saldoPrec - saldoIniziale) > 0.01) {
                     saldoIniziale = saldoPrec;
-                    await salvaStatoFirebase();
+                    await salvaStatoFirebase(true);
                     showToast(`📌 Saldo iniziale aggiornato dal mese precedente: ${formatNumber(saldoIniziale)} €`);
                 }
             }
@@ -926,7 +931,7 @@ async function caricaStatoFirebase() {
             saldoIniziale = saldoPrec !== 0 ? saldoPrec : 0;
             primaNota = []; contanti = []; fattureFornitori = []; assClienti = []; pagaDdt = [];
             nextFatturaId = 1;
-            await salvaStatoFirebase();
+            await salvaStatoFirebase(true);
             showToast(`📌 Creato mese ${mesiLista[currentMonth]} ${currentYear} con saldo iniziale ${formatNumber(saldoIniziale)} €`);
         }
         ordinaTuttiGliArray();
@@ -1444,7 +1449,7 @@ function handleCardVerify(e) {
     const checked = e.target.checked;
     if (idx !== null && primaNota[idx]) {
         primaNota[idx].verificato = checked;
-        salvaStatoFirebase();
+        salvaStatoFirebase(true);
     }
 }
 
@@ -1504,7 +1509,7 @@ function aggiornaPulsantiAzione() {
         }
     }
 }
-async function eliminaSelezionati(tipo) {
+    async function eliminaSelezionati(tipo) {
     if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return; }
     let conferma = confirm(`Eliminare definitivamente le righe selezionate?`);
     if (!conferma) return;
@@ -1567,7 +1572,7 @@ async function eliminaSelezionati(tipo) {
         pagaDdt = nuovi;
     }
     ordinaTuttiGliArray();
-    await salvaStatoFirebase();
+    await salvaStatoFirebase(false); // ricalcolo normale dopo eliminazione
     aggiornaTabelle();
     showToast("Elementi eliminati");
 }
@@ -1671,7 +1676,7 @@ async function saveEditedRowWithMove(tipo, idx) {
         else if (tipo === 'assclienti') assClienti[idx] = newRiga;
         else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
         ordinaTuttiGliArray();
-        await salvaStatoFirebase();
+        await salvaStatoFirebase(false);
         aggiornaTabelle();
         showToast("✅ Modifiche salvate!");
     } else {
@@ -1689,13 +1694,13 @@ function mostraModaleConferma(messaggio) {
         modal.className = 'modal-overlay';
         modal.innerHTML = `<div class="modal-content"><h3>⚠️ MODIFICHE NON SALVATE</h3><p>${messaggio}</p><p>Vuoi salvare prima di proseguire?</p><div class="modal-buttons"><button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button><button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button><button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button></div></div>`;
         document.body.appendChild(modal);
-        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
+        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(false); resolve(true); };
         document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
         document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
     });
 }
 
-// ESPORTAZIONI
+// ESPORTAZIONI (invariate)
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
@@ -1814,7 +1819,7 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     else if (tipo === 'fornitori') { const idx = fattureFornitori.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) fattureFornitori.splice(idx, 1); }
     else if (tipo === 'assclienti') { const idx = assClienti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) assClienti.splice(idx, 1); }
     else if (tipo === 'pagaddt') { const idx = pagaDdt.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) pagaDdt.splice(idx, 1); }
-    await salvaStatoFirebase();
+    await salvaStatoFirebase(false); // evitiamo ricalcolo immediato per non interferire con lo spostamento
     currentYear = annoDest;
     currentMonth = meseDest;
     await caricaStatoFirebase();
@@ -1829,8 +1834,11 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     return { spostato: true, annullato: false };
 }
 
-async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - mantenere */
-    if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return false; }
+async function inserisciRigaDaDati(tipo, dati) {
+    if (!currentMonthModifiable) {
+        showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true);
+        return false;
+    }
     if (tipo === 'primanota') {
         const { data, descrizione, avere, dare } = dati;
         if (!descrizione) { showToast("Inserisci descrizione", true); return false; }
@@ -1845,8 +1853,8 @@ async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - man
         if (!spostato) {
             primaNota.push(nuovaRiga);
             ordinaTuttiGliArray();
-            await salvaStatoFirebase();
-            aggiornaTabelle();
+            aggiornaTabelle();              // Mostra subito la riga
+            await salvaStatoFirebase(true); // Salva senza ricalcolo immediato
             setTimeout(() => evidenziaRigaPerValori('primanota', nuovaRiga), 300);
             showToast("✅ Riga aggiunta!");
             return true;
@@ -1868,8 +1876,8 @@ async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - man
         if (!spostato) {
             contanti.push(nuovaRiga);
             ordinaTuttiGliArray();
-            await salvaStatoFirebase();
             aggiornaTabelle();
+            await salvaStatoFirebase(true);
             setTimeout(() => evidenziaRigaPerValori('contanti', nuovaRiga), 300);
             showToast("✅ Incasso contanti aggiunto!");
             return true;
@@ -1891,8 +1899,8 @@ async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - man
             fattureFornitori.push(nuovaRiga);
             nextFatturaId++;
             ordinaTuttiGliArray();
-            await salvaStatoFirebase();
             aggiornaTabelle();
+            await salvaStatoFirebase(true);
             setTimeout(() => evidenziaRigaPerValori('fornitori', nuovaRiga), 300);
             showToast("✅ Fattura fornitore aggiunta!");
             return true;
@@ -1915,8 +1923,8 @@ async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - man
         if (!spostato) {
             assClienti.push(nuovaRiga);
             ordinaTuttiGliArray();
-            await salvaStatoFirebase();
             aggiornaTabelle();
+            await salvaStatoFirebase(true);
             setTimeout(() => evidenziaRigaPerValori('assclienti', nuovaRiga), 300);
             showToast("✅ Riga ASS Clienti aggiunta!");
             return true;
@@ -1939,8 +1947,8 @@ async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - man
         if (!spostato) {
             pagaDdt.push(nuovaRiga);
             ordinaTuttiGliArray();
-            await salvaStatoFirebase();
             aggiornaTabelle();
+            await salvaStatoFirebase(true);
             setTimeout(() => evidenziaRigaPerValori('pagaddt', nuovaRiga), 300);
             showToast("✅ Riga Paga DDT aggiunta!");
             return true;
@@ -2036,7 +2044,7 @@ function evidenziaRigaPerValori(tipo, riga) {
     }
 }
 
-// ==================== FUNZIONI MODALI MOBILE ====================
+// ==================== FUNZIONI MODALI MOBILE (invariate) ====================
 async function mostraModaleDataMobile() {
     try {
         const snapshot = await db.collection('contabilita').get();
@@ -2309,7 +2317,7 @@ document.getElementById('btnCancellaMese').onclick = cancellaMeseCorrente;
 document.getElementById('btnCancellaAnno').onclick = cancellaAnnoCorrente;
 document.getElementById('annoSelect').onchange = async () => { await aggiornaMeseSelectInBaseAnno(); await cambiaMeseDaSelect(); };
 document.getElementById('meseSelect').onchange = async () => { await cambiaMeseDaSelect(); };
-document.getElementById('saldoInizialeHeader').onchange = async e => { if(currentMonthModifiable) { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(); aggiornaTabelle(); marcaModificheNonSalvate(); } };
+document.getElementById('saldoInizialeHeader').onchange = async e => { if(currentMonthModifiable) { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(false); aggiornaTabelle(); marcaModificheNonSalvate(); } };
 setupImportField('saldoInizialeHeader');
 document.getElementById('btnVaiAgenti').onclick = async () => {
     if (modificheNonSalvate) { const ok = await mostraModaleConferma(`Hai modifiche non salvate. Vuoi salvare prima di andare agli agenti?`); if (!ok) return; }
