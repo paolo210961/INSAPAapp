@@ -283,7 +283,7 @@
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 3000; }
         .modal-content { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .modal-content h3 { margin: 0 0 15px 0; color: #e74c3c; }
+        .modal-content h3 { margin: 0 0 15px 0; color: #2c3e50; }
         .modal-content p { margin: 10px 0; color: #2c3e50; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
         .modal-buttons button { width: auto; padding: 10px 20px; margin: 0; }
@@ -291,8 +291,36 @@
         .btn-confirm-discard { background: #e74c3c; }
         .btn-confirm-cancel { background: #95a5a6; }
         .highlight-row { background-color: #fff3cd !important; transition: background-color 0.5s ease; }
+        /* Stile per numeri grandi nel modale SALDI */
+        .big-number {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        /* Stile per l'elenco periodi nel modale DATA */
+        .periodo-item {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .periodo-item:hover, .periodo-item:active {
+            background: #e9ecef;
+        }
+        .periodo-item .periodo-titolo {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        .periodo-item .periodo-saldo {
+            font-size: 0.85rem;
+            color: #27ae60;
+        }
 
-        /* ========== SOLO MOBILE: layout con logo, 6 icone, nessuna barra scorrevole ========== */
+        /* ========== SOLO MOBILE: layout con logo, 5 icone ========== */
         @media (max-width: 768px) {
             .header { display: none; }
             .sticky-toolbar { display: none; }
@@ -433,7 +461,7 @@
         </div>
     </div>
 
-    <!-- BARRA MOBILE (logo + 6 icone) -->
+    <!-- BARRA MOBILE (logo + 5 icone: FLOPPY, MENU, DATA, SALDI, ALTRO) -->
     <div class="mobile-top" style="display: none;">
         <div id="mobileLogo" class="mobile-logo">
             <img id="mobileLogoImg" style="display:none;">
@@ -443,7 +471,6 @@
             <button id="mobileFloppy" class="mobile-icon-btn"><span>💾</span><span>FLOPPY</span></button>
             <button id="mobileMenu" class="mobile-icon-btn"><span>☰</span><span>MENU</span></button>
             <button id="mobileData" class="mobile-icon-btn"><span>📅</span><span>DATA</span></button>
-            <button id="mobileModulo" class="mobile-icon-btn"><span>📝</span><span>MODULO</span></button>
             <button id="mobileSaldi" class="mobile-icon-btn"><span>💰</span><span>SALDI</span></button>
             <button id="mobileAltro" class="mobile-icon-btn"><span>☰</span><span>ALTRO</span></button>
         </div>
@@ -507,7 +534,7 @@
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th><tr></thead>
                         <tbody id="pagaDdtBody"></tbody>
                     </table>
                     <div id="pagaDdtActionButtons" class="action-buttons">
@@ -574,7 +601,6 @@ function formatDateVisual(isoDate) {
     if (parts.length !== 3) return isoDate;
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
-function formatDateInput(isoDate) { return isoDate || ""; }
 function getTodayDateISO() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -709,7 +735,7 @@ async function calcolaSaldoFinaleMeseSoloPrimaNota(anno, mese) {
     const totaleDare = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     return saldoIniz + totaleAvere - totaleDare;
 }
-async function aggiornaSaldoACascata(annoModificato, meseModificato) { /* identico */ 
+async function aggiornaSaldoACascata(annoModificato, meseModificato) {
     const oggi = new Date();
     const annoCorrente = oggi.getFullYear();
     const meseCorrente = oggi.getMonth();
@@ -1225,12 +1251,6 @@ function setScheda(s) {
     document.getElementById('toolbarPagaDdt').classList.toggle('active', s === 'pagaddt');
     aggiornaForm();
     aggiornaTabelle();
-    // Aggiorna etichetta pulsante MODULO su mobile in base alla scheda
-    const mobileModuloSpan = document.querySelector('#mobileModulo span:last-child');
-    if (mobileModuloSpan) {
-        if (s === 'primanota') mobileModuloSpan.innerText = 'MODULO';
-        else mobileModuloSpan.innerText = 'NUOVO';
-    }
 }
 function aggiornaForm() {
     const fa = document.getElementById('formArea');
@@ -1342,7 +1362,7 @@ function evidenziaRigaPerValori(tipo, riga) {
         }
     }
 }
-// ========== FUNZIONE GENERICA PER INSERIMENTO DIRETTO (usata dal modale mobile) ==========
+// ========== FUNZIONE GENERICA PER INSERIMENTO DIRETTO (usata dal modale PC) ==========
 async function inserisciRigaDaDati(tipo, dati) {
     if (!currentMonthModifiable) {
         showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true);
@@ -1729,138 +1749,133 @@ async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'in
     return { spostato: true, annullato: false };
 }
 
-// Funzioni per modale mobile contestuale (MODULO/NUOVO)
-function mostraModaleModulo() {
-    const tipo = currentScheda;
-    if (tipo === 'primanota') {
-        const today = getTodayDateObject();
-        const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
+// ==================== FUNZIONI MODALI MOBILE (DATA, SALDI, ALTRO, FLOPPY, MENU) ====================
+// TASTO DATA: mostra lista periodi (sola visualizzazione, navigazione)
+async function mostraModaleDataMobile() {
+    try {
+        const snapshot = await db.collection('contabilita').get();
+        const periodi = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.anno !== undefined && data.mese !== undefined) {
+                periodi.push({
+                    anno: data.anno,
+                    mese: data.mese,
+                    saldoIniziale: data.saldoIniziale || 0
+                });
+            }
+        });
+        periodi.sort((a,b) => {
+            if (a.anno !== b.anno) return a.anno - b.anno;
+            return a.mese - b.mese;
+        });
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:400px;"><h3>📝 NUOVA REGISTRAZIONE (Prima Nota)</h3>
-            <div class="form-group"><label>📅 Data</label><input type="date" id="modaleData" value="${defaultDate}"></div>
-            <div class="form-group"><label>💰 Avere (€)</label><input type="text" id="modaleAvere" class="import-field" placeholder="0,00"></div>
-            <div class="form-group"><label>💰 Dare (€)</label><input type="text" id="modaleDare" class="import-field" placeholder="0,00"></div>
-            <div class="form-group"><label>📝 Descrizione</label><input type="text" id="modaleDescrizione" placeholder="Descrizione"></div>
-            <div class="modal-buttons"><button id="modaleSalva" class="btn-success">💾 MEMORIZZA</button><button id="modaleAnnulla" class="btn-danger">ANNULLA</button></div>
-        </div>`;
+        let html = `<div class="modal-content" style="max-width:350px;"><h3>📅 PERIODI DISPONIBILI</h3><div style="max-height: 60vh; overflow-y: auto;">`;
+        if (periodi.length === 0) {
+            html += `<p>Nessun periodo trovato.</p>`;
+        } else {
+            for (let p of periodi) {
+                html += `<div class="periodo-item" data-anno="${p.anno}" data-mese="${p.mese}">
+                            <div class="periodo-titolo">${mesiLista[p.mese]} ${p.anno}</div>
+                            <div class="periodo-saldo">Saldo iniziale: ${formatNumber(p.saldoIniziale)} €</div>
+                         </div>`;
+            }
+        }
+        html += `</div><div class="modal-buttons"><button id="modalDataClose" class="btn-primary">CHIUDI</button></div></div>`;
+        modal.innerHTML = html;
         document.body.appendChild(modal);
-        setupImportField('modaleAvere');
-        setupImportField('modaleDare');
-        document.getElementById('modaleSalva').onclick = async () => {
-            const data = document.getElementById('modaleData').value;
-            const descrizione = document.getElementById('modaleDescrizione').value;
-            let avere = parseNumber(document.getElementById('modaleAvere').value);
-            let dare = parseNumber(document.getElementById('modaleDare').value);
-            const success = await inserisciRigaDaDati('primanota', { data, descrizione, avere, dare });
-            if (success) modal.remove();
-        };
-        document.getElementById('modaleAnnulla').onclick = () => modal.remove();
-    } else if (tipo === 'contanti') {
-        const today = getTodayDateObject();
-        const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:400px;"><h3>💵 NUOVO INCASSO CONTANTI</h3>
-            <div class="form-group"><label>📅 Data</label><input type="date" id="modaleData" value="${defaultDate}"></div>
-            <div class="form-group"><label>💰 Incasso (€)</label><input type="text" id="modaleImporto" class="import-field" placeholder="0,00"></div>
-            <div class="form-group"><label>📝 Descrizione</label><input type="text" id="modaleDescrizione" placeholder="Descrizione"></div>
-            <div class="modal-buttons"><button id="modaleSalva" class="btn-success">💾 MEMORIZZA</button><button id="modaleAnnulla" class="btn-danger">ANNULLA</button></div>
-        </div>`;
-        document.body.appendChild(modal);
-        setupImportField('modaleImporto');
-        document.getElementById('modaleSalva').onclick = async () => {
-            const data = document.getElementById('modaleData').value;
-            const descrizione = document.getElementById('modaleDescrizione').value;
-            const importo = parseNumber(document.getElementById('modaleImporto').value);
-            const success = await inserisciRigaDaDati('contanti', { data, descrizione, importo });
-            if (success) modal.remove();
-        };
-        document.getElementById('modaleAnnulla').onclick = () => modal.remove();
-    } else if (tipo === 'fornitori') {
-        const today = getTodayDateObject();
-        const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:400px;"><h3>📄 NUOVA FATTURA FORNITORE</h3>
-            <div class="form-group"><label>📅 Data</label><input type="date" id="modaleData" value="${defaultDate}"></div>
-            <div class="form-group"><label>🏢 Fornitore</label><input type="text" id="modaleFornitore" placeholder="Nome fornitore"></div>
-            <div class="form-group"><label>📄 N. Fattura</label><input type="text" id="modaleNumeroFattura" placeholder="Numero fattura"></div>
-            <div class="modal-buttons"><button id="modaleSalva" class="btn-success">💾 MEMORIZZA</button><button id="modaleAnnulla" class="btn-danger">ANNULLA</button></div>
-        </div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modaleSalva').onclick = async () => {
-            const data = document.getElementById('modaleData').value;
-            const fornitore = document.getElementById('modaleFornitore').value.trim();
-            const numeroFattura = document.getElementById('modaleNumeroFattura').value.trim();
-            const success = await inserisciRigaDaDati('fornitori', { data, fornitore, numeroFattura });
-            if (success) modal.remove();
-        };
-        document.getElementById('modaleAnnulla').onclick = () => modal.remove();
-    } else if (tipo === 'assclienti') {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:400px;"><h3>📋 NUOVA RIGA ASS_CONT_CLIENTI</h3>
-            <div class="form-group"><label>📝 Descrizione</label><input type="text" id="modaleDescrizione" placeholder="Descrizione"></div>
-            <div class="form-group"><label>👤 Nome</label><input type="text" id="modaleNome" placeholder="Nome"></div>
-            <div class="form-group"><label>💰 Importo (€)</label><input type="text" id="modaleImporto" class="import-field" placeholder="0,00"></div>
-            <div class="form-group"><label>📄 N° Doc.</label><input type="text" id="modaleNumDoc" placeholder="N° Documento"></div>
-            <div class="form-group"><label>📅 Data Doc.</label><input type="date" id="modaleDataDoc" value="${getTodayDateISO()}"></div>
-            <div class="modal-buttons"><button id="modaleSalva" class="btn-success">💾 MEMORIZZA</button><button id="modaleAnnulla" class="btn-danger">ANNULLA</button></div>
-        </div>`;
-        document.body.appendChild(modal);
-        setupImportField('modaleImporto');
-        document.getElementById('modaleSalva').onclick = async () => {
-            const descrizione = document.getElementById('modaleDescrizione').value;
-            const nome = document.getElementById('modaleNome').value.trim();
-            const importo = parseNumber(document.getElementById('modaleImporto').value);
-            const numDoc = document.getElementById('modaleNumDoc').value.trim();
-            const dataDoc = document.getElementById('modaleDataDoc').value;
-            const success = await inserisciRigaDaDati('assclienti', { descrizione, nome, importo, numDoc, dataDoc });
-            if (success) modal.remove();
-        };
-        document.getElementById('modaleAnnulla').onclick = () => modal.remove();
-    } else if (tipo === 'pagaddt') {
-        const today = getTodayDateObject();
-        const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:400px;"><h3>📋 NUOVA RIGA PAGA_DDT_CLIENTI</h3>
-            <div class="form-group"><label>👤 Nome</label><input type="text" id="modaleNome" placeholder="Nome"></div>
-            <div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="modaleNumDoc" placeholder="N° Fattura/DDT"></div>
-            <div class="form-group"><label>📅 Data</label><input type="date" id="modaleData" value="${defaultDate}"></div>
-            <div class="form-group"><label>💰 Importo (€)</label><input type="text" id="modaleImporto" class="import-field" placeholder="0,00"></div>
-            <div class="modal-buttons"><button id="modaleSalva" class="btn-success">💾 MEMORIZZA</button><button id="modaleAnnulla" class="btn-danger">ANNULLA</button></div>
-        </div>`;
-        document.body.appendChild(modal);
-        setupImportField('modaleImporto');
-        document.getElementById('modaleSalva').onclick = async () => {
-            const nome = document.getElementById('modaleNome').value.trim();
-            const numDoc = document.getElementById('modaleNumDoc').value.trim();
-            const data = document.getElementById('modaleData').value;
-            const importo = parseNumber(document.getElementById('modaleImporto').value);
-            const success = await inserisciRigaDaDati('pagaddt', { nome, numDoc, data, importo });
-            if (success) modal.remove();
-        };
-        document.getElementById('modaleAnnulla').onclick = () => modal.remove();
-    }
+        // Aggiungi eventi click su ogni periodo
+        document.querySelectorAll('.periodo-item').forEach(el => {
+            el.addEventListener('click', async () => {
+                const anno = parseInt(el.getAttribute('data-anno'));
+                const mese = parseInt(el.getAttribute('data-mese'));
+                modal.remove();
+                // Cambia periodo senza modifiche (sola navigazione)
+                if (anno === currentYear && mese === currentMonth) return;
+                const today = getTodayDateObject();
+                if (anno !== today.getFullYear() || mese !== today.getMonth()) {
+                    const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
+                    if (!conferma) return;
+                }
+                if (modificheNonSalvate) {
+                    const ok = await mostraModaleConferma("Hai modifiche non salvate. Vuoi salvare prima di cambiare periodo?");
+                    if (!ok) return;
+                    await caricaStatoFirebase();
+                }
+                currentYear = anno;
+                currentMonth = mese;
+                await caricaStatoFirebase();
+                await popolaAnniMeseDinamici();
+                document.getElementById('annoSelect').value = currentYear;
+                document.getElementById('meseSelect').value = currentMonth;
+                showToast(`📅 Visualizzazione: ${mesiLista[currentMonth]} ${currentYear}`);
+            });
+        });
+        document.getElementById('modalDataClose').onclick = () => modal.remove();
+    } catch(e) { showToast("Errore nel caricamento dei periodi", true); }
 }
-// Funzioni mobile layout e altri listener
-function toggleMobileLayout() {
-    const isMobile = window.innerWidth <= 768;
-    const mobileTop = document.querySelector('.mobile-top');
-    const header = document.querySelector('.header');
-    const sidebar = document.getElementById('sidebarContabilita');
-    if (isMobile) {
-        if (mobileTop) mobileTop.style.display = 'block';
-        if (header) header.style.display = 'none';
-        if (sidebar) sidebar.style.display = 'none';
+
+// TASTO SALDI: mostra totali in carattere grande e grassetto
+function mostraModaleSaldiMobile() {
+    let ta = 0, td = 0;
+    if (currentScheda === 'primanota') {
+        ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        const saldoFinale = saldoIniziale + ta - td;
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong class="big-number">Avere:</strong> <span class="positive big-number">${formatNumber(ta)} €</span></p><p><strong class="big-number">Dare:</strong> <span class="negative big-number">${formatNumber(td)} €</span></p><p><strong class="big-number">Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'} big-number">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else if (currentScheda === 'contanti') {
+        let tot = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO CONTANTI</h3><p><strong class="big-number">Totale incassi:</strong> <span class="positive big-number">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else if (currentScheda === 'assclienti') {
+        let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO ASS_CONT_CLIENTI</h3><p><strong class="big-number">Totale importi:</strong> <span class="positive big-number">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else if (currentScheda === 'pagaddt') {
+        let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PAGA_DDT_CLIENTI</h3><p><strong class="big-number">Totale importi:</strong> <span class="positive big-number">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
     } else {
-        if (mobileTop) mobileTop.style.display = 'none';
-        if (header) header.style.display = 'block';
-        if (sidebar) sidebar.style.display = 'block';
+        showToast("Riepilogo non disponibile per questa scheda", true);
     }
 }
+
+// TASTO ALTRO: senza voci Cancella Mese/Anno
+function mostraModaleAltro() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content" style="max-width:350px;"><h3>☰ COMANDI</h3>
+        <button id="modalePrimaNota" class="dropdown-item" style="margin:5px 0;">📋 PRIMA NOTA</button>
+        <button id="modaleContanti" class="dropdown-item" style="margin:5px 0;">💵 CONTANTI</button>
+        <button id="modaleFornitori" class="dropdown-item" style="margin:5px 0;">📄 FORNITORI</button>
+        <button id="modaleAssClienti" class="dropdown-item" style="margin:5px 0;">📋 ASS_CONT_CLIENTI</button>
+        <button id="modalePagaDdt" class="dropdown-item" style="margin:5px 0;">📋 PAGA_DDT_CLIENTI</button>
+        <button id="modaleAltroClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
+    </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('modalePrimaNota').onclick = () => { setScheda('primanota'); modal.remove(); };
+    document.getElementById('modaleContanti').onclick = () => { setScheda('contanti'); modal.remove(); };
+    document.getElementById('modaleFornitori').onclick = () => { setScheda('fornitori'); modal.remove(); };
+    document.getElementById('modaleAssClienti').onclick = () => { setScheda('assclienti'); modal.remove(); };
+    document.getElementById('modalePagaDdt').onclick = () => { setScheda('pagaddt'); modal.remove(); };
+    document.getElementById('modaleAltroClose').onclick = () => modal.remove();
+}
+
+// TASTO FLOPPY (invariato)
 function mostraModaleFloppy() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -1880,6 +1895,8 @@ function mostraModaleFloppy() {
     document.getElementById('modalCSVAnno').onclick = () => { esportaCSV(true); modal.remove(); };
     document.getElementById('modalFloppyClose').onclick = () => modal.remove();
 }
+
+// TASTO MENU (invariato)
 function mostraModaleMenu() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -1897,115 +1914,25 @@ function mostraModaleMenu() {
     document.getElementById('modalLogout').onclick = async () => { if (modificheNonSalvate) { const ok = await mostraModaleConferma("Hai modifiche non salvate. Salvare prima di uscire?"); if (!ok) { modal.remove(); return; } } window.location.href = 'index.html'; };
     document.getElementById('modalMenuClose').onclick = () => modal.remove();
 }
-function mostraModaleDataMobile() {
-    let anniHtml = '', mesiHtml = '';
-    for (let a of anniDisponibili) anniHtml += `<option value="${a}" ${a === currentYear ? 'selected' : ''}>${a}</option>`;
-    const mesiDisponibili = mesiDisponibiliPerAnno[currentYear] || [];
-    for (let m of mesiDisponibili) mesiHtml += `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${mesiLista[m]}</option>`;
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content"><h3>📅 Seleziona Periodo e Saldo</h3>
-        <div class="form-group"><label>Anno</label><select id="modalAnno">${anniHtml}</select></div>
-        <div class="form-group"><label>Mese</label><select id="modalMese">${mesiHtml}</select></div>
-        <div class="form-group"><label>Saldo iniziale (€)</label><input type="text" id="modalSaldoIniziale" value="${formatNumber(saldoIniziale)}" class="import-field"></div>
-        <div class="modal-buttons"><button id="modalDataOk" class="btn-success">OK</button><button id="modalDataCancel" class="btn-danger">ANNULLA</button></div>
-    </div>`;
-    document.body.appendChild(modal);
-    setupImportField('modalSaldoIniziale');
-    document.getElementById('modalAnno').addEventListener('change', (e) => {
-        const anno = parseInt(e.target.value);
-        const mesi = mesiDisponibiliPerAnno[anno] || [];
-        const meseSelect = document.getElementById('modalMese');
-        meseSelect.innerHTML = '';
-        for (let m of mesi) { const opt = document.createElement('option'); opt.value = m; opt.textContent = mesiLista[m]; if (m === currentMonth && anno === currentYear) opt.selected = true; meseSelect.appendChild(opt); }
-    });
-    document.getElementById('modalDataOk').onclick = async () => {
-        const nuovoAnno = parseInt(document.getElementById('modalAnno').value);
-        const nuovoMese = parseInt(document.getElementById('modalMese').value);
-        const nuovoSaldo = parseNumber(document.getElementById('modalSaldoIniziale').value);
-        if (nuovoAnno !== currentYear || nuovoMese !== currentMonth) await cambiaMeseDaSelectCustom(nuovoAnno, nuovoMese);
-        if (Math.abs(saldoIniziale - nuovoSaldo) > 0.01) { saldoIniziale = nuovoSaldo; await salvaStatoFirebase(); aggiornaTabelle(); showToast("Saldo iniziale aggiornato"); }
-        modal.remove();
-    };
-    document.getElementById('modalDataCancel').onclick = () => modal.remove();
-}
-async function cambiaMeseDaSelectCustom(anno, mese) {
-    if (anno === currentYear && mese === currentMonth) return;
-    const today = getTodayDateObject();
-    if (anno !== today.getFullYear() || mese !== today.getMonth()) {
-        const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
-        if (!conferma) return;
+
+// ==================== GESTIONE LAYOUT MOBILE E LISTENER ====================
+function toggleMobileLayout() {
+    const isMobile = window.innerWidth <= 768;
+    const mobileTop = document.querySelector('.mobile-top');
+    const header = document.querySelector('.header');
+    const sidebar = document.getElementById('sidebarContabilita');
+    if (isMobile) {
+        if (mobileTop) mobileTop.style.display = 'block';
+        if (header) header.style.display = 'none';
+        if (sidebar) sidebar.style.display = 'none';
+    } else {
+        if (mobileTop) mobileTop.style.display = 'none';
+        if (header) header.style.display = 'block';
+        if (sidebar) sidebar.style.display = 'block';
     }
-    if (modificheNonSalvate) {
-        const salvaRiga = await mostraModaleSalvaRigaPrimaDiCambiareMese();
-        if (salvaRiga === false) return;
-        await caricaStatoFirebase();
-        if (currentYear === anno && currentMonth === mese) return;
-    }
-    currentYear = anno;
-    currentMonth = mese;
-    await caricaStatoFirebase();
-    showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
-}
-function mostraModaleSaldiMobile() {
-    let ta = 0, td = 0;
-    if (currentScheda === 'primanota') {
-        ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-        td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-        const saldoFinale = saldoIniziale + ta - td;
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong>Avere:</strong> <span class="positive">${formatNumber(ta)} €</span></p><p><strong>Dare:</strong> <span class="negative">${formatNumber(td)} €</span></p><p><strong>Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'}">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else if (currentScheda === 'contanti') {
-        let tot = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO CONTANTI</h3><p><strong>Totale incassi:</strong> <span class="positive">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else if (currentScheda === 'assclienti') {
-        let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO ASS_CONT_CLIENTI</h3><p><strong>Totale importi:</strong> <span class="positive">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else if (currentScheda === 'pagaddt') {
-        let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PAGA_DDT_CLIENTI</h3><p><strong>Totale importi:</strong> <span class="positive">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else { showToast("Riepilogo non disponibile per questa scheda", true); }
-}
-function mostraModaleAltro() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content" style="max-width:350px;"><h3>☰ COMANDI</h3>
-        <button id="modalePrimaNota" class="dropdown-item" style="margin:5px 0;">📋 PRIMA NOTA</button>
-        <button id="modaleContanti" class="dropdown-item" style="margin:5px 0;">💵 CONTANTI</button>
-        <button id="modaleFornitori" class="dropdown-item" style="margin:5px 0;">📄 FORNITORI</button>
-        <button id="modaleAssClienti" class="dropdown-item" style="margin:5px 0;">📋 ASS_CONT_CLIENTI</button>
-        <button id="modalePagaDdt" class="dropdown-item" style="margin:5px 0;">📋 PAGA_DDT_CLIENTI</button>
-        <button id="modaleCancellaMese" class="dropdown-item btn-delete" style="margin:5px 0;">🗑 CANCELLA MESE</button>
-        <button id="modaleCancellaAnno" class="dropdown-item btn-delete" style="margin:5px 0;">🗑 CANCELLA ANNO</button>
-        <button id="modaleAltroClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
-    </div>`;
-    document.body.appendChild(modal);
-    document.getElementById('modalePrimaNota').onclick = () => { setScheda('primanota'); modal.remove(); };
-    document.getElementById('modaleContanti').onclick = () => { setScheda('contanti'); modal.remove(); };
-    document.getElementById('modaleFornitori').onclick = () => { setScheda('fornitori'); modal.remove(); };
-    document.getElementById('modaleAssClienti').onclick = () => { setScheda('assclienti'); modal.remove(); };
-    document.getElementById('modalePagaDdt').onclick = () => { setScheda('pagaddt'); modal.remove(); };
-    document.getElementById('modaleCancellaMese').onclick = async () => { modal.remove(); await cancellaMeseCorrente(); };
-    document.getElementById('modaleCancellaAnno').onclick = async () => { modal.remove(); await cancellaAnnoCorrente(); };
-    document.getElementById('modaleAltroClose').onclick = () => modal.remove();
 }
 
-// Listener pulsanti PC e mobile
+// Listener pulsanti PC
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
 document.getElementById('toolbarFornitori').onclick = () => setScheda('fornitori');
@@ -2065,12 +1992,14 @@ if (hamburgerBtn2 && navGrid2) {
     hamburgerBtn2.addEventListener('click', (e) => { e.stopPropagation(); navGrid2.classList.toggle('open'); });
     document.addEventListener('click', (e) => { if (!navGrid2.contains(e.target) && !hamburgerBtn2.contains(e.target)) navGrid2.classList.remove('open'); });
 }
+
+// Listener pulsanti mobile
 document.getElementById('mobileFloppy')?.addEventListener('click', () => mostraModaleFloppy());
 document.getElementById('mobileMenu')?.addEventListener('click', () => mostraModaleMenu());
 document.getElementById('mobileData')?.addEventListener('click', () => mostraModaleDataMobile());
-document.getElementById('mobileModulo')?.addEventListener('click', () => mostraModaleModulo());
 document.getElementById('mobileSaldi')?.addEventListener('click', () => mostraModaleSaldiMobile());
 document.getElementById('mobileAltro')?.addEventListener('click', () => mostraModaleAltro());
+
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) { const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci."; e.preventDefault(); e.returnValue = message; return message; }
 });
