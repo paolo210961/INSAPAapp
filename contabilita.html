@@ -318,7 +318,7 @@
             color: #27ae60;
         }
 
-        /* ========== SOLO MOBILE: layout con logo, 5 icone, tabelle visibili ========== */
+        /* ========== SOLO MOBILE ========== */
         @media (max-width: 768px) {
             .header { display: none; }
             .sticky-toolbar { display: none; }
@@ -469,7 +469,7 @@
         </div>
     </div>
 
-    <!-- BARRA MOBILE (logo + 5 icone: FLOPPY, MENU, DATA, SALDI, ALTRO) -->
+    <!-- BARRA MOBILE -->
     <div class="mobile-top" style="display: none;">
         <div id="mobileLogo" class="mobile-logo">
             <img id="mobileLogoImg" style="display:none;">
@@ -509,7 +509,7 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3>💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th><tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiActionButtons" class="action-buttons">
@@ -542,7 +542,7 @@
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></td></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
                         <tbody id="pagaDdtBody"></tbody>
                     </table>
                     <div id="pagaDdtActionButtons" class="action-buttons">
@@ -580,7 +580,7 @@ const db = firebase.firestore();
 
 // ==================== VARIABILI GLOBALI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
-let currentYear = 2026, currentMonth = 4, currentScheda = 'primanota';
+let currentYear = 2026, currentMonth = 5, currentScheda = 'primanota';
 let primaNota = [], contanti = [], fattureFornitori = [], assClienti = [], pagaDdt = [];
 let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
@@ -892,7 +892,7 @@ async function popolaAnniMeseDinamici() {
             const data = doc.data();
             const anno = data.anno;
             const mese = data.mese;
-            if (anno && mese !== undefined) {
+            if (anno !== undefined && mese !== undefined) {
                 anniSet.add(anno);
                 if (!mesiMap.has(anno)) mesiMap.set(anno, new Set());
                 mesiMap.get(anno).add(mese);
@@ -915,25 +915,25 @@ async function popolaAnniMeseDinamici() {
             return popolaAnniMeseDinamici();
         }
         const annoSelect = document.getElementById('annoSelect');
-        const oldAnno = annoSelect.value ? parseInt(annoSelect.value) : currentYear;
+        const currentAnnoValue = annoSelect.value ? parseInt(annoSelect.value) : currentYear;
         annoSelect.innerHTML = '';
         for (let a of anniDisponibili) {
             const opt = document.createElement('option');
             opt.value = a;
             opt.textContent = a;
-            if (a === oldAnno) opt.selected = true;
+            if (a === currentAnnoValue) opt.selected = true;
             annoSelect.appendChild(opt);
         }
         const annoSelezionato = parseInt(annoSelect.value);
         const mesiDisponibili = mesiDisponibiliPerAnno[annoSelezionato] || [];
         const meseSelect = document.getElementById('meseSelect');
-        const oldMese = meseSelect.value ? parseInt(meseSelect.value) : currentMonth;
+        const currentMeseValue = meseSelect.value ? parseInt(meseSelect.value) : currentMonth;
         meseSelect.innerHTML = '';
         for (let m of mesiDisponibili) {
             const opt = document.createElement('option');
             opt.value = m;
             opt.textContent = mesiLista[m];
-            if (m === oldMese) opt.selected = true;
+            if (m === currentMeseValue) opt.selected = true;
             meseSelect.appendChild(opt);
         }
         if (meseSelect.options.length === 0 && mesiDisponibili.length > 0) {
@@ -943,13 +943,8 @@ async function popolaAnniMeseDinamici() {
             opt.textContent = mesiLista[primoMese];
             meseSelect.appendChild(opt);
         }
-        const nuovoAnno = parseInt(annoSelect.value);
-        const nuovoMese = parseInt(meseSelect.value);
-        if (nuovoAnno !== currentYear || nuovoMese !== currentMonth) {
-            currentYear = nuovoAnno;
-            currentMonth = nuovoMese;
-            await caricaStatoFirebase();
-        }
+        // IMPORTANTE: NON modificare currentYear/currentMonth qui, solo i dropdown.
+        // La sincronizzazione è gestita da cambiaMeseDaSelect o da chiamate esterne.
     } catch(e) { console.error("Errore popolamento dropdown dinamici:", e); }
 }
 async function aggiornaMeseSelectInBaseAnno() {
@@ -983,6 +978,7 @@ async function cambiaMeseDaSelect() {
     if (nuovoAnno !== today.getFullYear() || nuovoMese !== today.getMonth()) {
         const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
         if (!conferma) {
+            // Ripristina i select ai valori correnti
             document.getElementById('annoSelect').value = currentYear;
             document.getElementById('meseSelect').value = currentMonth;
             return;
@@ -1002,6 +998,11 @@ async function cambiaMeseDaSelect() {
     currentMonth = nuovoMese;
     await caricaStatoFirebase();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
+    // Aggiorna i dropdown per sicurezza (potrebbero esserci nuovi mesi)
+    await popolaAnniMeseDinamici();
+    // Forza la selezione nei dropdown
+    document.getElementById('annoSelect').value = currentYear;
+    document.getElementById('meseSelect').value = currentMonth;
 }
 function mostraModaleSalvaRigaPrimaDiCambiareMese() {
     return new Promise((resolve) => {
@@ -1649,7 +1650,7 @@ function esportaReportRagioniere() {
     const saldo = saldoIniziale;
     const saldoFinale = saldo + ta - td;
     const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${formatDateVisual(r.data)}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p></table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${formatDateVisual(r.data)}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
     w.document.close();
 }
 function esportaPDFMese() {
@@ -1659,9 +1660,9 @@ function esportaPDFMese() {
 }
 function generaTabellaHTML(data, headers) {
     if (!data.length) return "<p>Nessun dato</p>";
-    let html = "<table><thead></tr>";
+    let html = "<table class='tabella'><thead><tr>";
     headers.forEach(h => html += `<th>${h}</th>`);
-    html += "</thead><tbody>";
+    html += "</tr></thead><tbody>";
     data.forEach(row => {
         html += "<tr>";
         headers.forEach(h => {
@@ -1828,6 +1829,7 @@ async function mostraModaleDataMobile() {
                 currentYear = anno;
                 currentMonth = mese;
                 await caricaStatoFirebase();
+                // Aggiorna i dropdown con i nuovi valori
                 await popolaAnniMeseDinamici();
                 document.getElementById('annoSelect').value = currentYear;
                 document.getElementById('meseSelect').value = currentMonth;
