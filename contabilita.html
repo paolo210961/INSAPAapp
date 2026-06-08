@@ -318,7 +318,7 @@
             color: #27ae60;
         }
 
-        /* ========== SOLO MOBILE ========== */
+        /* ========== STILI PER CARD MOBILE (solo schermi piccoli) ========== */
         @media (max-width: 768px) {
             .header { display: none; }
             .sticky-toolbar { display: none; }
@@ -398,23 +398,84 @@
             .content-area {
                 width: 100%;
                 padding: 10px;
-                overflow-x: auto;
-                overflow-y: visible;
+                overflow-x: hidden;
+                overflow-y: auto;
                 max-height: none;
             }
             .scadenze-box {
-                overflow-x: auto;
+                overflow-x: visible;
                 overflow-y: visible;
                 max-height: none;
                 width: 100%;
+                background: transparent;
+                border-left: none;
+                padding: 0;
             }
+            /* Nascondi le vecchie tabelle su mobile */
             .tabella {
-                font-size: 0.7rem;
-                min-width: 500px;
-                width: 100%;
-                table-layout: auto;
+                display: none;
             }
-            .action-buttons { justify-content: center; }
+            /* Stile per i contenitori delle card */
+            .cards-container {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 15px;
+            }
+            .card {
+                background: white;
+                border-radius: 16px;
+                padding: 12px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                border-left: 5px solid #3498db;
+            }
+            .card-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+            }
+            .card-row:last-child {
+                margin-bottom: 0;
+            }
+            .card-left-group {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .card-select-checkbox {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+            .card-date {
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+            .card-amount {
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+            .card-desc {
+                font-size: 0.85rem;
+                color: #2c3e50;
+                word-break: break-word;
+                flex: 1;
+                padding-right: 8px;
+            }
+            .card-other-amount {
+                font-size: 0.85rem;
+                font-weight: normal;
+            }
+            .card-verified-checkbox {
+                width: 20px;
+                height: 20px;
+                margin-left: 8px;
+                cursor: pointer;
+            }
+            .positive { color: #27ae60; }
+            .negative { color: #e74c3c; }
+            .action-buttons { justify-content: center; margin-top: 20px; }
         }
     </style>
 </head>
@@ -496,55 +557,60 @@
         <div class="content-area">
             <div id="contabilitaContainer">
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
-                    <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
+                    <h3 id="primaNotaTitle">📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
                         <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead>
                         <tbody id="primaNotaBody"></tbody>
                     </table>
+                    <div id="primaNotaCards" class="cards-container"></div>
                     <div id="primaNotaActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaPrima" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiPrima" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
-                    <h3>💵 INCASSO CONTANTI</h3>
+                    <h3 id="contantiTitle">💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th><tr></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
+                    <div id="contantiCards" class="cards-container"></div>
                     <div id="contantiActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaContanti" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiContanti" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
-                    <h3>📄 FATTURE FORNITORI</h3>
+                    <h3 id="fornitoriTitle">📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
                         <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
                         <tbody id="fornitoriBody"></tbody>
                     </table>
+                    <div id="fornitoriCards" class="cards-container"></div>
                     <div id="fornitoriActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaFornitori" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiFornitori" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
-                    <h3>📋 ASS_CONT_CLIENTI</h3>
+                    <h3 id="assClientiTitle">📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
                         <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
                         <tbody id="assClientiBody"></tbody>
                     </table>
+                    <div id="assClientiCards" class="cards-container"></div>
                     <div id="assClientiActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaAssClienti" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiAssClienti" class="btn-danger">🗑 ELIMINA</button>
                     </div>
                 </div>
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
-                    <h3>📋 PAGA_DDT_CLIENTI</h3>
+                    <h3 id="pagaDdtTitle">📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th><tr></thead>
                         <tbody id="pagaDdtBody"></tbody>
                     </table>
+                    <div id="pagaDdtCards" class="cards-container"></div>
                     <div id="pagaDdtActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaPagaDdt" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiPagaDdt" class="btn-danger">🗑 ELIMINA</button>
@@ -649,7 +715,6 @@ async function verificaDataInserimento(dataYMD, targetYear, targetMonth) {
     }
     return true;
 }
-
 // ==================== UTILITIES ====================
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
@@ -881,8 +946,7 @@ function aggiornaDataFormAlPrimoMese() {
     else if (currentScheda === 'fornitori' && document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = defaultDate;
     else if (currentScheda === 'pagaddt' && document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = defaultDate;
 }
-let anniDisponibili = [];
-let mesiDisponibiliPerAnno = {};
+let anniDisponibili = [], mesiDisponibiliPerAnno = {};
 async function popolaAnniMeseDinamici() {
     try {
         const snapshot = await db.collection('contabilita').get();
@@ -943,8 +1007,6 @@ async function popolaAnniMeseDinamici() {
             opt.textContent = mesiLista[primoMese];
             meseSelect.appendChild(opt);
         }
-        // IMPORTANTE: NON modificare currentYear/currentMonth qui, solo i dropdown.
-        // La sincronizzazione è gestita da cambiaMeseDaSelect o da chiamate esterne.
     } catch(e) { console.error("Errore popolamento dropdown dinamici:", e); }
 }
 async function aggiornaMeseSelectInBaseAnno() {
@@ -978,7 +1040,6 @@ async function cambiaMeseDaSelect() {
     if (nuovoAnno !== today.getFullYear() || nuovoMese !== today.getMonth()) {
         const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
         if (!conferma) {
-            // Ripristina i select ai valori correnti
             document.getElementById('annoSelect').value = currentYear;
             document.getElementById('meseSelect').value = currentMonth;
             return;
@@ -998,9 +1059,7 @@ async function cambiaMeseDaSelect() {
     currentMonth = nuovoMese;
     await caricaStatoFirebase();
     showToast(`📅 Cambiato a ${mesiLista[currentMonth]} ${currentYear}`);
-    // Aggiorna i dropdown per sicurezza (potrebbero esserci nuovi mesi)
     await popolaAnniMeseDinamici();
-    // Forza la selezione nei dropdown
     document.getElementById('annoSelect').value = currentYear;
     document.getElementById('meseSelect').value = currentMonth;
 }
@@ -1102,8 +1161,32 @@ function aggiornaRiepilogoHeader() {
         summaryDiv.innerHTML = `<div>📋 Totale PAGA_DDT_CLIENTI: <span class="positive">${formatNumber(tot)} €</span></div>`;
     }
 }
+
+// Funzione principale aggiornaTabelle: su PC usa le tabelle, su mobile genera card
 function aggiornaTabelle() {
+    const isMobile = window.innerWidth <= 768;
     const isModifiable = currentMonthModifiable;
+    const meseAnnoStr = `${mesiLista[currentMonth]} ${String(currentYear).slice(-2)}`;
+    document.getElementById('primaNotaTitle') && (document.getElementById('primaNotaTitle').innerHTML = `📋 PRIMA NOTA - Movimenti del periodo: ${meseAnnoStr}`);
+    document.getElementById('contantiTitle') && (document.getElementById('contantiTitle').innerHTML = `💵 INCASSO CONTANTI - ${meseAnnoStr}`);
+    document.getElementById('fornitoriTitle') && (document.getElementById('fornitoriTitle').innerHTML = `📄 FATTURE FORNITORI - ${meseAnnoStr}`);
+    document.getElementById('assClientiTitle') && (document.getElementById('assClientiTitle').innerHTML = `📋 ASS_CONT_CLIENTI - ${meseAnnoStr}`);
+    document.getElementById('pagaDdtTitle') && (document.getElementById('pagaDdtTitle').innerHTML = `📋 PAGA_DDT_CLIENTI - ${meseAnnoStr}`);
+
+    if (!isMobile) {
+        document.querySelectorAll('.cards-container').forEach(div => div.style.display = 'none');
+        document.querySelectorAll('.tabella').forEach(tab => tab.style.display = 'table');
+        renderTablesPC(isModifiable);
+    } else {
+        document.querySelectorAll('.tabella').forEach(tab => tab.style.display = 'none');
+        document.querySelectorAll('.cards-container').forEach(div => div.style.display = 'flex');
+        renderCardsMobile(isModifiable);
+    }
+    aggiornaPulsantiAzione();
+    aggiornaRiepilogoHeader();
+}
+
+function renderTablesPC(isModifiable) {
     // Prima Nota
     const primaBody = document.getElementById('primaNotaBody');
     if (primaBody) {
@@ -1196,9 +1279,312 @@ function aggiornaTabelle() {
             const impCell = row.insertCell(4); impCell.className = 'text-right'; impCell.innerHTML = item.importo ? '<strong>' + formatNumber(item.importo) + ' €</strong>' : '';
         });
     }
-    aggiornaPulsantiAzione();
-    aggiornaRiepilogoHeader();
 }
+
+function renderCardsMobile(isModifiable) {
+    // Prima Nota cards
+    const primaContainer = document.getElementById('primaNotaCards');
+    if (primaContainer) {
+        primaContainer.innerHTML = '';
+        primaNota.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = idx;
+            card.dataset.tipo = 'primanota';
+            const avere = item.avere ? parseNumber(item.avere) : 0;
+            const dare = item.dare ? parseNumber(item.dare) : 0;
+            const hasAvere = avere > 0;
+            const hasDare = dare > 0;
+            card.innerHTML = `
+                <div class="card-row">
+                    <div class="card-left-group">
+                        <input type="checkbox" class="card-select-checkbox" data-idx="${idx}" data-tipo="primanota">
+                        <span class="card-date">${formatDateVisual(item.data)}</span>
+                    </div>
+                    <div class="card-amount ${hasAvere ? 'positive' : 'negative'}">${hasAvere ? 'Avere: ' + formatNumber(avere) + ' €' : (hasDare ? 'Dare: ' + formatNumber(dare) + ' €' : '')}</div>
+                    <input type="checkbox" class="card-verified-checkbox" ${item.verificato ? 'checked' : ''} data-idx="${idx}" data-tipo="primanota">
+                </div>
+                <div class="card-row">
+                    <div class="card-desc">${item.descrizione || ''}</div>
+                    ${hasAvere && hasDare ? `<div class="card-other-amount negative">Dare: ${formatNumber(dare)} €</div>` : ''}
+                    ${!hasAvere && hasDare ? `<div class="card-other-amount positive">Avere: ${formatNumber(avere)} €</div>` : ''}
+                </div>
+            `;
+            primaContainer.appendChild(card);
+        });
+        attachCardEvents('primanota');
+    }
+    // Contanti cards
+    const contantiContainer = document.getElementById('contantiCards');
+    if (contantiContainer) {
+        contantiContainer.innerHTML = '';
+        contanti.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = idx;
+            card.dataset.tipo = 'contanti';
+            card.innerHTML = `
+                <div class="card-row">
+                    <div class="card-left-group">
+                        <input type="checkbox" class="card-select-checkbox" data-idx="${idx}" data-tipo="contanti">
+                        <span class="card-date">${formatDateVisual(item.data)}</span>
+                    </div>
+                    <div class="card-amount positive">Incasso: ${formatNumber(item.importo)} €</div>
+                </div>
+                <div class="card-row">
+                    <div class="card-desc">${item.descrizione || ''}</div>
+                </div>
+            `;
+            contantiContainer.appendChild(card);
+        });
+        attachCardEvents('contanti');
+    }
+    // Fornitori cards
+    const fornitoriContainer = document.getElementById('fornitoriCards');
+    if (fornitoriContainer) {
+        fornitoriContainer.innerHTML = '';
+        fattureFornitori.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = idx;
+            card.dataset.tipo = 'fornitori';
+            card.innerHTML = `
+                <div class="card-row">
+                    <div class="card-left-group">
+                        <input type="checkbox" class="card-select-checkbox" data-idx="${idx}" data-tipo="fornitori">
+                        <span class="card-date">${formatDateVisual(item.data)}</span>
+                    </div>
+                    <div class="card-amount">N° ${nextFatturaId - fattureFornitori.length + idx}/${currentYear}</div>
+                </div>
+                <div class="card-row">
+                    <div class="card-desc"><strong>Fornitore:</strong> ${item.fornitore || ''}</div>
+                    <div class="card-other-amount"><strong>N.Fattura:</strong> ${item.numeroFattura || ''}</div>
+                </div>
+            `;
+            fornitoriContainer.appendChild(card);
+        });
+        attachCardEvents('fornitori');
+    }
+    // ASS Clienti cards
+    const assClientiContainer = document.getElementById('assClientiCards');
+    if (assClientiContainer) {
+        assClientiContainer.innerHTML = '';
+        assClienti.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = idx;
+            card.dataset.tipo = 'assclienti';
+            card.innerHTML = `
+                <div class="card-row">
+                    <div class="card-left-group">
+                        <input type="checkbox" class="card-select-checkbox" data-idx="${idx}" data-tipo="assclienti">
+                        <span class="card-date">${formatDateVisual(item.dataIns)}</span>
+                    </div>
+                    <div class="card-amount positive">${formatNumber(item.importo)} €</div>
+                </div>
+                <div class="card-row">
+                    <div class="card-desc"><strong>${item.nome || ''}</strong> - ${item.descrizione || ''}</div>
+                </div>
+                <div class="card-row">
+                    <div class="card-desc">N° Doc: ${item.numDoc || ''}</div>
+                    <div class="card-other-amount">Data Doc: ${formatDateVisual(item.dataDoc)}</div>
+                </div>
+            `;
+            assClientiContainer.appendChild(card);
+        });
+        attachCardEvents('assclienti');
+    }
+    // Paga DDT cards
+    const pagaDdtContainer = document.getElementById('pagaDdtCards');
+    if (pagaDdtContainer) {
+        pagaDdtContainer.innerHTML = '';
+        pagaDdt.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = idx;
+            card.dataset.tipo = 'pagaddt';
+            card.innerHTML = `
+                <div class="card-row">
+                    <div class="card-left-group">
+                        <input type="checkbox" class="card-select-checkbox" data-idx="${idx}" data-tipo="pagaddt">
+                        <span class="card-date">${formatDateVisual(item.data)}</span>
+                    </div>
+                    <div class="card-amount positive">${formatNumber(item.importo)} €</div>
+                </div>
+                <div class="card-row">
+                    <div class="card-desc"><strong>${item.nome || ''}</strong></div>
+                    <div class="card-other-amount">N° ${item.numDoc || ''}</div>
+                </div>
+            `;
+            pagaDdtContainer.appendChild(card);
+        });
+        attachCardEvents('pagaddt');
+    }
+}
+
+function attachCardEvents(tipo) {
+    document.querySelectorAll(`.card-select-checkbox[data-tipo="${tipo}"]`).forEach(chk => {
+        chk.removeEventListener('change', handleCardSelect);
+        chk.addEventListener('change', handleCardSelect);
+    });
+    if (tipo === 'primanota') {
+        document.querySelectorAll(`.card-verified-checkbox[data-tipo="${tipo}"]`).forEach(chk => {
+            chk.removeEventListener('change', handleCardVerify);
+            chk.addEventListener('change', handleCardVerify);
+        });
+    }
+}
+
+function handleCardSelect(e) {
+    aggiornaPulsantiAzione();
+}
+
+function handleCardVerify(e) {
+    const idx = e.target.getAttribute('data-idx');
+    const checked = e.target.checked;
+    if (idx !== null && primaNota[idx]) {
+        primaNota[idx].verificato = checked;
+        salvaStatoFirebase();
+    }
+}
+
+// Override di aggiornaPulsantiAzione per supportare le card
+function aggiornaPulsantiAzione() {
+    if (!currentMonthModifiable) { document.querySelectorAll('.action-buttons').forEach(div => div.style.display = 'none'); return; }
+    let hasSelected = false;
+    if (currentScheda === 'primanota') {
+        const tableChecks = document.querySelectorAll('#primaNotaBody .row-check-prima:checked');
+        const cardChecks = document.querySelectorAll('.card-select-checkbox[data-tipo="primanota"]:checked');
+        hasSelected = tableChecks.length + cardChecks.length > 0;
+        document.getElementById('primaNotaActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllPrimaNota');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#primaNotaBody .row-check-prima');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    } else if (currentScheda === 'contanti') {
+        const tableChecks = document.querySelectorAll('#contantiBody .row-check-contanti:checked');
+        const cardChecks = document.querySelectorAll('.card-select-checkbox[data-tipo="contanti"]:checked');
+        hasSelected = tableChecks.length + cardChecks.length > 0;
+        document.getElementById('contantiActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllContanti');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#contantiBody .row-check-contanti');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    } else if (currentScheda === 'fornitori') {
+        const tableChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked');
+        const cardChecks = document.querySelectorAll('.card-select-checkbox[data-tipo="fornitori"]:checked');
+        hasSelected = tableChecks.length + cardChecks.length > 0;
+        document.getElementById('fornitoriActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllFornitori');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    } else if (currentScheda === 'assclienti') {
+        const tableChecks = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked');
+        const cardChecks = document.querySelectorAll('.card-select-checkbox[data-tipo="assclienti"]:checked');
+        hasSelected = tableChecks.length + cardChecks.length > 0;
+        document.getElementById('assClientiActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllAssClienti');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#assClientiBody .row-check-assclienti');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    } else if (currentScheda === 'pagaddt') {
+        const tableChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked');
+        const cardChecks = document.querySelectorAll('.card-select-checkbox[data-tipo="pagaddt"]:checked');
+        hasSelected = tableChecks.length + cardChecks.length > 0;
+        document.getElementById('pagaDdtActionButtons').style.display = hasSelected ? 'flex' : 'none';
+        const selectAll = document.getElementById('selectAllPagaDdt');
+        if (selectAll) {
+            const allChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt');
+            selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked);
+        }
+    }
+}
+async function eliminaSelezionati(tipo) {
+    if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return; }
+    let conferma = confirm(`Eliminare definitivamente le righe selezionate?`);
+    if (!conferma) return;
+    let indiciDaEliminare = new Set();
+    if (tipo === 'primanota') {
+        document.querySelectorAll('#primaNotaBody .row-check-prima:checked').forEach(chk => {
+            const idx = chk.closest('tr').rowIndex - 1;
+            indiciDaEliminare.add(idx);
+        });
+        document.querySelectorAll('.card-select-checkbox[data-tipo="primanota"]:checked').forEach(chk => {
+            const idx = parseInt(chk.getAttribute('data-idx'));
+            indiciDaEliminare.add(idx);
+        });
+        const nuovi = primaNota.filter((_, i) => !indiciDaEliminare.has(i));
+        primaNota = nuovi;
+    } else if (tipo === 'contanti') {
+        document.querySelectorAll('#contantiBody .row-check-contanti:checked').forEach(chk => {
+            const idx = chk.closest('tr').rowIndex - 1;
+            indiciDaEliminare.add(idx);
+        });
+        document.querySelectorAll('.card-select-checkbox[data-tipo="contanti"]:checked').forEach(chk => {
+            const idx = parseInt(chk.getAttribute('data-idx'));
+            indiciDaEliminare.add(idx);
+        });
+        const nuovi = contanti.filter((_, i) => !indiciDaEliminare.has(i));
+        contanti = nuovi;
+    } else if (tipo === 'fornitori') {
+        document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked').forEach(chk => {
+            const idx = chk.closest('tr').rowIndex - 1;
+            indiciDaEliminare.add(idx);
+        });
+        document.querySelectorAll('.card-select-checkbox[data-tipo="fornitori"]:checked').forEach(chk => {
+            const idx = parseInt(chk.getAttribute('data-idx'));
+            indiciDaEliminare.add(idx);
+        });
+        const nuovi = fattureFornitori.filter((_, i) => !indiciDaEliminare.has(i));
+        fattureFornitori = nuovi;
+        if (fattureFornitori.length === 0) nextFatturaId = 1;
+    } else if (tipo === 'assclienti') {
+        document.querySelectorAll('#assClientiBody .row-check-assclienti:checked').forEach(chk => {
+            const idx = chk.closest('tr').rowIndex - 1;
+            indiciDaEliminare.add(idx);
+        });
+        document.querySelectorAll('.card-select-checkbox[data-tipo="assclienti"]:checked').forEach(chk => {
+            const idx = parseInt(chk.getAttribute('data-idx'));
+            indiciDaEliminare.add(idx);
+        });
+        const nuovi = assClienti.filter((_, i) => !indiciDaEliminare.has(i));
+        assClienti = nuovi;
+    } else if (tipo === 'pagaddt') {
+        document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked').forEach(chk => {
+            const idx = chk.closest('tr').rowIndex - 1;
+            indiciDaEliminare.add(idx);
+        });
+        document.querySelectorAll('.card-select-checkbox[data-tipo="pagaddt"]:checked').forEach(chk => {
+            const idx = parseInt(chk.getAttribute('data-idx'));
+            indiciDaEliminare.add(idx);
+        });
+        const nuovi = pagaDdt.filter((_, i) => !indiciDaEliminare.has(i));
+        pagaDdt = nuovi;
+    }
+    ordinaTuttiGliArray();
+    await salvaStatoFirebase();
+    aggiornaTabelle();
+    showToast("Elementi eliminati");
+}
+
+async function salvaModificheSelezionate(tipo) {
+    if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return; }
+    if (window.innerWidth <= 768) {
+        showToast("La modifica diretta su mobile non è ancora supportata. Usa il PC per modificare.", true);
+        return;
+    }
+    const checks = document.querySelectorAll(`#${getBodyId(tipo)} .row-check-${getClassPrefix(tipo)}:checked`);
+    for (let i = 0; i < checks.length; i++) {
+        const idx = Array.from(checks[i].parentNode.parentNode.parentNode.children).indexOf(checks[i].parentNode.parentNode);
+        await saveEditedRowWithMove(tipo, idx);
+    }
+}
+
 function makeRowEditable(tipo, idx, row) {
     if (!currentMonthModifiable) return;
     if (tipo === 'primanota') {
@@ -1236,166 +1622,215 @@ function makeRowEditable(tipo, idx, row) {
         f.addEventListener('input', () => marcaModificheNonSalvate());
     });
 }
-function aggiornaPulsantiAzione() {
-    if (!currentMonthModifiable) { document.querySelectorAll('.action-buttons').forEach(div => div.style.display = 'none'); return; }
-    let hasSelected = false;
-    if (currentScheda === 'primanota') {
-        hasSelected = document.querySelectorAll('#primaNotaBody .row-check-prima:checked').length > 0;
-        document.getElementById('primaNotaActionButtons').style.display = hasSelected ? 'flex' : 'none';
-        const selectAll = document.getElementById('selectAllPrimaNota');
-        if (selectAll) { const allChecks = document.querySelectorAll('#primaNotaBody .row-check-prima'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
-    } else if (currentScheda === 'contanti') {
-        hasSelected = document.querySelectorAll('#contantiBody .row-check-contanti:checked').length > 0;
-        document.getElementById('contantiActionButtons').style.display = hasSelected ? 'flex' : 'none';
-        const selectAll = document.getElementById('selectAllContanti');
-        if (selectAll) { const allChecks = document.querySelectorAll('#contantiBody .row-check-contanti'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
-    } else if (currentScheda === 'fornitori') {
-        hasSelected = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked').length > 0;
-        document.getElementById('fornitoriActionButtons').style.display = hasSelected ? 'flex' : 'none';
-        const selectAll = document.getElementById('selectAllFornitori');
-        if (selectAll) { const allChecks = document.querySelectorAll('#fornitoriBody .row-check-fornitori'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
-    } else if (currentScheda === 'assclienti') {
-        hasSelected = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked').length > 0;
-        document.getElementById('assClientiActionButtons').style.display = hasSelected ? 'flex' : 'none';
-        const selectAll = document.getElementById('selectAllAssClienti');
-        if (selectAll) { const allChecks = document.querySelectorAll('#assClientiBody .row-check-assclienti'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
-    } else if (currentScheda === 'pagaddt') {
-        hasSelected = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked').length > 0;
-        document.getElementById('pagaDdtActionButtons').style.display = hasSelected ? 'flex' : 'none';
-        const selectAll = document.getElementById('selectAllPagaDdt');
-        if (selectAll) { const allChecks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt'); selectAll.checked = allChecks.length > 0 && Array.from(allChecks).every(c => c.checked); }
-    }
-}
-function setScheda(s) {
-    currentScheda = s;
-    document.getElementById('tabellaPrimaNotaContainer').style.display = s === 'primanota' ? 'block' : 'none';
-    document.getElementById('tabellaContantiContainer').style.display = s === 'contanti' ? 'block' : 'none';
-    document.getElementById('tabellaFornitoriContainer').style.display = s === 'fornitori' ? 'block' : 'none';
-    document.getElementById('tabellaAssClientiContainer').style.display = s === 'assclienti' ? 'block' : 'none';
-    document.getElementById('tabellaPagaDdtContainer').style.display = s === 'pagaddt' ? 'block' : 'none';
-    document.getElementById('toolbarPrimaNota').classList.toggle('active', s === 'primanota');
-    document.getElementById('toolbarContanti').classList.toggle('active', s === 'contanti');
-    document.getElementById('toolbarFornitori').classList.toggle('active', s === 'fornitori');
-    document.getElementById('toolbarAssClienti').classList.toggle('active', s === 'assclienti');
-    document.getElementById('toolbarPagaDdt').classList.toggle('active', s === 'pagaddt');
-    aggiornaForm();
-    aggiornaTabelle();
-}
-function aggiornaForm() {
-    const fa = document.getElementById('formArea');
-    if (currentScheda === 'primanota') {
-        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
-        setupImportField('formAvere'); setupImportField('formDare');
-    } else if (currentScheda === 'contanti') {
-        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>`;
-        setupImportField('formImportoContanti');
-    } else if (currentScheda === 'fornitori') {
-        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
-    } else if (currentScheda === 'assclienti') {
-        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div></div><div class="form-row"><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div><div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div></div><div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>`;
-        setupImportField('formImportoAss');
-    } else if (currentScheda === 'pagaddt') {
-        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div><div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div></div><div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div></div>`;
-        setupImportField('formImportoPaga');
-    }
-    const formInputs = fa.querySelectorAll('input, select, textarea');
-    formInputs.forEach(input => {
-        if (!input.hasAttribute('data-listener')) {
-            input.setAttribute('data-listener', 'true');
-            input.addEventListener('input', () => marcaModificheNonSalvate());
-            input.addEventListener('change', () => marcaModificheNonSalvate());
+
+async function saveEditedRowWithMove(tipo, idx) {
+    let newRiga = null; let dataRif = null;
+    if (tipo === 'primanota') {
+        const row = document.querySelector(`#primaNotaBody tr:nth-child(${idx+1})`);
+        if (row) {
+            const newData = row.querySelector('.edit-data')?.value;
+            const newDescrizione = row.querySelector('.edit-descrizione')?.value;
+            const newAvere = parseNumber(row.querySelector('.edit-avere')?.value);
+            const newDare = parseNumber(row.querySelector('.edit-dare')?.value);
+            const newVerificato = row.querySelector('.edit-verificato')?.checked;
+            if (newAvere > 0 && newDare > 0) { showToast("Avere e Dare non possono essere entrambi >0", true); return; }
+            newRiga = { data: newData, descrizione: newDescrizione, avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false };
+            dataRif = newData;
         }
-    });
-    pulisciForm();
-    if (!currentMonthModifiable) {
-        formInputs.forEach(inp => inp.disabled = true);
-        document.getElementById('btnMemorizza').disabled = true;
+    } else if (tipo === 'assclienti') {
+        const row = document.querySelector(`#assClientiBody tr:nth-child(${idx+1})`);
+        if (row) {
+            const newDataIns = row.querySelector('.edit-dataIns')?.value || getTodayDateISO();
+            const newDescrizione = row.querySelector('.edit-descrizione')?.value || '';
+            const newNome = row.querySelector('.edit-nome')?.value || '';
+            const newImporto = parseNumber(row.querySelector('.edit-importo')?.value) || null;
+            const newNumDoc = row.querySelector('.edit-numDoc')?.value || '';
+            const newDataDoc = row.querySelector('.edit-dataDoc')?.value || '';
+            newRiga = { dataIns: newDataIns, descrizione: newDescrizione, nome: newNome, importo: newImporto, numDoc: newNumDoc, dataDoc: newDataDoc };
+            dataRif = newDataDoc || newDataIns;
+        }
+    } else if (tipo === 'pagaddt') {
+        const row = document.querySelector(`#pagaDdtBody tr:nth-child(${idx+1})`);
+        if (row) {
+            const newNome = row.querySelector('.edit-nome')?.value || '';
+            const newNumDoc = row.querySelector('.edit-numDoc')?.value || '';
+            const newData = row.querySelector('.edit-data')?.value;
+            const newImporto = parseNumber(row.querySelector('.edit-importo')?.value) || null;
+            newRiga = { nome: newNome, numDoc: newNumDoc, data: newData, importo: newImporto };
+            dataRif = newData;
+        }
+    } else { return; }
+    if (!newRiga) return;
+    const [year, month] = dataRif.split('-');
+    const targetMonth = parseInt(month) - 1, targetYear = parseInt(year);
+    if (!await verificaDataInserimento(dataRif, targetYear, targetMonth)) return;
+    const { spostato, annullato } = await verificaESpostaRigaSeNecessario(newRiga, tipo, dataRif, 'modifica');
+    if (annullato) return;
+    if (!spostato) {
+        if (tipo === 'primanota') primaNota[idx] = newRiga;
+        else if (tipo === 'assclienti') assClienti[idx] = newRiga;
+        else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
+        ordinaTuttiGliArray();
+        await salvaStatoFirebase();
+        aggiornaTabelle();
+        showToast("✅ Modifiche salvate!");
     } else {
-        formInputs.forEach(inp => inp.disabled = false);
-        document.getElementById('btnMemorizza').disabled = false;
+        await caricaStatoFirebase();
+        aggiornaTabelle();
     }
 }
-function pulisciForm() {
+
+function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
+function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
+
+function mostraModaleConferma(messaggio) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>⚠️ MODIFICHE NON SALVATE</h3><p>${messaggio}</p><p>Vuoi salvare prima di proseguire?</p><div class="modal-buttons"><button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button><button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button><button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button></div></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
+        document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
+        document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
+    });
+}
+
+// ESPORTAZIONI
+function esportaReportRagioniere() {
+    const mn = mesiLista[currentMonth]; const anno = currentYear;
+    const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    const saldo = saldoIniziale;
+    const saldoFinale = saldo + ta - td;
+    const w = window.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${formatDateVisual(r.data)}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
+    w.document.close();
+}
+function esportaPDFMese() {
+    const w = window.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Mese ${mesiLista[currentMonth]} ${currentYear}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Mese ${mesiLista[currentMonth]} ${currentYear}</h1><h2>Prima Nota</h2>${generaTabellaHTML(primaNota,['Data','Descrizione','Avere','Dare'])}<h2>Contanti</h2>${generaTabellaHTML(contanti,['Data','Descrizione','Incasso'])}<h2>Fornitori</h2>${generaTabellaHTML(fattureFornitori,['Data','Fornitore','N.Fattura'])}<h2>ASS_CONT_CLIENTI</h2>${generaTabellaHTML(assClienti,['Data Ins.','Descrizione','Nome','Importo','N° Doc.','Data Doc.'])}<h2>PAGA_DDT_CLIENTI</h2>${generaTabellaHTML(pagaDdt,['Nome','N° Fat/DDT','Data','Importo'])}</body></html>`);
+    w.document.close();
+}
+function generaTabellaHTML(data, headers) {
+    if (!data.length) return "<p>Nessun dato</p>";
+    let html = "<table class='tabella'><thead><tr>";
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += "</tr></thead><tbody>";
+    data.forEach(row => {
+        html += "<tr>";
+        headers.forEach(h => {
+            let key = h.toLowerCase().replace(/ /g,'').replace(/\./g,'').replace(/è/g,'e');
+            let val = row[key] || row[h.toLowerCase().replace(/ /g,'')] || '';
+            if (key === 'data') val = formatDateVisual(val);
+            else if (key === 'datains') val = formatDateVisual(val);
+            else if (key === 'datadoc') val = formatDateVisual(val);
+            if (h.includes('€')) val = formatNumber(val) + ' €';
+            html += `<td>${val}</td>`;
+        });
+        html += "</tr>";
+    });
+    html += "</tbody></table>";
+    return html;
+}
+async function esportaReportAnno() {
+    const anno = currentYear;
+    const snapshot = await db.collection('contabilita').where('anno', '==', anno).get();
+    if (snapshot.empty) { showToast("Nessun dato per l'anno selezionato", true); return; }
+    let html = `<html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:monospace;padding:20px;} .mese{margin-top:30px;border-top:2px solid #000;}</style></head><body><h1>Report Annuale ${anno}</h1>`;
+    const mesiOrdinati = [];
+    snapshot.forEach(doc => { const data = doc.data(); mesiOrdinati.push({ mese: data.mese, data: data }); });
+    mesiOrdinati.sort((a,b) => a.mese - b.mese);
+    for (let m of mesiOrdinati) {
+        const d = m.data;
+        const saldoIniz = d.saldoIniziale || 0;
+        const prima = d.primaNota || [];
+        const ta = prima.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        const td = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        const saldoFinale = saldoIniz + ta - td;
+        html += `<div class="mese"><h2>${mesiLista[d.mese]} ${anno}</h2><p>Saldo iniziale: ${formatNumber(saldoIniz)} €</p><p>Totale Avere: ${formatNumber(ta)} €</p><p>Totale Dare: ${formatNumber(td)} €</p><p>Saldo finale: ${formatNumber(saldoFinale)} €</p></div>`;
+    }
+    html += `</body></html>`;
+    const w = window.open();
+    w.document.write(html);
+    w.document.close();
+}
+function esportaCSV(perAnno) {
+    if (perAnno) { showToast("Esportazione CSV annuale non completamente implementata in demo", true); return; }
+    let dataToExport = [];
+    if (currentScheda === 'primanota') dataToExport = primaNota.map(r => ({ ...r, tipo: 'PrimaNota', data: formatDateVisual(r.data) }));
+    else if (currentScheda === 'contanti') dataToExport = contanti.map(r => ({ ...r, tipo: 'Contanti', data: formatDateVisual(r.data) }));
+    else if (currentScheda === 'fornitori') dataToExport = fattureFornitori.map(r => ({ ...r, tipo: 'Fornitori', data: formatDateVisual(r.data) }));
+    else if (currentScheda === 'assclienti') dataToExport = assClienti.map(r => ({ ...r, tipo: 'AssClienti', dataIns: formatDateVisual(r.dataIns), dataDoc: formatDateVisual(r.dataDoc) }));
+    else if (currentScheda === 'pagaddt') dataToExport = pagaDdt.map(r => ({ ...r, tipo: 'PagaDdt', data: formatDateVisual(r.data) }));
+    if (dataToExport.length === 0) { showToast("Nessun dato da esportare", true); return; }
+    const headers = Object.keys(dataToExport[0]);
+    const csvRows = [headers.join(',')];
+    for (const row of dataToExport) {
+        const values = headers.map(header => `"${String(row[header] || '').replace(/"/g, '""')}"`);
+        csvRows.push(values.join(','));
+    }
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${currentScheda}_${currentYear}_${currentMonth}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showToast("CSV esportato");
+}
+
+async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
+    if (!dataYMD) return { spostato: false, annullato: false };
+    const [annoStr, meseStr] = dataYMD.split('-');
+    const annoDest = parseInt(annoStr);
+    const meseDest = parseInt(meseStr) - 1;
+    if (isNaN(annoDest) || isNaN(meseDest)) return { spostato: false, annullato: false };
+    if (annoDest === currentYear && meseDest === currentMonth) return { spostato: false, annullato: false };
     const today = getTodayDateObject();
-    const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
-    if (currentScheda === 'primanota') {
-        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = defaultDate;
-        if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
-        if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
-        if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
-    } else if (currentScheda === 'contanti') {
-        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = defaultDate;
-        if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
-        if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = '';
-    } else if (currentScheda === 'fornitori') {
-        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = defaultDate;
-        if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
-        if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
-    } else if (currentScheda === 'assclienti') {
-        if (document.getElementById('formDescrizioneAss')) document.getElementById('formDescrizioneAss').value = '';
-        if (document.getElementById('formNomeAss')) document.getElementById('formNomeAss').value = '';
-        if (document.getElementById('formImportoAss')) document.getElementById('formImportoAss').value = '';
-        if (document.getElementById('formNumDocAss')) document.getElementById('formNumDocAss').value = '';
-        if (document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = getTodayDateISO();
-    } else if (currentScheda === 'pagaddt') {
-        if (document.getElementById('formNomePaga')) document.getElementById('formNomePaga').value = '';
-        if (document.getElementById('formNumDocPaga')) document.getElementById('formNumDocPaga').value = '';
-        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = defaultDate;
-        if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
+    const isFuture = (annoDest > today.getFullYear()) || (annoDest === today.getFullYear() && meseDest > today.getMonth());
+    const isLastDay = isLastDayOfMonth(today);
+    const isNextMonth = (annoDest === today.getFullYear() && meseDest === today.getMonth() + 1);
+    const skipConfirm = (isLastDay && isNextMonth) || isFuture;
+    let conferma = true;
+    if (!skipConfirm) conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire?`);
+    if (!conferma) return { spostato: false, annullato: true };
+    const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
+    const docSnap = await docRef.get();
+    let targetData = {};
+    if (docSnap.exists) targetData = docSnap.data();
+    else {
+        let annoPrec = annoDest, mesePrec = meseDest - 1;
+        if (mesePrec < 0) { mesePrec = 11; annoPrec = annoDest - 1; }
+        const saldoPrec = await calcolaSaldoFinaleMeseSoloPrimaNota(annoPrec, mesePrec);
+        targetData = { anno: annoDest, mese: meseDest, saldoIniziale: saldoPrec, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() };
     }
+    if (tipo === 'primanota') { targetData.primaNota = targetData.primaNota || []; targetData.primaNota.push(riga); targetData.primaNota = ordinaArrayPerData(targetData.primaNota, 'data'); }
+    else if (tipo === 'contanti') { targetData.contanti = targetData.contanti || []; targetData.contanti.push(riga); targetData.contanti = ordinaArrayPerData(targetData.contanti, 'data'); }
+    else if (tipo === 'fornitori') { targetData.fattureFornitori = targetData.fattureFornitori || []; targetData.fattureFornitori.push(riga); targetData.fattureFornitori = ordinaArrayPerData(targetData.fattureFornitori, 'data'); }
+    else if (tipo === 'assclienti') { targetData.assClienti = targetData.assClienti || []; targetData.assClienti.push(riga); targetData.assClienti = targetData.assClienti.slice().sort((a,b) => { const da = a.dataDoc ? dateFromISO(a.dataDoc) : dateFromISO(a.dataIns); const db = b.dataDoc ? dateFromISO(b.dataDoc) : dateFromISO(b.dataIns); if (!da && !db) return 0; if (!da) return 1; if (!db) return -1; return da - db; }); }
+    else if (tipo === 'pagaddt') { targetData.pagaDdt = targetData.pagaDdt || []; targetData.pagaDdt.push(riga); targetData.pagaDdt = ordinaArrayPerData(targetData.pagaDdt, 'data'); }
+    await docRef.set(targetData);
+    if (tipo === 'primanota') { const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) primaNota.splice(idx, 1); }
+    else if (tipo === 'contanti') { const idx = contanti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) contanti.splice(idx, 1); }
+    else if (tipo === 'fornitori') { const idx = fattureFornitori.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) fattureFornitori.splice(idx, 1); }
+    else if (tipo === 'assclienti') { const idx = assClienti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) assClienti.splice(idx, 1); }
+    else if (tipo === 'pagaddt') { const idx = pagaDdt.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) pagaDdt.splice(idx, 1); }
+    await salvaStatoFirebase();
+    currentYear = annoDest;
+    currentMonth = meseDest;
+    await caricaStatoFirebase();
+    await popolaAnniMeseDinamici();
+    document.getElementById('annoSelect').value = currentYear;
+    document.getElementById('meseSelect').value = currentMonth;
+    aggiornaTabelle();
+    aggiornaRiepilogoHeader();
+    aggiornaDataFormAlPrimoMese();
+    showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
+    setTimeout(() => evidenziaRigaPerValori(tipo, riga), 300);
+    return { spostato: true, annullato: false };
 }
-function evidenziaRigaPerValori(tipo, riga) {
-    let tableBodyId = '';
-    if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
-    else if (tipo === 'contanti') tableBodyId = 'contantiBody';
-    else if (tipo === 'fornitori') tableBodyId = 'fornitoriBody';
-    else if (tipo === 'assclienti') tableBodyId = 'assClientiBody';
-    else if (tipo === 'pagaddt') tableBodyId = 'pagaDdtBody';
-    const tbody = document.getElementById(tableBodyId);
-    if (!tbody) return;
-    for (let i = 0; i < tbody.rows.length; i++) {
-        const row = tbody.rows[i];
-        let match = false;
-        if (tipo === 'primanota') {
-            const dataCell = row.cells[2]?.innerText;
-            const descCell = row.cells[3]?.innerText;
-            const avereCell = row.cells[4]?.innerText.replace(' €', '').trim();
-            const dareCell = row.cells[5]?.innerText.replace(' €', '').trim();
-            if (dataCell === formatDateVisual(riga.data) && descCell === riga.descrizione && (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) && (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === ''))) match = true;
-        } else if (tipo === 'contanti') {
-            const dataCell = row.cells[2]?.innerText;
-            const descCell = row.cells[3]?.innerText;
-            const impCell = row.cells[4]?.innerText.replace(' €', '').trim();
-            if (dataCell === formatDateVisual(riga.data) && descCell === riga.descrizione && impCell === formatNumber(riga.importo)) match = true;
-        } else if (tipo === 'fornitori') {
-            const dataCell = row.cells[2]?.innerText;
-            const fornitoreCell = row.cells[3]?.innerText;
-            const numFatCell = row.cells[4]?.innerText;
-            if (dataCell === formatDateVisual(riga.data) && fornitoreCell === riga.fornitore && numFatCell === riga.numeroFattura) match = true;
-        } else if (tipo === 'assclienti') {
-            const nomeCell = row.cells[3]?.innerText;
-            const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
-            const numDocCell = row.cells[5]?.innerText;
-            if (nomeCell === riga.nome && importoCell === formatNumber(riga.importo) && numDocCell === riga.numDoc) match = true;
-        } else if (tipo === 'pagaddt') {
-            const nomeCell = row.cells[1]?.innerText;
-            const numDocCell = row.cells[2]?.innerText;
-            const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
-            if (nomeCell === riga.nome && numDocCell === riga.numDoc && importoCell === formatNumber(riga.importo)) match = true;
-        }
-        if (match) {
-            row.classList.add('highlight-row');
-            setTimeout(() => row.classList.remove('highlight-row'), 5000);
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            break;
-        }
-    }
-}
-async function inserisciRigaDaDati(tipo, dati) {
-    if (!currentMonthModifiable) {
-        showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true);
-        return false;
-    }
+
+async function inserisciRigaDaDati(tipo, dati) { /* identica all'originale - mantenere */
+    if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return false; }
     if (tipo === 'primanota') {
         const { data, descrizione, avere, dare } = dati;
         if (!descrizione) { showToast("Inserisci descrizione", true); return false; }
@@ -1517,6 +1952,7 @@ async function inserisciRigaDaDati(tipo, dati) {
     }
     return false;
 }
+
 async function memorizzaNuovo() {
     if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return false; }
     if (currentScheda === 'primanota') {
@@ -1551,228 +1987,53 @@ async function memorizzaNuovo() {
     }
     return false;
 }
-async function eliminaSelezionati(tipo) {
-    if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return; }
-    let conferma = confirm(`Eliminare definitivamente le righe selezionate?`);
-    if (!conferma) return;
-    if (tipo === 'primanota') { const checks = document.querySelectorAll('#primaNotaBody .row-check-prima:checked'); const nuovi = primaNota.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); primaNota = nuovi; }
-    else if (tipo === 'contanti') { const checks = document.querySelectorAll('#contantiBody .row-check-contanti:checked'); const nuovi = contanti.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); contanti = nuovi; }
-    else if (tipo === 'fornitori') { const checks = document.querySelectorAll('#fornitoriBody .row-check-fornitori:checked'); const nuovi = fattureFornitori.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); fattureFornitori = nuovi; if (fattureFornitori.length === 0) nextFatturaId = 1; }
-    else if (tipo === 'assclienti') { const checks = document.querySelectorAll('#assClientiBody .row-check-assclienti:checked'); const nuovi = assClienti.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); assClienti = nuovi; }
-    else if (tipo === 'pagaddt') { const checks = document.querySelectorAll('#pagaDdtBody .row-check-pagaddt:checked'); const nuovi = pagaDdt.filter((_, i) => !Array.from(checks).some(c => c.parentNode.parentNode.rowIndex-1 === i)); pagaDdt = nuovi; }
-    ordinaTuttiGliArray();
-    await salvaStatoFirebase();
-    aggiornaTabelle();
-    showToast("Elementi eliminati");
-}
-async function salvaModificheSelezionate(tipo) {
-    if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return; }
-    const checks = document.querySelectorAll(`#${getBodyId(tipo)} .row-check-${getClassPrefix(tipo)}:checked`);
-    for (let i = 0; i < checks.length; i++) {
-        const idx = Array.from(checks[i].parentNode.parentNode.parentNode.children).indexOf(checks[i].parentNode.parentNode);
-        await saveEditedRowWithMove(tipo, idx);
-    }
-}
-async function saveEditedRowWithMove(tipo, idx) {
-    let newRiga = null; let dataRif = null;
-    if (tipo === 'primanota') {
-        const row = document.querySelector(`#primaNotaBody tr:nth-child(${idx+1})`);
-        if (row) {
-            const newData = row.querySelector('.edit-data')?.value;
-            const newDescrizione = row.querySelector('.edit-descrizione')?.value;
-            const newAvere = parseNumber(row.querySelector('.edit-avere')?.value);
-            const newDare = parseNumber(row.querySelector('.edit-dare')?.value);
-            const newVerificato = row.querySelector('.edit-verificato')?.checked;
-            if (newAvere > 0 && newDare > 0) { showToast("Avere e Dare non possono essere entrambi >0", true); return; }
-            newRiga = { data: newData, descrizione: newDescrizione, avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false };
-            dataRif = newData;
+
+function evidenziaRigaPerValori(tipo, riga) {
+    let tableBodyId = '';
+    if (tipo === 'primanota') tableBodyId = 'primaNotaBody';
+    else if (tipo === 'contanti') tableBodyId = 'contantiBody';
+    else if (tipo === 'fornitori') tableBodyId = 'fornitoriBody';
+    else if (tipo === 'assclienti') tableBodyId = 'assClientiBody';
+    else if (tipo === 'pagaddt') tableBodyId = 'pagaDdtBody';
+    const tbody = document.getElementById(tableBodyId);
+    if (!tbody) return;
+    for (let i = 0; i < tbody.rows.length; i++) {
+        const row = tbody.rows[i];
+        let match = false;
+        if (tipo === 'primanota') {
+            const dataCell = row.cells[2]?.innerText;
+            const descCell = row.cells[3]?.innerText;
+            const avereCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            const dareCell = row.cells[5]?.innerText.replace(' €', '').trim();
+            if (dataCell === formatDateVisual(riga.data) && descCell === riga.descrizione && (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) && (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === ''))) match = true;
+        } else if (tipo === 'contanti') {
+            const dataCell = row.cells[2]?.innerText;
+            const descCell = row.cells[3]?.innerText;
+            const impCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            if (dataCell === formatDateVisual(riga.data) && descCell === riga.descrizione && impCell === formatNumber(riga.importo)) match = true;
+        } else if (tipo === 'fornitori') {
+            const dataCell = row.cells[2]?.innerText;
+            const fornitoreCell = row.cells[3]?.innerText;
+            const numFatCell = row.cells[4]?.innerText;
+            if (dataCell === formatDateVisual(riga.data) && fornitoreCell === riga.fornitore && numFatCell === riga.numeroFattura) match = true;
+        } else if (tipo === 'assclienti') {
+            const nomeCell = row.cells[3]?.innerText;
+            const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            const numDocCell = row.cells[5]?.innerText;
+            if (nomeCell === riga.nome && importoCell === formatNumber(riga.importo) && numDocCell === riga.numDoc) match = true;
+        } else if (tipo === 'pagaddt') {
+            const nomeCell = row.cells[1]?.innerText;
+            const numDocCell = row.cells[2]?.innerText;
+            const importoCell = row.cells[4]?.innerText.replace(' €', '').trim();
+            if (nomeCell === riga.nome && numDocCell === riga.numDoc && importoCell === formatNumber(riga.importo)) match = true;
         }
-    } else if (tipo === 'assclienti') {
-        const row = document.querySelector(`#assClientiBody tr:nth-child(${idx+1})`);
-        if (row) {
-            const newDataIns = row.querySelector('.edit-dataIns')?.value || getTodayDateISO();
-            const newDescrizione = row.querySelector('.edit-descrizione')?.value || '';
-            const newNome = row.querySelector('.edit-nome')?.value || '';
-            const newImporto = parseNumber(row.querySelector('.edit-importo')?.value) || null;
-            const newNumDoc = row.querySelector('.edit-numDoc')?.value || '';
-            const newDataDoc = row.querySelector('.edit-dataDoc')?.value || '';
-            newRiga = { dataIns: newDataIns, descrizione: newDescrizione, nome: newNome, importo: newImporto, numDoc: newNumDoc, dataDoc: newDataDoc };
-            dataRif = newDataDoc || newDataIns;
+        if (match) {
+            row.classList.add('highlight-row');
+            setTimeout(() => row.classList.remove('highlight-row'), 5000);
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            break;
         }
-    } else if (tipo === 'pagaddt') {
-        const row = document.querySelector(`#pagaDdtBody tr:nth-child(${idx+1})`);
-        if (row) {
-            const newNome = row.querySelector('.edit-nome')?.value || '';
-            const newNumDoc = row.querySelector('.edit-numDoc')?.value || '';
-            const newData = row.querySelector('.edit-data')?.value;
-            const newImporto = parseNumber(row.querySelector('.edit-importo')?.value) || null;
-            newRiga = { nome: newNome, numDoc: newNumDoc, data: newData, importo: newImporto };
-            dataRif = newData;
-        }
-    } else { return; }
-    if (!newRiga) return;
-    const [year, month] = dataRif.split('-');
-    const targetMonth = parseInt(month) - 1, targetYear = parseInt(year);
-    if (!await verificaDataInserimento(dataRif, targetYear, targetMonth)) return;
-    const { spostato, annullato } = await verificaESpostaRigaSeNecessario(newRiga, tipo, dataRif, 'modifica');
-    if (annullato) return;
-    if (!spostato) {
-        if (tipo === 'primanota') primaNota[idx] = newRiga;
-        else if (tipo === 'assclienti') assClienti[idx] = newRiga;
-        else if (tipo === 'pagaddt') pagaDdt[idx] = newRiga;
-        ordinaTuttiGliArray();
-        await salvaStatoFirebase();
-        aggiornaTabelle();
-        showToast("✅ Modifiche salvate!");
-    } else {
-        await caricaStatoFirebase();
-        aggiornaTabelle();
     }
-}
-function getBodyId(tipo) { const map = { primanota: 'primaNotaBody', contanti: 'contantiBody', fornitori: 'fornitoriBody', assclienti: 'assClientiBody', pagaddt: 'pagaDdtBody' }; return map[tipo]; }
-function getClassPrefix(tipo) { const map = { primanota: 'prima', contanti: 'contanti', fornitori: 'fornitori', assclienti: 'assclienti', pagaddt: 'pagaddt' }; return map[tipo]; }
-function mostraModaleConferma(messaggio) {
-    return new Promise((resolve) => {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>⚠️ MODIFICHE NON SALVATE</h3><p>${messaggio}</p><p>Vuoi salvare prima di proseguire?</p><div class="modal-buttons"><button id="modalSave" class="btn-confirm-save">💾 SALVA E CONTINUA</button><button id="modalDiscard" class="btn-confirm-discard">🗑 NON SALVARE</button><button id="modalCancel" class="btn-confirm-cancel">❌ ANNULLA</button></div></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSave').onclick = async () => { modal.remove(); await salvaStatoFirebase(); resolve(true); };
-        document.getElementById('modalDiscard').onclick = () => { modal.remove(); resetModificheNonSalvate(); resolve(true); };
-        document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
-    });
-}
-// ESPORTAZIONI
-function esportaReportRagioniere() {
-    const mn = mesiLista[currentMonth]; const anno = currentYear;
-    const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-    const td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-    const saldo = saldoIniziale;
-    const saldoFinale = saldo + ta - td;
-    const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Ragioniere ${mn} ${anno}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Ragioniere - ${mn} ${anno}</h1><p><strong>Saldo iniziale:</strong> ${formatNumber(saldo)} €</p></table><thead><tr><th>Data</th><th>Descrizione</th><th>Avere (€)</th><th>Dare (€)</th></tr></thead><tbody>${primaNota.map(r => `<tr><td>${formatDateVisual(r.data)}</td><td>${r.descrizione}</td><td class="text-right">${r.avere ? formatNumber(r.avere) : '-'}</td><td class="text-right">${r.dare ? formatNumber(r.dare) : '-'}</td></tr>`).join('')}</tbody></table><p><strong>Totale Avere:</strong> ${formatNumber(ta)} €</p><p><strong>Totale Dare:</strong> ${formatNumber(td)} €</p><p><strong>Saldo finale:</strong> ${formatNumber(saldoFinale)} €</p></body></html>`);
-    w.document.close();
-}
-function esportaPDFMese() {
-    const w = window.open();
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Mese ${mesiLista[currentMonth]} ${currentYear}</title><style>body{font-family:monospace;padding:20px;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:8px;text-align:left}</style></head><body><h1>Report Mese ${mesiLista[currentMonth]} ${currentYear}</h1><h2>Prima Nota</h2>${generaTabellaHTML(primaNota,['Data','Descrizione','Avere','Dare'])}<h2>Contanti</h2>${generaTabellaHTML(contanti,['Data','Descrizione','Incasso'])}<h2>Fornitori</h2>${generaTabellaHTML(fattureFornitori,['Data','Fornitore','N.Fattura'])}<h2>ASS_CONT_CLIENTI</h2>${generaTabellaHTML(assClienti,['Data Ins.','Descrizione','Nome','Importo','N° Doc.','Data Doc.'])}<h2>PAGA_DDT_CLIENTI</h2>${generaTabellaHTML(pagaDdt,['Nome','N° Fat/DDT','Data','Importo'])}</body></html>`);
-    w.document.close();
-}
-function generaTabellaHTML(data, headers) {
-    if (!data.length) return "<p>Nessun dato</p>";
-    let html = "<table class='tabella'><thead><tr>";
-    headers.forEach(h => html += `<th>${h}</th>`);
-    html += "</tr></thead><tbody>";
-    data.forEach(row => {
-        html += "<tr>";
-        headers.forEach(h => {
-            let key = h.toLowerCase().replace(/ /g,'').replace(/\./g,'').replace(/è/g,'e');
-            let val = row[key] || row[h.toLowerCase().replace(/ /g,'')] || '';
-            if (key === 'data') val = formatDateVisual(val);
-            else if (key === 'datains') val = formatDateVisual(val);
-            else if (key === 'datadoc') val = formatDateVisual(val);
-            if (h.includes('€')) val = formatNumber(val) + ' €';
-            html += `<td>${val}</td>`;
-        });
-        html += "</tr>";
-    });
-    html += "</tbody></table>";
-    return html;
-}
-async function esportaReportAnno() {
-    const anno = currentYear;
-    const snapshot = await db.collection('contabilita').where('anno', '==', anno).get();
-    if (snapshot.empty) { showToast("Nessun dato per l'anno selezionato", true); return; }
-    let html = `<html><head><meta charset="UTF-8"><title>Report Annuale ${anno}</title><style>body{font-family:monospace;padding:20px;} .mese{margin-top:30px;border-top:2px solid #000;}</style></head><body><h1>Report Annuale ${anno}</h1>`;
-    const mesiOrdinati = [];
-    snapshot.forEach(doc => { const data = doc.data(); mesiOrdinati.push({ mese: data.mese, data: data }); });
-    mesiOrdinati.sort((a,b) => a.mese - b.mese);
-    for (let m of mesiOrdinati) {
-        const d = m.data;
-        const saldoIniz = d.saldoIniziale || 0;
-        const prima = d.primaNota || [];
-        const ta = prima.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-        const td = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-        const saldoFinale = saldoIniz + ta - td;
-        html += `<div class="mese"><h2>${mesiLista[d.mese]} ${anno}</h2><p>Saldo iniziale: ${formatNumber(saldoIniz)} €</p><p>Totale Avere: ${formatNumber(ta)} €</p><p>Totale Dare: ${formatNumber(td)} €</p><p>Saldo finale: ${formatNumber(saldoFinale)} €</p></div>`;
-    }
-    html += `</body></html>`;
-    const w = window.open();
-    w.document.write(html);
-    w.document.close();
-}
-function esportaCSV(perAnno) {
-    if (perAnno) { showToast("Esportazione CSV annuale non completamente implementata in demo", true); return; }
-    let dataToExport = [];
-    if (currentScheda === 'primanota') dataToExport = primaNota.map(r => ({ ...r, tipo: 'PrimaNota', data: formatDateVisual(r.data) }));
-    else if (currentScheda === 'contanti') dataToExport = contanti.map(r => ({ ...r, tipo: 'Contanti', data: formatDateVisual(r.data) }));
-    else if (currentScheda === 'fornitori') dataToExport = fattureFornitori.map(r => ({ ...r, tipo: 'Fornitori', data: formatDateVisual(r.data) }));
-    else if (currentScheda === 'assclienti') dataToExport = assClienti.map(r => ({ ...r, tipo: 'AssClienti', dataIns: formatDateVisual(r.dataIns), dataDoc: formatDateVisual(r.dataDoc) }));
-    else if (currentScheda === 'pagaddt') dataToExport = pagaDdt.map(r => ({ ...r, tipo: 'PagaDdt', data: formatDateVisual(r.data) }));
-    if (dataToExport.length === 0) { showToast("Nessun dato da esportare", true); return; }
-    const headers = Object.keys(dataToExport[0]);
-    const csvRows = [headers.join(',')];
-    for (const row of dataToExport) {
-        const values = headers.map(header => `"${String(row[header] || '').replace(/"/g, '""')}"`);
-        csvRows.push(values.join(','));
-    }
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${currentScheda}_${currentYear}_${currentMonth}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    showToast("CSV esportato");
-}
-async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
-    if (!dataYMD) return { spostato: false, annullato: false };
-    const [annoStr, meseStr] = dataYMD.split('-');
-    const annoDest = parseInt(annoStr);
-    const meseDest = parseInt(meseStr) - 1;
-    if (isNaN(annoDest) || isNaN(meseDest)) return { spostato: false, annullato: false };
-    if (annoDest === currentYear && meseDest === currentMonth) return { spostato: false, annullato: false };
-    const today = getTodayDateObject();
-    const isFuture = (annoDest > today.getFullYear()) || (annoDest === today.getFullYear() && meseDest > today.getMonth());
-    const isLastDay = isLastDayOfMonth(today);
-    const isNextMonth = (annoDest === today.getFullYear() && meseDest === today.getMonth() + 1);
-    const skipConfirm = (isLastDay && isNextMonth) || isFuture;
-    let conferma = true;
-    if (!skipConfirm) conferma = confirm(`⚠️ Non sei nel mese/anno in corso (${mesiLista[currentMonth]} ${currentYear}). La data inserita appartiene a ${mesiLista[meseDest]} ${annoDest}. Vuoi proseguire?`);
-    if (!conferma) return { spostato: false, annullato: true };
-    const docRef = db.collection('contabilita').doc(`${annoDest}_${meseDest}`);
-    const docSnap = await docRef.get();
-    let targetData = {};
-    if (docSnap.exists) targetData = docSnap.data();
-    else {
-        let annoPrec = annoDest, mesePrec = meseDest - 1;
-        if (mesePrec < 0) { mesePrec = 11; annoPrec = annoDest - 1; }
-        const saldoPrec = await calcolaSaldoFinaleMeseSoloPrimaNota(annoPrec, mesePrec);
-        targetData = { anno: annoDest, mese: meseDest, saldoIniziale: saldoPrec, primaNota: [], contanti: [], fattureFornitori: [], assClienti: [], pagaDdt: [], nextFatturaId: 1, ultimoAggiornamento: new Date().toISOString() };
-    }
-    if (tipo === 'primanota') { targetData.primaNota = targetData.primaNota || []; targetData.primaNota.push(riga); targetData.primaNota = ordinaArrayPerData(targetData.primaNota, 'data'); }
-    else if (tipo === 'contanti') { targetData.contanti = targetData.contanti || []; targetData.contanti.push(riga); targetData.contanti = ordinaArrayPerData(targetData.contanti, 'data'); }
-    else if (tipo === 'fornitori') { targetData.fattureFornitori = targetData.fattureFornitori || []; targetData.fattureFornitori.push(riga); targetData.fattureFornitori = ordinaArrayPerData(targetData.fattureFornitori, 'data'); }
-    else if (tipo === 'assclienti') { targetData.assClienti = targetData.assClienti || []; targetData.assClienti.push(riga); targetData.assClienti = targetData.assClienti.slice().sort((a,b) => { const da = a.dataDoc ? dateFromISO(a.dataDoc) : dateFromISO(a.dataIns); const db = b.dataDoc ? dateFromISO(b.dataDoc) : dateFromISO(b.dataIns); if (!da && !db) return 0; if (!da) return 1; if (!db) return -1; return da - db; }); }
-    else if (tipo === 'pagaddt') { targetData.pagaDdt = targetData.pagaDdt || []; targetData.pagaDdt.push(riga); targetData.pagaDdt = ordinaArrayPerData(targetData.pagaDdt, 'data'); }
-    await docRef.set(targetData);
-    if (tipo === 'primanota') { const idx = primaNota.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) primaNota.splice(idx, 1); }
-    else if (tipo === 'contanti') { const idx = contanti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) contanti.splice(idx, 1); }
-    else if (tipo === 'fornitori') { const idx = fattureFornitori.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) fattureFornitori.splice(idx, 1); }
-    else if (tipo === 'assclienti') { const idx = assClienti.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) assClienti.splice(idx, 1); }
-    else if (tipo === 'pagaddt') { const idx = pagaDdt.findIndex(r => JSON.stringify(r) === JSON.stringify(riga)); if (idx !== -1) pagaDdt.splice(idx, 1); }
-    await salvaStatoFirebase();
-    currentYear = annoDest;
-    currentMonth = meseDest;
-    await caricaStatoFirebase();
-    await popolaAnniMeseDinamici();
-    document.getElementById('annoSelect').value = currentYear;
-    document.getElementById('meseSelect').value = currentMonth;
-    aggiornaTabelle();
-    aggiornaRiepilogoHeader();
-    aggiornaDataFormAlPrimoMese();
-    showToast(`✅ Riga spostata a ${mesiLista[currentMonth]} ${currentYear}`);
-    setTimeout(() => evidenziaRigaPerValori(tipo, riga), 300);
-    return { spostato: true, annullato: false };
 }
 
 // ==================== FUNZIONI MODALI MOBILE ====================
@@ -1829,7 +2090,6 @@ async function mostraModaleDataMobile() {
                 currentYear = anno;
                 currentMonth = mese;
                 await caricaStatoFirebase();
-                // Aggiorna i dropdown con i nuovi valori
                 await popolaAnniMeseDinamici();
                 document.getElementById('annoSelect').value = currentYear;
                 document.getElementById('meseSelect').value = currentMonth;
@@ -1947,6 +2207,87 @@ function toggleMobileLayout() {
         if (sidebar) sidebar.style.display = 'block';
     }
 }
+
+function setScheda(s) {
+    currentScheda = s;
+    document.getElementById('tabellaPrimaNotaContainer').style.display = s === 'primanota' ? 'block' : 'none';
+    document.getElementById('tabellaContantiContainer').style.display = s === 'contanti' ? 'block' : 'none';
+    document.getElementById('tabellaFornitoriContainer').style.display = s === 'fornitori' ? 'block' : 'none';
+    document.getElementById('tabellaAssClientiContainer').style.display = s === 'assclienti' ? 'block' : 'none';
+    document.getElementById('tabellaPagaDdtContainer').style.display = s === 'pagaddt' ? 'block' : 'none';
+    document.getElementById('toolbarPrimaNota').classList.toggle('active', s === 'primanota');
+    document.getElementById('toolbarContanti').classList.toggle('active', s === 'contanti');
+    document.getElementById('toolbarFornitori').classList.toggle('active', s === 'fornitori');
+    document.getElementById('toolbarAssClienti').classList.toggle('active', s === 'assclienti');
+    document.getElementById('toolbarPagaDdt').classList.toggle('active', s === 'pagaddt');
+    aggiornaForm();
+    aggiornaTabelle();
+}
+
+function aggiornaForm() {
+    const fa = document.getElementById('formArea');
+    if (currentScheda === 'primanota') {
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
+        setupImportField('formAvere'); setupImportField('formDare');
+    } else if (currentScheda === 'contanti') {
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>`;
+        setupImportField('formImportoContanti');
+    } else if (currentScheda === 'fornitori') {
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataFornitori"></div><div class="form-group"><label>🏢 Fornitore</label><input type="text" id="formFornitore" placeholder="Nome fornitore"></div></div><div class="form-group"><label>📄 N. Fattura</label><input type="text" id="formNumeroFattura" placeholder="Numero fattura"></div>`;
+    } else if (currentScheda === 'assclienti') {
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneAss" placeholder="Descrizione"></div><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomeAss" placeholder="Nome"></div></div><div class="form-row"><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoAss" class="import-field" placeholder="0,00"></div><div class="form-group"><label>📄 N° Doc.</label><input type="text" id="formNumDocAss" placeholder="N° Documento"></div></div><div class="form-group"><label>📅 Data Doc.</label><input type="date" id="formDataDocAss"></div>`;
+        setupImportField('formImportoAss');
+    } else if (currentScheda === 'pagaddt') {
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>👤 Nome</label><input type="text" id="formNomePaga" placeholder="Nome"></div><div class="form-group"><label>📄 N° Fat/DDT</label><input type="text" id="formNumDocPaga" placeholder="N° Fattura/DDT"></div></div><div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPaga"></div><div class="form-group"><label>💰 Importo €</label><input type="text" id="formImportoPaga" class="import-field" placeholder="0,00"></div></div>`;
+        setupImportField('formImportoPaga');
+    }
+    const formInputs = fa.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        if (!input.hasAttribute('data-listener')) {
+            input.setAttribute('data-listener', 'true');
+            input.addEventListener('input', () => marcaModificheNonSalvate());
+            input.addEventListener('change', () => marcaModificheNonSalvate());
+        }
+    });
+    pulisciForm();
+    if (!currentMonthModifiable) {
+        formInputs.forEach(inp => inp.disabled = true);
+        document.getElementById('btnMemorizza').disabled = true;
+    } else {
+        formInputs.forEach(inp => inp.disabled = false);
+        document.getElementById('btnMemorizza').disabled = false;
+    }
+}
+function pulisciForm() {
+    const today = getTodayDateObject();
+    const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
+    if (currentScheda === 'primanota') {
+        if (document.getElementById('formDataPrimaNota')) document.getElementById('formDataPrimaNota').value = defaultDate;
+        if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
+        if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
+        if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
+    } else if (currentScheda === 'contanti') {
+        if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = defaultDate;
+        if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
+        if (document.getElementById('formImportoContanti')) document.getElementById('formImportoContanti').value = '';
+    } else if (currentScheda === 'fornitori') {
+        if (document.getElementById('formDataFornitori')) document.getElementById('formDataFornitori').value = defaultDate;
+        if (document.getElementById('formFornitore')) document.getElementById('formFornitore').value = '';
+        if (document.getElementById('formNumeroFattura')) document.getElementById('formNumeroFattura').value = '';
+    } else if (currentScheda === 'assclienti') {
+        if (document.getElementById('formDescrizioneAss')) document.getElementById('formDescrizioneAss').value = '';
+        if (document.getElementById('formNomeAss')) document.getElementById('formNomeAss').value = '';
+        if (document.getElementById('formImportoAss')) document.getElementById('formImportoAss').value = '';
+        if (document.getElementById('formNumDocAss')) document.getElementById('formNumDocAss').value = '';
+        if (document.getElementById('formDataDocAss')) document.getElementById('formDataDocAss').value = getTodayDateISO();
+    } else if (currentScheda === 'pagaddt') {
+        if (document.getElementById('formNomePaga')) document.getElementById('formNomePaga').value = '';
+        if (document.getElementById('formNumDocPaga')) document.getElementById('formNumDocPaga').value = '';
+        if (document.getElementById('formDataPaga')) document.getElementById('formDataPaga').value = defaultDate;
+        if (document.getElementById('formImportoPaga')) document.getElementById('formImportoPaga').value = '';
+    }
+}
+
 // Listener PC
 document.getElementById('toolbarPrimaNota').onclick = () => setScheda('primanota');
 document.getElementById('toolbarContanti').onclick = () => setScheda('contanti');
