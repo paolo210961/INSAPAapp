@@ -318,7 +318,7 @@
             color: #27ae60;
         }
 
-        /* ========== SOLO MOBILE: layout con logo, 5 icone ========== */
+        /* ========== SOLO MOBILE: layout con logo, 5 icone, tabelle visibili ========== */
         @media (max-width: 768px) {
             .header { display: none; }
             .sticky-toolbar { display: none; }
@@ -399,10 +399,20 @@
                 width: 100%;
                 padding: 10px;
                 overflow-x: auto;
+                overflow-y: visible;
+                max-height: none;
+            }
+            .scadenze-box {
+                overflow-x: auto;
+                overflow-y: visible;
+                max-height: none;
+                width: 100%;
             }
             .tabella {
                 font-size: 0.7rem;
                 min-width: 500px;
+                width: 100%;
+                table-layout: auto;
             }
             .action-buttons { justify-content: center; }
         }
@@ -410,6 +420,7 @@
 </head>
 <body>
 <div id="appContainer" style="display: flex; flex-direction: column; height: 100%;">
+    <!-- HEADER DESKTOP -->
     <div class="header">
         <div class="row1">
             <div class="logo-area">
@@ -458,6 +469,7 @@
         </div>
     </div>
 
+    <!-- BARRA MOBILE (logo + 5 icone: FLOPPY, MENU, DATA, SALDI, ALTRO) -->
     <div class="mobile-top" style="display: none;">
         <div id="mobileLogo" class="mobile-logo">
             <img id="mobileLogoImg" style="display:none;">
@@ -486,7 +498,7 @@
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3>📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></td></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead>
                         <tbody id="primaNotaBody"></tbody>
                     </table>
                     <div id="primaNotaActionButtons" class="action-buttons">
@@ -530,9 +542,9 @@
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
                     <h3>📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></table></thead>
+                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></td></thead>
                         <tbody id="pagaDdtBody"></tbody>
-                    <table>
+                    </table>
                     <div id="pagaDdtActionButtons" class="action-buttons">
                         <button id="btnSalvaModificaPagaDdt" class="btn-success">✅ SALVA</button>
                         <button id="btnEliminaSelezionatiPagaDdt" class="btn-danger">🗑 ELIMINA</button>
@@ -731,7 +743,6 @@ async function calcolaSaldoFinaleMeseSoloPrimaNota(anno, mese) {
     const totaleDare = prima.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     return saldoIniz + totaleAvere - totaleDare;
 }
-// ------------------- RICALCOLO TUTTI I SALDI A CASCATA -------------------
 async function ricalcolaTuttiISaldi() {
     try {
         const snapshot = await db.collection('contabilita').get();
@@ -749,7 +760,6 @@ async function ricalcolaTuttiISaldi() {
             }
         });
         if (periodi.length === 0) return;
-        // Ordina per anno e mese
         periodi.sort((a,b) => {
             if (a.anno !== b.anno) return a.anno - b.anno;
             return a.mese - b.mese;
@@ -761,17 +771,14 @@ async function ricalcolaTuttiISaldi() {
             const totaleAvere = p.primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
             const totaleDare = p.primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
             let saldoFinale = p.saldoIniziale + totaleAvere - totaleDare;
-            // Se non è il primo mese, il saldo iniziale dovrebbe essere il saldo finale del mese precedente
             if (i > 0 && ultimoSaldoFinale !== null) {
                 if (Math.abs(p.saldoIniziale - ultimoSaldoFinale) > 0.01) {
-                    // Correggi il saldo iniziale
                     await db.collection('contabilita').doc(p.id).update({
                         saldoIniziale: ultimoSaldoFinale,
                         ultimoAggiornamento: new Date().toISOString()
                     });
                     modifiche = true;
                     p.saldoIniziale = ultimoSaldoFinale;
-                    // Ricalcola saldo finale dopo correzione
                     saldoFinale = p.saldoIniziale + totaleAvere - totaleDare;
                 }
             }
@@ -779,16 +786,13 @@ async function ricalcolaTuttiISaldi() {
         }
         if (modifiche) {
             showToast("🔄 Saldi iniziali dei mesi corretti automaticamente (a cascata).");
-            // Ricarica la vista corrente se necessario
             if (periodi.some(p => p.anno === currentYear && p.mese === currentMonth)) {
                 await caricaStatoFirebase();
             }
         }
     } catch(e) { console.error("Errore ricalcolo saldi:", e); }
 }
-
 async function aggiornaSaldoACascata(annoModificato, meseModificato) {
-    // Chiamiamo semplicemente il ricalcolo completo per sicurezza
     await ricalcolaTuttiISaldi();
 }
 async function caricaSaldoMesePrecedente(anno, mese) {
@@ -806,7 +810,6 @@ async function salvaStatoFirebase() {
         });
         resetModificheNonSalvate();
         showToast("✅ Dati salvati su Firebase!");
-        // Ricalcola tutti i saldi a cascata dopo il salvataggio
         await ricalcolaTuttiISaldi();
         await popolaAnniMeseDinamici();
     } catch(e) { showToast("Errore salvataggio!", true); }
@@ -1017,7 +1020,7 @@ async function cancellaMeseCorrente() {
     try {
         await db.collection('contabilita').doc(`${currentYear}_${currentMonth}`).delete();
         showToast(`🗑 Mese ${mesiLista[currentMonth]} ${currentYear} eliminato.`);
-        await ricalcolaTuttiISaldi(); // Ricalcola i saldi dopo eliminazione
+        await ricalcolaTuttiISaldi();
         const oggi = new Date();
         const annoCorrente = oggi.getFullYear();
         const meseCorrente = oggi.getMonth();
@@ -1638,7 +1641,7 @@ function mostraModaleConferma(messaggio) {
         document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
     });
 }
-// ESPORTAZIONI (invariate)
+// ESPORTAZIONI
 function esportaReportRagioniere() {
     const mn = mesiLista[currentMonth]; const anno = currentYear;
     const ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
@@ -1656,9 +1659,9 @@ function esportaPDFMese() {
 }
 function generaTabellaHTML(data, headers) {
     if (!data.length) return "<p>Nessun dato</p>";
-    let html = "<table><thead><tr>";
+    let html = "<table><thead></tr>";
     headers.forEach(h => html += `<th>${h}</th>`);
-    html += "</tr></thead><tbody>";
+    html += "</thead><tbody>";
     data.forEach(row => {
         html += "<tr>";
         headers.forEach(h => {
@@ -1720,7 +1723,6 @@ function esportaCSV(perAnno) {
     URL.revokeObjectURL(link.href);
     showToast("CSV esportato");
 }
-// Funzioni per spostamento righe tra mesi
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') {
     if (!dataYMD) return { spostato: false, annullato: false };
     const [annoStr, meseStr] = dataYMD.split('-');
@@ -2085,7 +2087,6 @@ if (logoRettangolo) {
 // Avvio
 Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     await popolaAnniMeseDinamici();
-    // Ricalcola tutti i saldi all'avvio per correggere eventuali incoerenze
     await ricalcolaTuttiISaldi();
     const now = new Date();
     const annoCorrente = now.getFullYear();
