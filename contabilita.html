@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        /* ========== STILI BASE (PC e mobile condivisi) ========== */
+        /* ========== STILI BASE ========== */
         * { box-sizing: border-box; }
         html, body {
             height: 100%;
@@ -20,6 +20,87 @@
             background: #eef2f5;
             display: flex;
             flex-direction: column;
+        }
+        /* STILI STAMPA PDF */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                font-size: 11pt;
+            }
+            .header, .sticky-toolbar, .sidebar, .mobile-top, .floppy-container, 
+            .row2, .filtri-rapidi, .action-buttons, footer, .version-box,
+            #btnMemorizza, .toolbar-btn, .nav-btn, #hamburgerBtn, .mobile-icons,
+            .floppy-btn, .dropdown-menu, .toolbar-btn, .btn-delete {
+                display: none !important;
+            }
+            .main-container {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+            .content-area {
+                box-shadow: none !important;
+                padding: 10px !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+            .scadenze-box {
+                border: 1px solid #ccc !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .tabella {
+                display: table !important;
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .tabella th, .tabella td {
+                border: 1px solid #aaa;
+                padding: 8px;
+            }
+            .tabella th {
+                background: #f0f0f0 !important;
+            }
+            .positive {
+                color: #158c3a !important;
+                font-weight: bold;
+            }
+            .negative {
+                color: #c0392b !important;
+                font-weight: bold;
+            }
+            .summary-header {
+                display: flex !important;
+                gap: 20px;
+                background: #f8f9fa;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+            }
+            .cards-container {
+                display: none !important;
+            }
+            .report-header {
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #2c3e50;
+                padding-bottom: 10px;
+            }
+            .report-footer {
+                text-align: center;
+                margin-top: 30px;
+                font-size: 9pt;
+                color: #666;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+            }
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
         }
         .header {
             background: white;
@@ -121,15 +202,9 @@
         }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #f1c40f; color: #000000; }
-        
-        /* Box riepilogo affiancati */
-        .summary-container {
+        .summary-header {
             display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .summary-box {
+            gap: 30px;
             background: #f8f9fa;
             padding: 10px 20px;
             border-radius: 40px;
@@ -138,14 +213,10 @@
             color: #2c3e50;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .summary-box div { font-weight: bold; font-size: 1.1rem; }
-        .summary-box span { font-weight: bold; margin-left: 5px; font-size: 1.1rem; }
-        .positive { color: #158c3a; }  /* Verde più marcato */
+        .summary-header div { font-weight: bold; font-size: 1.1rem; }
+        .summary-header span { font-weight: bold; margin-left: 5px; font-size: 1.1rem; }
+        .positive { color: #158c3a; }
         .negative { color: #e74c3c; }
-        .cassa-box {
-            background: #e8f8f5;
-            border-left: 4px solid #158c3a;
-        }
         .row2 {
             display: flex;
             justify-content: space-between;
@@ -345,48 +416,12 @@
             color: #158c3a;
         }
 
-        /* Stili per la stampa PDF */
-        @media print {
-            .header, .sticky-toolbar, .sidebar, .version-box, footer, .floppy-container, .row2, .mobile-top, .action-buttons, .nav-box, .filtri-rapidi {
-                display: none !important;
-            }
-            .main-container {
-                display: block !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .content-area {
-                overflow: visible !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .scadenze-box {
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .tabella {
-                font-size: 10pt !important;
-            }
-            .tabella th, .tabella td {
-                padding: 4px !important;
-            }
-            body {
-                background: white !important;
-                margin: 0 !important;
-                padding: 10px !important;
-            }
-            .summary-container {
-                display: none !important;
-            }
-        }
-
-        /* ========== STILI PER CARD MOBILE ========== */
+        /* ========== STILI MOBILE ========== */
         @media (max-width: 768px) {
             .header { display: none; }
             .sticky-toolbar { display: none; }
             .sidebar { display: none; }
-            .summary-container { display: none; }
+            .summary-header { display: none; }
             .row2 { display: none; }
             .filtri-rapidi { display: none; }
             .mobile-top {
@@ -534,6 +569,8 @@
                 margin-left: 8px;
                 cursor: pointer;
             }
+            .positive { color: #158c3a; }
+            .negative { color: #e74c3c; }
             .action-buttons { justify-content: center; margin-top: 20px; }
         }
     </style>
@@ -560,17 +597,7 @@
                     <button id="dropdownCSVAnno" class="dropdown-item">📎 E) Esporta Anno CSV</button>
                 </div>
             </div>
-            <!-- BOX RIEPILOGO AFFIANCATI -->
-            <div class="summary-container">
-                <div id="summaryAvereDare" class="summary-box">
-                    <div>📈 Avere: <span class="positive" id="totaleAvere">0,00 €</span></div>
-                    <div>📉 Dare: <span class="negative" id="totaleDare">0,00 €</span></div>
-                    <div>💰 Saldo: <span class="positive" id="totaleSaldo">0,00 €</span></div>
-                </div>
-                <div id="summaryCassa" class="summary-box cassa-box">
-                    <div>🏦 CASSA: <span class="positive" id="totaleCassa">0,00 €</span></div>
-                </div>
-            </div>
+            <div id="summaryHeader" class="summary-header"></div>
         </div>
         <div class="row2">
             <div class="nav-box">
@@ -651,9 +678,7 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3 id="contantiTitle">💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead>
-                            <tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiCards" class="cards-container"></div>
@@ -665,9 +690,7 @@
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3 id="fornitoriTitle">📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
-                        <thead>
-                            <tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
                         <tbody id="fornitoriBody"></tbody>
                     </table>
                     <div id="fornitoriCards" class="cards-container"></div>
@@ -679,9 +702,7 @@
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
                     <h3 id="assClientiTitle">📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
-                        <thead>
-                            <tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
                         <tbody id="assClientiBody"></tbody>
                     </table>
                     <div id="assClientiCards" class="cards-container"></div>
@@ -693,9 +714,7 @@
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
                     <h3 id="pagaDdtTitle">📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
-                        <thead>
-                            <tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr>
-                        </thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
                         <tbody id="pagaDdtBody"></tbody>
                     </table>
                     <div id="pagaDdtCards" class="cards-container"></div>
@@ -951,6 +970,9 @@ async function ricalcolaTuttiISaldi() {
             }
         }
     } catch(e) { console.error("Errore ricalcolo saldi:", e); }
+}
+async function aggiornaSaldoACascata(annoModificato, meseModificato) {
+    await ricalcolaTuttiISaldi();
 }
 async function caricaSaldoMesePrecedente(anno, mese) {
     let annoPrec = anno, mesePrec = mese - 1;
@@ -1235,23 +1257,361 @@ async function cancellaAnnoCorrente() {
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
 
-// ==================== FUNZIONE AGGIORNA RIEPILOGO CON BOX SEPARATI ====================
+// ==================== FUNZIONE AGGIORNA RIEPILOGO ====================
 function aggiornaRiepilogoHeader() {
+    const summaryDiv = document.getElementById('summaryHeader');
+    if (!summaryDiv) return;
     if (currentScheda === 'primanota') {
         let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
         let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
         let tc = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
         let sal = saldoIniziale + ta - td;
-        
-        document.getElementById('totaleAvere').innerHTML = formatNumber(ta) + ' €';
-        document.getElementById('totaleDare').innerHTML = formatNumber(td) + ' €';
-        document.getElementById('totaleSaldo').innerHTML = formatNumber(sal) + ' €';
-        document.getElementById('totaleSaldo').className = sal >= 0 ? 'positive' : 'negative';
-        document.getElementById('totaleCassa').innerHTML = formatNumber(tc) + ' €';
+        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div><div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div><div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div><div>🏦 CASSA: <span class="positive">${formatNumber(tc)} €</span></div>`;
+    } else if (currentScheda === 'contanti') {
+        let tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        summaryDiv.innerHTML = `<div>💵 Incasso contanti: <span class="positive">${formatNumber(tc)} €</span></div>`;
+    } else if (currentScheda === 'fornitori') {
+        summaryDiv.innerHTML = `<div>📄 Numero fatture fornitori: ${fattureFornitori.length}</div>`;
+    } else if (currentScheda === 'assclienti') {
+        let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        summaryDiv.innerHTML = `<div>📋 Totale ASS_CONT_CLIENTI: <span class="positive">${formatNumber(tot)} €</span></div>`;
+    } else if (currentScheda === 'pagaddt') {
+        let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        summaryDiv.innerHTML = `<div>📋 Totale PAGA_DDT_CLIENTI: <span class="positive">${formatNumber(tot)} €</span></div>`;
     }
 }
 
-// ===== FUNZIONI DI RENDER (PC e mobile) =====
+// ===== REPORT PDF PER RAGIONIERE (usa window.print) =====
+function esportaReportRagioniere() {
+    const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+    const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+    const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
+    const saldoFinale = saldoIniziale + totaleAvere - totaleDare;
+    
+    // Costruisco l'HTML per la stampa
+    let rowsHtml = '';
+    primaNota.forEach((item, idx) => {
+        rowsHtml += `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${formatDateVisual(item.data) || ''}</td>
+                <td>${item.descrizione || ''}</td>
+                <td class="text-right">${item.avere ? formatNumber(item.avere) + ' €' : '-'}</td>
+                <td class="text-right">${item.dare ? formatNumber(item.dare) + ' €' : '-'}</td>
+                <td class="text-right">${item.cassa ? formatNumber(item.cassa) + ' €' : '-'}</td>
+                <td class="text-center">${item.verificato ? '✅' : '❌'}</td>
+            </tr>
+        `;
+    });
+    
+    const printHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Report Ragioniere - ${mesiLista[currentMonth]} ${currentYear}</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    padding: 20px;
+                    background: white;
+                }
+                .report-header {
+                    text-align: center;
+                    margin-bottom: 25px;
+                    border-bottom: 2px solid #2c3e50;
+                    padding-bottom: 15px;
+                }
+                .report-header h1 {
+                    color: #2c3e50;
+                    font-size: 24px;
+                    margin-bottom: 8px;
+                }
+                .report-header h2 {
+                    color: #555;
+                    font-size: 18px;
+                    margin-bottom: 5px;
+                }
+                .report-header p {
+                    color: #777;
+                    font-size: 12px;
+                    margin-top: 10px;
+                }
+                .summary-box {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                    padding: 15px 20px;
+                    margin-bottom: 25px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 30px;
+                    justify-content: space-around;
+                }
+                .summary-item {
+                    text-align: center;
+                }
+                .summary-item .label {
+                    font-size: 12px;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+                .summary-item .value {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin-top: 5px;
+                }
+                .positive { color: #158c3a; }
+                .negative { color: #c0392b; }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    font-size: 12px;
+                }
+                th, td {
+                    border: 1px solid #aaa;
+                    padding: 8px 10px;
+                    text-align: left;
+                }
+                th {
+                    background: #e9ecef;
+                    font-weight: bold;
+                }
+                .text-right {
+                    text-align: right;
+                }
+                .text-center {
+                    text-align: center;
+                }
+                .report-footer {
+                    text-align: center;
+                    margin-top: 30px;
+                    font-size: 10px;
+                    color: #999;
+                    border-top: 1px solid #ddd;
+                    padding-top: 15px;
+                }
+                @media print {
+                    body {
+                        padding: 0;
+                        margin: 0;
+                    }
+                    .summary-box {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    table {
+                        break-inside: avoid;
+                    }
+                    tr {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="report-header">
+                <h1>📊 REPORT RAGIONIERE</h1>
+                <h2>Prima Nota Contabile</h2>
+                <p>Periodo: ${mesiLista[currentMonth]} ${currentYear}</p>
+                <p>Data generazione: ${new Date().toLocaleString('it-IT')}</p>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-item">
+                    <div class="label">💰 Saldo Iniziale</div>
+                    <div class="value positive">${formatNumber(saldoIniziale)} €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">📈 Totale Avere</div>
+                    <div class="value positive">${formatNumber(totaleAvere)} €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">📉 Totale Dare</div>
+                    <div class="value negative">${formatNumber(totaleDare)} €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">🏦 Totale Cassa</div>
+                    <div class="value positive">${formatNumber(totaleCassa)} €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">📌 Saldo Finale</div>
+                    <div class="value ${saldoFinale >= 0 ? 'positive' : 'negative'}">${formatNumber(saldoFinale)} €</div>
+                </div>
+            </div>
+            
+            <h3 style="margin: 20px 0 10px 0;">📋 Dettaglio Movimenti</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:50px">#</th>
+                        <th>Data</th>
+                        <th>Descrizione</th>
+                        <th style="width:100px">Avere (€)</th>
+                        <th style="width:100px">Dare (€)</th>
+                        <th style="width:100px">Cassa (€)</th>
+                        <th style="width:60px">✅</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td></tr>'}
+                </tbody>
+                <tfoot>
+                    <tr style="background: #f8f9fa; font-weight: bold;">
+                        <td colspan="3"><strong>TOTALI</strong></td>
+                        <td class="text-right"><strong>${formatNumber(totaleAvere)} €</strong></td>
+                        <td class="text-right"><strong>${formatNumber(totaleDare)} €</strong></td>
+                        <td class="text-right"><strong>${formatNumber(totaleCassa)} €</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="report-footer">
+                <p>Documento generato automaticamente da inSAPA Contabilità v${APP_VERSION}</p>
+                <p>Questo documento è valido come report ufficiale</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    // Apro una nuova finestra per la stampa
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Attendo che il contenuto sia caricato poi apro la finestra di stampa
+    printWindow.onload = () => {
+        printWindow.print();
+        showToast("✅ Report PDF pronto per il salvataggio");
+    };
+}
+
+function esportaPDFMese() {
+    try {
+        let htmlContent = `<!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"><title>Report Mese - ${mesiLista[currentMonth]} ${currentYear}</title>
+        <style>
+            body{font-family:'Segoe UI',Arial;padding:20px;} 
+            table{border-collapse:collapse;width:100%;} 
+            th,td{border:1px solid #ccc;padding:8px;text-align:left;} 
+            th{background:#f0f0f0;}
+            .positive { color: #158c3a; }
+            .negative { color: #c0392b; }
+            .text-right { text-align: right; }
+            @media print {
+                body { padding: 0; margin: 0; }
+            }
+        </style>
+        </head>
+        <body>
+        <h1>REPORT MESE</h1>
+        <h2>${mesiLista[currentMonth]} ${currentYear}</h2>
+        <h3>📋 PRIMA NOTA</h3>
+        <table>
+        <thead><tr><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>Cassa</th><th>Verificato</th></tr></thead>
+        <tbody>`;
+        
+        primaNota.forEach(item => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.descrizione || ''}</td>
+                <td class="text-right">${item.avere ? formatNumber(item.avere) + ' €' : ''}</td>
+                <td class="text-right">${item.dare ? formatNumber(item.dare) + ' €' : ''}</td>
+                <td class="text-right">${item.cassa ? formatNumber(item.cassa) + ' €' : ''}</td>
+                <td>${item.verificato ? '✅' : '❌'}</td>
+            </tr>`;
+        });
+        
+        const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
+        
+        htmlContent += `<tr style="background:#f0f0f0;font-weight:bold;">
+            <td colspan="2">TOTALI</td>
+            <td class="text-right">${formatNumber(totaleAvere)} €</td>
+            <td class="text-right">${formatNumber(totaleDare)} €</td>
+            <td class="text-right">${formatNumber(totaleCassa)} €</td>
+            <td></td>
+        </tr>
+        </tbody>
+        </table>
+        
+        <h3>💵 CONTANTI</h3>
+        <table>
+        <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead>
+        <tbody>`;
+        
+        contanti.forEach(item => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.descrizione || ''}</td>
+                <td class="text-right">${formatNumber(item.importo)} €</td>
+            </tr>`;
+        });
+        
+        const totaleContanti = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        htmlContent += `<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="2">TOTALE INCASSI</td><td class="text-right">${formatNumber(totaleContanti)} €</td></tr>
+        </tbody>
+        </table>
+        
+        <h3>📄 FORNITORI</h3>
+        <table>
+        <thead><tr><th>Data</th><th>Fornitore</th><th>N. Fattura</th><th>N° interno</th></tr></thead>
+        <tbody>`;
+        
+        fattureFornitori.forEach((item, idx) => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.fornitore || ''}</td>
+                <td>${item.numeroFattura || ''}</td>
+                <td>${nextFatturaId - fattureFornitori.length + idx}/${currentYear}</td>
+            </tr>`;
+        });
+        htmlContent += `</tbody>
+        </table>
+        <p><em>Report generato il ${new Date().toLocaleString('it-IT')}</em></p>
+        </body></html>`;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.onload = () => {
+            printWindow.print();
+            showToast("✅ Report Mese pronto per il salvataggio");
+        };
+    } catch(e) { showToast("Errore esportazione report mese", true); }
+}
+
+function esportaReportAnno() {
+    showToast("📅 Report Annuale - Aprire la stampa dal browser (Ctrl+P) dopo aver selezionato l'anno", false);
+}
+
+function esportaCSV(perAnno) {
+    try {
+        let csvContent = "Data,Descrizione,Avere,Dare,Cassa,Verificato\n";
+        primaNota.forEach(item => {
+            csvContent += `"${item.data || ''}","${(item.descrizione || '').replace(/"/g, '""')}","${item.avere || ''}","${item.dare || ''}","${item.cassa || ''}","${item.verificato ? 'SI' : 'NO'}"\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csvContent], {type: 'text/csv;charset=utf-8;'});
+        const link = document.createElement('a');
+        const filename = perAnno ? `export_anno_${currentYear}.csv` : `export_mese_${currentYear}_${currentMonth+1}.csv`;
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast(`✅ CSV ${perAnno ? 'Annuale' : 'Mensile'} esportato!`);
+    } catch(e) { showToast("Errore esportazione CSV", true); }
+}
+
+// ===== FUNZIONI DI RENDER =====
 function aggiornaTabelle() {
     const isMobile = window.innerWidth <= 768;
     const isModifiable = currentMonthModifiable;
@@ -1276,7 +1636,6 @@ function aggiornaTabelle() {
 }
 
 function renderTablesPC(isModifiable) {
-    // Prima Nota con colonna CASSA
     const primaBody = document.getElementById('primaNotaBody');
     if (primaBody) {
         primaBody.innerHTML = '';
@@ -1372,7 +1731,7 @@ function renderTablesPC(isModifiable) {
 }
 
 function renderCardsMobile(isModifiable) {
-    // Prima Nota cards con CASSA
+    // Prima Nota cards
     const primaContainer = document.getElementById('primaNotaCards');
     if (primaContainer) {
         primaContainer.innerHTML = '';
@@ -1398,8 +1757,6 @@ function renderCardsMobile(isModifiable) {
                 <div class="card-row">
                     <div class="card-desc">${item.descrizione || ''}</div>
                     ${cassa > 0 ? `<div class="card-other-amount positive">CASSA: ${formatNumber(cassa)} €</div>` : ''}
-                    ${hasAvere && hasDare ? `<div class="card-other-amount negative">Dare: ${formatNumber(dare)} €</div>` : ''}
-                    ${!hasAvere && hasDare ? `<div class="card-other-amount positive">Avere: ${formatNumber(avere)} €</div>` : ''}
                 </div>
             `;
             primaContainer.appendChild(card);
@@ -1413,8 +1770,6 @@ function renderCardsMobile(isModifiable) {
         contanti.forEach((item, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.dataset.index = idx;
-            card.dataset.tipo = 'contanti';
             card.innerHTML = `
                 <div class="card-row">
                     <div class="card-left-group">
@@ -1438,8 +1793,6 @@ function renderCardsMobile(isModifiable) {
         fattureFornitori.forEach((item, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.dataset.index = idx;
-            card.dataset.tipo = 'fornitori';
             card.innerHTML = `
                 <div class="card-row">
                     <div class="card-left-group">
@@ -1464,8 +1817,6 @@ function renderCardsMobile(isModifiable) {
         assClienti.forEach((item, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.dataset.index = idx;
-            card.dataset.tipo = 'assclienti';
             card.innerHTML = `
                 <div class="card-row">
                     <div class="card-left-group">
@@ -1493,8 +1844,6 @@ function renderCardsMobile(isModifiable) {
         pagaDdt.forEach((item, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.dataset.index = idx;
-            card.dataset.tipo = 'pagaddt';
             card.innerHTML = `
                 <div class="card-row">
                     <div class="card-left-group">
@@ -1595,7 +1944,8 @@ function aggiornaPulsantiAzione() {
         }
     }
 }
-    async function eliminaSelezionati(tipo) {
+
+async function eliminaSelezionati(tipo) {
     if (!currentMonthModifiable) { showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true); return; }
     let conferma = confirm(`Eliminare definitivamente le righe selezionate?`);
     if (!conferma) return;
@@ -1788,7 +2138,6 @@ function mostraModaleConferma(messaggio) {
     });
 }
 
-// ===== FUNZIONI DI INSERIMENTO MODIFICATE con CASSA =====
 async function inserisciRigaDaDati(tipo, dati) {
     if (!currentMonthModifiable) {
         showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true);
@@ -2014,301 +2363,180 @@ function evidenziaRigaPerValori(tipo, riga) {
     }
 }
 
-// ==================== ESPORTAZIONE PDF CON WINDOW.PRINT ====================
-function esportaReportRagioniere() {
-    const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-    const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-    const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
-    const saldoFinale = saldoIniziale + totaleAvere - totaleDare;
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Report Ragioniere - ${mesiLista[currentMonth]} ${currentYear}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    padding: 20px;
-                    background: white;
-                }
-                .report-header {
-                    text-align: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 20px;
-                    border-bottom: 2px solid #2c3e50;
-                }
-                .report-header h1 {
-                    color: #2c3e50;
-                    margin-bottom: 10px;
-                }
-                .report-header h3 {
-                    color: #7f8c8d;
-                }
-                .summary-cards {
-                    display: flex;
-                    gap: 20px;
-                    justify-content: center;
-                    margin-bottom: 30px;
-                    flex-wrap: wrap;
-                }
-                .card-summary {
-                    background: #f8f9fa;
-                    border-radius: 12px;
-                    padding: 15px 25px;
-                    text-align: center;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                .card-summary .label {
-                    font-size: 14px;
-                    color: #7f8c8d;
-                    margin-bottom: 5px;
-                }
-                .card-summary .value {
-                    font-size: 24px;
-                    font-weight: bold;
-                }
-                .card-summary.positive .value { color: #158c3a; }
-                .card-summary.negative .value { color: #e74c3c; }
-                .card-summary.cassa .value { color: #2980b9; }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 20px;
-                }
-                th, td {
-                    border: 1px solid #ddd;
-                    padding: 10px 8px;
-                    text-align: left;
-                }
-                th {
-                    background-color: #2c3e50;
-                    color: white;
-                    font-weight: bold;
-                }
-                tr:nth-child(even) { background-color: #f9f9f9; }
-                .text-right { text-align: right; }
-                .footer {
-                    margin-top: 30px;
-                    text-align: center;
-                    font-size: 12px;
-                    color: #95a5a6;
-                    border-top: 1px solid #ddd;
-                    padding-top: 15px;
-                }
-                .search-box {
-                    margin-bottom: 20px;
-                    text-align: right;
-                }
-                .search-box input {
-                    padding: 8px 12px;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
-                    width: 250px;
-                    font-size: 14px;
-                }
-                @media print {
-                    .no-print { display: none; }
-                    .card-summary { box-shadow: none; border: 1px solid #ddd; }
-                    th { background-color: #e9ecef !important; color: black !important; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="report-header">
-                <h1>📊 REPORT RAGIONIERE</h1>
-                <h3>Periodo: ${mesiLista[currentMonth]} ${currentYear}</h3>
-                <h3>Data generazione: ${new Date().toLocaleString('it-IT')}</h3>
-            </div>
-            
-            <div class="search-box no-print">
-                <input type="text" id="searchInput" placeholder="🔍 Cerca nella tabella..." onkeyup="filterTable()">
-            </div>
-            
-            <div class="summary-cards">
-                <div class="card-summary positive">
-                    <div class="label">📈 Totale AVERE</div>
-                    <div class="value">${formatNumber(totaleAvere)} €</div>
-                </div>
-                <div class="card-summary negative">
-                    <div class="label">📉 Totale DARE</div>
-                    <div class="value">${formatNumber(totaleDare)} €</div>
-                </div>
-                <div class="card-summary cassa">
-                    <div class="label">🏦 Totale CASSA</div>
-                    <div class="value">${formatNumber(totaleCassa)} €</div>
-                </div>
-                <div class="card-summary ${saldoFinale >= 0 ? 'positive' : 'negative'}">
-                    <div class="label">💰 Saldo Finale</div>
-                    <div class="value">${formatNumber(saldoFinale)} €</div>
-                </div>
-            </div>
-            
-            <div class="info-box no-print" style="background:#e8f4f8; padding:10px; border-radius:8px; margin-bottom:20px;">
-                <strong>ℹ️ Informazioni:</strong> Saldo iniziale cassa: ${formatNumber(saldoIniziale)} € | 
-                Numero movimenti: ${primaNota.length}
-            </div>
-            
-            <table id="reportTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Data</th>
-                        <th>Descrizione</th>
-                        <th class="text-right">Avere (€)</th>
-                        <th class="text-right">Dare (€)</th>
-                        <th class="text-right">Cassa (€)</th>
-                        <th>Verificato</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${primaNota.map((item, idx) => `
-                        <tr>
-                            <td>${idx + 1}</td>
-                            <td>${formatDateVisual(item.data) || ''}</td>
-                            <td>${(item.descrizione || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
-                            <td class="text-right">${item.avere ? formatNumber(item.avere) + ' €' : '-'}</td>
-                            <td class="text-right">${item.dare ? formatNumber(item.dare) + ' €' : '-'}</td>
-                            <td class="text-right">${item.cassa ? formatNumber(item.cassa) + ' €' : '-'}</td>
-                            <td>${item.verificato ? '✅ Sì' : '❌ No'}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            
-            <div class="footer">
-                <p>Documento generato da inSAPA Contabilità v${APP_VERSION}</p>
-                <p>inSAPA - Sistema Amministrativo Professionale Avanzato</p>
-            </div>
-            
-            <script>
-                function filterTable() {
-                    const input = document.getElementById('searchInput');
-                    const filter = input.value.toLowerCase();
-                    const table = document.getElementById('reportTable');
-                    const tr = table.getElementsByTagName('tr');
-                    for (let i = 1; i < tr.length; i++) {
-                        let txt = '';
-                        const cells = tr[i].getElementsByTagName('td');
-                        for (let j = 0; j < cells.length; j++) {
-                            txt += cells[j].textContent.toLowerCase() + ' ';
-                        }
-                        tr[i].style.display = txt.indexOf(filter) > -1 ? '' : 'none';
-                    }
-                }
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-    showToast("✅ Report Ragioniere aperto per la stampa PDF!");
-}
-
-function esportaPDFMese() {
-    const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-    const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-    const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
-    const totaleContanti = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-    const saldoFinale = saldoIniziale + totaleAvere - totaleDare;
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Report Mese - ${mesiLista[currentMonth]} ${currentYear}</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background: white; }
-                .report-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #2c3e50; }
-                .report-header h1 { color: #2c3e50; margin-bottom: 10px; }
-                h2 { color: #2c3e50; margin: 20px 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #2c3e50; color: white; font-weight: bold; }
-                .text-right { text-align: right; }
-                .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #95a5a6; border-top: 1px solid #ddd; padding-top: 15px; }
-                .search-box { margin-bottom: 20px; text-align: right; }
-                .search-box input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; width: 250px; }
-                @media print { .no-print { display: none; } th { background-color: #e9ecef !important; color: black !important; } }
-            </style>
-        </head>
-        <body>
-            <div class="report-header">
-                <h1>📄 REPORT MESE</h1>
-                <h3>${mesiLista[currentMonth]} ${currentYear}</h3>
-                <h3>Data generazione: ${new Date().toLocaleString('it-IT')}</h3>
-            </div>
-            <div class="search-box no-print"><input type="text" id="searchInput" placeholder="🔍 Cerca..." onkeyup="filterTable()"></div>
-            <h2>📋 PRIMA NOTA</h2>
-            <table id="reportTable">
-                <thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere</th><th class="text-right">Dare</th><th class="text-right">Cassa</th><th>Verificato</th></tr></thead>
-                <tbody>${primaNota.map((item, idx) => `<tr><td>${idx+1}</td><td>${formatDateVisual(item.data)}</td><td>${(item.descrizione || '').replace(/</g, '&lt;')}</td><td class="text-right">${item.avere ? formatNumber(item.avere)+' €' : '-'}</td><td class="text-right">${item.dare ? formatNumber(item.dare)+' €' : '-'}</td><td class="text-right">${item.cassa ? formatNumber(item.cassa)+' €' : '-'}</td><td>${item.verificato ? '✅' : '❌'}</td></tr>`).join('')}</tbody>
-            </table>
-            <p><strong>Totali Prima Nota:</strong> Avere: ${formatNumber(totaleAvere)} € | Dare: ${formatNumber(totaleDare)} € | Cassa: ${formatNumber(totaleCassa)} € | Saldo: ${formatNumber(saldoFinale)} €</p>
-            <h2>💵 CONTANTI</h2>
-            <table><thead><tr><th>#</th><th>Data</th><th>Descrizione</th><th class="text-right">Importo</th></tr></thead>
-            <tbody>${contanti.map((item, idx) => `<tr><td>${idx+1}</td><td>${formatDateVisual(item.data)}</td><td>${(item.descrizione || '').replace(/</g, '&lt;')}</td><td class="text-right">${formatNumber(item.importo)} €</td></tr>`).join('')}</tbody>
-            </table>
-            <p><strong>Totale Incassi Contanti:</strong> ${formatNumber(totaleContanti)} €</p>
-            <h2>📄 FORNITORI</h2>
-            <table><thead><tr><th>#</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
-            <tbody>${fattureFornitori.map((item, idx) => `<tr><td>${idx+1}</td><td>${formatDateVisual(item.data)}</td><td>${(item.fornitore || '').replace(/</g, '&lt;')}</td><td>${item.numeroFattura || ''}</td></tr>`).join('')}</tbody>
-            </table>
-            <div class="footer"><p>inSAPA Contabilità v${APP_VERSION}</p></div>
-            <script>
-                function filterTable() {
-                    const input = document.getElementById('searchInput');
-                    const filter = input.value.toLowerCase();
-                    const table = document.getElementById('reportTable');
-                    const tr = table.getElementsByTagName('tr');
-                    for (let i = 1; i < tr.length; i++) {
-                        let txt = '';
-                        const cells = tr[i].getElementsByTagName('td');
-                        for (let j = 0; j < cells.length; j++) txt += cells[j].textContent.toLowerCase() + ' ';
-                        tr[i].style.display = txt.indexOf(filter) > -1 ? '' : 'none';
-                    }
-                }
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-    showToast("✅ Report Mese aperto per la stampa PDF!");
-}
-
-function esportaReportAnno() {
-    showToast("📅 Report Annuale - Funzionalità in sviluppo", false);
-}
-
-function esportaCSV(perAnno) {
+async function mostraModaleDataMobile() {
     try {
-        let csvContent = "Data,Descrizione,Avere,Dare,Cassa,Verificato\n";
-        primaNota.forEach(item => {
-            csvContent += `"${item.data || ''}","${(item.descrizione || '').replace(/"/g, '""')}","${item.avere || ''}","${item.dare || ''}","${item.cassa || ''}","${item.verificato ? 'SI' : 'NO'}"\n`;
+        const snapshot = await db.collection('contabilita').get();
+        const periodi = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.anno !== undefined && data.mese !== undefined) {
+                periodi.push({
+                    anno: data.anno,
+                    mese: data.mese,
+                    saldoIniziale: data.saldoIniziale || 0
+                });
+            }
         });
-        const blob = new Blob(["\uFEFF" + csvContent], {type: 'text/csv;charset=utf-8;'});
-        const link = document.createElement('a');
-        const filename = perAnno ? `export_anno_${currentYear}.csv` : `export_mese_${currentYear}_${currentMonth+1}.csv`;
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(link.href);
-        showToast(`✅ CSV ${perAnno ? 'Annuale' : 'Mensile'} esportato!`);
-    } catch(e) { showToast("Errore esportazione CSV", true); }
+        periodi.sort((a,b) => {
+            if (a.anno !== b.anno) return a.anno - b.anno;
+            return a.mese - b.mese;
+        });
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        let html = `<div class="modal-content" style="max-width:350px;"><h3>📅 PERIODI DISPONIBILI</h3><div style="max-height: 60vh; overflow-y: auto;">`;
+        if (periodi.length === 0) {
+            html += `<p>Nessun periodo trovato.</p>`;
+        } else {
+            for (let p of periodi) {
+                html += `<div class="periodo-item" data-anno="${p.anno}" data-mese="${p.mese}">
+                            <div class="periodo-titolo">${mesiLista[p.mese]} ${p.anno}</div>
+                            <div class="periodo-saldo">Saldo iniziale: ${formatNumber(p.saldoIniziale)} €</div>
+                         </div>`;
+            }
+        }
+        html += `</div><div class="modal-buttons"><button id="modalDataClose" class="btn-primary">CHIUDI</button></div></div>`;
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+        document.querySelectorAll('.periodo-item').forEach(el => {
+            el.addEventListener('click', async () => {
+                const anno = parseInt(el.getAttribute('data-anno'));
+                const mese = parseInt(el.getAttribute('data-mese'));
+                modal.remove();
+                if (anno === currentYear && mese === currentMonth) return;
+                const today = getTodayDateObject();
+                if (anno !== today.getFullYear() || mese !== today.getMonth()) {
+                    const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
+                    if (!conferma) return;
+                }
+                if (modificheNonSalvate) {
+                    const ok = await mostraModaleConferma("Hai modifiche non salvate. Vuoi salvare prima di cambiare periodo?");
+                    if (!ok) return;
+                    await caricaStatoFirebase();
+                }
+                currentYear = anno;
+                currentMonth = mese;
+                await caricaStatoFirebase();
+                await popolaAnniMeseDinamici();
+                document.getElementById('annoSelect').value = currentYear;
+                document.getElementById('meseSelect').value = currentMonth;
+                showToast(`📅 Visualizzazione: ${mesiLista[currentMonth]} ${currentYear}`);
+            });
+        });
+        document.getElementById('modalDataClose').onclick = () => modal.remove();
+    } catch(e) { showToast("Errore nel caricamento dei periodi", true); }
+}
+
+function mostraModaleSaldiMobile() {
+    let ta = 0, td = 0, tc = 0;
+    if (currentScheda === 'primanota') {
+        ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        tc = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
+        const saldoFinale = saldoIniziale + ta - td;
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong class="big-number">Avere:</strong> <span class="positive big-number">${formatNumber(ta)} €</span></p><p><strong class="big-number">Dare:</strong> <span class="negative big-number">${formatNumber(td)} €</span></p><p><strong class="big-number">CASSA:</strong> <span class="positive big-number">${formatNumber(tc)} €</span></p><p><strong class="big-number">Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'} big-number">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else if (currentScheda === 'contanti') {
+        let tot = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO CONTANTI</h3><p><strong class="big-number">Totale incassi:</strong> <span class="positive big-number">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else if (currentScheda === 'assclienti') {
+        let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO ASS_CONT_CLIENTI</h3><p><strong class="big-number">Totale importi:</strong> <span class="positive big-number">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else if (currentScheda === 'pagaddt') {
+        let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PAGA_DDT_CLIENTI</h3><p><strong class="big-number">Totale importi:</strong> <span class="positive big-number">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
+    } else {
+        showToast("Riepilogo non disponibile per questa scheda", true);
+    }
+}
+
+function mostraModaleAltro() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content" style="max-width:350px;"><h3>☰ COMANDI</h3>
+        <button id="modalePrimaNota" class="dropdown-item" style="margin:5px 0;">📋 PRIMA NOTA</button>
+        <button id="modaleContanti" class="dropdown-item" style="margin:5px 0;">💵 CONTANTI</button>
+        <button id="modaleFornitori" class="dropdown-item" style="margin:5px 0;">📄 FORNITORI</button>
+        <button id="modaleAssClienti" class="dropdown-item" style="margin:5px 0;">📋 ASS_CONT_CLIENTI</button>
+        <button id="modalePagaDdt" class="dropdown-item" style="margin:5px 0;">📋 PAGA_DDT_CLIENTI</button>
+        <button id="modaleAltroClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
+    </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('modalePrimaNota').onclick = () => { setScheda('primanota'); modal.remove(); };
+    document.getElementById('modaleContanti').onclick = () => { setScheda('contanti'); modal.remove(); };
+    document.getElementById('modaleFornitori').onclick = () => { setScheda('fornitori'); modal.remove(); };
+    document.getElementById('modaleAssClienti').onclick = () => { setScheda('assclienti'); modal.remove(); };
+    document.getElementById('modalePagaDdt').onclick = () => { setScheda('pagaddt'); modal.remove(); };
+    document.getElementById('modaleAltroClose').onclick = () => modal.remove();
+}
+
+function mostraModaleFloppy() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content" style="max-width:300px;"><h3>📁 ESPORTAZIONI</h3>
+        <button id="modalReportRagioniere" class="dropdown-item" style="margin:5px 0;">📊 Report Ragioniere (PDF)</button>
+        <button id="modalReportMese" class="dropdown-item" style="margin:5px 0;">📄 Report Mese</button>
+        <button id="modalReportAnno" class="dropdown-item" style="margin:5px 0;">📅 Report Anno</button>
+        <button id="modalCSVMese" class="dropdown-item" style="margin:5px 0;">📎 CSV Mese</button>
+        <button id="modalCSVAnno" class="dropdown-item" style="margin:5px 0;">📎 CSV Anno</button>
+        <button id="modalFloppyClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
+    </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('modalReportRagioniere').onclick = () => { esportaReportRagioniere(); modal.remove(); };
+    document.getElementById('modalReportMese').onclick = () => { esportaPDFMese(); modal.remove(); };
+    document.getElementById('modalReportAnno').onclick = () => { esportaReportAnno(); modal.remove(); };
+    document.getElementById('modalCSVMese').onclick = () => { esportaCSV(false); modal.remove(); };
+    document.getElementById('modalCSVAnno').onclick = () => { esportaCSV(true); modal.remove(); };
+    document.getElementById('modalFloppyClose').onclick = () => modal.remove();
+}
+
+function mostraModaleMenu() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content" style="max-width:300px;"><h3>☰ MENU</h3>
+        <button id="modaleContabilita" class="dropdown-item" style="margin:5px 0;">📊 CONTABILITÀ (già qui)</button>
+        <button id="modaleAgenti" class="dropdown-item" style="margin:5px 0;">👥 AGENTI</button>
+        <button id="modaleChangePwd" class="dropdown-item" style="margin:5px 0;">🔑 CAMBIA PASSWORD</button>
+        <button id="modaleLogout" class="dropdown-item" style="margin:5px 0;">🚪 ESCI</button>
+        <button id="modalMenuClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
+    </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('modaleContabilita').onclick = () => { modal.remove(); };
+    document.getElementById('modaleAgenti').onclick = () => { modal.remove(); navigaConControllo('agenti.html'); };
+    document.getElementById('modaleChangePwd').onclick = () => { modal.remove(); document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; };
+    document.getElementById('modaleLogout').onclick = () => { modal.remove(); navigaConControllo('index.html'); };
+    document.getElementById('modalMenuClose').onclick = () => modal.remove();
+}
+
+async function navigaConControllo(url) {
+    if (modificheNonSalvate) {
+        const salva = await mostraModaleConferma("Hai modifiche non salvate. Vuoi salvare prima di uscire?");
+        if (salva) {
+            await salvaStatoFirebase(true);
+        }
+        resetModificheNonSalvate();
+    }
+    window.location.href = url;
 }
 
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') { 
     return { spostato: false, annullato: false };
 }
 
-// ==================== GESTIONE LAYOUT MOBILE E LISTENER ====================
 function toggleMobileLayout() {
     const isMobile = window.innerWidth <= 768;
     const mobileTop = document.querySelector('.mobile-top');
@@ -2375,6 +2603,7 @@ function aggiornaForm() {
         document.getElementById('btnMemorizza').disabled = false;
     }
 }
+
 function pulisciForm() {
     const today = getTodayDateObject();
     const defaultDate = (currentYear === today.getFullYear() && currentMonth === today.getMonth()) ? getTodayDateISO() : getFirstDayOfMonthISO(currentYear, currentMonth);
@@ -2457,7 +2686,6 @@ document.getElementById('mobileData')?.addEventListener('click', () => mostraMod
 document.getElementById('mobileSaldi')?.addEventListener('click', () => mostraModaleSaldiMobile());
 document.getElementById('mobileAltro')?.addEventListener('click', () => mostraModaleAltro());
 
-// Versione box click per copiare
 const versionBox = document.getElementById('versionBox');
 if (versionBox) {
     versionBox.addEventListener('click', () => {
@@ -2470,7 +2698,7 @@ window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) { const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci."; e.preventDefault(); e.returnValue = message; return message; }
 });
 
-// ==================== LOGO: SINGOLO CLICK = LINK PRINCIPALE, DOPPIO CLICK = LINK SECONDARIO ====================
+// LOGO
 let linkPrincipale = "", linkSecondario = "";
 async function caricaLinkDaFile() {
     try {
@@ -2506,152 +2734,6 @@ const mobileLogoDiv = document.getElementById('mobileLogo');
 if (mobileLogoDiv) {
     mobileLogoDiv.addEventListener('click', (e) => { e.stopPropagation(); apriLinkPrincipale(); });
     mobileLogoDiv.addEventListener('dblclick', (e) => { e.stopPropagation(); apriLinkSecondario(); });
-}
-
-// ==================== FUNZIONI MODALI MOBILE ====================
-async function mostraModaleDataMobile() {
-    try {
-        const snapshot = await db.collection('contabilita').get();
-        const periodi = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.anno !== undefined && data.mese !== undefined) {
-                periodi.push({ anno: data.anno, mese: data.mese, saldoIniziale: data.saldoIniziale || 0 });
-            }
-        });
-        periodi.sort((a,b) => { if (a.anno !== b.anno) return a.anno - b.anno; return a.mese - b.mese; });
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        let html = `<div class="modal-content" style="max-width:350px;"><h3>📅 PERIODI DISPONIBILI</h3><div style="max-height: 60vh; overflow-y: auto;">`;
-        if (periodi.length === 0) html += `<p>Nessun periodo trovato.</p>`;
-        else for (let p of periodi) html += `<div class="periodo-item" data-anno="${p.anno}" data-mese="${p.mese}"><div class="periodo-titolo">${mesiLista[p.mese]} ${p.anno}</div><div class="periodo-saldo">Saldo iniziale: ${formatNumber(p.saldoIniziale)} €</div></div>`;
-        html += `</div><div class="modal-buttons"><button id="modalDataClose" class="btn-primary">CHIUDI</button></div></div>`;
-        modal.innerHTML = html;
-        document.body.appendChild(modal);
-        document.querySelectorAll('.periodo-item').forEach(el => {
-            el.addEventListener('click', async () => {
-                const anno = parseInt(el.getAttribute('data-anno'));
-                const mese = parseInt(el.getAttribute('data-mese'));
-                modal.remove();
-                if (anno === currentYear && mese === currentMonth) return;
-                const today = getTodayDateObject();
-                if (anno !== today.getFullYear() || mese !== today.getMonth()) {
-                    const conferma = confirm(`⚠️ Stai uscendo dal mese corrente (${mesiLista[today.getMonth()]} ${today.getFullYear()}). Vuoi continuare?`);
-                    if (!conferma) return;
-                }
-                if (modificheNonSalvate) {
-                    const ok = await mostraModaleConferma("Hai modifiche non salvate. Vuoi salvare prima di cambiare periodo?");
-                    if (!ok) return;
-                    await caricaStatoFirebase();
-                }
-                currentYear = anno; currentMonth = mese;
-                await caricaStatoFirebase();
-                await popolaAnniMeseDinamici();
-                document.getElementById('annoSelect').value = currentYear;
-                document.getElementById('meseSelect').value = currentMonth;
-                showToast(`📅 Visualizzazione: ${mesiLista[currentMonth]} ${currentYear}`);
-            });
-        });
-        document.getElementById('modalDataClose').onclick = () => modal.remove();
-    } catch(e) { showToast("Errore nel caricamento dei periodi", true); }
-}
-function mostraModaleSaldiMobile() {
-    if (currentScheda === 'primanota') {
-        let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
-        let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
-        let tc = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
-        const saldoFinale = saldoIniziale + ta - td;
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong>Avere:</strong> <span class="positive">${formatNumber(ta)} €</span></p><p><strong>Dare:</strong> <span class="negative">${formatNumber(td)} €</span></p><p><strong>CASSA:</strong> <span class="positive">${formatNumber(tc)} €</span></p><p><strong>Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'}">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else if (currentScheda === 'contanti') {
-        let tot = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO CONTANTI</h3><p><strong>Totale incassi:</strong> <span class="positive">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else if (currentScheda === 'assclienti') {
-        let tot = assClienti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO ASS_CONT_CLIENTI</h3><p><strong>Totale importi:</strong> <span class="positive">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else if (currentScheda === 'pagaddt') {
-        let tot = pagaDdt.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PAGA_DDT_CLIENTI</h3><p><strong>Totale importi:</strong> <span class="positive">${formatNumber(tot)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById('modalSaldiClose').onclick = () => modal.remove();
-    } else showToast("Riepilogo non disponibile per questa scheda", true);
-}
-function mostraModaleAltro() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content" style="max-width:350px;"><h3>☰ COMANDI</h3>
-        <button id="modalePrimaNota" class="dropdown-item" style="margin:5px 0;">📋 PRIMA NOTA</button>
-        <button id="modaleContanti" class="dropdown-item" style="margin:5px 0;">💵 CONTANTI</button>
-        <button id="modaleFornitori" class="dropdown-item" style="margin:5px 0;">📄 FORNITORI</button>
-        <button id="modaleAssClienti" class="dropdown-item" style="margin:5px 0;">📋 ASS_CONT_CLIENTI</button>
-        <button id="modalePagaDdt" class="dropdown-item" style="margin:5px 0;">📋 PAGA_DDT_CLIENTI</button>
-        <button id="modaleAltroClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
-    </div>`;
-    document.body.appendChild(modal);
-    document.getElementById('modalePrimaNota').onclick = () => { setScheda('primanota'); modal.remove(); };
-    document.getElementById('modaleContanti').onclick = () => { setScheda('contanti'); modal.remove(); };
-    document.getElementById('modaleFornitori').onclick = () => { setScheda('fornitori'); modal.remove(); };
-    document.getElementById('modaleAssClienti').onclick = () => { setScheda('assclienti'); modal.remove(); };
-    document.getElementById('modalePagaDdt').onclick = () => { setScheda('pagaddt'); modal.remove(); };
-    document.getElementById('modaleAltroClose').onclick = () => modal.remove();
-}
-function mostraModaleFloppy() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content" style="max-width:300px;"><h3>📁 ESPORTAZIONI</h3>
-        <button id="modalReportRagioniere" class="dropdown-item" style="margin:5px 0;">📊 Report Ragioniere (PDF)</button>
-        <button id="modalReportMese" class="dropdown-item" style="margin:5px 0;">📄 Report Mese (PDF)</button>
-        <button id="modalReportAnno" class="dropdown-item" style="margin:5px 0;">📅 Report Anno</button>
-        <button id="modalCSVMese" class="dropdown-item" style="margin:5px 0;">📎 CSV Mese</button>
-        <button id="modalCSVAnno" class="dropdown-item" style="margin:5px 0;">📎 CSV Anno</button>
-        <button id="modalFloppyClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
-    </div>`;
-    document.body.appendChild(modal);
-    document.getElementById('modalReportRagioniere').onclick = () => { esportaReportRagioniere(); modal.remove(); };
-    document.getElementById('modalReportMese').onclick = () => { esportaPDFMese(); modal.remove(); };
-    document.getElementById('modalReportAnno').onclick = () => { esportaReportAnno(); modal.remove(); };
-    document.getElementById('modalCSVMese').onclick = () => { esportaCSV(false); modal.remove(); };
-    document.getElementById('modalCSVAnno').onclick = () => { esportaCSV(true); modal.remove(); };
-    document.getElementById('modalFloppyClose').onclick = () => modal.remove();
-}
-function mostraModaleMenu() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="modal-content" style="max-width:300px;"><h3>☰ MENU</h3>
-        <button id="modaleContabilita" class="dropdown-item" style="margin:5px 0;">📊 CONTABILITÀ (già qui)</button>
-        <button id="modaleAgenti" class="dropdown-item" style="margin:5px 0;">👥 AGENTI</button>
-        <button id="modaleChangePwd" class="dropdown-item" style="margin:5px 0;">🔑 CAMBIA PASSWORD</button>
-        <button id="modaleLogout" class="dropdown-item" style="margin:5px 0;">🚪 ESCI</button>
-        <button id="modalMenuClose" class="btn-danger" style="margin-top:15px;">CHIUDI</button>
-    </div>`;
-    document.body.appendChild(modal);
-    document.getElementById('modaleContabilita').onclick = () => { modal.remove(); };
-    document.getElementById('modaleAgenti').onclick = () => { modal.remove(); navigaConControllo('agenti.html'); };
-    document.getElementById('modaleChangePwd').onclick = () => { modal.remove(); document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; };
-    document.getElementById('modaleLogout').onclick = () => { modal.remove(); navigaConControllo('index.html'); };
-    document.getElementById('modalMenuClose').onclick = () => modal.remove();
-}
-
-async function navigaConControllo(url) {
-    if (modificheNonSalvate) {
-        const salva = await mostraModaleConferma("Hai modifiche non salvate. Vuoi salvare prima di uscire?");
-        if (salva) await salvaStatoFirebase(true);
-        resetModificheNonSalvate();
-    }
-    window.location.href = url;
 }
 
 // Avvio
