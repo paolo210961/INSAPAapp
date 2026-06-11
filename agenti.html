@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.67</title>
+    <title>inSAPA - Agenti vA.5.68</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -32,6 +32,7 @@
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-cerca-listino { background: #8e44ad; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .btn-ordine-header { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
         .tooltip-wrapper { position: relative; display: inline-block; }
@@ -81,30 +82,14 @@
         .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
         .cliente-info-modale p { margin: 5px 0; }
         
-        /* Stili per la stampa PDF */
-        @media print {
-            .modal-overlay, .modal-content, .btn-group-modal, .ricerca-articolo-ordine, .ordine-articolo-qta input, .ordine-articolo-qta label {
-                display: none !important;
-            }
-            .print-area {
-                display: block !important;
-            }
-            .ordine-articolo-item {
-                border: none;
-                border-bottom: 1px solid #ddd;
-                page-break-inside: avoid;
-            }
-        }
-        
-        .print-area {
-            display: none;
-            padding: 20px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .print-area h2 { color: #2c3e50; }
-        .print-area table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .print-area th, .print-area td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .print-area th { background: #f1c40f; }
+        /* Stili per il modale listino prezzi */
+        .listino-risultato-item { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: white; text-align: left; }
+        .listino-risultato-codice { font-weight: bold; font-size: 1.1rem; color: #2c3e50; margin-bottom: 5px; }
+        .listino-risultato-desc { color: #555; margin-bottom: 8px; font-size: 0.9rem; }
+        .listino-risultato-dettagli { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.85rem; background: #f8f9fa; padding: 8px; border-radius: 6px; margin-top: 5px; }
+        .listino-risultato-dettagli span { color: #2c3e50; font-weight: bold; }
+        .listino-prezzo { font-size: 1.2rem; font-weight: bold; color: #27ae60; margin: 8px 0; }
+        .lista-risultati { max-height: 500px; overflow-y: auto; margin: 15px 0; text-align: left; }
         
         @media (max-width: 768px) {
             .header-row { flex-direction: column; align-items: stretch; }
@@ -141,6 +126,7 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
+            .listino-risultato-dettagli { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -169,14 +155,13 @@
             <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
         <div class="action-group">
-            <div class="tooltip-wrapper">
-                <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
-                <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt - Esempio: ORD01.txt e SCA01.txt (accetta anche ORD1.txt e SCA1.txt)</span>
+            <div class="action-group" style="display: flex; gap: 10px;">
+                <input type="text" id="cercaListino" placeholder="🔍 Cerca per codice o descrizione..." style="min-width: 200px;">
+                <button id="btnCercaListino" class="btn-cerca-listino">📋 CERCA PREZZO</button>
             </div>
             <button id="btnCompilaOrdine" class="btn-ordine-header">
                 📝 COMPILA ORDINE
             </button>
-            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
     </div>
@@ -196,7 +181,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.67 - Stampa PDF su PC / Email su Mobile</div>
+<div class="version">vA.5.68 - Ricerca Prezzi da Listino</div>
 
 <script>
 const firebaseConfig = {
@@ -217,12 +202,147 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
+let listinoArticoli = [];
 
 let linkPrincipale = "", linkSecondario = "";
 
 // Funzione per rilevare se è desktop/PC (non touch o mouse preciso)
 function isDesktop() {
     return window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
+}
+
+// FUNZIONE: Carica listino da file "LISTINO"
+async function caricaListino() {
+    try {
+        const response = await fetch('LISTINO');
+        if (!response.ok) {
+            console.log("File LISTINO non trovato, verrà usato listino vuoto");
+            return;
+        }
+        const text = await response.text();
+        const lines = text.split(/\r?\n/);
+        
+        listinoArticoli = [];
+        let inTable = false;
+        let headers = [];
+        
+        for (let line of lines) {
+            line = line.trim();
+            if (line === "") continue;
+            
+            // Cerca l'inizio della tabella
+            if (line.includes("Codice Artic.") && line.includes("Codice EAN")) {
+                inTable = true;
+                // Estrai gli headers
+                headers = line.split(/\s{2,}/);
+                continue;
+            }
+            
+            // Linea di separazione
+            if (line.includes("---") || line.includes("===")) continue;
+            
+            // Se siamo nella tabella e la linea non è vuota
+            if (inTable && line.length > 0 && !line.includes("Azienda:")) {
+                // Parser flessibile per il formato del listino
+                // Il formato ha colonne fisse approssimative
+                let parts = line.split(/\s{2,}/);
+                if (parts.length >= 8) {
+                    // Pulisci i dati
+                    let codice = parts[0].trim();
+                    let codiceEan = parts[1].trim();
+                    let prezzoStr = parts[2].trim().replace(',', '.');
+                    let prezzo = parseFloat(prezzoStr) || 0;
+                    let descrizione = parts[3].trim();
+                    let um = parts[4].trim();
+                    let gm = parts[5].trim();
+                    let mOrd = parseInt(parts[6].trim()) || 0;
+                    let iva = parseInt(parts[7].trim()) || 0;
+                    
+                    // Salta righe con codice vuoto o prezzo 0 (intestazioni)
+                    if (codice && codice !== "" && !codice.includes("Codice") && prezzo > 0) {
+                        listinoArticoli.push({
+                            codice: codice,
+                            codiceEan: codiceEan,
+                            prezzo: prezzo,
+                            descrizione: descrizione,
+                            um: um,
+                            gm: gm,
+                            mOrd: mOrd,
+                            iva: iva
+                        });
+                    }
+                }
+            }
+        }
+        
+        console.log("LISTINO CARICATO:", listinoArticoli.length, "articoli");
+        showToast("Listino caricato: " + listinoArticoli.length + " articoli");
+        
+    } catch(e) {
+        console.error("Errore caricamento listino:", e);
+        showToast("Errore caricamento listino", true);
+    }
+}
+
+// FUNZIONE: Apre modale ricerca listino
+function apriModaleListino() {
+    const searchText = document.getElementById('cercaListino').value.trim();
+    if (!searchText) {
+        alert("Inserisci un codice o descrizione da cercare!");
+        return;
+    }
+    
+    // Cerca nel listino
+    const lowerSearch = searchText.toLowerCase();
+    const risultati = listinoArticoli.filter(art => 
+        art.codice.toLowerCase().includes(lowerSearch) || 
+        art.descrizione.toLowerCase().includes(lowerSearch)
+    );
+    
+    if (risultati.length === 0) {
+        alert("Nessun articolo trovato per: " + searchText);
+        return;
+    }
+    
+    // Crea modale
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    
+    let risultatiHtml = '';
+    for (let art of risultati) {
+        risultatiHtml += `
+            <div class="listino-risultato-item">
+                <div class="listino-risultato-codice">📦 ${art.codice}</div>
+                <div class="listino-risultato-desc">${art.descrizione}</div>
+                <div class="listino-prezzo">💶 PREZZO: € ${art.prezzo.toFixed(2)}</div>
+                <div class="listino-risultato-dettagli">
+                    <div>📏 UM: <span>${art.um || '-'}</span></div>
+                    <div>🔢 MINIMO ORDINABILE: <span>${art.mOrd || '0'}</span></div>
+                    <div>🏷️ CODICE EAN: <span>${art.codiceEan || '-'}</span></div>
+                    <div>📊 IVA: <span>${art.iva}%</span></div>
+                    <div>📂 GRUPPO MERC.: <span>${art.gm || '-'}</span></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>📋 LISTINO PREZZI - RISULTATI RICERCA</h3>
+            <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">Ricerca: "${searchText}" | Trovati: ${risultati.length}</p>
+            <div class="lista-risultati">
+                ${risultatiHtml}
+            </div>
+            <div class="btn-group-modal">
+                <button id="btnChiudiListino" class="btn-primary">CHIUDI</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnChiudiListino').onclick = () => {
+        modal.remove();
+    };
 }
 
 async function caricaLinkDaFile() {
@@ -869,37 +989,6 @@ function filtraArticoli() {
     document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
 }
 
-function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
-    let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
-    let match = baseName.match(/^([A-Z]+)(\d+)$/i);
-    if (!match) return false;
-    if (match[1].toUpperCase() !== tipo) return false;
-    return parseInt(match[2],10) === parseInt(codiceAgente,10);
-}
-async function caricaFile(files) {
-    if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
-    if (files.length !== 2) { alert("Servono ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
-    let codAgente = agenteCorrente.codice;
-    let trovati = { ord: false, sca: false };
-    let ordText = null, scaText = null, errori = [];
-    for (let file of files) {
-        let nome = file.name;
-        if (nomeFileCorrisponde(nome, codAgente, 'ORD')) { trovati.ord = true; ordText = await file.text(); }
-        else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) { trovati.sca = true; scaText = await file.text(); }
-        else errori.push(nome);
-    }
-    if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
-    if (!trovati.ord || !trovati.sca) { alert("FILE MANCANTI: ORD" + codAgente + ".txt e SCA" + codAgente + ".txt"); return false; }
-    datiOrd = []; datiSca = [];
-    if (ordText) { datiOrd = parseORD(ordText); }
-    if (scaText) { datiSca = parseSCA(scaText); }
-    await salvaDatiAgente();
-    aggiornaClienti();
-    document.getElementById('fileStatusInline').innerHTML = "OK ORD: " + datiOrd.length + " | SCA: " + datiSca.length;
-    alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti\nTotale clienti unici: " + clientiUnici.length);
-    return true;
-}
-
 const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
 const navGridAgenti = document.getElementById('navGrid');
 if (hamburgerBtnAgenti && navGridAgenti) {
@@ -916,7 +1005,10 @@ document.getElementById('selectAgente').onchange = (e) => {
 document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if (c) filtraArticoli(); };
-document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('btnCercaListino').onclick = () => apriModaleListino();
+document.getElementById('cercaListino').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') apriModaleListino();
+});
 document.getElementById('btnCompilaOrdine').onclick = () => {
     let clienteCodice = document.getElementById('selectClienteAgenti').value;
     if (!clienteCodice) {
@@ -930,9 +1022,8 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
         alert("Cliente non trovato!");
     }
 };
-document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 
-Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
+Promise.all([caricaLinkDaFile(), caricaAgenti(), caricaListino()]).then(() => caricaLogoSaved());
 </script>
 </body>
 </html>
