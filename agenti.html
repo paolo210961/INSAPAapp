@@ -111,7 +111,6 @@
             .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
             .btn-whatsapp { width: 100%; justify-content: center; }
             .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
-            .btnCreaAgenteMobileHide { grid-column: span 2; display: flex; gap: 10px; }
             .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
             .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
@@ -154,10 +153,6 @@
             </button>
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
-        </div>
-        <div class="action-group btnCreaAgenteMobileHide">
-            <button id="btnEliminaAgente" class="btn-danger" style="display:inline-block; width:auto;">ELIMINA AGENTE</button>
-            <button id="btnCreaAgente" class="btn-success" style="display:inline-block; width:auto;">CREA AGENTE</button>
         </div>
     </div>
 </div>
@@ -358,40 +353,6 @@ async function salvaDatiAgente() {
     }
 }
 
-async function creaAgente(codice, nome) {
-    if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
-    let codiceNorm = normalizzaCodiceAgente(codice);
-    if (agentiLista.find(a => a.codice === codiceNorm)) { alert("Codice gia esistente!"); return false; }
-    try { await db.collection('agenti_lista').doc(codiceNorm).set({ codice: codiceNorm, nome }); await caricaAgenti(); return true; } catch(e) { alert("ERRORE: "+e.message); return false; }
-}
-async function eliminaAgente() {
-    if (!agenteCorrente) { alert("Nessun agente selezionato!"); return; }
-    const modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = '<div class="modal-content"><h3>ATTENZIONE</h3><p>Sei sicuro di voler eliminare l\'agente:<br><strong>'+agenteCorrente.codice+' - '+agenteCorrente.nome+'</strong>?</p><p style="color:#e74c3c">Operazione IRREVERSIBILE!</p><div class="btn-group-modal"><button id="btnConfermaElimina" class="btn-danger">CONFERMA</button><button id="btnAnnullaElimina" class="btn-primary">ANNULLA</button></div></div>';
-    document.body.appendChild(modal);
-    document.getElementById('btnConfermaElimina').onclick = async () => {
-        try {
-            const ordRef = db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).collection('clienti');
-            const scaRef = db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).collection('clienti');
-            
-            const ordSnapshot = await ordRef.get();
-            const batch = db.batch();
-            ordSnapshot.forEach(doc => batch.delete(doc.ref));
-            const scaSnapshot = await scaRef.get();
-            scaSnapshot.forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
-            
-            await db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).delete();
-            await db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).delete();
-            await db.collection('agenti_lista').doc(agenteCorrente.codice).delete();
-            
-            showToast("Agente "+agenteCorrente.codice+" eliminato");
-            agenteCorrente = null; localStorage.removeItem('ultimoAgenteSelezionato'); datiOrd = []; datiSca = []; clientiUnici = []; document.getElementById('dettaglioAgenti').innerHTML = ''; document.getElementById('fileStatusInline').innerHTML = ''; await caricaAgenti(); modal.remove();
-        } catch(e) { alert("ERRORE: "+e.message); }
-    };
-    document.getElementById('btnAnnullaElimina').onclick = () => modal.remove();
-}
-
 function convertiImportoItaliano(importoStr) {
     if (!importoStr) return 0;
     let isNegative = importoStr.endsWith('-');
@@ -510,6 +471,41 @@ function calcolaUltimaDataArticolo(articolo) {
     return dateObj[0];
 }
 
+// NUOVA FUNZIONE: Gestisce l'input quantità (zero nascosto, selezione automatica)
+function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
+    inputElement.value = '';
+    inputElement.placeholder = '0';
+    
+    inputElement.addEventListener('focus', function() {
+        if (this.value === '0') this.value = '';
+    });
+    
+    inputElement.addEventListener('blur', function() {
+        let val = this.value.trim();
+        if (val === '' || val === '0') {
+            this.value = '';
+            quantitaInputs[articoloCodice] = 0;
+        } else {
+            let num = parseInt(val, 10);
+            if (isNaN(num) || num < 0) num = 0;
+            this.value = num;
+            quantitaInputs[articoloCodice] = num;
+        }
+    });
+    
+    inputElement.addEventListener('input', function() {
+        let val = this.value.trim();
+        if (val === '') {
+            quantitaInputs[articoloCodice] = 0;
+        } else {
+            let num = parseInt(val, 10);
+            if (!isNaN(num) && num >= 0) {
+                quantitaInputs[articoloCodice] = num;
+            }
+        }
+    });
+}
+
 // NUOVA FUNZIONE: Apre modale compila ordine
 function apriModaleOrdine(cliente) {
     if (!cliente) {
@@ -586,23 +582,20 @@ function apriModaleOrdine(cliente) {
                     </div>
                     <div class="ordine-articolo-qta">
                         <label>Quantità:</label>
-                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" value="${quantitaInputs[art.codice] || 0}" placeholder="0">
+                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" style="text-align:center;">
                     </div>
                 </div>
             `;
         }
         container.innerHTML = html;
         
-        // Ricollega eventi input
+        // Setup input quantità con comportamento zero nascosto
         for (let art of filtrati) {
             const inputId = `qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
             const input = document.getElementById(inputId);
             if (input) {
-                input.addEventListener('change', (e) => {
-                    const val = parseInt(e.target.value) || 0;
-                    if (val >= 0) quantitaInputs[art.codice] = val;
-                    else quantitaInputs[art.codice] = 0;
-                });
+                if (quantitaInputs[art.codice] === undefined) quantitaInputs[art.codice] = 0;
+                setupQuantitaInput(input, art.codice, quantitaInputs);
             }
         }
     }
@@ -615,7 +608,6 @@ function apriModaleOrdine(cliente) {
     });
     
     document.getElementById('btnInviaEmailOrdine').onclick = () => {
-        // Raccogli quantità
         let articoliConQta = [];
         for (let art of articoliOrdinati) {
             let qta = quantitaInputs[art.codice] || 0;
@@ -633,7 +625,6 @@ function apriModaleOrdine(cliente) {
             return;
         }
         
-        // Prepara corpo email
         let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
         let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
         corpo += `ARTICOLI ORDINATI:\n`;
@@ -645,7 +636,6 @@ function apriModaleOrdine(cliente) {
         corpo += `----------------------------------------\n`;
         corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
         
-        // Apri app email
         window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
         
         modal.remove();
@@ -823,14 +813,6 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
     }
 };
 document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
-document.getElementById('btnCreaAgente').onclick = () => {
-    let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = '<div class="modal-content"><h3>NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 01 o A01"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-primary">ANNULLA</button></div></div>';
-    document.body.appendChild(modal);
-    document.getElementById('btnConferma').onclick = async () => { let cod = document.getElementById('nuovoCodice').value.trim(); let nom = document.getElementById('nuovoNome').value.trim(); if (cod && nom) { if (await creaAgente(cod, nom)) { alert("Agente "+cod+" - "+nom+" creato!"); modal.remove(); } } else alert("Compila tutti i campi!"); };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-};
-document.getElementById('btnEliminaAgente').onclick = () => eliminaAgente();
 
 Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
 </script>
