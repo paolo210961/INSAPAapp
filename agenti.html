@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.64</title>
+    <title>inSAPA - Agenti vA.5.65</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -100,7 +100,6 @@
             .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
             .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
-            /* miglioramento visualizzazione tabella su mobile */
             .scadenze-box table, .scadenze-box thead, .scadenze-box tbody, .scadenze-box th, .scadenze-box td, .scadenze-box tr { display: block; }
             .scadenze-box thead tr { position: absolute; top: -9999px; left: -9999px; }
             .scadenze-box tr { border: 1px solid #ccc; margin-bottom: 10px; }
@@ -166,7 +165,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.64 - Tabella scadenze con Data Doc (allineata)</div>
+<div class="version">vA.5.65 - Sotto-collezioni + supporto codici alfanumerici</div>
 
 <script>
 const firebaseConfig = {
@@ -229,13 +228,36 @@ function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').
 function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
 function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
 
-function normalizzaCodiceAgente(codice) { let num = parseInt(codice, 10); return isNaN(num) ? codice : num.toString(); }
+function normalizzaCodiceAgente(codice) { 
+    // Non forzare parseInt, mantieni come stringa
+    return codice.toString(); 
+}
+
+async function pulisciVecchiDocumentiMonolitici(codice) {
+    try {
+        // Controlla ed elimina il vecchio documento ORD monolitico
+        const vecchioOrd = await db.collection('agenti_dati').doc('ord_'+codice).get();
+        if (vecchioOrd.exists && vecchioOrd.data().dati) {
+            await db.collection('agenti_dati').doc('ord_'+codice).delete();
+            console.log("Vecchio documento ORD monolitico eliminato per agente", codice);
+        }
+        // Controlla ed elimina il vecchio documento SCA monolitico
+        const vecchioSca = await db.collection('agenti_dati').doc('sca_'+codice).get();
+        if (vecchioSca.exists && vecchioSca.data().dati) {
+            await db.collection('agenti_dati').doc('sca_'+codice).delete();
+            console.log("Vecchio documento SCA monolitico eliminato per agente", codice);
+        }
+    } catch(e) { 
+        console.log("Nessun vecchio documento da pulire o errore:", e.message); 
+    }
+}
+
 async function caricaAgenti() {
     try {
         const snapshot = await db.collection('agenti_lista').get();
         agentiLista = [];
         snapshot.forEach(doc => { let data = doc.data(); data.codice = normalizzaCodiceAgente(data.codice); agentiLista.push(data); });
-        agentiLista.sort((a,b) => { let aNum = parseInt(a.codice,10), bNum = parseInt(b.codice,10); if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum; return a.codice.localeCompare(b.codice); });
+        agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
         aggiornaSelectAgenti();
         const ultimoAgente = localStorage.getItem('ultimoAgenteSelezionato');
         if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) { document.getElementById('selectAgente').value = ultimoAgente; selezionaAgente(ultimoAgente); }
@@ -248,35 +270,94 @@ function aggiornaSelectAgenti() {
     for (let a of agentiLista) { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = a.codice+" - "+a.nome; select.appendChild(opt); }
     if (oldValue && agentiLista.find(a => a.codice === oldValue)) { select.value = oldValue; selezionaAgente(oldValue); }
 }
+
+async function caricaDatiAgente(codice) {
+    try {
+        // Carica ORD dalla sotto-collezione
+        const ordSnapshot = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
+        datiOrd = [];
+        ordSnapshot.forEach(doc => {
+            datiOrd.push(doc.data());
+        });
+        
+        // Carica SCA dalla sotto-collezione
+        const scaSnapshot = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
+        datiSca = [];
+        scaSnapshot.forEach(doc => {
+            datiSca.push(doc.data());
+        });
+        
+        document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        return true;
+    } catch(e) { 
+        console.error("Errore caricamento:", e);
+        return false;
+    }
+}
+
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
     localStorage.setItem('ultimoAgenteSelezionato', codice);
-    try {
-        let ordDoc = await db.collection('agenti_dati').doc('ord_'+codice).get();
-        let scaDoc = await db.collection('agenti_dati').doc('sca_'+codice).get();
-        if (!ordDoc.exists) { let vecchioCodice = codice.padStart(4, '0'); ordDoc = await db.collection('agenti_dati').doc('ord_'+vecchioCodice).get(); if (ordDoc.exists) { await db.collection('agenti_dati').doc('ord_'+codice).set(ordDoc.data()); await db.collection('agenti_dati').doc('ord_'+vecchioCodice).delete(); } }
-        if (!scaDoc.exists) { let vecchioCodice = codice.padStart(4, '0'); scaDoc = await db.collection('agenti_dati').doc('sca_'+vecchioCodice).get(); if (scaDoc.exists) { await db.collection('agenti_dati').doc('sca_'+codice).set(scaDoc.data()); await db.collection('agenti_dati').doc('sca_'+vecchioCodice).delete(); } }
-        datiOrd = ordDoc.exists ? ordDoc.data().dati : [];
-        datiSca = scaDoc.exists ? scaDoc.data().dati : [];
-        document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
-        aggiornaClienti();
-        document.getElementById('cercaCliente').value = '';
-        document.getElementById('cercaArticoloInline').value = '';
-        document.getElementById('dettaglioAgenti').innerHTML = '';
-        resetModificheNonSalvate();
-    } catch(e) { alert("Errore caricamento dati: "+e.message); }
+    await caricaDatiAgente(codice);
+    aggiornaClienti();
+    document.getElementById('cercaCliente').value = '';
+    document.getElementById('cercaArticoloInline').value = '';
+    document.getElementById('dettaglioAgenti').innerHTML = '';
+    resetModificheNonSalvate();
 }
+
 async function salvaDatiAgente() {
     if (!agenteCorrente) return;
     try {
-        await db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).set({ dati: datiOrd });
-        await db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).set({ dati: datiSca });
+        // Salva ORD in sotto-collezione
+        const ordRef = db.collection('agenti_dati').doc('ord_' + agenteCorrente.codice).collection('clienti');
+        const batch = db.batch();
+        
+        // Cancella vecchi dati ORD
+        const vecchiOrd = await ordRef.get();
+        vecchiOrd.forEach(doc => batch.delete(doc.ref));
+        
+        // Aggiungi nuovi clienti ORD
+        for (let cliente of datiOrd) {
+            const docRef = ordRef.doc(cliente.codice.toString());
+            batch.set(docRef, {
+                codice: cliente.codice,
+                ragione: cliente.ragione,
+                articoli: cliente.articoli
+            });
+        }
+        
+        // Salva SCA in sotto-collezione
+        const scaRef = db.collection('agenti_dati').doc('sca_' + agenteCorrente.codice).collection('clienti');
+        
+        const vecchiSca = await scaRef.get();
+        vecchiSca.forEach(doc => batch.delete(doc.ref));
+        
+        for (let cliente of datiSca) {
+            const docRef = scaRef.doc(cliente.codice.toString());
+            batch.set(docRef, {
+                codice: cliente.codice,
+                ragione: cliente.ragione,
+                scadenze: cliente.scadenze
+            });
+        }
+        
+        await batch.commit();
+        
+        // Pulisci automaticamente i vecchi documenti monolitici
+        await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
+        
         document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
         resetModificheNonSalvate();
         showToast("Dati salvati!");
-    } catch(e) { alert("Errore salvataggio: "+e.message); }
+        return true;
+    } catch(e) { 
+        alert("Errore salvataggio: "+e.message); 
+        return false;
+    }
 }
+
 async function creaAgente(codice, nome) {
     if (!codice || !nome) { alert("Inserisci codice e nome!"); return false; }
     let codiceNorm = normalizzaCodiceAgente(codice);
@@ -290,9 +371,21 @@ async function eliminaAgente() {
     document.body.appendChild(modal);
     document.getElementById('btnConfermaElimina').onclick = async () => {
         try {
-            await db.collection('agenti_lista').doc(agenteCorrente.codice).delete();
+            // Elimina anche le sotto-collezioni
+            const ordRef = db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).collection('clienti');
+            const scaRef = db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).collection('clienti');
+            
+            const ordSnapshot = await ordRef.get();
+            const batch = db.batch();
+            ordSnapshot.forEach(doc => batch.delete(doc.ref));
+            const scaSnapshot = await scaRef.get();
+            scaSnapshot.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            
             await db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).delete();
             await db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).delete();
+            await db.collection('agenti_lista').doc(agenteCorrente.codice).delete();
+            
             showToast("Agente "+agenteCorrente.codice+" eliminato");
             agenteCorrente = null; localStorage.removeItem('ultimoAgenteSelezionato'); datiOrd = []; datiSca = []; clientiUnici = []; document.getElementById('dettaglioAgenti').innerHTML = ''; document.getElementById('fileStatusInline').innerHTML = ''; await caricaAgenti(); modal.remove();
         } catch(e) { alert("ERRORE: "+e.message); }
@@ -320,7 +413,12 @@ function parseORD(text) {
         line = line.trimEnd();
         if (line === "") continue;
         let mCliente = line.match(reCliente);
-        if (mCliente) { currentCliente = { codice: mCliente[1], ragione: mCliente[2].trim(), articoli: [] }; clienti.set(currentCliente.codice, currentCliente); continue; }
+        if (mCliente) { 
+            // Mantieni il codice come stringa (anche se numerico, resta stringa)
+            currentCliente = { codice: mCliente[1].toString(), ragione: mCliente[2].trim(), articoli: [] }; 
+            clienti.set(currentCliente.codice, currentCliente); 
+            continue; 
+        }
         if (!currentCliente) continue;
         if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
         let coppie = [], match;
@@ -329,7 +427,8 @@ function parseORD(text) {
         let firstCoppiaStart = coppie[0].start;
         let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
         let tokens = descrizioneRaw.split(/\s+/);
-        let codice = parseInt(tokens[0], 10).toString();
+        // CODICE ARTICOLO: mantieni come stringa originale (non parseInt)
+        let codice = tokens[0].toString();
         let descrizione = tokens.slice(1).join(" ");
         let lastCoppiaEnd = coppie[coppie.length-1].end;
         let afterCoppie = line.substring(lastCoppiaEnd).trim();
@@ -342,7 +441,6 @@ function parseORD(text) {
     return Array.from(clienti.values());
 }
 
-// ==================== PARSER SCA v3 - FIX DEFINITIVO ====================
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
@@ -367,7 +465,8 @@ function parseSCA(text) {
         if (line.startsWith("STAMPA")) continue;
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            let codice = parseInt(mCliente[1], 10).toString();
+            // Mantieni il codice come stringa
+            let codice = mCliente[1].toString();
             let ragione = mCliente[2].trim();
             currentCliente = { codice, ragione, scadenze: [] };
             clienti.set(codice, currentCliente);
@@ -411,7 +510,7 @@ function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("S
 function aggiornaClienti() {
     let mappa = new Map();
     for (let c of datiOrd) {
-        let codiceNorm = parseInt(c.codice, 10).toString();
+        let codiceNorm = c.codice.toString();
         mappa.set(codiceNorm, { codice: codiceNorm, ragione: c.ragione, hasScadenze: false, scadenze: [], ordini: c.articoli });
     }
     for (let c of datiSca) {
@@ -442,11 +541,10 @@ function filtraClienti() {
     if (clientiFiltrati.length === 0) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
 }
 
-// Funzione per costruire la tabella con Data Doc al posto della descrizione
 function buildScadenzeHtml(cliente) {
     let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
     html += '<button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button>';
-    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
+    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th><tr></thead><tbody>';
     for (let s of cliente.scadenze) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += '<tr>';
@@ -566,7 +664,7 @@ document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeC
 document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
-    modal.innerHTML = '<div class="modal-content"><h3>NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 01"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-primary">ANNULLA</button></div></div>';
+    modal.innerHTML = '<div class="modal-content"><h3>NUOVO AGENTE</h3><label>Codice</label><input type="text" id="nuovoCodice" placeholder="es. 01 o A01"><label>Nome</label><input type="text" id="nuovoNome" placeholder="es. Mario Rossi"><div class="btn-group-modal"><button id="btnConferma" class="btn-success">CREA</button><button id="btnAnnulla" class="btn-primary">ANNULLA</button></div></div>';
     document.body.appendChild(modal);
     document.getElementById('btnConferma').onclick = async () => { let cod = document.getElementById('nuovoCodice').value.trim(); let nom = document.getElementById('nuovoNome').value.trim(); if (cod && nom) { if (await creaAgente(cod, nom)) { alert("Agente "+cod+" - "+nom+" creato!"); modal.remove(); } } else alert("Compila tutti i campi!"); };
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
