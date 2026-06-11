@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.66</title>
+    <title>inSAPA - Agenti vA.5.67</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -80,6 +80,31 @@
         .ricerca-articolo-ordine input { width: 100%; padding: 10px; font-size: 0.9rem; }
         .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
         .cliente-info-modale p { margin: 5px 0; }
+        
+        /* Stili per la stampa PDF */
+        @media print {
+            .modal-overlay, .modal-content, .btn-group-modal, .ricerca-articolo-ordine, .ordine-articolo-qta input, .ordine-articolo-qta label {
+                display: none !important;
+            }
+            .print-area {
+                display: block !important;
+            }
+            .ordine-articolo-item {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+        
+        .print-area {
+            display: none;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .print-area h2 { color: #2c3e50; }
+        .print-area table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .print-area th, .print-area td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .print-area th { background: #f1c40f; }
         
         @media (max-width: 768px) {
             .header-row { flex-direction: column; align-items: stretch; }
@@ -171,7 +196,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.66 - Compila Ordine via Email</div>
+<div class="version">vA.5.67 - Stampa PDF su PC / Email su Mobile</div>
 
 <script>
 const firebaseConfig = {
@@ -194,6 +219,12 @@ let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
 
 let linkPrincipale = "", linkSecondario = "";
+
+// Funzione per rilevare se è desktop/PC (non touch o mouse preciso)
+function isDesktop() {
+    return window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
+}
+
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -460,7 +491,97 @@ function inviaScadenzeWhatsApp(cliente) {
 }
 function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
-// NUOVA FUNZIONE: Calcola ultima data acquisto per ogni articolo
+// Funzione per generare HTML dell'ordine (usato sia per email che per stampa)
+function generaHtmlOrdine(cliente, articoliConQta) {
+    let html = `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+            <h2 style="color: #2c3e50; border-bottom: 2px solid #f1c40f; padding-bottom: 10px;">📝 ORDINE DA CLIENTE</h2>
+            <div style="background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p><strong>Codice Cliente:</strong> ${cliente.codice}</p>
+                <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
+                <p><strong>Data Ordine:</strong> ${new Date().toLocaleDateString('it-IT')}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                <thead>
+                    <tr style="background: #f1c40f;">
+                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Codice Articolo</th>
+                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Descrizione</th>
+                        <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">Quantità</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    for (let item of articoliConQta) {
+        html += `
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.codice}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.descrizione}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantita} pz</td>
+            </tr>
+        `;
+    }
+    html += `
+                </tbody>
+            </table>
+            <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 10px;">
+                Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}
+            </div>
+        </div>
+    `;
+    return html;
+}
+
+// Funzione per stampare PDF (PC)
+function stampaPDF(cliente, articoliConQta) {
+    const htmlContent = generaHtmlOrdine(cliente, articoliConQta);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Ordine_${cliente.codice}_${new Date().toLocaleDateString('it-IT').replace(/\//g, '-')}</title>
+            <meta charset="UTF-8">
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+                @media print {
+                    body { margin: 0; padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            ${htmlContent}
+            <script>
+                window.onload = function() {
+                    window.print();
+                    window.onafterprint = function() {
+                        window.close();
+                    };
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+// Funzione per inviare email (mobile)
+function inviaEmailOrdine(cliente, articoliConQta) {
+    let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
+    let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
+    corpo += `ARTICOLI ORDINATI:\n`;
+    corpo += `----------------------------------------\n`;
+    for (let item of articoliConQta) {
+        corpo += `📦 ${item.codice} - ${item.descrizione}\n`;
+        corpo += `   Quantità: ${item.quantita} pz\n\n`;
+    }
+    corpo += `----------------------------------------\n`;
+    corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
+    
+    window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
+}
+
+// Calcola ultima data acquisto per ogni articolo
 function calcolaUltimaDataArticolo(articolo) {
     if (!articolo.coppie || articolo.coppie.length === 0) return null;
     let dateObj = articolo.coppie.map(c => ({
@@ -471,7 +592,7 @@ function calcolaUltimaDataArticolo(articolo) {
     return dateObj[0];
 }
 
-// NUOVA FUNZIONE: Gestisce l'input quantità (zero nascosto, selezione automatica)
+// Gestisce l'input quantità (zero nascosto, selezione automatica)
 function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     inputElement.value = '';
     inputElement.placeholder = '0';
@@ -506,7 +627,7 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     });
 }
 
-// NUOVA FUNZIONE: Apre modale compila ordine
+// Apre modale compila ordine
 function apriModaleOrdine(cliente) {
     if (!cliente) {
         alert("Seleziona un cliente prima di compilare l'ordine!");
@@ -532,6 +653,10 @@ function apriModaleOrdine(cliente) {
     // Crea modale
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
+    
+    const isDesktopDevice = isDesktop();
+    const pulsanteTesto = isDesktopDevice ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
+    
     modal.innerHTML = `
         <div class="modal-content">
             <h3>📝 ORDINE DA CLIENTE</h3>
@@ -544,7 +669,7 @@ function apriModaleOrdine(cliente) {
             </div>
             <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
             <div class="btn-group-modal">
-                <button id="btnInviaEmailOrdine" class="btn-success">📧 INVIA EMAIL</button>
+                <button id="btnConfermaOrdine" class="btn-success">${pulsanteTesto}</button>
                 <button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button>
             </div>
         </div>
@@ -589,7 +714,6 @@ function apriModaleOrdine(cliente) {
         }
         container.innerHTML = html;
         
-        // Setup input quantità con comportamento zero nascosto
         for (let art of filtrati) {
             const inputId = `qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
             const input = document.getElementById(inputId);
@@ -607,7 +731,7 @@ function apriModaleOrdine(cliente) {
         renderListaArticoli(e.target.value);
     });
     
-    document.getElementById('btnInviaEmailOrdine').onclick = () => {
+    document.getElementById('btnConfermaOrdine').onclick = () => {
         let articoliConQta = [];
         for (let art of articoliOrdinati) {
             let qta = quantitaInputs[art.codice] || 0;
@@ -625,21 +749,15 @@ function apriModaleOrdine(cliente) {
             return;
         }
         
-        let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
-        let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
-        corpo += `ARTICOLI ORDINATI:\n`;
-        corpo += `----------------------------------------\n`;
-        for (let item of articoliConQta) {
-            corpo += `📦 ${item.codice} - ${item.descrizione}\n`;
-            corpo += `   Quantità: ${item.quantita} pz\n\n`;
+        if (isDesktopDevice) {
+            stampaPDF(cliente, articoliConQta);
+            showToast("Apertura finestra di stampa...");
+        } else {
+            inviaEmailOrdine(cliente, articoliConQta);
+            showToast("Apertura email in corso...");
         }
-        corpo += `----------------------------------------\n`;
-        corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
-        
-        window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
         
         modal.remove();
-        showToast("Apertura email in corso...");
     };
     
     document.getElementById('btnAnnullaOrdine').onclick = () => {
