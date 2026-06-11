@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.55</title>
+    <title>inSAPA - Contabilità vC.5.56</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -277,7 +277,24 @@
         .tabella td input[type="text"], .tabella td input[type="date"] { width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
         .edit-mode { background-color: #fffef5; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .version { position: fixed; bottom: 10px; right: 10px; background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; z-index: 100; }
+        .version-box {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #2c3e50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 100;
+            font-family: monospace;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .version-box:hover {
+            background: #3498db;
+        }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .toast-message { position: fixed; bottom: 80px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
@@ -559,7 +576,18 @@
                 <div id="tabellaPrimaNotaContainer" class="scadenze-box">
                     <h3 id="primaNotaTitle">📋 PRIMA NOTA - Movimenti del periodo</h3>
                     <table class="tabella" id="tabellaPrimaNota">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Avere (€)</th><th class="text-right">Dare (€)</th><th style="width:50px">✅</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th style="width:40px"><input type="checkbox" id="selectAllPrimaNota"></th>
+                                <th style="width:50px">#</th>
+                                <th>Data</th>
+                                <th>Descrizione</th>
+                                <th class="text-right">Avere (€)</th>
+                                <th class="text-right">Dare (€)</th>
+                                <th style="width:50px">✅</th>
+                                <th class="text-right">CASSA (€)</th>
+                            </tr>
+                        </thead>
                         <tbody id="primaNotaBody"></tbody>
                     </table>
                     <div id="primaNotaCards" class="cards-container"></div>
@@ -571,7 +599,9 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3 id="contantiTitle">💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
+                        <thead>
+                            <tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr>
+                        </thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiCards" class="cards-container"></div>
@@ -583,7 +613,9 @@
                 <div id="tabellaFornitoriContainer" class="scadenze-box" style="display: none;">
                     <h3 id="fornitoriTitle">📄 FATTURE FORNITORI</h3>
                     <table class="tabella" id="tabellaFornitori">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr></thead>
+                        <thead>
+                            <tr><th style="width:40px"><input type="checkbox" id="selectAllFornitori"></th><th>N° int</th><th>Data</th><th>Fornitore</th><th>N. Fattura</th></tr>
+                        </thead>
                         <tbody id="fornitoriBody"></tbody>
                     </table>
                     <div id="fornitoriCards" class="cards-container"></div>
@@ -595,7 +627,9 @@
                 <div id="tabellaAssClientiContainer" class="scadenze-box" style="display: none;">
                     <h3 id="assClientiTitle">📋 ASS_CONT_CLIENTI</h3>
                     <table class="tabella" id="tabellaAssClienti">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr></thead>
+                        <thead>
+                            <tr><th style="width:40px"><input type="checkbox" id="selectAllAssClienti"></th><th>Data Ins.</th><th>Descrizione</th><th>Nome</th><th class="text-right">Importo (€)</th><th>N° Doc.</th><th>Data Doc.</th></tr>
+                        </thead>
                         <tbody id="assClientiBody"></tbody>
                     </table>
                     <div id="assClientiCards" class="cards-container"></div>
@@ -607,7 +641,9 @@
                 <div id="tabellaPagaDdtContainer" class="scadenze-box" style="display: none;">
                     <h3 id="pagaDdtTitle">📋 PAGA_DDT_CLIENTI</h3>
                     <table class="tabella" id="tabellaPagaDdt">
-                        <thead>鲸<th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr></thead>
+                        <thead>
+                            <tr><th style="width:40px"><input type="checkbox" id="selectAllPagaDdt"></th><th>Nome</th><th>N° Fat/DDT</th><th>Data</th><th class="text-right">Importo (€)</th></tr>
+                        </thead>
                         <tbody id="pagaDdtBody"></tbody>
                     </table>
                     <div id="pagaDdtCards" class="cards-container"></div>
@@ -631,7 +667,13 @@
     <footer>Logo: 1 click→Link1 | Doppio click→Link2</footer>
 </div>
 
+<!-- MINIBOX VERSIONE -->
+<div class="version-box" id="versionBox" title="Clicca per copiare la versione">📌 vC.5.56</div>
+
 <script>
+// ==================== VERSIONE ====================
+const APP_VERSION = "vC.5.56";
+
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
@@ -652,7 +694,8 @@ let saldoIniziale = 0, nextFatturaId = 1;
 let modificheNonSalvate = false;
 let currentMonthModifiable = true;
 const mesiLista = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-    // ==================== FUNZIONI DATE (invariate) ====================
+
+// ==================== FUNZIONI DATE ====================
 function formatDateToISO(dateStr) {
     if (!dateStr) return "";
     if (dateStr.includes('-')) {
@@ -1142,14 +1185,17 @@ async function cancellaAnnoCorrente() {
         showToast(`📅 Ora sei nel mese corrente: ${mesiLista[currentMonth]} ${currentYear}`);
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
+
+// ==================== FUNZIONE AGGIORNA RIEPILOGO CON CASSA ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
     if (currentScheda === 'primanota') {
         let ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
         let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        let tc = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
         let sal = saldoIniziale + ta - td;
-        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div><div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div><div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div>`;
+        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div><div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div><div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div><div>🏦 CASSA: <span class="positive">${formatNumber(tc)} €</span></div>`;
     } else if (currentScheda === 'contanti') {
         let tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
         summaryDiv.innerHTML = `<div>💵 Incasso contanti: <span class="positive">${formatNumber(tc)} €</span></div>`;
@@ -1189,7 +1235,7 @@ function aggiornaTabelle() {
 }
 
 function renderTablesPC(isModifiable) {
-    // Prima Nota
+    // Prima Nota con colonna CASSA
     const primaBody = document.getElementById('primaNotaBody');
     if (primaBody) {
         primaBody.innerHTML = '';
@@ -1209,6 +1255,8 @@ function renderTablesPC(isModifiable) {
             if (isModifiable) verChk.onchange = async () => { item.verificato = verChk.checked; await salvaStatoFirebase(true); };
             else verChk.disabled = true;
             row.insertCell(6).appendChild(verChk);
+            // Colonna CASSA
+            row.insertCell(7).innerHTML = item.cassa ? '<strong>' + formatNumber(item.cassa) + ' €</strong>' : '';
         });
     }
     // Contanti
@@ -1284,7 +1332,7 @@ function renderTablesPC(isModifiable) {
 }
 
 function renderCardsMobile(isModifiable) {
-    // Prima Nota cards
+    // Prima Nota cards con CASSA
     const primaContainer = document.getElementById('primaNotaCards');
     if (primaContainer) {
         primaContainer.innerHTML = '';
@@ -1295,6 +1343,7 @@ function renderCardsMobile(isModifiable) {
             card.dataset.tipo = 'primanota';
             const avere = item.avere ? parseNumber(item.avere) : 0;
             const dare = item.dare ? parseNumber(item.dare) : 0;
+            const cassa = item.cassa ? parseNumber(item.cassa) : 0;
             const hasAvere = avere > 0;
             const hasDare = dare > 0;
             card.innerHTML = `
@@ -1308,6 +1357,7 @@ function renderCardsMobile(isModifiable) {
                 </div>
                 <div class="card-row">
                     <div class="card-desc">${item.descrizione || ''}</div>
+                    ${cassa > 0 ? `<div class="card-other-amount positive">CASSA: ${formatNumber(cassa)} €</div>` : ''}
                     ${hasAvere && hasDare ? `<div class="card-other-amount negative">Dare: ${formatNumber(dare)} €</div>` : ''}
                     ${!hasAvere && hasDare ? `<div class="card-other-amount positive">Avere: ${formatNumber(avere)} €</div>` : ''}
                 </div>
@@ -1595,6 +1645,7 @@ function makeRowEditable(tipo, idx, row) {
         row.cells[4].innerHTML = `<input type="text" value="${item.avere ? formatNumber(item.avere) : ''}" class="edit-avere import-field">`;
         row.cells[5].innerHTML = `<input type="text" value="${item.dare ? formatNumber(item.dare) : ''}" class="edit-dare import-field">`;
         row.cells[6].innerHTML = `<input type="checkbox" ${item.verificato ? 'checked' : ''} class="edit-verificato">`;
+        row.cells[7].innerHTML = `<input type="text" value="${item.cassa ? formatNumber(item.cassa) : ''}" class="edit-cassa import-field">`;
         row.classList.add('edit-mode');
     } else if (tipo === 'assclienti') {
         const item = assClienti[idx];
@@ -1634,8 +1685,9 @@ async function saveEditedRowWithMove(tipo, idx) {
             const newAvere = parseNumber(row.querySelector('.edit-avere')?.value);
             const newDare = parseNumber(row.querySelector('.edit-dare')?.value);
             const newVerificato = row.querySelector('.edit-verificato')?.checked;
+            const newCassa = parseNumber(row.querySelector('.edit-cassa')?.value);
             if (newAvere > 0 && newDare > 0) { showToast("Avere e Dare non possono essere entrambi >0", true); return; }
-            newRiga = { data: newData, descrizione: newDescrizione, avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false };
+            newRiga = { data: newData, descrizione: newDescrizione, avere: newAvere || null, dare: newDare || null, verificato: newVerificato || false, cassa: newCassa || null };
             dataRif = newData;
         }
     } else if (tipo === 'assclienti') {
@@ -1696,21 +1748,21 @@ function mostraModaleConferma(messaggio) {
     });
 }
 
-// ===== FUNZIONI DI INSERIMENTO MODIFICATE =====
+// ===== FUNZIONI DI INSERIMENTO MODIFICATE con CASSA =====
 async function inserisciRigaDaDati(tipo, dati) {
     if (!currentMonthModifiable) {
         showToast("❌ Questo mese non è modificabile (solo ultimi 3 mesi).", true);
         return false;
     }
     if (tipo === 'primanota') {
-        const { data, descrizione, avere, dare } = dati;
+        const { data, descrizione, avere, dare, cassa } = dati;
         if (!descrizione) { showToast("Inserisci descrizione", true); return false; }
         if (avere > 0 && dare > 0) { showToast("⚠️ Non puoi inserire sia Avere che Dare", true); return false; }
-        if (avere === 0 && dare === 0) { showToast("Inserisci almeno un importo", true); return false; }
+        if (avere === 0 && dare === 0 && (cassa === 0 || !cassa)) { showToast("Inserisci almeno un importo (Avere/Dare/Cassa)", true); return false; }
         const [year, month] = data.split('-');
         const targetMonth = parseInt(month) - 1, targetYear = parseInt(year);
         if (!await verificaDataInserimento(data, targetYear, targetMonth)) return false;
-        const nuovaRiga = { data, descrizione, avere: avere || null, dare: dare || null, verificato: false };
+        const nuovaRiga = { data, descrizione, avere: avere || null, dare: dare || null, cassa: cassa || null, verificato: false };
         const { spostato, annullato } = await verificaESpostaRigaSeNecessario(nuovaRiga, 'primanota', data);
         if (annullato) return false;
         if (!spostato) {
@@ -1841,7 +1893,8 @@ async function memorizzaNuovo() {
         const descrizione = document.getElementById('formDescrizionePrimaNota')?.value;
         let avere = parseNumber(document.getElementById('formAvere')?.value);
         let dare = parseNumber(document.getElementById('formDare')?.value);
-        return await inserisciRigaDaDati('primanota', { data, descrizione, avere, dare });
+        let cassa = parseNumber(document.getElementById('formCassa')?.value);
+        return await inserisciRigaDaDati('primanota', { data, descrizione, avere, dare, cassa });
     } else if (currentScheda === 'contanti') {
         const data = document.getElementById('formDataContanti')?.value;
         const descrizione = document.getElementById('formDescrizioneContanti')?.value;
@@ -1886,7 +1939,11 @@ function evidenziaRigaPerValori(tipo, riga) {
             const descCell = row.cells[3]?.innerText;
             const avereCell = row.cells[4]?.innerText.replace(' €', '').trim();
             const dareCell = row.cells[5]?.innerText.replace(' €', '').trim();
-            if (dataCell === formatDateVisual(riga.data) && descCell === riga.descrizione && (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) && (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === ''))) match = true;
+            const cassaCell = row.cells[7]?.innerText.replace(' €', '').trim();
+            if (dataCell === formatDateVisual(riga.data) && descCell === riga.descrizione && 
+                (avereCell === formatNumber(riga.avere) || (riga.avere === null && avereCell === '')) && 
+                (dareCell === formatNumber(riga.dare) || (riga.dare === null && dareCell === '')) &&
+                (cassaCell === formatNumber(riga.cassa) || (riga.cassa === null && cassaCell === ''))) match = true;
         } else if (tipo === 'contanti') {
             const dataCell = row.cells[2]?.innerText;
             const descCell = row.cells[3]?.innerText;
@@ -1981,14 +2038,15 @@ async function mostraModaleDataMobile() {
     } catch(e) { showToast("Errore nel caricamento dei periodi", true); }
 }
 function mostraModaleSaldiMobile() {
-    let ta = 0, td = 0;
+    let ta = 0, td = 0, tc = 0;
     if (currentScheda === 'primanota') {
         ta = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
         td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        tc = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
         const saldoFinale = saldoIniziale + ta - td;
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong class="big-number">Avere:</strong> <span class="positive big-number">${formatNumber(ta)} €</span></p><p><strong class="big-number">Dare:</strong> <span class="negative big-number">${formatNumber(td)} €</span></p><p><strong class="big-number">Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'} big-number">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong class="big-number">Avere:</strong> <span class="positive big-number">${formatNumber(ta)} €</span></p><p><strong class="big-number">Dare:</strong> <span class="negative big-number">${formatNumber(td)} €</span></p><p><strong class="big-number">CASSA:</strong> <span class="positive big-number">${formatNumber(tc)} €</span></p><p><strong class="big-number">Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'} big-number">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
         document.body.appendChild(modal);
         document.getElementById('modalSaldiClose').onclick = () => modal.remove();
     } else if (currentScheda === 'contanti') {
@@ -2072,7 +2130,7 @@ function mostraModaleMenu() {
     document.getElementById('modalMenuClose').onclick = () => modal.remove();
 }
 
-// ==================== FUNZIONE DI NAVIGAZIONE CON CONTROLLO (CORRETTA) ====================
+// ==================== FUNZIONE DI NAVIGAZIONE CON CONTROLLO ====================
 async function navigaConControllo(url) {
     if (modificheNonSalvate) {
         const salva = await mostraModaleConferma("Hai modifiche non salvate. Vuoi salvare prima di uscire?");
@@ -2084,14 +2142,162 @@ async function navigaConControllo(url) {
     window.location.href = url;
 }
 
-// ==================== ESPORTAZIONI (invariate, ma presenti) ====================
-function esportaReportRagioniere() { showToast("Report Ragioniere generato (demo)", false); }
-function esportaPDFMese() { showToast("Report Mese PDF (demo)", false); }
-function esportaReportAnno() { showToast("Report Anno (demo)", false); }
-function esportaCSV(perAnno) { showToast("CSV esportato (demo)", false); }
+// ==================== ESPORTAZIONI FUNZIONANTI ====================
+function esportaReportRagioniere() {
+    try {
+        let htmlContent = `<!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"><title>Report Ragioniere - ${mesiLista[currentMonth]} ${currentYear}</title>
+        <style>body{font-family:Arial;padding:20px;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#f0f0f0;}</style>
+        </head>
+        <body>
+        <h1>REPORT RAGIONIERE</h1>
+        <h2>Periodo: ${mesiLista[currentMonth]} ${currentYear}</h2>
+        <h3>Saldo iniziale cassa: ${formatNumber(saldoIniziale)} €</h3>
+        <h3>PRIMA NOTA</h3>
+        <table>
+        <tr><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>Cassa</th><th>Verificato</th></tr>`;
+        
+        primaNota.forEach(item => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.descrizione || ''}</td>
+                <td class="text-right">${item.avere ? formatNumber(item.avere) + ' €' : ''}</td>
+                <td class="text-right">${item.dare ? formatNumber(item.dare) + ' €' : ''}</td>
+                <td class="text-right">${item.cassa ? formatNumber(item.cassa) + ' €' : ''}</td>
+                <td>${item.verificato ? '✅' : '❌'}</td>
+            </tr>`;
+        });
+        
+        const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
+        const saldoFinale = saldoIniziale + totaleAvere - totaleDare;
+        
+        htmlContent += `<tr style="background:#f0f0f0;font-weight:bold;">
+            <td colspan="2">TOTALI</td>
+            <td class="text-right">${formatNumber(totaleAvere)} €</td>
+            <td class="text-right">${formatNumber(totaleDare)} €</td>
+            <td class="text-right">${formatNumber(totaleCassa)} €</td>
+            <td></td>
+        </tr>
+        </table>
+        <h3>Saldo finale cassa: ${formatNumber(saldoFinale)} €</h3>
+        <p><em>Report generato il ${new Date().toLocaleString('it-IT')}</em></p>
+        </body></html>`;
+        
+        const blob = new Blob([htmlContent], {type: 'text/html'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `report_ragioniere_${currentYear}_${currentMonth+1}.html`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("✅ Report Ragioniere esportato!");
+    } catch(e) { showToast("Errore esportazione report", true); }
+}
+
+function esportaPDFMese() {
+    try {
+        let htmlContent = `<!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"><title>Report Mese - ${mesiLista[currentMonth]} ${currentYear}</title>
+        <style>body{font-family:Arial;padding:20px;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#f0f0f0;}</style>
+        </head>
+        <body>
+        <h1>REPORT MESE</h1>
+        <h2>${mesiLista[currentMonth]} ${currentYear}</h2>
+        <h3>📋 PRIMA NOTA</h3>
+        <table>
+        <tr><th>Data</th><th>Descrizione</th><th>Avere</th><th>Dare</th><th>Cassa</th><th>Verificato</th></tr>`;
+        
+        primaNota.forEach(item => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.descrizione || ''}</td>
+                <td class="text-right">${item.avere ? formatNumber(item.avere) + ' €' : ''}</td>
+                <td class="text-right">${item.dare ? formatNumber(item.dare) + ' €' : ''}</td>
+                <td class="text-right">${item.cassa ? formatNumber(item.cassa) + ' €' : ''}</td>
+                <td>${item.verificato ? '✅' : '❌'}</td>
+            </tr>`;
+        });
+        
+        const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
+        const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
+        const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
+        
+        htmlContent += `<tr style="background:#f0f0f0;font-weight:bold;">
+            <td colspan="2">TOTALI</td>
+            <td class="text-right">${formatNumber(totaleAvere)} €</td>
+            <td class="text-right">${formatNumber(totaleDare)} €</td>
+            <td class="text-right">${formatNumber(totaleCassa)} €</td>
+            <td></td>
+        </tr>
+        </table>
+        
+        <h3>💵 CONTANTI</h3>
+        <table>
+        <tr><th>Data</th><th>Descrizione</th><th>Importo</th></tr>`;
+        
+        contanti.forEach(item => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.descrizione || ''}</td>
+                <td class="text-right">${formatNumber(item.importo)} €</td>
+            </tr>`;
+        });
+        
+        const totaleContanti = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
+        htmlContent += `<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="2">TOTALE INCASSI</td><td class="text-right">${formatNumber(totaleContanti)} €</td></tr>
+        </table>
+        
+        <h3>📄 FORNITORI</h3>
+        <table>
+        <tr><th>Data</th><th>Fornitore</th><th>N. Fattura</th><th>N° interno</th></tr>`;
+        
+        fattureFornitori.forEach((item, idx) => {
+            htmlContent += `<tr>
+                <td>${formatDateVisual(item.data)}</td>
+                <td>${item.fornitore || ''}</td>
+                <td>${item.numeroFattura || ''}</td>
+                <td>${nextFatturaId - fattureFornitori.length + idx}/${currentYear}</td>
+            </tr>`;
+        });
+        htmlContent += `</table>
+        <p><em>Report generato il ${new Date().toLocaleString('it-IT')}</em></p>
+        </body></html>`;
+        
+        const blob = new Blob([htmlContent], {type: 'text/html'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `report_mese_${currentYear}_${currentMonth+1}.html`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("✅ Report Mese esportato!");
+    } catch(e) { showToast("Errore esportazione report mese", true); }
+}
+
+function esportaReportAnno() {
+    showToast("📅 Report Annuale - Funzionalità in sviluppo", false);
+}
+
+function esportaCSV(perAnno) {
+    try {
+        let csvContent = "Data,Descrizione,Avere,Dare,Cassa,Verificato\n";
+        primaNota.forEach(item => {
+            csvContent += `"${item.data || ''}","${(item.descrizione || '').replace(/"/g, '""')}","${item.avere || ''}","${item.dare || ''}","${item.cassa || ''}","${item.verificato ? 'SI' : 'NO'}"\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csvContent], {type: 'text/csv;charset=utf-8;'});
+        const link = document.createElement('a');
+        const filename = perAnno ? `export_anno_${currentYear}.csv` : `export_mese_${currentYear}_${currentMonth+1}.csv`;
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast(`✅ CSV ${perAnno ? 'Annuale' : 'Mensile'} esportato!`);
+    } catch(e) { showToast("Errore esportazione CSV", true); }
+}
 
 async function verificaESpostaRigaSeNecessario(riga, tipo, dataYMD, source = 'inserimento') { 
-    // Funzione stub per compatibilità, restituisce {spostato: false, annullato: false}
     return { spostato: false, annullato: false };
 }
 
@@ -2131,8 +2337,8 @@ function setScheda(s) {
 function aggiornaForm() {
     const fa = document.getElementById('formArea');
     if (currentScheda === 'primanota') {
-        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
-        setupImportField('formAvere'); setupImportField('formDare');
+        fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataPrimaNota"></div><div class="form-group"><label>💰 Avere €</label><input type="text" id="formAvere" class="import-field" placeholder="0,00"></div><div class="form-group"><label>💰 Dare €</label><input type="text" id="formDare" class="import-field" placeholder="0,00"></div></div><div class="form-row"><div class="form-group"><label>🏦 CASSA €</label><input type="text" id="formCassa" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizionePrimaNota" placeholder="Descrizione"></div>`;
+        setupImportField('formAvere'); setupImportField('formDare'); setupImportField('formCassa');
     } else if (currentScheda === 'contanti') {
         fa.innerHTML = `<div class="form-row"><div class="form-group"><label>📅 Data</label><input type="date" id="formDataContanti"></div><div class="form-group"><label>💰 Incasso €</label><input type="text" id="formImportoContanti" class="import-field" placeholder="0,00"></div></div><div class="form-group"><label>📝 Descrizione</label><input type="text" id="formDescrizioneContanti" placeholder="Descrizione"></div>`;
         setupImportField('formImportoContanti');
@@ -2170,6 +2376,7 @@ function pulisciForm() {
         if (document.getElementById('formDescrizionePrimaNota')) document.getElementById('formDescrizionePrimaNota').value = '';
         if (document.getElementById('formAvere')) document.getElementById('formAvere').value = '';
         if (document.getElementById('formDare')) document.getElementById('formDare').value = '';
+        if (document.getElementById('formCassa')) document.getElementById('formCassa').value = '';
     } else if (currentScheda === 'contanti') {
         if (document.getElementById('formDataContanti')) document.getElementById('formDataContanti').value = defaultDate;
         if (document.getElementById('formDescrizioneContanti')) document.getElementById('formDescrizioneContanti').value = '';
@@ -2242,6 +2449,15 @@ document.getElementById('mobileMenu')?.addEventListener('click', () => mostraMod
 document.getElementById('mobileData')?.addEventListener('click', () => mostraModaleDataMobile());
 document.getElementById('mobileSaldi')?.addEventListener('click', () => mostraModaleSaldiMobile());
 document.getElementById('mobileAltro')?.addEventListener('click', () => mostraModaleAltro());
+
+// Versione box click per copiare
+const versionBox = document.getElementById('versionBox');
+if (versionBox) {
+    versionBox.addEventListener('click', () => {
+        navigator.clipboard.writeText(APP_VERSION);
+        showToast(`📌 Versione ${APP_VERSION} copiata!`);
+    });
+}
 
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) { const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci."; e.preventDefault(); e.returnValue = message; return message; }
