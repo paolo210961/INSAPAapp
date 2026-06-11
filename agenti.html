@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.71</title>
+    <title>inSAPA - Agenti vA.5.72</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -148,7 +148,7 @@
         }
     </style>
 </head>
-<body>
+    <body>
 <div class="header">
     <div class="header-row">
         <div class="logo-area">
@@ -199,7 +199,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.71 - Stampa PDF/Email con persistenza quantità/note, Listino</div>
+<div class="version">vA.5.72 - Stampa PDF/Email con persistenza quantità/note, Listino</div>
 
 <script>
 // --------------------------- FIREBASE CONFIG ---------------------------
@@ -511,8 +511,7 @@ function generaHtmlOrdine(cliente, articoliConQta, note = "") {
     html += `<div style="margin-top:20px;text-align:center;font-size:12px;color:#999;">Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}</div></div>`;
     return html;
 }
-
-function stampaPDF(cliente, articoliConQta, note = "") {
+    function stampaPDF(cliente, articoliConQta, note = "") {
     const htmlContent = generaHtmlOrdine(cliente, articoliConQta, note);
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Ordine_${cliente.codice}_${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}</title><meta charset="UTF-8"><style>body{font-family:'Segoe UI',Arial,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>${htmlContent}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>`);
@@ -587,7 +586,7 @@ function apriListinoModale() {
         } else {
             let html = `<table class="listino-tabella"><thead><tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr></thead><tbody>`;
             for (let art of filtrati) {
-                html += `<tr><td>${art.codiceArtic}</td><td>${art.codice}</td><td>${art.ean || '-'}</td><td>${art.stok || '-'}</td><td>${art.descrizione}</td><td>${art.um || '-'}</td><td>${art.gm || '-'}</td><td>${art.mOrd || '-'}</td><td>${art.iva || '-'}</td></tr>`;
+                html += `<tr><td style="white-space:nowrap;">${art.codiceArtic}</td><td style="white-space:nowrap;">${art.codice}</td><td style="white-space:nowrap;">${art.ean || '-'}</td><td style="white-space:nowrap;">${art.stok || '-'}</td><td>${art.descrizione}</td><td>${art.um || '-'}</td><td>${art.gm || '-'}</td><td>${art.mOrd || '-'}</td><td>${art.iva || '-'}</td></tr>`;
             }
             html += `</tbody></table>`;
             resultDiv.innerHTML = html;
@@ -692,8 +691,7 @@ function apriModaleOrdine(cliente) {
     window.addEventListener('popstate', popHandlerOrdine);
     modal.addEventListener('click', (e) => { if (e.target === modal) { modal.remove(); history.back(); } });
 }
-
-// --------------------------- GESTIONE CLIENTI E VISUALIZZAZIONE ---------------------------
+    // --------------------------- GESTIONE CLIENTI E VISUALIZZAZIONE ---------------------------
 function aggiornaClienti() {
     let mappa = new Map();
     for (let c of datiOrd) {
@@ -802,47 +800,44 @@ function parseListino(text) {
     const lines = text.split(/\r?\n/);
     const articoli = [];
     for (let line of lines) {
-        line = line.trimEnd();
+        line = line.trim();
         if (!line) continue;
         if (line.startsWith('==') || line.startsWith('---') || line.startsWith('\\') || line.startsWith('Codice') || line.includes('Azienda:')) continue;
-        let parts = line.split(/\t/);
-        if (parts.length === 1) {
-            parts = line.split(/\s{8,}/);
+        let matchCodice = line.match(/^([A-Z0-9]+)\s+/);
+        if (!matchCodice) continue;
+        let codiceArtic = matchCodice[1];
+        let resto = line.substring(matchCodice[0].length);
+        let ean = "";
+        let matchEan = resto.match(/^(\d{13})\s+/);
+        if (matchEan) {
+            ean = matchEan[1];
+            resto = resto.substring(matchEan[0].length);
         }
-        for (let part of parts) {
-            part = part.trim();
-            if (!part) continue;
-            let padded = part.padEnd(90, ' ');
-            let codiceArtic = padded.substring(0, 12).trim();
-            if (!codiceArtic || !codiceArtic.match(/^[A-Z0-9]+$/i)) continue;
-            let ean = padded.substring(16, 30).trim();
-            let stok = padded.substring(30, 40).trim();
-            let descrizione = padded.substring(40, 70).trim();
-            let um = padded.substring(70, 75).trim();
-            let gm = padded.substring(75, 80).trim();
-            let mOrd = padded.substring(80, 85).trim();
-            let iva = padded.substring(85, 90).trim();
-            if (stok === "0,0000" || stok === "0" || stok === "0,00") continue;
-            let descParts = descrizione.split(/\s+/);
-            if (descParts.length >= 2 && descParts[0].match(/^[A-Z]$/) && descParts[1].match(/^[\d\.,]+$/)) {
-                if (!stok || stok === "0") {
-                    stok = descParts[1];
-                    descParts.splice(0, 2);
-                    descrizione = descParts.join(" ");
-                }
-            }
-            articoli.push({
-                codiceArtic: codiceArtic,
-                codice: codiceArtic,
-                ean: ean,
-                stok: stok,
-                descrizione: descrizione,
-                um: um,
-                gm: gm,
-                mOrd: mOrd,
-                iva: iva
-            });
-        }
+        let stok = "";
+        let matchStok = resto.match(/^([\d\.,]+)\s+/);
+        if (matchStok) {
+            stok = matchStok[1];
+            resto = resto.substring(matchStok[0].length);
+        } else continue;
+        if (parseFloat(stok.replace(',', '.')) === 0) continue;
+        let parole = resto.trim().split(/\s+/);
+        if (parole.length < 4) continue;
+        let iva = parole.pop();
+        let mOrd = parole.pop();
+        let gm = parole.pop();
+        let um = parole.pop();
+        let descrizione = parole.join(" ");
+        articoli.push({
+            codiceArtic: codiceArtic,
+            codice: codiceArtic,
+            ean: ean,
+            stok: stok,
+            descrizione: descrizione,
+            um: um,
+            gm: gm,
+            mOrd: mOrd,
+            iva: iva
+        });
     }
     const unique = [];
     const seen = new Set();
