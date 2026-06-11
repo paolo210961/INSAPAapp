@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.0</title>
+    <title>inSAPA - Agenti vA.5.68</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -33,7 +33,6 @@
         .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-ordine-header { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-listino-header { background: #9b59b6; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
         .tooltip-wrapper { position: relative; display: inline-block; }
         .tooltip-wrapper .tooltip-text { visibility: hidden; width: 280px; background-color: #2c3e50; color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.7rem; font-weight: normal; white-space: normal; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
@@ -49,12 +48,14 @@
         .scadenze-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
         .btn-whatsapp { background: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; width: auto; margin: 0; }
         .btn-whatsapp:hover { background: #128C7E; transform: translateY(-1px); }
+        .btn-listino-mini { background: #8e44ad; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; margin-left: 10px; }
         .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
         .articolo-item:hover { background-color: #fff3cd; transform: translateX(5px); }
         .articolo-titolo { font-weight: bold; }
         .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 2px solid #3498db; font-size: 0.75rem; display: none; }
         .storico-ordini.visible { display: block; }
         .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 4px 8px; margin: 3px; border-radius: 6px; }
+        .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
@@ -66,6 +67,8 @@
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
         .avviso-modifiche { position: sticky; top: 110px; background: #e74c3c; color: white; padding: 10px 20px; text-align: center; font-weight: bold; font-size: 0.85rem; z-index: 998; display: none; border-bottom: 2px solid #c0392b; }
         .avviso-modifiche.show { display: block; }
+        
+        /* Stili per il modale ordine */
         .ordine-articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: white; }
         .ordine-articolo-info { margin-bottom: 8px; }
         .ordine-articolo-codice { font-weight: bold; color: #2c3e50; }
@@ -76,361 +79,1016 @@
         .lista-articoli-ordine { max-height: 400px; overflow-y: auto; margin: 15px 0; text-align: left; }
         .ricerca-articolo-ordine { margin: 15px 0; }
         .ricerca-articolo-ordine input { width: 100%; padding: 10px; font-size: 0.9rem; }
-        .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
         .cliente-info-modale p { margin: 5px 0; }
-        .btn-listino-modale { background: #9b59b6; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
-        .note-ordine-area { margin: 15px 0; text-align: left; }
-        .note-ordine-area textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical; }
-        .listino-modal-content { max-width: 1200px; width: 95%; }
-        .tabella-listino { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .tabella-listino th, .tabella-listino td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
-        .tabella-listino th { background: #f1c40f; position: sticky; top: 0; }
-        .listino-search { margin-bottom: 15px; }
-        .listino-search input { width: 100%; padding: 10px; }
+        
+        /* Stili per il modale listino (responsive) */
+        .listino-modal { max-width: 95vw; width: 1200px; max-height: 85vh; overflow-y: auto; padding: 20px; }
+        .listino-search { margin-bottom: 20px; width: 100%; padding: 12px; font-size: 1rem; }
+        .listino-tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .listino-tabella th, .listino-tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .listino-tabella th { background: #f1c40f; position: sticky; top: 0; }
+        .nota-field { margin: 15px 0; text-align: left; }
+        .nota-field label { font-weight: bold; display: block; margin-bottom: 5px; }
+        .nota-field textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; }
+        
         @media (max-width: 768px) {
-            .tabella-listino, .tabella-listino thead, .tabella-listino tbody, .tabella-listino th, .tabella-listino td, .tabella-listino tr { display: block; }
-            .tabella-listino thead tr { position: absolute; top: -9999px; left: -9999px; }
-            .tabella-listino tr { border: 1px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
-            .tabella-listino td { border: none; position: relative; padding-left: 50%; white-space: normal; text-align: left; }
-            .tabella-listino td:before { position: absolute; top: 8px; left: 8px; width: 45%; padding-right: 10px; white-space: nowrap; font-weight: bold; content: attr(data-label); }
-            .listino-modal-content { padding: 15px; }
             .header-row { flex-direction: column; align-items: stretch; }
             .header-row-bottom { flex-direction: column; align-items: stretch; }
+            .logo-area { justify-content: center; flex-direction: column; }
+            .logo-rettangolo { width: 250px; height: 70px; margin: 0 auto; }
+            .logo-tooltip { display: none; }
+            .nav-box { position: relative; width: 100%; text-align: center; }
+            .hamburger-btn { display: block; margin: 0 auto; }
+            .nav-grid { display: none; flex-direction: column; position: absolute; top: 100%; right: 0; left: 0; background: #f1c40f; border-radius: 12px; padding: 10px; margin-top: 5px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .nav-grid.open { display: flex; }
+            .nav-btn { width: 100%; text-align: center; }
             .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
             .action-group label { display: none; }
-            .action-group select, .action-group button, .action-group input { width: 100%; padding: 10px; margin: 0; }
-            .btn-ordine-header, .btn-listino-header { justify-content: center; }
+            .action-group select, .action-group button, .action-group input { width: 100%; padding: 10px; font-size: 0.9rem; margin: 0; }
+            .action-group select { min-width: unset; }
+            .action-group input { min-width: unset; }
+            .action-group:first-child { grid-template-columns: 1fr; }
+            .action-group:first-child select { width: 100%; }
             .main-container { flex-direction: column; }
-            .sidebar { width: 100%; position: static; }
-            .cliente-info-modale { flex-direction: column; align-items: stretch; }
+            .sidebar { width: 100%; position: static; top: 0; max-height: none; margin-bottom: 20px; }
+            .content-area { width: 100%; }
+            button, .btn-success, .btn-primary, .btn-danger, .btn-whatsapp { padding: 10px; font-size: 0.9rem; }
+            body { font-size: 15px; }
+            h3 { font-size: 1.1rem; }
+            select, input { padding: 10px; font-size: 0.9rem; }
+            .scadenze-box { overflow-x: auto; }
+            .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .btn-whatsapp { width: 100%; justify-content: center; }
+            .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
+            .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
+            .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
+            .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
+            .modal-content { width: 95%; padding: 15px; }
+            .lista-articoli-ordine { max-height: 50vh; }
+            /* Nascondi il pulsante ORD+SCA su mobile */
+            .btn-carica-file-mobile-hide { display: none !important; }
+            /* Listino modal adattato a mobile (bottom sheet) */
+            .listino-modal { border-radius: 28px 28px 0 0; margin: auto 0 0 0; max-height: 90vh; width: 100%; }
+            .modal-overlay { align-items: flex-end; }
         }
-        .print-area { display: none; }
-        @media print { .modal-overlay, .modal-content { display: none; } }
+        /* Desktop: mostra normalmente */
+        @media (min-width: 769px) {
+            .btn-carica-file-mobile-hide { display: inline-flex; }
+        }
+        .pc-only { display: none; }
+        @media (min-width: 769px) {
+            .pc-only { display: inline-flex; }
+        }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area"><div id="logoRettangolo" class="logo-rettangolo"><img id="logoImmagine" style="display:none;"><span id="logoSpan">LOGO</span><div class="logo-tooltip">1 tap: Link1 | 2 tap: Link2</div></div></div>
-        <div class="nav-box"><button id="hamburgerBtn" class="hamburger-btn">☰</button><div id="navGrid" class="nav-grid"><button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button><button class="nav-btn disabled" disabled>AGENTI</button><button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button></div></div>
+        <div class="logo-area">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <img id="logoImmagine" style="display:none;">
+                <span id="logoSpan">LOGO</span>
+                <div class="logo-tooltip">1 tap: Link1 | 2 tap: Link2</div>
+            </div>
+        </div>
+        <div class="nav-box">
+            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+            <div id="navGrid" class="nav-grid">
+                <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
+                <button class="nav-btn disabled" disabled>AGENTI</button>
+                <button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button>
+            </div>
+        </div>
     </div>
-    <div class="header-row-bottom" id="headerActionGroup"></div>
+    <div class="header-row-bottom">
+        <div class="action-group">
+            <select id="selectAgente"><option value="">-- Seleziona agente --</option></select>
+            <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
+        </div>
+        <div class="action-group">
+            <div class="tooltip-wrapper btn-carica-file-mobile-hide" id="tooltipOrdsca">
+                <button id="btnCaricaFile" class="btn-primary">ORD+SCA+LIST</button>
+                <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt - Esempio: ORD01.txt e SCA01.txt (accetta anche ORD1.txt e SCA1.txt)</span>
+            </div>
+            <!-- Pulsante LISTINO aggiuntivo per PC (tra ORD+SCA+LIST e COMPILA ORDINE) -->
+            <button id="btnListinoHeader" class="btn-primary pc-only">📋 LISTINO</button>
+            <button id="btnCompilaOrdine" class="btn-ordine-header">
+                📝 COMPILA ORDINE
+            </button>
+            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
+            <span id="fileStatusInline" class="file-status-inline"></span>
+        </div>
+    </div>
 </div>
-<div class="avviso-modifiche" id="avvisoModifiche">ATTENZIONE: Modifiche non salvate! Premi "SALVA" prima di cambiare.</div>
-<div class="main-container"><div class="sidebar"><h3>Cerca Cliente</h3><input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente..."><h3 style="margin-top:20px;">Seleziona Cliente</h3><select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select></div><div class="content-area"><div id="dettaglioAgenti"></div></div></div>
+
+<div class="avviso-modifiche" id="avvisoModifiche">ATTENZIONE: Ci sono modifiche non salvate! Premi "SALVA" prima di cambiare.</div>
+
+<div class="main-container">
+    <div class="sidebar">
+        <h3>Cerca Cliente</h3>
+        <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
+        <h3 style="margin-top:20px;">Seleziona Cliente</h3>
+        <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select>
+    </div>
+    <div class="content-area">
+        <div id="dettaglioAgenti"></div>
+    </div>
+</div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.6.0 - Ordini con Note e Listino Prodotti</div>
+<div class="version">vA.5.68 - Stampa PDF/Email con persistenza quantità e note, Listino</div>
 
 <script>
-const firebaseConfig = { apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ", authDomain: "insapa-database.firebaseapp.com", projectId: "insapa-database", storageBucket: "insapa-database.firebasestorage.app", messagingSenderId: "331230245928", appId: "1:331230245928:web:2ee43d9209e43c3c89b11d" };
+const firebaseConfig = {
+    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
+    authDomain: "insapa-database.firebaseapp.com",
+    projectId: "insapa-database",
+    storageBucket: "insapa-database.firebasestorage.app",
+    messagingSenderId: "331230245928",
+    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
+};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let agentiLista = [], agenteCorrente = null, datiOrd = [], datiSca = [], clientiUnici = [], clienteScadenzeCorrente = null, modificheNonSalvate = false;
+let agentiLista = [];
+let agenteCorrente = null;
+let datiOrd = [];
+let datiSca = [];
+let clientiUnici = [];
+let clienteScadenzeCorrente = null;
+let modificheNonSalvate = false;
+
+// Oggetto per memorizzare quantità e note per cliente (persistente fino a invio)
+let ordiniMemorizzati = {}; // struttura: { [codiceCliente]: { quantities: { codiceArt: qta }, note: "" } }
+
 let linkPrincipale = "", linkSecondario = "";
 
-// ==================== DATI LISTINO (mock - sostituire con dati reali) ====================
-const listinoProdotti = [
-    { codiceArtic: "A001", codice: "A001", ean: "8001234567890", stock: "120", descrizione: "Cacciavite a stella", um: "pz", gm: "0.15", mOrd: "10", iva: "22%" },
-    { codiceArtic: "A002", codice: "A002", ean: "8001234567891", stock: "85", descrizione: "Pinza universale 200mm", um: "pz", gm: "0.32", mOrd: "5", iva: "22%" },
-    { codiceArtic: "B010", codice: "B010", ean: "8001234567892", stock: "45", descrizione: "Nastro isolante nero", um: "rotolo", gm: "0.08", mOrd: "20", iva: "22%" },
-    { codiceArtic: "C005", codice: "C005", ean: "8001234567893", stock: "210", descrizione: "Batteria stilo AA", um: "pz", gm: "0.02", mOrd: "50", iva: "22%" },
-    { codiceArtic: "D012", codice: "D012", ean: "8001234567894", stock: "7", descrizione: "Trapano avvitatore 18V", um: "pz", gm: "1.8", mOrd: "1", iva: "22%" }
-];
+function isDesktop() {
+    return window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
+}
 
-function isDesktop() { return window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768; }
-function showToast(msg, isErr = false) { let t = document.createElement('div'); t.className = 'toast-message'; t.style.backgroundColor = isErr ? '#e74c3c' : '#27ae60'; t.innerText = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
-function marcaModifiche() { modificheNonSalvate = true; document.getElementById('avvisoModifiche').classList.add('show'); }
-function resetModifiche() { modificheNonSalvate = false; document.getElementById('avvisoModifiche').classList.remove('show'); }
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+        }
+    } catch(e) {}
+}
+function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("Link principale"); } else showToast("Link principale non configurato", true); }
+function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("Link secondario"); } else showToast("Link secondario non configurato", true); }
+function caricaLogoSaved() {
+    const logoImg = document.getElementById('logoImmagine');
+    const logoSpan = document.getElementById('logoSpan');
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+}
+const logoDivElemAgenti = document.getElementById('logoRettangolo');
+let lastTapAgenti = 0;
+logoDivElemAgenti.addEventListener('click', (e) => {
+    const now = new Date().getTime();
+    const tapLength = now - lastTapAgenti;
+    if (tapLength < 300 && tapLength > 0) { e.stopPropagation(); apriLinkSecondario(); lastTapAgenti = 0; }
+    else { lastTapAgenti = now; setTimeout(() => { if (lastTapAgenti !== 0 && (new Date().getTime() - lastTapAgenti) > 300) { apriLinkPrincipale(); lastTapAgenti = 0; } }, 300); }
+});
+caricaLogoSaved();
 
-// ==================== LISTINO MODALE ====================
-function apriListinoModal() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    const isMobile = !isDesktop();
-    modal.innerHTML = `
-        <div class="modal-content listino-modal-content">
-            <h3>📋 LISTINO PRODOTTI</h3>
-            <div class="listino-search"><input type="text" id="searchListino" placeholder="Cerca per codice o descrizione..."></div>
-            <div style="overflow-x: auto; max-height: 60vh;">
-                <table class="tabella-listino" id="tabellaListino">
-                    <thead><tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>S T O K</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr></thead>
-                    <tbody id="listaProdottiBody"></tbody>
-                </table>
-            </div>
-            <div class="btn-group-modal"><button id="btnChiudiListino" class="btn-primary">CHIUDI</button></div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    const tbody = modal.querySelector('#listaProdottiBody');
-    function render(filter = '') {
-        const filtro = filter.toLowerCase();
-        const filtrati = listinoProdotti.filter(p => p.codiceArtic.toLowerCase().includes(filtro) || p.descrizione.toLowerCase().includes(filtro));
-        tbody.innerHTML = filtrati.map(p => `
-            <tr>
-                <td data-label="Codice Artic.">${p.codiceArtic}</td>
-                <td data-label="Codice">${p.codice}</td>
-                <td data-label="EAN">${p.ean}</td>
-                <td data-label="S T O K">${p.stock}</td>
-                <td data-label="Descrizione">${p.descrizione}</td>
-                <td data-label="UM">${p.um}</td>
-                <td data-label="G.M.">${p.gm}</td>
-                <td data-label="M.Ord">${p.mOrd}</td>
-                <td data-label="Iva">${p.iva}</td>
-            </tr>
-        `).join('');
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
+function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
+function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
+
+function normalizzaCodiceAgente(codice) { 
+    return codice.toString(); 
+}
+
+async function pulisciVecchiDocumentiMonolitici(codice) {
+    try {
+        const vecchioOrd = await db.collection('agenti_dati').doc('ord_'+codice).get();
+        if (vecchioOrd.exists && vecchioOrd.data().dati) {
+            await db.collection('agenti_dati').doc('ord_'+codice).delete();
+            console.log("Vecchio documento ORD monolitico eliminato per agente", codice);
+        }
+        const vecchioSca = await db.collection('agenti_dati').doc('sca_'+codice).get();
+        if (vecchioSca.exists && vecchioSca.data().dati) {
+            await db.collection('agenti_dati').doc('sca_'+codice).delete();
+            console.log("Vecchio documento SCA monolitico eliminato per agente", codice);
+        }
+    } catch(e) { 
+        console.log("Nessun vecchio documento da pulire o errore:", e.message); 
     }
-    render('');
-    const searchInput = modal.querySelector('#searchListino');
-    searchInput.addEventListener('input', (e) => render(e.target.value));
-    modal.querySelector('#btnChiudiListino').onclick = () => modal.remove();
 }
 
-// ==================== FUNZIONI STAMPA/EMAIL CON NOTE ====================
-function generaHtmlOrdine(cliente, articoliConQta, note) {
-    return `
-        <div style="font-family:'Segoe UI',Arial,sans-serif;padding:20px;max-width:800px;margin:0 auto;">
-            <h2 style="color:#2c3e50;border-bottom:2px solid #f1c40f;">📝 ORDINE CLIENTE</h2>
-            <div style="background:#eef2f5;padding:15px;border-radius:8px;margin-bottom:20px;">
-                <p><strong>Codice:</strong> ${cliente.codice}</p><p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
-                <p><strong>Data Ordine:</strong> ${new Date().toLocaleDateString('it-IT')}</p>
-            </div>
-            <table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f1c40f;"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>
-                ${articoliConQta.map(a => `<tr><td>${a.codice}</td><td>${a.descrizione}</td><td style="text-align:center">${a.quantita} pz</td></tr>`).join('')}
-            </tbody></table>
-            ${note ? `<div style="margin-top:20px;padding:12px;background:#fff9e0;border-left:4px solid #f1c40f;"><strong>📌 NOTE:</strong><br>${note.replace(/\n/g,'<br>')}</div>` : ''}
-            <div style="margin-top:20px;font-size:12px;color:#999;text-align:center;">Documento generato da inSAPA Agenti</div>
-        </div>
-    `;
-}
-function stampaPDF(cliente, articoliConQta, note) {
-    const html = generaHtmlOrdine(cliente, articoliConQta, note);
-    const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html><html><head><title>Ordine_${cliente.codice}</title><meta charset="UTF-8"><style>body{margin:20px;font-family:sans-serif;}</style></head><body>${html}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>`);
-    win.document.close();
-}
-function inviaEmailOrdine(cliente, articoliConQta, note) {
-    let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\nARTICOLI ORDINATI:\n${articoliConQta.map(a => `📦 ${a.codice} - ${a.descrizione}   Q.tà: ${a.quantita} pz`).join('\n')}\n\n`;
-    if (note) corpo += `📝 NOTE:\n${note}\n\n`;
-    corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
-    window.location.href = `mailto:?subject=ORDINE ${cliente.codice} - ${cliente.ragione}&body=${encodeURIComponent(corpo)}`;
-}
-    // ==================== MODALE ORDINE CON NOTE E LISTINO ====================
-function apriModaleOrdine(cliente) {
-    if (!cliente || !cliente.ordini || cliente.ordini.length === 0) { alert("Nessun articolo disponibile per questo cliente."); return; }
-    let quantitaInputs = {};
-    let noteCorrente = '';
-    const articoliOrdinati = [...cliente.ordini].sort((a,b) => {
-        let getDate = (art) => art.coppie?.length ? new Date(art.coppie[0].data.split('/').reverse().join('-')).getTime() : 0;
-        return getDate(b) - getDate(a);
-    });
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    const isDesktopDevice = isDesktop();
-    const pulsanteTesto = isDesktopDevice ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>📝 ORDINE DA CLIENTE</h3>
-            <div class="cliente-info-modale">
-                <div><p><strong>${cliente.codice}</strong> - ${cliente.ragione}</p></div>
-                <button id="btnListinoModale" class="btn-listino-modale">📋 LISTINO</button>
-            </div>
-            <div class="ricerca-articolo-ordine"><input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione..."></div>
-            <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
-            <div class="note-ordine-area"><textarea id="noteOrdineTextarea" rows="3" placeholder="Inserisci note aggiuntive (es. consegna, riferimenti)..."></textarea></div>
-            <div class="btn-group-modal"><button id="btnConfermaOrdine" class="btn-success">${pulsanteTesto}</button><button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button></div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    function renderLista(search = '') {
-        const container = document.getElementById('listaArticoliOrdine');
-        const filtrati = articoliOrdinati.filter(a => a.codice.toLowerCase().includes(search) || a.descrizione.toLowerCase().includes(search));
-        if (!filtrati.length) { container.innerHTML = '<p style="text-align:center;">Nessun articolo trovato</p>'; return; }
-        let html = '';
-        filtrati.forEach(art => {
-            const ultimo = art.coppie?.length ? `Ultimo acquisto: ${art.coppie[0].data}` : 'Mai acquistato';
-            html += `<div class="ordine-articolo-item" data-codice="${art.codice}">
-                <div class="ordine-articolo-info"><div class="ordine-articolo-codice">${art.codice}</div><div class="ordine-articolo-desc">${art.descrizione}</div><div style="font-size:0.7rem;color:#888;">${ultimo}</div></div>
-                <div class="ordine-articolo-qta"><label>Quantità:</label><input type="number" id="qta_${art.codice.replace(/[^a-z0-9]/gi,'_')}" min="0" step="1" value="${quantitaInputs[art.codice] || 0}" style="width:80px;"></div>
-            </div>`;
-        });
-        container.innerHTML = html;
-        filtrati.forEach(art => {
-            const inp = document.getElementById(`qta_${art.codice.replace(/[^a-z0-9]/gi,'_')}`);
-            if (inp) {
-                inp.addEventListener('input', (e) => { let v = parseInt(e.target.value) || 0; if(v<0) v=0; quantitaInputs[art.codice] = v; inp.value = v; });
-                if(quantitaInputs[art.codice]) inp.value = quantitaInputs[art.codice];
-            }
-        });
-    }
-    renderLista('');
-    document.getElementById('ricercaArticoloOrdine').addEventListener('input', (e) => renderLista(e.target.value.toLowerCase()));
-    document.getElementById('btnListinoModale').onclick = (e) => { e.stopPropagation(); apriListinoModal(); };
-    const noteTextarea = document.getElementById('noteOrdineTextarea');
-    noteTextarea.value = noteCorrente;
-    noteTextarea.addEventListener('input', (e) => { noteCorrente = e.target.value; });
-    document.getElementById('btnConfermaOrdine').onclick = () => {
-        let articoliConQta = [];
-        for(let art of articoliOrdinati) { let q = quantitaInputs[art.codice] || 0; if(q>0) articoliConQta.push({ codice: art.codice, descrizione: art.descrizione, quantita: q }); }
-        if(articoliConQta.length === 0) { alert("Inserire almeno una quantità > 0"); return; }
-        const noteFinale = noteCorrente.trim();
-        if(isDesktopDevice) stampaPDF(cliente, articoliConQta, noteFinale);
-        else inviaEmailOrdine(cliente, articoliConQta, noteFinale);
-        modal.remove();
-        showToast(isDesktopDevice ? "PDF in stampa..." : "Email aperta...");
-    };
-    document.getElementById('btnAnnullaOrdine').onclick = () => modal.remove();
-}
-
-// ==================== CARICAMENTO DATI (Firebase) ====================
-function normalizzaCodiceAgente(c) { return c.toString(); }
 async function caricaAgenti() {
-    const snap = await db.collection('agenti_lista').get();
-    agentiLista = []; snap.forEach(d => { let data = d.data(); data.codice = normalizzaCodiceAgente(data.codice); agentiLista.push(data); });
-    agentiLista.sort((a,b)=>a.codice.localeCompare(b.codice));
-    let sel = document.getElementById('selectAgente');
-    sel.innerHTML = '<option value="">-- Seleziona agente --</option>';
-    agentiLista.forEach(a => { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = `${a.codice} - ${a.nome}`; sel.appendChild(opt); });
-    let last = localStorage.getItem('ultimoAgenteSelezionato');
-    if(last && agentiLista.find(a=>a.codice===last)) { sel.value = last; selezionaAgente(last); }
+    try {
+        const snapshot = await db.collection('agenti_lista').get();
+        agentiLista = [];
+        snapshot.forEach(doc => { let data = doc.data(); data.codice = normalizzaCodiceAgente(data.codice); agentiLista.push(data); });
+        agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
+        aggiornaSelectAgenti();
+        const ultimoAgente = localStorage.getItem('ultimoAgenteSelezionato');
+        if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) { document.getElementById('selectAgente').value = ultimoAgente; selezionaAgente(ultimoAgente); }
+    } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
+function aggiornaSelectAgenti() {
+    let select = document.getElementById('selectAgente');
+    let oldValue = select.value;
+    select.innerHTML = '<option value="">-- Seleziona agente --</option>';
+    for (let a of agentiLista) { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = a.codice+" - "+a.nome; select.appendChild(opt); }
+    if (oldValue && agentiLista.find(a => a.codice === oldValue)) { select.value = oldValue; selezionaAgente(oldValue); }
+}
+
 async function caricaDatiAgente(codice) {
-    const ordSnap = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
-    datiOrd = ordSnap.docs.map(d => d.data());
-    const scaSnap = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
-    datiSca = scaSnap.docs.map(d => d.data());
+    try {
+        const ordSnapshot = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
+        datiOrd = [];
+        ordSnapshot.forEach(doc => {
+            datiOrd.push(doc.data());
+        });
+        
+        const scaSnapshot = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
+        datiSca = [];
+        scaSnapshot.forEach(doc => {
+            datiSca.push(doc.data());
+        });
+        
+        document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        return true;
+    } catch(e) { 
+        console.error("Errore caricamento:", e);
+        return false;
+    }
 }
+
 async function selezionaAgente(codice) {
-    agenteCorrente = agentiLista.find(a=>a.codice===codice);
-    if(!agenteCorrente) return;
+    agenteCorrente = agentiLista.find(a => a.codice === codice);
+    if (!agenteCorrente) return;
     localStorage.setItem('ultimoAgenteSelezionato', codice);
     await caricaDatiAgente(codice);
+    // Reset memorie ordini quando cambia agente
+    ordiniMemorizzati = {};
     aggiornaClienti();
     document.getElementById('cercaCliente').value = '';
     document.getElementById('cercaArticoloInline').value = '';
     document.getElementById('dettaglioAgenti').innerHTML = '';
-    resetModifiche();
+    resetModificheNonSalvate();
 }
-function aggiornaClienti() {
-    let m = new Map();
-    for(let c of datiOrd) { m.set(c.codice.toString(), { codice:c.codice.toString(), ragione:c.ragione, ordini:c.articoli, scadenze:[], hasScadenze:false }); }
-    for(let c of datiSca) { let cod = c.codice.toString(); if(m.has(cod)) { let cl = m.get(cod); cl.scadenze = c.scadenze; cl.hasScadenze = true; } else m.set(cod, { codice:cod, ragione:c.ragione, ordini:[], scadenze:c.scadenze, hasScadenze:true }); }
-    clientiUnici = Array.from(m.values());
-    filtraClienti();
-}
-function filtraClienti() {
-    let txt = document.getElementById('cercaCliente').value.toLowerCase();
-    let filtrati = clientiUnici.filter(c => c.codice.includes(txt) || c.ragione.toLowerCase().includes(txt));
-    let sel = document.getElementById('selectClienteAgenti');
-    sel.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-    filtrati.forEach(c => { let opt = document.createElement('option'); opt.value = c.codice; opt.textContent = `${c.codice} - ${c.ragione}${c.hasScadenze && c.scadenze.length ? ` (${c.scadenze.length} scad.)` : ''}`; if(c.hasScadenze && c.scadenze.length) opt.style.fontWeight='bold'; sel.appendChild(opt); });
-}
-function mostraDettaglioCliente(codice) {
-    let cliente = clientiUnici.find(c=>c.codice===codice);
-    if(!cliente) return;
-    clienteScadenzeCorrente = cliente;
-    let html = `<div class="scadenze-box"><div class="scadenze-header"><h3>📅 Scadenze ${cliente.codice} ${cliente.ragione}</h3><button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)">📱 Invia Scadenze</button></div><table><thead><tr><th>Scadenza</th><th>Data Doc</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>${(cliente.scadenze||[]).map(s=>`<tr><td>${s.scadenza}</td><td>${s.dataDoc||''}</td><td>${s.numDoc}</td><td style="text-align:right">${s.importo.toFixed(2)} €</td></tr>`).join('')}</tbody></table></div>`;
-    if(cliente.ordini && cliente.ordini.length) {
-        html += `<div class="scadenze-box"><h3>📦 ORD - ${cliente.codice} (${cliente.ordini.length} articoli)</h3>`;
-        cliente.ordini.forEach(art => { html += `<div class="articolo-item"><strong>${art.codice} ${art.descrizione}</strong><div>€ ${art.prezzo?.toFixed(2)} - Sc.${art.sconto1}%</div><div class="storico-ordini">${(art.coppie||[]).slice(0,4).map(o=>`<span>${o.data} q.${o.qta}</span>`).join('')}</div></div>`; });
-        html += `</div>`;
-    }
-    document.getElementById('dettaglioAgenti').innerHTML = html;
-    document.querySelectorAll('.articolo-item').forEach(el => el.onclick = (e) => { e.stopPropagation(); let s = el.querySelector('.storico-ordini'); if(s) s.classList.toggle('visible'); });
-}
-function inviaScadenzeWhatsApp(cliente) { if(!cliente?.scadenze?.length) return alert("Nessuna scadenza"); let msg = `SCADENZE ${cliente.codice} ${cliente.ragione}\n`+cliente.scadenze.map(s=>`${s.scadenza} €${s.importo.toFixed(2)}`).join('\n'); window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank'); }
-window.inviaScadenzeWhatsApp = inviaScadenzeWhatsApp;
-document.getElementById('selectClienteAgenti').onchange = (e) => e.target.value && mostraDettaglioCliente(e.target.value);
-document.getElementById('cercaCliente').oninput = () => filtraClienti();
-document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if(c) mostraDettaglioCliente(c); };
-// Pulsante compila ordine (per compatibilità con vecchio layout, ma verrà sovrascritto)
-document.getElementById('btnCompilaOrdine') && (document.getElementById('btnCompilaOrdine').onclick = () => { let cod = document.getElementById('selectClienteAgenti').value; if(!cod) alert("Seleziona cliente"); else { let cl = clientiUnici.find(c=>c.codice===cod); cl && apriModaleOrdine(cl); } });
 
-// ==================== GESTIONE BOTTONI PC/MOBILE ====================
-function setupHeaderButtons() {
-    const container = document.getElementById('headerActionGroup');
-    if(!container) return;
-    container.innerHTML = '';
-    const isPc = isDesktop();
-    if(isPc) {
-        // PC: pulsante ORD+SCA+LIST (upload file)
-        const wrapper = document.createElement('div');
-        wrapper.className = 'tooltip-wrapper';
-        const btnUpload = document.createElement('button');
-        btnUpload.id = 'btnCaricaFilePC';
-        btnUpload.className = 'btn-primary';
-        btnUpload.innerHTML = '📂 ORD+SCA+LIST';
-        btnUpload.style.display = 'inline-flex';
-        btnUpload.style.alignItems = 'center';
-        btnUpload.style.gap = '5px';
-        const tooltipSpan = document.createElement('span');
-        tooltipSpan.className = 'tooltip-text';
-        tooltipSpan.innerText = 'Carica file ORD{codice}.txt e SCA{codice}.txt';
-        wrapper.appendChild(btnUpload);
-        wrapper.appendChild(tooltipSpan);
-        container.appendChild(wrapper);
-        btnUpload.onclick = () => document.getElementById('fileInput').click();
+async function salvaDatiAgente() {
+    if (!agenteCorrente) return;
+    try {
+        const ordRef = db.collection('agenti_dati').doc('ord_' + agenteCorrente.codice).collection('clienti');
+        const batch = db.batch();
         
-        // Pulsante LISTINO
-        const btnListino = document.createElement('button');
-        btnListino.id = 'btnListinoPC';
-        btnListino.className = 'btn-listino-header';
-        btnListino.innerHTML = '📋 LISTINO';
-        btnListino.onclick = () => apriListinoModal();
-        container.appendChild(btnListino);
+        const vecchiOrd = await ordRef.get();
+        vecchiOrd.forEach(doc => batch.delete(doc.ref));
         
-        // Pulsante COMPILA ORDINE
-        const btnOrdine = document.createElement('button');
-        btnOrdine.id = 'btnCompilaOrdineClone';
-        btnOrdine.className = 'btn-ordine-header';
-        btnOrdine.innerHTML = '📝 COMPILA ORDINE';
-        btnOrdine.onclick = () => { let cod = document.getElementById('selectClienteAgenti').value; if(!cod) alert("Seleziona cliente"); else { let cl = clientiUnici.find(c=>c.codice===cod); cl && apriModaleOrdine(cl); } };
-        container.appendChild(btnOrdine);
-    } else {
-        // Mobile: solo pulsante COMPILA ORDINE (nessun ORD+SCA)
-        const btnOrdine = document.createElement('button');
-        btnOrdine.id = 'btnCompilaOrdineMobile';
-        btnOrdine.className = 'btn-ordine-header';
-        btnOrdine.innerHTML = '📝 COMPILA ORDINE';
-        btnOrdine.onclick = () => { let cod = document.getElementById('selectClienteAgenti').value; if(!cod) alert("Seleziona cliente"); else { let cl = clientiUnici.find(c=>c.codice===cod); cl && apriModaleOrdine(cl); } };
-        container.appendChild(btnOrdine);
+        for (let cliente of datiOrd) {
+            const docRef = ordRef.doc(cliente.codice.toString());
+            batch.set(docRef, {
+                codice: cliente.codice,
+                ragione: cliente.ragione,
+                articoli: cliente.articoli
+            });
+        }
+        
+        const scaRef = db.collection('agenti_dati').doc('sca_' + agenteCorrente.codice).collection('clienti');
+        
+        const vecchiSca = await scaRef.get();
+        vecchiSca.forEach(doc => batch.delete(doc.ref));
+        
+        for (let cliente of datiSca) {
+            const docRef = scaRef.doc(cliente.codice.toString());
+            batch.set(docRef, {
+                codice: cliente.codice,
+                ragione: cliente.ragione,
+                scadenze: cliente.scadenze
+            });
+        }
+        
+        await batch.commit();
+        await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
+        
+        document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        resetModificheNonSalvate();
+        showToast("Dati salvati!");
+        return true;
+    } catch(e) { 
+        alert("Errore salvataggio: "+e.message); 
+        return false;
     }
-    // Input file nascosto globale (per caricamento ORD/SCA)
-    if(!document.getElementById('fileInput')) {
-        let inp = document.createElement('input');
-        inp.type = 'file';
-        inp.id = 'fileInput';
-        inp.multiple = true;
-        inp.accept = '.txt,.csv';
-        inp.style.display = 'none';
-        document.body.appendChild(inp);
-        inp.onchange = async (e) => {
-            if(!agenteCorrente) { alert("Seleziona agente"); return; }
-            let files = Array.from(e.target.files);
-            if(files.length !== 2) { alert("Servono esattamente 2 file: ORD e SCA"); return; }
-            let ordTxt=null, scaTxt=null;
-            for(let f of files) {
-                let name = f.name.replace(/\.[^.]*$/,'');
-                if(name.toUpperCase().startsWith('ORD')) ordTxt = await f.text();
-                else if(name.toUpperCase().startsWith('SCA')) scaTxt = await f.text();
+}
+
+function convertiImportoItaliano(importoStr) {
+    if (!importoStr) return 0;
+    let isNegative = importoStr.endsWith('-');
+    if (isNegative) importoStr = importoStr.slice(0, -1);
+    let importoPulito = importoStr.replace(/\./g, '').replace(',', '.');
+    let importo = parseFloat(importoPulito);
+    if (isNegative && !isNaN(importo)) importo = -importo;
+    return isNaN(importo) ? 0 : importo;
+}
+
+function parseORD(text) {
+    const lines = text.split(/\r?\n/);
+    const clienti = new Map();
+    let currentCliente = null;
+    const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
+    const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
+    for (let line of lines) {
+        line = line.trimEnd();
+        if (line === "") continue;
+        let mCliente = line.match(reCliente);
+        if (mCliente) { 
+            currentCliente = { codice: mCliente[1].toString(), ragione: mCliente[2].trim(), articoli: [] }; 
+            clienti.set(currentCliente.codice, currentCliente); 
+            continue; 
+        }
+        if (!currentCliente) continue;
+        if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
+        let coppie = [], match;
+        while ((match = reCoppia.exec(line)) !== null) { let qta = parseFloat(match[1].replace(',', '.')); let data = match[2]; coppie.push({ qta, data, start: match.index, end: match.index + match[0].length }); }
+        if (coppie.length === 0) continue;
+        let firstCoppiaStart = coppie[0].start;
+        let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
+        let tokens = descrizioneRaw.split(/\s+/);
+        let codice = tokens[0].toString();
+        let descrizione = tokens.slice(1).join(" ");
+        let lastCoppiaEnd = coppie[coppie.length-1].end;
+        let afterCoppie = line.substring(lastCoppiaEnd).trim();
+        let numTokens = afterCoppie.split(/\s+/);
+        let prezzo = 0, sconto1 = 0;
+        if (numTokens.length >= 2) { prezzo = parseFloat(numTokens[0].replace(',', '.')); sconto1 = parseFloat(numTokens[1].replace(',', '.')); }
+        coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+        currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
+    }
+    return Array.from(clienti.values());
+}
+
+function parseSCA(text) {
+    const lines = text.split(/\r?\n/);
+    const clienti = new Map();
+    let currentCliente = null;
+    const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+-?/;
+    for (let lineOriginale of lines) {
+        let line = lineOriginale
+            .replace(/\uFEFF/g, '')
+            .replace(/\f/g, ' ')
+            .replace(/\t/g, ' ')
+            .replace(/\*/g, ' ')
+            .trim();
+        if (!line) continue;
+        if (/^=+/.test(line)) continue;
+        if (/^-+/.test(line)) continue;
+        if (line.startsWith("Scadenza")) continue;
+        if (line.startsWith("VOSTRO DARE")) continue;
+        if (line.startsWith("TOTALE") || line.startsWith("TOT.")) continue;
+        if (line.startsWith("AGENTE:")) continue;
+        if (line.startsWith("TUTTE")) continue;
+        if (line.startsWith("inSAPA")) continue;
+        if (line.startsWith("STAMPA")) continue;
+        let mCliente = line.match(reCliente);
+        if (mCliente) {
+            let codice = mCliente[1].toString();
+            let ragione = mCliente[2].trim();
+            currentCliente = { codice, ragione, scadenze: [] };
+            clienti.set(codice, currentCliente);
+            continue;
+        }
+        if (currentCliente) {
+            line = line.replace(/\s+/g, ' ').trim();
+            let parts = line.split(' ');
+            let euroIndex = parts.findIndex(p => p.toLowerCase() === "euro");
+            if (euroIndex === -1) continue;
+            let scadenza = parts[0] || '';
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(scadenza)) continue;
+            let importoStr = parts[euroIndex + 1] || '0';
+            let importo = convertiImportoItaliano(importoStr);
+            let dataDoc = parts[euroIndex - 1] || '';
+            let numDoc = parts[euroIndex - 2] || '';
+            let descrizione = parts.slice(1, euroIndex - 2).join(" ");
+            currentCliente.scadenze.push({ scadenza, descrizione, numDoc, dataDoc, importo });
+        }
+    }
+    return Array.from(clienti.values());
+}
+
+function inviaScadenzeWhatsApp(cliente) {
+    if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
+    let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
+    let totale = 0;
+    for (let s of cliente.scadenze) {
+        messaggio += "Scadenza: " + s.scadenza + "\nData Doc: " + s.dataDoc + "\nN.Documento: " + s.numDoc + "\nImporto: EUR " + s.importo.toFixed(2) + "\n---\n";
+        totale += s.importo;
+    }
+    messaggio += "\nTOTALE: EUR " + totale.toFixed(2) + "\nMessaggio generato da inSAPA Agenti";
+    window.open("https://wa.me/?text=" + encodeURIComponent(messaggio), '_blank');
+}
+function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
+
+// Funzione per generare HTML dell'ordine (usato sia per email che per stampa) con NOTE
+function generaHtmlOrdine(cliente, articoliConQta, note = "") {
+    let html = `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+            <h2 style="color: #2c3e50; border-bottom: 2px solid #f1c40f; padding-bottom: 10px;">📝 ORDINE DA CLIENTE</h2>
+            <div style="background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p><strong>Codice Cliente:</strong> ${cliente.codice}</p>
+                <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
+                <p><strong>Data Ordine:</strong> ${new Date().toLocaleDateString('it-IT')}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                <thead>
+                    <tr style="background: #f1c40f;">
+                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Codice Articolo</th>
+                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Descrizione</th>
+                        <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">Quantità</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    for (let item of articoliConQta) {
+        html += `
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.codice}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.descrizione}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantita} pz</td>
+            </tr>
+        `;
+    }
+    html += `
+                </tbody>
+            </table>
+    `;
+    if (note && note.trim()) {
+        html += `<div style="margin-top: 20px; background: #fff9e6; padding: 12px; border-left: 4px solid #f1c40f;">
+                    <strong>📝 NOTE:</strong><br>${note.replace(/\n/g, '<br>')}
+                 </div>`;
+    }
+    html += `
+            <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 10px;">
+                Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}
+            </div>
+        </div>
+    `;
+    return html;
+}
+
+// Funzione per stampare PDF (PC)
+function stampaPDF(cliente, articoliConQta, note = "") {
+    const htmlContent = generaHtmlOrdine(cliente, articoliConQta, note);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Ordine_${cliente.codice}_${new Date().toLocaleDateString('it-IT').replace(/\//g, '-')}</title>
+            <meta charset="UTF-8">
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+                @media print {
+                    body { margin: 0; padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            ${htmlContent}
+            <script>
+                window.onload = function() {
+                    window.print();
+                    window.onafterprint = function() {
+                        window.close();
+                    };
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+// Funzione per inviare email (mobile)
+function inviaEmailOrdine(cliente, articoliConQta, note = "") {
+    let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
+    let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
+    corpo += `ARTICOLI ORDINATI:\n`;
+    corpo += `----------------------------------------\n`;
+    for (let item of articoliConQta) {
+        corpo += `📦 ${item.codice} - ${item.descrizione}\n`;
+        corpo += `   Quantità: ${item.quantita} pz\n\n`;
+    }
+    if (note && note.trim()) {
+        corpo += `----------------------------------------\n📝 NOTE:\n${note}\n\n`;
+    }
+    corpo += `----------------------------------------\n`;
+    corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
+    
+    window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
+}
+
+// Calcola ultima data acquisto per ogni articolo
+function calcolaUltimaDataArticolo(articolo) {
+    if (!articolo.coppie || articolo.coppie.length === 0) return null;
+    let dateObj = articolo.coppie.map(c => ({
+        data: c.data,
+        timestamp: new Date(c.data.split('/').reverse().join('-')).getTime()
+    }));
+    dateObj.sort((a,b) => b.timestamp - a.timestamp);
+    return dateObj[0];
+}
+
+// Gestisce l'input quantità (zero nascosto, selezione automatica)
+function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
+    inputElement.value = '';
+    inputElement.placeholder = '0';
+    
+    inputElement.addEventListener('focus', function() {
+        if (this.value === '0') this.value = '';
+    });
+    
+    inputElement.addEventListener('blur', function() {
+        let val = this.value.trim();
+        if (val === '' || val === '0') {
+            this.value = '';
+            quantitaInputs[articoloCodice] = 0;
+        } else {
+            let num = parseInt(val, 10);
+            if (isNaN(num) || num < 0) num = 0;
+            this.value = num;
+            quantitaInputs[articoloCodice] = num;
+        }
+    });
+    
+    inputElement.addEventListener('input', function() {
+        let val = this.value.trim();
+        if (val === '') {
+            quantitaInputs[articoloCodice] = 0;
+        } else {
+            let num = parseInt(val, 10);
+            if (!isNaN(num) && num >= 0) {
+                quantitaInputs[articoloCodice] = num;
             }
-            if(ordTxt && scaTxt) { datiOrd = parseORD(ordTxt); datiSca = parseSCA(scaTxt); await salvaDatiAgente(); aggiornaClienti(); showToast("Dati ORD/SCA aggiornati"); }
-            else alert("File non riconosciuti. Devono iniziare con ORD e SCA");
-            e.target.value = '';
+        }
+    });
+}
+
+// Apre modale compila ordine con persistenza quantità e note
+function apriModaleOrdine(cliente) {
+    if (!cliente) {
+        alert("Seleziona un cliente prima di compilare l'ordine!");
+        return;
+    }
+    
+    if (!cliente.ordini || cliente.ordini.length === 0) {
+        alert("Questo cliente non ha articoli disponibili (nessun dato ORD caricato)!");
+        return;
+    }
+    
+    // Carica eventuali quantità e nota memorizzate per questo cliente
+    const memorizzato = ordiniMemorizzati[cliente.codice] || { quantities: {}, note: "" };
+    let quantitaInputs = { ...memorizzato.quantities };
+    let noteCorrente = memorizzato.note || "";
+    
+    // Ordina articoli per ultimo acquisto
+    let articoliOrdinati = [...cliente.ordini];
+    articoliOrdinati.sort((a,b) => {
+        let dataA = calcolaUltimaDataArticolo(a);
+        let dataB = calcolaUltimaDataArticolo(b);
+        if (!dataA && !dataB) return 0;
+        if (!dataA) return 1;
+        if (!dataB) return -1;
+        return dataB.timestamp - dataA.timestamp;
+    });
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    
+    const isDesktopDevice = isDesktop();
+    const pulsanteTesto = isDesktopDevice ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>📝 ORDINE DA CLIENTE</h3>
+            <div class="cliente-info-modale">
+                <p><strong>Codice:</strong> ${cliente.codice}</p>
+                <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
+            </div>
+            <div class="ricerca-articolo-ordine">
+                <input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione...">
+            </div>
+            <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
+            <div class="nota-field">
+                <label>📝 NOTE (opzionali):</label>
+                <textarea id="noteOrdine" rows="3" placeholder="Inserisci eventuali note per questo ordine...">${noteCorrente.replace(/</g, '&lt;')}</textarea>
+            </div>
+            <div class="btn-group-modal">
+                <button id="btnConfermaOrdine" class="btn-success">${pulsanteTesto}</button>
+                <button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    function renderListaArticoli(searchText = '') {
+        const container = document.getElementById('listaArticoliOrdine');
+        let filtrati = articoliOrdinati;
+        if (searchText) {
+            const lowerSearch = searchText.toLowerCase();
+            filtrati = articoliOrdinati.filter(art => 
+                art.codice.toLowerCase().includes(lowerSearch) || 
+                art.descrizione.toLowerCase().includes(lowerSearch)
+            );
+        }
+        
+        if (filtrati.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#999;">Nessun articolo trovato</p>';
+            return;
+        }
+        
+        let html = '';
+        for (let art of filtrati) {
+            const ultimoAcquisto = calcolaUltimaDataArticolo(art);
+            const ultimoTesto = ultimoAcquisto ? `Ultimo acquisto: ${ultimoAcquisto.data}` : 'Mai acquistato';
+            const qtaCorrente = quantitaInputs[art.codice] || 0;
+            html += `
+                <div class="ordine-articolo-item" data-codice="${art.codice}">
+                    <div class="ordine-articolo-info">
+                        <div class="ordine-articolo-codice">${art.codice}</div>
+                        <div class="ordine-articolo-desc">${art.descrizione}</div>
+                        <div class="ordine-articolo-desc" style="font-size:0.7rem; color:#888;">${ultimoTesto}</div>
+                    </div>
+                    <div class="ordine-articolo-qta">
+                        <label>Quantità:</label>
+                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" style="text-align:center;" value="${qtaCorrente > 0 ? qtaCorrente : ''}">
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+        
+        for (let art of filtrati) {
+            const inputId = `qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const input = document.getElementById(inputId);
+            if (input) {
+                const currentQta = quantitaInputs[art.codice] || 0;
+                if (currentQta > 0) input.value = currentQta;
+                setupQuantitaInput(input, art.codice, quantitaInputs);
+            }
+        }
+    }
+    
+    renderListaArticoli();
+    
+    const ricercaInput = document.getElementById('ricercaArticoloOrdine');
+    ricercaInput.addEventListener('input', (e) => {
+        renderListaArticoli(e.target.value);
+    });
+    
+    // Aggiorna nota in tempo reale
+    const noteTextarea = document.getElementById('noteOrdine');
+    noteTextarea.addEventListener('input', (e) => {
+        noteCorrente = e.target.value;
+        // salva in memoria temporanea
+        ordiniMemorizzati[cliente.codice] = {
+            quantities: quantitaInputs,
+            note: noteCorrente
+        };
+    });
+    
+    // Salva quantità su ogni modifica tramite setupQuantitaInput già agganciato, ma per sicurezza aggiorniamo anche su blur
+    function saveCurrentState() {
+        ordiniMemorizzati[cliente.codice] = {
+            quantities: { ...quantitaInputs },
+            note: noteTextarea.value
         };
     }
+    
+    document.getElementById('btnConfermaOrdine').onclick = () => {
+        let articoliConQta = [];
+        for (let art of articoliOrdinati) {
+            let qta = quantitaInputs[art.codice] || 0;
+            if (qta > 0) {
+                articoliConQta.push({
+                    codice: art.codice,
+                    descrizione: art.descrizione,
+                    quantita: qta
+                });
+            }
+        }
+        
+        if (articoliConQta.length === 0) {
+            alert("Inserisci almeno una quantità maggiore di zero!");
+            return;
+        }
+        
+        const noteFinale = noteTextarea.value;
+        
+        if (isDesktopDevice) {
+            stampaPDF(cliente, articoliConQta, noteFinale);
+            showToast("Apertura finestra di stampa...");
+        } else {
+            inviaEmailOrdine(cliente, articoliConQta, noteFinale);
+            showToast("Apertura email in corso...");
+        }
+        
+        // Dopo invio, azzera la memoria per questo cliente (nuovo ordine)
+        delete ordiniMemorizzati[cliente.codice];
+        modal.remove();
+    };
+    
+    document.getElementById('btnAnnullaOrdine').onclick = () => {
+        // Salva lo stato prima di chiudere (se l'utente ha modificato qualcosa)
+        saveCurrentState();
+        modal.remove();
+    };
+    
+    // Salva anche quando si chiude cliccando fuori? gestiamo con cleanup
+    window.addEventListener('click', function modalClickOutside(e) {
+        if (e.target === modal) {
+            saveCurrentState();
+            modal.remove();
+            window.removeEventListener('click', modalClickOutside);
+        }
+    });
 }
-function parseORD(txt) { const lines=txt.split(/\r?\n/); let map=new Map(); let curr=null; for(let l of lines){ let m=l.match(/^Cliente\s+:\s+(\d+)\s+(.+)/); if(m){ curr={codice:m[1].toString(),ragione:m[2].trim(),articoli:[]}; map.set(curr.codice,curr); continue; } if(!curr) continue; let reCoppia=/(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g, coppie=[]; let match; while((match=reCoppia.exec(l))!==null)coppie.push({qta:parseFloat(match[1].replace(',','.')),data:match[2]}); if(!coppie.length)continue; let desc=l.substring(0,l.indexOf(coppie[0].data)-2).trim().split(/\s+/); let codice=desc[0]; let descrizione=desc.slice(1).join(" "); curr.articoli.push({codice,descrizione,coppie,prezzo:0,sconto1:0}); } return Array.from(map.values()); }
-function parseSCA(txt) { const lines=txt.split(/\r?\n/); let map=new Map(); let curr=null; for(let l of lines){ let m=l.match(/^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo/); if(m){ curr={codice:m[1].toString(),ragione:m[2].trim(),scadenze:[]}; map.set(curr.codice,curr); continue; } if(curr && l.includes("Euro")){ let parts=l.split(/\s+/); let idx=parts.findIndex(p=>p.toLowerCase()==="euro"); if(idx>0){ let scad=parts[0]; if(/^\d{2}\/\d{2}\/\d{4}$/.test(scad)){ let imp=parseFloat(parts[idx+1]?.replace(/\./g,'').replace(',','.')); if(!isNaN(imp)) curr.scadenze.push({scadenza:scad,descrizione:parts.slice(1,idx-2).join(" "),numDoc:parts[idx-2],dataDoc:parts[idx-1],importo:imp}); } } } } return Array.from(map.values()); }
-async function salvaDatiAgente() { if(!agenteCorrente) return; try { let batch=db.batch(); let ordRef=db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).collection('clienti'); let oldOrd=await ordRef.get(); oldOrd.forEach(d=>batch.delete(d.ref)); datiOrd.forEach(c=>{batch.set(ordRef.doc(c.codice.toString()),{codice:c.codice,ragione:c.ragione,articoli:c.articoli});}); let scaRef=db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).collection('clienti'); let oldSca=await scaRef.get(); oldSca.forEach(d=>batch.delete(d.ref)); datiSca.forEach(c=>{batch.set(scaRef.doc(c.codice.toString()),{codice:c.codice,ragione:c.ragione,scadenze:c.scadenze});}); await batch.commit(); resetModifiche(); showToast("Dati salvati"); return true; } catch(e){alert("Errore salvataggio:"+e.message); return false;} }
-function caricaLinkDaFile() { fetch('link.html').then(r=>r.ok?r.text():'').then(t=>{ let lines=t.split(/\r?\n/).filter(l=>l.trim()&&!l.trim().startsWith('<')); if(lines[0]) linkPrincipale=lines[0]; if(lines[1]) linkSecondario=lines[1]; }).catch(e=>{}); }
-function caricaLogoSaved() { let img=document.getElementById('logoImmagine'), span=document.getElementById('logoSpan'); fetch('icons/logo.jpg').then(r=>{ if(r.ok){ img.src='icons/logo.jpg'; img.style.display='block'; span.style.display='none'; } else { fetch('icons/logo.png').then(r2=>{if(r2.ok){img.src='icons/logo.png';img.style.display='block';span.style.display='none';} else throw''}).catch(()=>{img.style.display='none';span.style.display='block';}); } }).catch(()=>{img.style.display='none';span.style.display='block';}); }
-let lastTap=0; document.getElementById('logoRettangolo').addEventListener('click',(e)=>{ let now=Date.now(); if(now-lastTap<300){ apriLinkSecondario(); lastTap=0; } else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); } });
-function apriLinkPrincipale(){ if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link1 mancante",true); }
-function apriLinkSecondario(){ if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link2 mancante",true); }
-document.getElementById('hamburgerBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); };
-document.addEventListener('click', (e) => { let nav=document.getElementById('navGrid'); if(!nav.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) nav.classList.remove('open'); });
-Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => { setupHeaderButtons(); caricaLogoSaved(); });
+
+// Funzione per costruire il catalogo articoli unico da tutti i clienti ORD (per listino)
+function getCatalogoArticoli() {
+    const mappaArticoli = new Map(); // key: codice articolo
+    for (let cliente of datiOrd) {
+        if (!cliente.articoli) continue;
+        for (let art of cliente.articoli) {
+            if (!mappaArticoli.has(art.codice)) {
+                // Dati reali da ORD
+                mappaArticoli.set(art.codice, {
+                    codice: art.codice,
+                    descrizione: art.descrizione,
+                    // Campi mancanti: generiamo placeholder realistici
+                    ean: `EAN${art.codice}`,
+                    stock: Math.floor(Math.random() * 200), // finto stock
+                    um: "PZ",
+                    gm: "0,00",
+                    mOrd: 1,
+                    iva: "22%"
+                });
+            }
+        }
+    }
+    return Array.from(mappaArticoli.values());
+}
+
+// Modale LISTINO (con ricerca e tabella)
+function apriListinoModal() {
+    if (!agenteCorrente) {
+        alert("Seleziona prima un agente.");
+        return;
+    }
+    const catalogo = getCatalogoArticoli();
+    if (catalogo.length === 0) {
+        alert("Nessun articolo trovato. Carica prima un file ORD.");
+        return;
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    const isMobile = !isDesktop();
+    modal.innerHTML = `
+        <div class="modal-content listino-modal">
+            <h3>📋 LISTINO ARTICOLI</h3>
+            <input type="text" id="searchListino" class="listino-search" placeholder="Cerca per codice o descrizione...">
+            <div style="overflow-x: auto;">
+                <table class="listino-tabella" id="tabellaListino">
+                    <thead>
+                        <tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>S T O K</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr>
+                    </thead>
+                    <tbody id="listaArticoliListino"></tbody>
+                </table>
+            </div>
+            <button id="chiudiListino" class="btn-primary" style="margin-top:15px;">CHIUDI</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    function renderListino(searchTerm = "") {
+        const tbody = document.getElementById("listaArticoliListino");
+        let filtrati = catalogo;
+        if (searchTerm) {
+            const low = searchTerm.toLowerCase();
+            filtrati = catalogo.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
+        }
+        if (filtrati.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Nessun articolo trovato</td></tr>';
+            return;
+        }
+        let html = "";
+        for (let art of filtrati) {
+            html += `<tr>
+                        <td>${art.codice}</td>
+                        <td>${art.codice}</td>
+                        <td>${art.ean}</td>
+                        <td>${art.stock}</td>
+                        <td>${art.descrizione}</td>
+                        <td>${art.um}</td>
+                        <td>${art.gm}</td>
+                        <td>${art.mOrd}</td>
+                        <td>${art.iva}</td>
+                     </tr>`;
+        }
+        tbody.innerHTML = html;
+    }
+    
+    renderListino();
+    const searchInput = document.getElementById("searchListino");
+    searchInput.addEventListener("input", (e) => renderListino(e.target.value));
+    
+    document.getElementById("chiudiListino").onclick = () => modal.remove();
+}
+
+function aggiornaClienti() {
+    let mappa = new Map();
+    for (let c of datiOrd) {
+        let codiceNorm = c.codice.toString();
+        mappa.set(codiceNorm, { codice: codiceNorm, ragione: c.ragione, hasScadenze: false, scadenze: [], ordini: c.articoli });
+    }
+    for (let c of datiSca) {
+        let codiceNormalizzato = c.codice.toString();
+        let match = mappa.get(codiceNormalizzato);
+        if (match) { match.hasScadenze = true; match.scadenze = c.scadenze; }
+        else { mappa.set(codiceNormalizzato, { codice: codiceNormalizzato, ragione: c.ragione, hasScadenze: true, scadenze: c.scadenze, ordini: [] }); }
+    }
+    clientiUnici = Array.from(mappa.values());
+    filtraClienti();
+}
+
+function filtraClienti() {
+    let searchText = document.getElementById('cercaCliente').value.toLowerCase();
+    let clientiFiltrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(searchText) || c.ragione.toLowerCase().includes(searchText));
+    clientiFiltrati.sort((a,b) => { let aHas = a.hasScadenze && a.scadenze.length; let bHas = b.hasScadenze && b.scadenze.length; if (aHas && !bHas) return -1; if (!aHas && bHas) return 1; return a.ragione.localeCompare(b.ragione); });
+    let select = document.getElementById('selectClienteAgenti');
+    select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
+    for (let c of clientiFiltrati) {
+        let opt = document.createElement('option');
+        opt.value = c.codice;
+        let hasScad = c.hasScadenze && c.scadenze.length;
+        if (hasScad) { opt.style.color = '#c0392b'; opt.style.fontWeight = 'bold'; opt.textContent = "[R] " + c.codice + " - " + c.ragione + " (" + c.scadenze.length + " scad.)"; }
+        else opt.textContent = c.codice + " - " + c.ragione;
+        select.appendChild(opt);
+    }
+    if (clientiFiltrati.length === 0) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
+}
+
+function buildScadenzeHtml(cliente) {
+    let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
+    html += '<button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button>';
+    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
+    for (let s of cliente.scadenze) {
+        let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
+        html += '<tr>';
+        html += '<td style="white-space:nowrap" data-label="Scadenza">' + s.scadenza + '</td>';
+        html += '<td style="white-space:nowrap" data-label="Data Doc.">' + (s.dataDoc || '') + '</td>';
+        html += '<td data-label="N.Doc">' + s.numDoc + '</td>';
+        html += '<td style="text-align:right" ' + classeImporto + ' data-label="Importo">' + s.importo.toFixed(2) + ' €</td>';
+        html += '</tr>';
+    }
+    html += '</tbody></table></div>';
+    return html;
+}
+
+function mostraDettaglioCliente(codice) {
+    let cliente = clientiUnici.find(c => c.codice === codice);
+    if (!cliente) return;
+    clienteScadenzeCorrente = cliente;
+    let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h2 style="margin:0;">Cliente: ' + cliente.codice + ' - ' + cliente.ragione + '</h2><button id="btnListinoSottoCliente" class="btn-listino-mini">📋 LISTINO</button></div>';
+    let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
+    if (hasScadenze) html += buildScadenzeHtml(cliente);
+    else html += '<div class="scadenze-box">Nessuna scadenza per ' + cliente.ragione + '</div>';
+    if (cliente.ordini && cliente.ordini.length) {
+        html += '<div class="scadenze-box"><h3>ORD - ' + cliente.codice + ' ' + cliente.ragione + ' (' + cliente.ordini.length + ' articoli)</h3>';
+        for (let art of cliente.ordini) {
+            let storicoHtml = '';
+            if (art.coppie && art.coppie.length) {
+                let mostrati = art.coppie.slice(0,4);
+                storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '"><strong>STORICO ORDINI (ultimi 4):</strong><br>';
+                for (let ord of mostrati) storicoHtml += '<span>' + ord.data + ' Q.ta: ' + ord.qta + '</span> ';
+                storicoHtml += '</div>';
+            } else storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '">Nessun ordine registrato</div>';
+            html += '<div class="articolo-item" data-codice="' + art.codice + '"><div class="articolo-titolo"><strong>' + art.codice + ' ' + art.descrizione + '</strong></div><div>EUR ' + art.prezzo.toFixed(2) + ' - Sc. ' + art.sconto1.toFixed(2) + '%</div>' + storicoHtml + '</div>';
+        }
+        html += '</div>';
+    } else html += '<div class="scadenze-box">Nessun ordine per ' + cliente.ragione + '</div>';
+    document.getElementById('dettaglioAgenti').innerHTML = html;
+    document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
+    const btnListino = document.getElementById('btnListinoSottoCliente');
+    if (btnListino) btnListino.onclick = () => apriListinoModal();
+}
+
+function filtraArticoli() {
+    let clienteCodice = document.getElementById('selectClienteAgenti').value;
+    if (!clienteCodice) return;
+    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
+    if (!cliente || !cliente.ordini) return;
+    let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
+    let filtrati = cliente.ordini.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
+    let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h2 style="margin:0;">Cliente: ' + cliente.codice + ' - ' + cliente.ragione + '</h2><button id="btnListinoSottoCliente" class="btn-listino-mini">📋 LISTINO</button></div>';
+    let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
+    if (hasScadenze) html += buildScadenzeHtml(cliente);
+    if (filtrati.length) {
+        html += '<div class="scadenze-box"><h3>ORD - ' + cliente.codice + ' ' + cliente.ragione + ' (' + filtrati.length + ' articoli)</h3>';
+        for (let art of filtrati) {
+            let storicoHtml = '';
+            if (art.coppie && art.coppie.length) {
+                let mostrati = art.coppie.slice(0,4);
+                storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '"><strong>STORICO ORDINI (ultimi 4):</strong><br>';
+                for (let ord of mostrati) storicoHtml += '<span>' + ord.data + ' Q.ta: ' + ord.qta + '</span> ';
+                storicoHtml += '</div>';
+            } else storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '">Nessun ordine registrato</div>';
+            html += '<div class="articolo-item" data-codice="' + art.codice + '"><div class="articolo-titolo"><strong>' + art.codice + ' ' + art.descrizione + '</strong></div><div>EUR ' + art.prezzo.toFixed(2) + ' - Sc. ' + art.sconto1.toFixed(2) + '%</div>' + storicoHtml + '</div>';
+        }
+        html += '</div>';
+    } else html += '<div class="scadenze-box">Nessun articolo trovato per "' + searchText + '"</div>';
+    document.getElementById('dettaglioAgenti').innerHTML = html;
+    document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
+    const btnListino = document.getElementById('btnListinoSottoCliente');
+    if (btnListino) btnListino.onclick = () => apriListinoModal();
+}
+
+function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
+    let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
+    let match = baseName.match(/^([A-Z]+)(\d+)$/i);
+    if (!match) return false;
+    if (match[1].toUpperCase() !== tipo) return false;
+    return parseInt(match[2],10) === parseInt(codiceAgente,10);
+}
+async function caricaFile(files) {
+    if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
+    if (files.length !== 2) { alert("Servono ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
+    let codAgente = agenteCorrente.codice;
+    let trovati = { ord: false, sca: false };
+    let ordText = null, scaText = null, errori = [];
+    for (let file of files) {
+        let nome = file.name;
+        if (nomeFileCorrisponde(nome, codAgente, 'ORD')) { trovati.ord = true; ordText = await file.text(); }
+        else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) { trovati.sca = true; scaText = await file.text(); }
+        else errori.push(nome);
+    }
+    if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
+    if (!trovati.ord || !trovati.sca) { alert("FILE MANCANTI: ORD" + codAgente + ".txt e SCA" + codAgente + ".txt"); return false; }
+    datiOrd = []; datiSca = [];
+    if (ordText) { datiOrd = parseORD(ordText); }
+    if (scaText) { datiSca = parseSCA(scaText); }
+    await salvaDatiAgente();
+    aggiornaClienti();
+    document.getElementById('fileStatusInline').innerHTML = "OK ORD: " + datiOrd.length + " | SCA: " + datiSca.length;
+    alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti\nTotale clienti unici: " + clientiUnici.length);
+    return true;
+}
+
+const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
+const navGridAgenti = document.getElementById('navGrid');
+if (hamburgerBtnAgenti && navGridAgenti) {
+    hamburgerBtnAgenti.addEventListener('click', (e) => { e.stopPropagation(); navGridAgenti.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if (!navGridAgenti.contains(e.target) && !hamburgerBtnAgenti.contains(e.target)) navGridAgenti.classList.remove('open'); });
+}
+
+document.getElementById('selectAgente').onchange = (e) => {
+    if (e.target.value && modificheNonSalvate) {
+        if (confirm("Modifiche non salvate. Salvare prima di cambiare?")) salvaDatiAgente().then(() => selezionaAgente(e.target.value));
+        else selezionaAgente(e.target.value);
+    } else if (e.target.value) selezionaAgente(e.target.value);
+};
+document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
+document.getElementById('cercaCliente').oninput = () => filtraClienti();
+document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if (c) filtraArticoli(); };
+document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('btnCompilaOrdine').onclick = () => {
+    let clienteCodice = document.getElementById('selectClienteAgenti').value;
+    if (!clienteCodice) {
+        alert("Seleziona prima un cliente dalla lista!");
+        return;
+    }
+    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
+    if (cliente) {
+        apriModaleOrdine(cliente);
+    } else {
+        alert("Cliente non trovato!");
+    }
+};
+// Pulsante LISTINO nell'header (PC)
+const btnListinoHeader = document.getElementById('btnListinoHeader');
+if (btnListinoHeader) btnListinoHeader.onclick = () => apriListinoModal();
+
+document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
+
+Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
 </script>
 </body>
 </html>
