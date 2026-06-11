@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.72</title>
+    <title>inSAPA - Agenti vA.5.73</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -86,7 +86,7 @@
         .listino-tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         .listino-tabella th, .listino-tabella td { border: 1px solid #aaa; padding: 8px; text-align: left; vertical-align: top; }
         .listino-tabella th { background: #f1c40f; position: sticky; top: 0; }
-        .listino-tabella td:nth-child(2) { text-align: right; }
+        .listino-tabella td:nth-child(3) { text-align: right; }
         .listino-tabella td:last-child { text-align: center; }
         
         .listino-card-container { display: flex; flex-direction: column; gap: 12px; max-height: 60vh; overflow-y: auto; padding: 5px; }
@@ -189,10 +189,10 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.72 - Listino parser corretto, bordi verticali, ricerca</div>
+<div class="version">vA.5.73 - Listino parser split multi-spazio, 8 colonne, bordi verticali</div>
 
 <script>
-const firebaseConfig = {
+    const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
     projectId: "insapa-database",
@@ -419,7 +419,7 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
-// PARSER CORRETTO DEL LISTINO (larghezza fissa, basato sul file originale)
+// PARSER CORRETTO (basato su spazi multipli, come nella prima versione funzionante)
 function parseLIST(text) {
     const lines = text.split(/\r?\n/);
     const articoli = [];
@@ -428,33 +428,70 @@ function parseLIST(text) {
             continue;
         if (line.trim() === "") continue;
         if (line.match(/^[\s\d]+$/)) continue;
-        if (line.includes("ELIMINATO") || line.includes("Eliminato")) continue;
-        if (line.length < 40) continue;
+        if (line.includes("ELIMINATO")) continue;
         
-        let codice = line.substring(0, 12).trim();
-        if (codice === "" || (!isNaN(parseFloat(codice)) && codice.length < 5)) continue;
+        let cleanLine = line.replace(/\r/g, '').trimEnd();
+        if (cleanLine.length < 30) continue;
         
-        let stockRaw = line.substring(15, 30).trim().replace(',', '.');
+        // Dividi per 2 o più spazi (così separa le colonne)
+        let parti = cleanLine.split(/\s{2,}/);
+        if (parti.length < 3) continue;
+        
+        let codice = parti[0].trim();
+        if (codice === "") continue;
+        
+        let idx = 1;
+        let ean = "";
+        // Se il secondo campo è un EAN valido (13 cifre o inizia con 800/801)
+        if (parti.length > idx && (parti[idx].trim().match(/^8[0-9]{12}$/) || parti[idx].trim().match(/^[0-9]{13}$/))) {
+            ean = parti[idx].trim();
+            idx++;
+        }
+        
+        // Stock
+        let stockRaw = parti[idx].trim().replace(',', '.');
         let stock = parseFloat(stockRaw);
         if (isNaN(stock)) stock = 0;
         let stockStr = stock.toFixed(4).replace('.', ',');
+        idx++;
         
-        let descrizioneRaw = line.substring(30, 70).trim();
-        let descrizione = descrizioneRaw.replace(/\s+/g, ' ').trim();
+        // Il resto contiene descrizione + UM + GM + M.Ord + eventuale Iva
+        let resto = parti.slice(idx).join(" ");
+        let iva = "22";
+        let ivaMatch = resto.match(/(\d{2})\s*$/);
+        if (ivaMatch) {
+            iva = ivaMatch[1];
+            resto = resto.substring(0, resto.length - ivaMatch[0].length).trim();
+        }
         
-        let um = line.substring(70, 75).trim();
-        if (um.length === 0) um = "";
+        let parole = resto.split(/\s+/);
+        let descrizione = "";
+        let um = "";
+        let gm = "";
+        let mOrd = "";
         
-        let gm = line.substring(75, 82).trim();
-        let mOrd = line.substring(82, 90).trim();
+        // Di solito gli ultimi 3 token sono UM, GM, M.Ord (es. "GCVH 10 0")
+        if (parole.length >= 4) {
+            mOrd = parole.pop();
+            gm = parole.pop();
+            um = parole.pop();
+            descrizione = parole.join(" ");
+        } else if (parole.length === 3) {
+            gm = parole.pop();
+            um = parole.pop();
+            descrizione = parole.join(" ");
+        } else if (parole.length === 2) {
+            um = parole.pop();
+            descrizione = parole.join(" ");
+        } else {
+            descrizione = parole.join(" ");
+        }
         
-        let iva = line.slice(-4).trim();
-        if (iva.length > 3) iva = iva.slice(-2);
-        if (!iva.match(/^\d+$/)) iva = "22";
+        descrizione = descrizione.replace(/^\s*N\.\s*/, '').trim();
         
         articoli.push({
             codiceArticolo: codice,
-            ean: "",
+            ean: ean,
             stock: stockStr,
             descrizione: descrizione,
             um: um,
@@ -463,9 +500,10 @@ function parseLIST(text) {
             iva: iva
         });
     }
-    return articoli.filter(a => a.codiceArticolo.length >= 3);
+    return articoli;
 }
-                    function inviaScadenzeWhatsApp(cliente) {
+
+function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
     let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
     let totale = 0;
@@ -531,7 +569,7 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     });
 }
 
-// MODALE LISTINO CON RIGHE VERTICALI E RICERCA
+// MODALE LISTINO CON RIGHE VERTICALI E RICERCA (8 colonne)
 function apriListinoModal() {
     if (!listinoData.length) { alert("Nessun dato listino disponibile. Carica il file LIST.txt."); return; }
     const isMobile = !isDesktop();
@@ -548,7 +586,8 @@ function apriListinoModal() {
             let html = '';
             for (let art of filtrati) {
                 html += `<div class="listino-card">
-                            <div class="listino-card-row"><span class="listino-card-label">Codice:</span><span class="listino-card-value">${escapeHtml(art.codiceArticolo)}</span></div>
+                            <div class="listino-card-row"><span class="listino-card-label">Codice Artic.:</span><span class="listino-card-value">${escapeHtml(art.codiceArticolo)}</span></div>
+                            <div class="listino-card-row"><span class="listino-card-label">Codice EAN:</span><span class="listino-card-value">${escapeHtml(art.ean)}</span></div>
                             <div class="listino-card-row"><span class="listino-card-label">STOK:</span><span class="listino-card-value">${escapeHtml(art.stock)}</span></div>
                             <div class="listino-card-row"><span class="listino-card-label">Descrizione:</span><span class="listino-card-value">${escapeHtml(art.descrizione)}</span></div>
                             <div class="listino-card-row"><span class="listino-card-label">UM:</span><span class="listino-card-value">${escapeHtml(art.um)}</span></div>
@@ -563,17 +602,18 @@ function apriListinoModal() {
         searchInput.addEventListener('input', e => renderCards(e.target.value.toLowerCase()));
         document.getElementById('chiudiListinoMobile').onclick = () => modal.remove();
     } else {
-        modal.innerHTML = `<div class="modal-content listino-modal"><h3>📋 LISTINO ARTICOLI</h3><input type="text" id="searchListinoPC" class="listino-search" placeholder="Cerca per codice o descrizione..."><div style="overflow-x:auto;"><table class="listino-tabella"><thead><tr><th>Codice</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr></thead><tbody id="listaArticoliListinoPC"></tbody></table></div><button id="chiudiListinoPC" class="btn-primary" style="margin-top:15px;">CHIUDI</button></div>`;
+        modal.innerHTML = `<div class="modal-content listino-modal"><h3>📋 LISTINO ARTICOLI</h3><input type="text" id="searchListinoPC" class="listino-search" placeholder="Cerca per codice o descrizione..."><div style="overflow-x:auto;"><table class="listino-tabella"><thead><tr><th>Codice Artic.</th><th>Codice EAN</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr></thead><tbody id="listaArticoliListinoPC"></tbody></table></div><button id="chiudiListinoPC" class="btn-primary" style="margin-top:15px;">CHIUDI</button></div>`;
         document.body.appendChild(modal);
         const tbody = document.getElementById('listaArticoliListinoPC');
         const searchInput = document.getElementById('searchListinoPC');
         function renderTable(term = "") {
             let filtrati = term ? listinoData.filter(a => a.codiceArticolo.toLowerCase().includes(term) || a.descrizione.toLowerCase().includes(term)) : listinoData;
-            if (!filtrati.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nessun articolo trovato</td></tr>'; return; }
+            if (!filtrati.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Nessun articolo trovato</td></tr>'; return; }
             let html = '';
             for (let art of filtrati) {
                 html += `<tr>
                             <td>${escapeHtml(art.codiceArticolo)}</td>
+                            <td>${escapeHtml(art.ean)}</td>
                             <td style="text-align:right">${escapeHtml(art.stock)}</td>
                             <td>${escapeHtml(art.descrizione)}</td>
                             <td>${escapeHtml(art.um)}</td>
@@ -725,7 +765,7 @@ function buildScadenzeHtml(cliente) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += '</tbody></table></div>';
+    html += '</tbody>}</div>';
     return html;
 }
 function mostraDettaglioCliente(codice) {
