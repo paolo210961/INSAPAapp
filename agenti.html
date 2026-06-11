@@ -160,7 +160,6 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
-            /* Nascondi il pulsante ORD+SCA su mobile? No, lo teniamo ma solo per caricare file */
         }
         /* Desktop: mostra normalmente */
         .pc-only { display: inline-flex; }
@@ -512,47 +511,67 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
-// Parsing del file LIST.txt (separatore ;, prima riga opzionale di intestazione)
+// PARSING DEL FILE LIST.txt (formato a larghezza fissa, come nel file originale)
 function parseLIST(text) {
     const lines = text.split(/\r?\n/);
-    const lista = [];
-    let startIndex = 0;
-    // Controlla se la prima riga contiene intestazioni (es. "CodiceArticolo;Codice;EAN...")
-    if (lines.length > 0 && lines[0].toLowerCase().includes("codice")) {
-        startIndex = 1;
-    }
-    for (let i = startIndex; i < lines.length; i++) {
-        let line = lines[i].trim();
-        if (line === "") continue;
-        const campi = line.split(';');
-        if (campi.length >= 9) {
-            lista.push({
-                codiceArticolo: campi[0].trim(),
-                codice: campi[1].trim(),
-                ean: campi[2].trim(),
-                stock: campi[3].trim(),
-                descrizione: campi[4].trim(),
-                um: campi[5].trim(),
-                gm: campi[6].trim(),
-                mOrd: campi[7].trim(),
-                iva: campi[8].trim()
-            });
-        } else if (campi.length >= 1) {
-            // Se non ci sono abbastanza campi, crea un record minimale
-            lista.push({
-                codiceArticolo: campi[0].trim(),
-                codice: campi[0].trim(),
+    const articoli = [];
+    let inArticoli = false;
+    
+    for (let line of lines) {
+        line = line.trimEnd();
+        // Salta intestazioni, righe di separatori e pagine
+        if (line.includes("LISTINO ARTICOLI") || line.includes("Codice Artic.") || line.includes("===") || line.includes("Azienda:") || line.includes("Data:"))
+            continue;
+        if (line.match(/^[\s\d]+\d+$/)) continue; // righe con solo numeri
+        if (line.trim() === "" || line.includes("Eliminato") || line.includes("ELIMINATO")) continue;
+        
+        // Formato fisso: le colonne sono allineate
+        // Esempio: "00003                                      8,0000  GIANNINA PROF.c/MAN.LEGNOcm130 N.  GCVH     10                                 22"
+        // Estraiamo i campi in base alle posizioni approssimative
+        let codice = line.substring(0, 10).trim();
+        if (codice === "") continue;
+        if (!isNaN(parseFloat(codice)) || codice.match(/^[A-Z0-9]+$/)) {
+            // Cerca il campo STOK (posizione circa 10-25)
+            let stokStr = line.substring(15, 30).trim().replace(',', '.');
+            let stok = parseFloat(stokStr);
+            if (isNaN(stok)) stok = 0;
+            
+            // Descrizione - campo variabile
+            let resto = line.substring(30).trim();
+            // Cerco di separare descrizione, UM, GM, M.Ord, Iva
+            // Di solito descrizione termina con "N." o simili, poi UM, poi GM, poi M.Ord, poi IVA a destra
+            let descrizione = "";
+            let um = "";
+            let gm = "";
+            let mOrd = "";
+            let iva = "";
+            
+            // Approccio: spezza per spazi multipli
+            let parti = resto.split(/\s{2,}/);
+            if (parti.length >= 1) descrizione = parti[0];
+            if (parti.length >= 2) um = parti[1];
+            if (parti.length >= 3) gm = parti[2];
+            if (parti.length >= 4) mOrd = parti[3];
+            if (parti.length >= 5) iva = parti[4];
+            
+            // A volte iva è l'ultimo campo (22)
+            if (iva === "" && parti.length >= 5) iva = parti[4];
+            if (iva === "" && parti.length >= 6) iva = parti[5];
+            
+            articoli.push({
+                codiceArticolo: codice,
+                codice: codice, // per compatibilità
                 ean: "",
-                stock: "",
-                descrizione: campi.length > 1 ? campi[1].trim() : "",
-                um: "",
-                gm: "",
-                mOrd: "",
-                iva: ""
+                stock: stok.toFixed(4).replace('.', ','),
+                descrizione: descrizione,
+                um: um,
+                gm: gm,
+                mOrd: mOrd,
+                iva: iva
             });
         }
     }
-    return lista;
+    return articoli;
 }
 
 function inviaScadenzeWhatsApp(cliente) {
@@ -589,11 +608,11 @@ function generaHtmlOrdine(cliente, articoliConQta, note = "") {
     `;
     for (let item of articoliConQta) {
         html += `
-            <tr>
+             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">${item.codice}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${item.descrizione}</td>
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantita} pz</td>
-            </tr>
+             </tr>
         `;
     }
     html += `
@@ -709,9 +728,8 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     });
 }
 
-// Apre modale listino su PC (tabella) o su mobile (card, chiamato dal modale ordine)
-// Se chiamato su mobile, viene passato un elemento genitore? No, lo apriamo come modale separato.
-function apriListinoModal(modalParent = null) {
+// ---------- NUOVA FUNZIONE LISTINO con ricerca e bordi verticali ----------
+function apriListinoModal() {
     if (!listinoData.length) {
         alert("Nessun dato listino disponibile. Carica il file LIST.txt.");
         return;
@@ -754,8 +772,7 @@ function apriListinoModal(modalParent = null) {
                 html += `
                     <div class="listino-card">
                         <div class="listino-card-row"><span class="listino-card-label">Codice Artic.:</span><span class="listino-card-value">${escapeHtml(art.codiceArticolo)}</span></div>
-                        <div class="listino-card-row"><span class="listino-card-label">Codice:</span><span class="listino-card-value">${escapeHtml(art.codice)}</span></div>
-                        <div class="listino-card-row"><span class="listino-card-label">EAN:</span><span class="listino-card-value">${escapeHtml(art.ean)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">Codice EAN:</span><span class="listino-card-value">${escapeHtml(art.ean)}</span></div>
                         <div class="listino-card-row"><span class="listino-card-label">STOK:</span><span class="listino-card-value">${escapeHtml(art.stock)}</span></div>
                         <div class="listino-card-row"><span class="listino-card-label">Descrizione:</span><span class="listino-card-value">${escapeHtml(art.descrizione)}</span></div>
                         <div class="listino-card-row"><span class="listino-card-label">UM:</span><span class="listino-card-value">${escapeHtml(art.um)}</span></div>
@@ -772,7 +789,7 @@ function apriListinoModal(modalParent = null) {
         searchInput.addEventListener('input', (e) => renderCards(e.target.value));
         document.getElementById('chiudiListinoMobile').onclick = () => modal.remove();
     } else {
-        // Modal per PC: tabella con scroll orizzontale
+        // Modal per PC: tabella con bordi verticali
         modal.innerHTML = `
             <div class="modal-content listino-modal">
                 <h3>📋 LISTINO ARTICOLI</h3>
@@ -780,7 +797,7 @@ function apriListinoModal(modalParent = null) {
                 <div style="overflow-x: auto;">
                     <table class="listino-tabella" id="tabellaListinoPC">
                         <thead>
-                            <tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr>
+                            <tr><th>Codice Artic.</th><th>Codice EAN</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr>
                         </thead>
                         <tbody id="listaArticoliListinoPC"></tbody>
                     </table>
@@ -801,21 +818,20 @@ function apriListinoModal(modalParent = null) {
                 );
             }
             if (filtrati.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Nessun articolo trovato</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Nessun articolo trovato</td></tr>';
                 return;
             }
             let html = '';
             for (let art of filtrati) {
                 html += `<tr>
                             <td>${escapeHtml(art.codiceArticolo)}</td>
-                            <td>${escapeHtml(art.codice)}</td>
                             <td>${escapeHtml(art.ean)}</td>
-                            <td>${escapeHtml(art.stock)}</td>
+                            <td style="text-align:right">${escapeHtml(art.stock)}</td>
                             <td>${escapeHtml(art.descrizione)}</td>
                             <td>${escapeHtml(art.um)}</td>
                             <td>${escapeHtml(art.gm)}</td>
                             <td>${escapeHtml(art.mOrd)}</td>
-                            <td>${escapeHtml(art.iva)}</td>
+                            <td style="text-align:center">${escapeHtml(art.iva)}</td>
                          </tr>`;
             }
             tbody.innerHTML = html;
@@ -826,6 +842,21 @@ function apriListinoModal(modalParent = null) {
         searchInput.addEventListener('input', (e) => renderTable(e.target.value));
         document.getElementById('chiudiListinoPC').onclick = () => modal.remove();
     }
+    
+    // Gestione tasto ESC per chiudere questo modale
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
+    // Rimuovi listener quando il modale viene chiuso
+    const originalRemove = modal.remove.bind(modal);
+    modal.remove = function() {
+        document.removeEventListener('keydown', escHandler);
+        originalRemove();
+    };
 }
 
 function escapeHtml(str) {
@@ -923,6 +954,20 @@ function apriModaleOrdine(cliente) {
         };
     }
     
+    // Gestione ESC per questo modale
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
+    const originalRemoveModal = modal.remove.bind(modal);
+    modal.remove = function() {
+        document.removeEventListener('keydown', escHandler);
+        originalRemoveModal();
+    };
+    
     function renderListaArticoli(searchText = '') {
         const container = document.getElementById('listaArticoliOrdine');
         let filtrati = articoliOrdinati;
@@ -998,7 +1043,6 @@ function apriModaleOrdine(cliente) {
     const btnListinoNelModale = document.getElementById('btnListinoNelModale');
     if (btnListinoNelModale) {
         btnListinoNelModale.onclick = () => {
-            // Apri modale listino (versione mobile card) senza chiudere l'ordine
             apriListinoModal();
         };
     }
@@ -1048,11 +1092,6 @@ function apriModaleOrdine(cliente) {
             window.removeEventListener('click', modalClickOutside);
         }
     });
-}
-
-// Funzione per costruire il catalogo articoli da LIST.txt (già in listinoData)
-function getCatalogoArticoli() {
-    return listinoData;
 }
 
 // Aggiornamento clienti e visualizzazione
@@ -1166,7 +1205,6 @@ function filtraArticoli() {
 
 function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
     let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
-    // Per LIST.txt, tipo speciale 'LIST'
     if (tipo === 'LIST') {
         return baseName.toUpperCase() === 'LIST';
     }
