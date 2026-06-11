@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.65</title>
+    <title>inSAPA - Agenti vA.5.66</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -32,7 +32,7 @@
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-whatsapp-header { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-ordine-header { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
         .tooltip-wrapper { position: relative; display: inline-block; }
         .tooltip-wrapper .tooltip-text { visibility: hidden; width: 280px; background-color: #2c3e50; color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.7rem; font-weight: normal; white-space: normal; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
@@ -58,7 +58,7 @@
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; text-align: center; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; text-align: center; }
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
@@ -66,6 +66,21 @@
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
         .avviso-modifiche { position: sticky; top: 110px; background: #e74c3c; color: white; padding: 10px 20px; text-align: center; font-weight: bold; font-size: 0.85rem; z-index: 998; display: none; border-bottom: 2px solid #c0392b; }
         .avviso-modifiche.show { display: block; }
+        
+        /* Stili per il modale ordine */
+        .ordine-articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: white; }
+        .ordine-articolo-info { margin-bottom: 8px; }
+        .ordine-articolo-codice { font-weight: bold; color: #2c3e50; }
+        .ordine-articolo-desc { font-size: 0.85rem; color: #666; margin-top: 3px; }
+        .ordine-articolo-qta { display: flex; align-items: center; gap: 10px; }
+        .ordine-articolo-qta label { font-size: 0.8rem; color: #555; }
+        .ordine-articolo-qta input { width: 80px; padding: 6px; text-align: center; margin: 0; }
+        .lista-articoli-ordine { max-height: 400px; overflow-y: auto; margin: 15px 0; text-align: left; }
+        .ricerca-articolo-ordine { margin: 15px 0; }
+        .ricerca-articolo-ordine input { width: 100%; padding: 10px; font-size: 0.9rem; }
+        .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
+        .cliente-info-modale p { margin: 5px 0; }
+        
         @media (max-width: 768px) {
             .header-row { flex-direction: column; align-items: stretch; }
             .header-row-bottom { flex-direction: column; align-items: stretch; }
@@ -96,15 +111,12 @@
             .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
             .btn-whatsapp { width: 100%; justify-content: center; }
             .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
-            .btnCreaAgenteMobileHide { display: none !important; }
+            .btnCreaAgenteMobileHide { grid-column: span 2; display: flex; gap: 10px; }
             .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
             .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
-            .scadenze-box table, .scadenze-box thead, .scadenze-box tbody, .scadenze-box th, .scadenze-box td, .scadenze-box tr { display: block; }
-            .scadenze-box thead tr { position: absolute; top: -9999px; left: -9999px; }
-            .scadenze-box tr { border: 1px solid #ccc; margin-bottom: 10px; }
-            .scadenze-box td { border: none; position: relative; padding-left: 50%; text-align: left !important; }
-            .scadenze-box td:before { content: attr(data-label); position: absolute; left: 6px; width: 45%; padding-right: 10px; font-weight: bold; white-space: nowrap; }
+            .modal-content { width: 95%; padding: 15px; }
+            .lista-articoli-ordine { max-height: 50vh; }
         }
     </style>
 </head>
@@ -119,7 +131,7 @@
             </div>
         </div>
         <div class="nav-box">
-            <button id="hamburgerBtn" class="hamburger-btn">menu</button>
+            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
             <div id="navGrid" class="nav-grid">
                 <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
                 <button class="nav-btn disabled" disabled>AGENTI</button>
@@ -137,9 +149,8 @@
                 <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
                 <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt - Esempio: ORD01.txt e SCA01.txt (accetta anche ORD1.txt e SCA1.txt)</span>
             </div>
-            <button id="btnInviaScadenzeHeader" class="btn-whatsapp-header">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg>
-                Invia Scadenze
+            <button id="btnCompilaOrdine" class="btn-ordine-header">
+                📝 COMPILA ORDINE
             </button>
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
@@ -165,7 +176,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.65 - Sotto-collezioni + supporto codici alfanumerici</div>
+<div class="version">vA.5.66 - Compila Ordine via Email</div>
 
 <script>
 const firebaseConfig = {
@@ -229,19 +240,16 @@ function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvviso
 function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
 
 function normalizzaCodiceAgente(codice) { 
-    // Non forzare parseInt, mantieni come stringa
     return codice.toString(); 
 }
 
 async function pulisciVecchiDocumentiMonolitici(codice) {
     try {
-        // Controlla ed elimina il vecchio documento ORD monolitico
         const vecchioOrd = await db.collection('agenti_dati').doc('ord_'+codice).get();
         if (vecchioOrd.exists && vecchioOrd.data().dati) {
             await db.collection('agenti_dati').doc('ord_'+codice).delete();
             console.log("Vecchio documento ORD monolitico eliminato per agente", codice);
         }
-        // Controlla ed elimina il vecchio documento SCA monolitico
         const vecchioSca = await db.collection('agenti_dati').doc('sca_'+codice).get();
         if (vecchioSca.exists && vecchioSca.data().dati) {
             await db.collection('agenti_dati').doc('sca_'+codice).delete();
@@ -273,14 +281,12 @@ function aggiornaSelectAgenti() {
 
 async function caricaDatiAgente(codice) {
     try {
-        // Carica ORD dalla sotto-collezione
         const ordSnapshot = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
         datiOrd = [];
         ordSnapshot.forEach(doc => {
             datiOrd.push(doc.data());
         });
         
-        // Carica SCA dalla sotto-collezione
         const scaSnapshot = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
         datiSca = [];
         scaSnapshot.forEach(doc => {
@@ -310,15 +316,12 @@ async function selezionaAgente(codice) {
 async function salvaDatiAgente() {
     if (!agenteCorrente) return;
     try {
-        // Salva ORD in sotto-collezione
         const ordRef = db.collection('agenti_dati').doc('ord_' + agenteCorrente.codice).collection('clienti');
         const batch = db.batch();
         
-        // Cancella vecchi dati ORD
         const vecchiOrd = await ordRef.get();
         vecchiOrd.forEach(doc => batch.delete(doc.ref));
         
-        // Aggiungi nuovi clienti ORD
         for (let cliente of datiOrd) {
             const docRef = ordRef.doc(cliente.codice.toString());
             batch.set(docRef, {
@@ -328,7 +331,6 @@ async function salvaDatiAgente() {
             });
         }
         
-        // Salva SCA in sotto-collezione
         const scaRef = db.collection('agenti_dati').doc('sca_' + agenteCorrente.codice).collection('clienti');
         
         const vecchiSca = await scaRef.get();
@@ -344,8 +346,6 @@ async function salvaDatiAgente() {
         }
         
         await batch.commit();
-        
-        // Pulisci automaticamente i vecchi documenti monolitici
         await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
         
         document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
@@ -371,7 +371,6 @@ async function eliminaAgente() {
     document.body.appendChild(modal);
     document.getElementById('btnConfermaElimina').onclick = async () => {
         try {
-            // Elimina anche le sotto-collezioni
             const ordRef = db.collection('agenti_dati').doc('ord_'+agenteCorrente.codice).collection('clienti');
             const scaRef = db.collection('agenti_dati').doc('sca_'+agenteCorrente.codice).collection('clienti');
             
@@ -414,7 +413,6 @@ function parseORD(text) {
         if (line === "") continue;
         let mCliente = line.match(reCliente);
         if (mCliente) { 
-            // Mantieni il codice come stringa (anche se numerico, resta stringa)
             currentCliente = { codice: mCliente[1].toString(), ragione: mCliente[2].trim(), articoli: [] }; 
             clienti.set(currentCliente.codice, currentCliente); 
             continue; 
@@ -427,7 +425,6 @@ function parseORD(text) {
         let firstCoppiaStart = coppie[0].start;
         let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
         let tokens = descrizioneRaw.split(/\s+/);
-        // CODICE ARTICOLO: mantieni come stringa originale (non parseInt)
         let codice = tokens[0].toString();
         let descrizione = tokens.slice(1).join(" ");
         let lastCoppiaEnd = coppie[coppie.length-1].end;
@@ -465,12 +462,10 @@ function parseSCA(text) {
         if (line.startsWith("STAMPA")) continue;
         let mCliente = line.match(reCliente);
         if (mCliente) {
-            // Mantieni il codice come stringa
             let codice = mCliente[1].toString();
             let ragione = mCliente[2].trim();
             currentCliente = { codice, ragione, scadenze: [] };
             clienti.set(codice, currentCliente);
-            console.log("CLIENTE:", codice, ragione);
             continue;
         }
         if (currentCliente) {
@@ -486,12 +481,9 @@ function parseSCA(text) {
             let numDoc = parts[euroIndex - 2] || '';
             let descrizione = parts.slice(1, euroIndex - 2).join(" ");
             currentCliente.scadenze.push({ scadenza, descrizione, numDoc, dataDoc, importo });
-            console.log("SCAD:", scadenza, "Doc:", numDoc, "E:", importo.toFixed(2));
         }
     }
-    const result = Array.from(clienti.values());
-    console.log("CLIENTI SCA TOTALI:", result.length);
-    return result;
+    return Array.from(clienti.values());
 }
 
 function inviaScadenzeWhatsApp(cliente) {
@@ -507,6 +499,164 @@ function inviaScadenzeWhatsApp(cliente) {
 }
 function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
+// NUOVA FUNZIONE: Calcola ultima data acquisto per ogni articolo
+function calcolaUltimaDataArticolo(articolo) {
+    if (!articolo.coppie || articolo.coppie.length === 0) return null;
+    let dateObj = articolo.coppie.map(c => ({
+        data: c.data,
+        timestamp: new Date(c.data.split('/').reverse().join('-')).getTime()
+    }));
+    dateObj.sort((a,b) => b.timestamp - a.timestamp);
+    return dateObj[0];
+}
+
+// NUOVA FUNZIONE: Apre modale compila ordine
+function apriModaleOrdine(cliente) {
+    if (!cliente) {
+        alert("Seleziona un cliente prima di compilare l'ordine!");
+        return;
+    }
+    
+    if (!cliente.ordini || cliente.ordini.length === 0) {
+        alert("Questo cliente non ha articoli disponibili (nessun dato ORD caricato)!");
+        return;
+    }
+    
+    // Ordina articoli per ultimo acquisto (più recente in cima)
+    let articoliOrdinati = [...cliente.ordini];
+    articoliOrdinati.sort((a,b) => {
+        let dataA = calcolaUltimaDataArticolo(a);
+        let dataB = calcolaUltimaDataArticolo(b);
+        if (!dataA && !dataB) return 0;
+        if (!dataA) return 1;
+        if (!dataB) return -1;
+        return dataB.timestamp - dataA.timestamp;
+    });
+    
+    // Crea modale
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>📝 ORDINE DA CLIENTE</h3>
+            <div class="cliente-info-modale">
+                <p><strong>Codice:</strong> ${cliente.codice}</p>
+                <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
+            </div>
+            <div class="ricerca-articolo-ordine">
+                <input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione...">
+            </div>
+            <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
+            <div class="btn-group-modal">
+                <button id="btnInviaEmailOrdine" class="btn-success">📧 INVIA EMAIL</button>
+                <button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    let quantitaInputs = {};
+    
+    function renderListaArticoli(searchText = '') {
+        const container = document.getElementById('listaArticoliOrdine');
+        let filtrati = articoliOrdinati;
+        if (searchText) {
+            const lowerSearch = searchText.toLowerCase();
+            filtrati = articoliOrdinati.filter(art => 
+                art.codice.toLowerCase().includes(lowerSearch) || 
+                art.descrizione.toLowerCase().includes(lowerSearch)
+            );
+        }
+        
+        if (filtrati.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#999;">Nessun articolo trovato</p>';
+            return;
+        }
+        
+        let html = '';
+        for (let art of filtrati) {
+            const ultimoAcquisto = calcolaUltimaDataArticolo(art);
+            const ultimoTesto = ultimoAcquisto ? `Ultimo acquisto: ${ultimoAcquisto.data}` : 'Mai acquistato';
+            html += `
+                <div class="ordine-articolo-item" data-codice="${art.codice}">
+                    <div class="ordine-articolo-info">
+                        <div class="ordine-articolo-codice">${art.codice}</div>
+                        <div class="ordine-articolo-desc">${art.descrizione}</div>
+                        <div class="ordine-articolo-desc" style="font-size:0.7rem; color:#888;">${ultimoTesto}</div>
+                    </div>
+                    <div class="ordine-articolo-qta">
+                        <label>Quantità:</label>
+                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" value="${quantitaInputs[art.codice] || 0}" placeholder="0">
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+        
+        // Ricollega eventi input
+        for (let art of filtrati) {
+            const inputId = `qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('change', (e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    if (val >= 0) quantitaInputs[art.codice] = val;
+                    else quantitaInputs[art.codice] = 0;
+                });
+            }
+        }
+    }
+    
+    renderListaArticoli();
+    
+    const ricercaInput = document.getElementById('ricercaArticoloOrdine');
+    ricercaInput.addEventListener('input', (e) => {
+        renderListaArticoli(e.target.value);
+    });
+    
+    document.getElementById('btnInviaEmailOrdine').onclick = () => {
+        // Raccogli quantità
+        let articoliConQta = [];
+        for (let art of articoliOrdinati) {
+            let qta = quantitaInputs[art.codice] || 0;
+            if (qta > 0) {
+                articoliConQta.push({
+                    codice: art.codice,
+                    descrizione: art.descrizione,
+                    quantita: qta
+                });
+            }
+        }
+        
+        if (articoliConQta.length === 0) {
+            alert("Inserisci almeno una quantità maggiore di zero!");
+            return;
+        }
+        
+        // Prepara corpo email
+        let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
+        let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
+        corpo += `ARTICOLI ORDINATI:\n`;
+        corpo += `----------------------------------------\n`;
+        for (let item of articoliConQta) {
+            corpo += `📦 ${item.codice} - ${item.descrizione}\n`;
+            corpo += `   Quantità: ${item.quantita} pz\n\n`;
+        }
+        corpo += `----------------------------------------\n`;
+        corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
+        
+        // Apri app email
+        window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
+        
+        modal.remove();
+        showToast("Apertura email in corso...");
+    };
+    
+    document.getElementById('btnAnnullaOrdine').onclick = () => {
+        modal.remove();
+    };
+}
+
 function aggiornaClienti() {
     let mappa = new Map();
     for (let c of datiOrd) {
@@ -520,7 +670,6 @@ function aggiornaClienti() {
         else { mappa.set(codiceNormalizzato, { codice: codiceNormalizzato, ragione: c.ragione, hasScadenze: true, scadenze: c.scadenze, ordini: [] }); }
     }
     clientiUnici = Array.from(mappa.values());
-    console.log("Clienti unici:", clientiUnici.length, "Con scadenze:", clientiUnici.filter(c => c.hasScadenze && c.scadenze.length > 0).length);
     filtraClienti();
 }
 
@@ -544,7 +693,7 @@ function filtraClienti() {
 function buildScadenzeHtml(cliente) {
     let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
     html += '<button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button>';
-    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th><tr></thead><tbody>';
+    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
     for (let s of cliente.scadenze) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += '<tr>';
@@ -634,8 +783,8 @@ async function caricaFile(files) {
     if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
     if (!trovati.ord || !trovati.sca) { alert("FILE MANCANTI: ORD" + codAgente + ".txt e SCA" + codAgente + ".txt"); return false; }
     datiOrd = []; datiSca = [];
-    if (ordText) { datiOrd = parseORD(ordText); console.log("ORD:", datiOrd.length, "clienti"); }
-    if (scaText) { datiSca = parseSCA(scaText); console.log("SCA:", datiSca.length, "clienti"); }
+    if (ordText) { datiOrd = parseORD(ordText); }
+    if (scaText) { datiSca = parseSCA(scaText); }
     await salvaDatiAgente();
     aggiornaClienti();
     document.getElementById('fileStatusInline').innerHTML = "OK ORD: " + datiOrd.length + " | SCA: " + datiSca.length;
@@ -660,7 +809,19 @@ document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if (c) filtraArticoli(); };
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
-document.getElementById('btnInviaScadenzeHeader').onclick = () => inviaScadenzeClienteCorrente();
+document.getElementById('btnCompilaOrdine').onclick = () => {
+    let clienteCodice = document.getElementById('selectClienteAgenti').value;
+    if (!clienteCodice) {
+        alert("Seleziona prima un cliente dalla lista!");
+        return;
+    }
+    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
+    if (cliente) {
+        apriModaleOrdine(cliente);
+    } else {
+        alert("Cliente non trovato!");
+    }
+};
 document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('btnCreaAgente').onclick = () => {
     let modal = document.createElement('div'); modal.className = 'modal-overlay';
