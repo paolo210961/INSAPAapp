@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.68</title>
+    <title>inSAPA - Agenti vA.5.69</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -88,6 +88,40 @@
         .listino-tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         .listino-tabella th, .listino-tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         .listino-tabella th { background: #f1c40f; position: sticky; top: 0; }
+        
+        /* Stili per i card del listino su mobile (senza scroll laterale) */
+        .listino-card-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .listino-card {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .listino-card-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+        .listino-card-label {
+            font-weight: bold;
+            width: 100px;
+            flex-shrink: 0;
+            color: #2c3e50;
+        }
+        .listino-card-value {
+            flex: 1;
+            color: #333;
+        }
+        
         .nota-field { margin: 15px 0; text-align: left; }
         .nota-field label { font-weight: bold; display: block; margin-bottom: 5px; }
         .nota-field textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; }
@@ -126,19 +160,12 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
-            /* Nascondi il pulsante ORD+SCA su mobile */
-            .btn-carica-file-mobile-hide { display: none !important; }
-            /* Listino modal adattato a mobile (bottom sheet) */
-            .listino-modal { border-radius: 28px 28px 0 0; margin: auto 0 0 0; max-height: 90vh; width: 100%; }
-            .modal-overlay { align-items: flex-end; }
+            /* Nascondi il pulsante ORD+SCA su mobile? No, lo teniamo ma solo per caricare file */
         }
         /* Desktop: mostra normalmente */
-        @media (min-width: 769px) {
-            .btn-carica-file-mobile-hide { display: inline-flex; }
-        }
-        .pc-only { display: none; }
-        @media (min-width: 769px) {
-            .pc-only { display: inline-flex; }
+        .pc-only { display: inline-flex; }
+        @media (max-width: 768px) {
+            .pc-only { display: none; }
         }
     </style>
 </head>
@@ -167,11 +194,11 @@
             <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
         <div class="action-group">
-            <div class="tooltip-wrapper btn-carica-file-mobile-hide" id="tooltipOrdsca">
+            <div class="tooltip-wrapper" id="tooltipOrdsca">
                 <button id="btnCaricaFile" class="btn-primary">ORD+SCA+LIST</button>
-                <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt - Esempio: ORD01.txt e SCA01.txt (accetta anche ORD1.txt e SCA1.txt)</span>
+                <span class="tooltip-text">Carica 3 file: ORDxx.txt, SCAxx.txt, LIST.txt (LIST uguale per tutti)</span>
             </div>
-            <!-- Pulsante LISTINO aggiuntivo per PC (tra ORD+SCA+LIST e COMPILA ORDINE) -->
+            <!-- Pulsante LISTINO per PC (nella barra) -->
             <button id="btnListinoHeader" class="btn-primary pc-only">📋 LISTINO</button>
             <button id="btnCompilaOrdine" class="btn-ordine-header">
                 📝 COMPILA ORDINE
@@ -196,7 +223,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.68 - Stampa PDF/Email con persistenza quantità e note, Listino</div>
+<div class="version">vA.5.69 - Listino da LIST.txt, 3 file obbligatori, back fix mobile</div>
 
 <script>
 const firebaseConfig = {
@@ -218,8 +245,12 @@ let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
 
-// Oggetto per memorizzare quantità e note per cliente (persistente fino a invio)
-let ordiniMemorizzati = {}; // struttura: { [codiceCliente]: { quantities: { codiceArt: qta }, note: "" } }
+// Memorizzazione quantità e note per ordini in corso
+let ordiniMemorizzati = {}; // { [codiceCliente]: { quantities: {}, note: "" } }
+
+// Dati del listino caricato da LIST.txt
+let listinoData = [];       // array di oggetti con tutti i campi
+let listinoMap = new Map(); // mappa codice articolo -> oggetto
 
 let linkPrincipale = "", linkSecondario = "";
 
@@ -334,7 +365,6 @@ async function selezionaAgente(codice) {
     if (!agenteCorrente) return;
     localStorage.setItem('ultimoAgenteSelezionato', codice);
     await caricaDatiAgente(codice);
-    // Reset memorie ordini quando cambia agente
     ordiniMemorizzati = {};
     aggiornaClienti();
     document.getElementById('cercaCliente').value = '';
@@ -482,6 +512,49 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
+// Parsing del file LIST.txt (separatore ;, prima riga opzionale di intestazione)
+function parseLIST(text) {
+    const lines = text.split(/\r?\n/);
+    const lista = [];
+    let startIndex = 0;
+    // Controlla se la prima riga contiene intestazioni (es. "CodiceArticolo;Codice;EAN...")
+    if (lines.length > 0 && lines[0].toLowerCase().includes("codice")) {
+        startIndex = 1;
+    }
+    for (let i = startIndex; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (line === "") continue;
+        const campi = line.split(';');
+        if (campi.length >= 9) {
+            lista.push({
+                codiceArticolo: campi[0].trim(),
+                codice: campi[1].trim(),
+                ean: campi[2].trim(),
+                stock: campi[3].trim(),
+                descrizione: campi[4].trim(),
+                um: campi[5].trim(),
+                gm: campi[6].trim(),
+                mOrd: campi[7].trim(),
+                iva: campi[8].trim()
+            });
+        } else if (campi.length >= 1) {
+            // Se non ci sono abbastanza campi, crea un record minimale
+            lista.push({
+                codiceArticolo: campi[0].trim(),
+                codice: campi[0].trim(),
+                ean: "",
+                stock: "",
+                descrizione: campi.length > 1 ? campi[1].trim() : "",
+                um: "",
+                gm: "",
+                mOrd: "",
+                iva: ""
+            });
+        }
+    }
+    return lista;
+}
+
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
     let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
@@ -495,7 +568,6 @@ function inviaScadenzeWhatsApp(cliente) {
 }
 function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
-// Funzione per generare HTML dell'ordine (usato sia per email che per stampa) con NOTE
 function generaHtmlOrdine(cliente, articoliConQta, note = "") {
     let html = `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
@@ -542,7 +614,6 @@ function generaHtmlOrdine(cliente, articoliConQta, note = "") {
     return html;
 }
 
-// Funzione per stampare PDF (PC)
 function stampaPDF(cliente, articoliConQta, note = "") {
     const htmlContent = generaHtmlOrdine(cliente, articoliConQta, note);
     const printWindow = window.open('', '_blank');
@@ -576,7 +647,6 @@ function stampaPDF(cliente, articoliConQta, note = "") {
     printWindow.document.close();
 }
 
-// Funzione per inviare email (mobile)
 function inviaEmailOrdine(cliente, articoliConQta, note = "") {
     let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
     let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
@@ -595,7 +665,6 @@ function inviaEmailOrdine(cliente, articoliConQta, note = "") {
     window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
 }
 
-// Calcola ultima data acquisto per ogni articolo
 function calcolaUltimaDataArticolo(articolo) {
     if (!articolo.coppie || articolo.coppie.length === 0) return null;
     let dateObj = articolo.coppie.map(c => ({
@@ -606,7 +675,6 @@ function calcolaUltimaDataArticolo(articolo) {
     return dateObj[0];
 }
 
-// Gestisce l'input quantità (zero nascosto, selezione automatica)
 function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     inputElement.value = '';
     inputElement.placeholder = '0';
@@ -641,7 +709,136 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     });
 }
 
-// Apre modale compila ordine con persistenza quantità e note
+// Apre modale listino su PC (tabella) o su mobile (card, chiamato dal modale ordine)
+// Se chiamato su mobile, viene passato un elemento genitore? No, lo apriamo come modale separato.
+function apriListinoModal(modalParent = null) {
+    if (!listinoData.length) {
+        alert("Nessun dato listino disponibile. Carica il file LIST.txt.");
+        return;
+    }
+    
+    const isMobileDevice = !isDesktop();
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    
+    if (isMobileDevice) {
+        // Modal per mobile: visualizzazione a card
+        modal.innerHTML = `
+            <div class="modal-content listino-modal" style="max-width: 95%;">
+                <h3>📋 LISTINO ARTICOLI</h3>
+                <input type="text" id="searchListinoMobile" class="listino-search" placeholder="Cerca per codice o descrizione...">
+                <div id="listinoCardContainer" class="listino-card-container"></div>
+                <button id="chiudiListinoMobile" class="btn-primary" style="margin-top:15px;">CHIUDI</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const container = document.getElementById('listinoCardContainer');
+        const searchInput = document.getElementById('searchListinoMobile');
+        
+        function renderCards(searchTerm = "") {
+            let filtrati = listinoData;
+            if (searchTerm) {
+                const low = searchTerm.toLowerCase();
+                filtrati = listinoData.filter(a => 
+                    a.codiceArticolo.toLowerCase().includes(low) || 
+                    a.descrizione.toLowerCase().includes(low)
+                );
+            }
+            if (filtrati.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px;">Nessun articolo trovato</div>';
+                return;
+            }
+            let html = '';
+            for (let art of filtrati) {
+                html += `
+                    <div class="listino-card">
+                        <div class="listino-card-row"><span class="listino-card-label">Codice Artic.:</span><span class="listino-card-value">${escapeHtml(art.codiceArticolo)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">Codice:</span><span class="listino-card-value">${escapeHtml(art.codice)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">EAN:</span><span class="listino-card-value">${escapeHtml(art.ean)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">STOK:</span><span class="listino-card-value">${escapeHtml(art.stock)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">Descrizione:</span><span class="listino-card-value">${escapeHtml(art.descrizione)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">UM:</span><span class="listino-card-value">${escapeHtml(art.um)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">G.M.:</span><span class="listino-card-value">${escapeHtml(art.gm)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">M.Ord:</span><span class="listino-card-value">${escapeHtml(art.mOrd)}</span></div>
+                        <div class="listino-card-row"><span class="listino-card-label">Iva:</span><span class="listino-card-value">${escapeHtml(art.iva)}</span></div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+        
+        renderCards();
+        searchInput.addEventListener('input', (e) => renderCards(e.target.value));
+        document.getElementById('chiudiListinoMobile').onclick = () => modal.remove();
+    } else {
+        // Modal per PC: tabella con scroll orizzontale
+        modal.innerHTML = `
+            <div class="modal-content listino-modal">
+                <h3>📋 LISTINO ARTICOLI</h3>
+                <input type="text" id="searchListinoPC" class="listino-search" placeholder="Cerca per codice o descrizione...">
+                <div style="overflow-x: auto;">
+                    <table class="listino-tabella" id="tabellaListinoPC">
+                        <thead>
+                            <tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr>
+                        </thead>
+                        <tbody id="listaArticoliListinoPC"></tbody>
+                    </table>
+                </div>
+                <button id="chiudiListinoPC" class="btn-primary" style="margin-top:15px;">CHIUDI</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        function renderTable(searchTerm = "") {
+            const tbody = document.getElementById('listaArticoliListinoPC');
+            let filtrati = listinoData;
+            if (searchTerm) {
+                const low = searchTerm.toLowerCase();
+                filtrati = listinoData.filter(a => 
+                    a.codiceArticolo.toLowerCase().includes(low) || 
+                    a.descrizione.toLowerCase().includes(low)
+                );
+            }
+            if (filtrati.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Nessun articolo trovato</td></tr>';
+                return;
+            }
+            let html = '';
+            for (let art of filtrati) {
+                html += `<tr>
+                            <td>${escapeHtml(art.codiceArticolo)}</td>
+                            <td>${escapeHtml(art.codice)}</td>
+                            <td>${escapeHtml(art.ean)}</td>
+                            <td>${escapeHtml(art.stock)}</td>
+                            <td>${escapeHtml(art.descrizione)}</td>
+                            <td>${escapeHtml(art.um)}</td>
+                            <td>${escapeHtml(art.gm)}</td>
+                            <td>${escapeHtml(art.mOrd)}</td>
+                            <td>${escapeHtml(art.iva)}</td>
+                         </tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+        
+        renderTable();
+        const searchInput = document.getElementById('searchListinoPC');
+        searchInput.addEventListener('input', (e) => renderTable(e.target.value));
+        document.getElementById('chiudiListinoPC').onclick = () => modal.remove();
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// Apre modale compila ordine con persistenza quantità e note e pulsante LISTINO (solo mobile)
 function apriModaleOrdine(cliente) {
     if (!cliente) {
         alert("Seleziona un cliente prima di compilare l'ordine!");
@@ -675,15 +872,22 @@ function apriModaleOrdine(cliente) {
     const isDesktopDevice = isDesktop();
     const pulsanteTesto = isDesktopDevice ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
     
+    // Generazione HTML per il modale: se mobile, aggiungi il pulsante LISTINO sotto il nome cliente
+    let listinoButtonHtml = '';
+    if (!isDesktopDevice) {
+        listinoButtonHtml = `<button id="btnListinoNelModale" class="btn-listino-mini" style="margin-top:8px; width:100%;">📋 LISTINO (catalogo generale)</button>`;
+    }
+    
     modal.innerHTML = `
         <div class="modal-content">
             <h3>📝 ORDINE DA CLIENTE</h3>
             <div class="cliente-info-modale">
                 <p><strong>Codice:</strong> ${cliente.codice}</p>
                 <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
+                ${listinoButtonHtml}
             </div>
             <div class="ricerca-articolo-ordine">
-                <input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione...">
+                <input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo (storico cliente)...">
             </div>
             <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
             <div class="nota-field">
@@ -698,6 +902,27 @@ function apriModaleOrdine(cliente) {
     `;
     document.body.appendChild(modal);
     
+    // Gestione tasto indietro su mobile: chiude il modale senza ricaricare la pagina
+    if (!isDesktopDevice) {
+        window.history.pushState({ modalOpen: true }, '');
+        const popstateHandler = function(e) {
+            if (document.body.contains(modal)) {
+                e.preventDefault();
+                modal.remove();
+                window.history.back(); // per rimuovere lo stato aggiunto
+                window.removeEventListener('popstate', popstateHandler);
+            }
+        };
+        window.addEventListener('popstate', popstateHandler);
+        // Quando il modale viene rimosso manualmente, rimuovi l'evento
+        const originalRemove = modal.remove.bind(modal);
+        modal.remove = function() {
+            window.removeEventListener('popstate', popstateHandler);
+            window.history.back();
+            originalRemove();
+        };
+    }
+    
     function renderListaArticoli(searchText = '') {
         const container = document.getElementById('listaArticoliOrdine');
         let filtrati = articoliOrdinati;
@@ -710,7 +935,7 @@ function apriModaleOrdine(cliente) {
         }
         
         if (filtrati.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999;">Nessun articolo trovato</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">Nessun articolo trovato nello storico</p>';
             return;
         }
         
@@ -753,22 +978,28 @@ function apriModaleOrdine(cliente) {
         renderListaArticoli(e.target.value);
     });
     
-    // Aggiorna nota in tempo reale
     const noteTextarea = document.getElementById('noteOrdine');
     noteTextarea.addEventListener('input', (e) => {
         noteCorrente = e.target.value;
-        // salva in memoria temporanea
         ordiniMemorizzati[cliente.codice] = {
             quantities: quantitaInputs,
             note: noteCorrente
         };
     });
     
-    // Salva quantità su ogni modifica tramite setupQuantitaInput già agganciato, ma per sicurezza aggiorniamo anche su blur
     function saveCurrentState() {
         ordiniMemorizzati[cliente.codice] = {
             quantities: { ...quantitaInputs },
             note: noteTextarea.value
+        };
+    }
+    
+    // Pulsante LISTINO per mobile (nel modale)
+    const btnListinoNelModale = document.getElementById('btnListinoNelModale');
+    if (btnListinoNelModale) {
+        btnListinoNelModale.onclick = () => {
+            // Apri modale listino (versione mobile card) senza chiudere l'ordine
+            apriListinoModal();
         };
     }
     
@@ -800,18 +1031,16 @@ function apriModaleOrdine(cliente) {
             showToast("Apertura email in corso...");
         }
         
-        // Dopo invio, azzera la memoria per questo cliente (nuovo ordine)
+        // Dopo invio, azzera la memoria per questo cliente
         delete ordiniMemorizzati[cliente.codice];
         modal.remove();
     };
     
     document.getElementById('btnAnnullaOrdine').onclick = () => {
-        // Salva lo stato prima di chiudere (se l'utente ha modificato qualcosa)
         saveCurrentState();
         modal.remove();
     };
     
-    // Salva anche quando si chiude cliccando fuori? gestiamo con cleanup
     window.addEventListener('click', function modalClickOutside(e) {
         if (e.target === modal) {
             saveCurrentState();
@@ -821,98 +1050,12 @@ function apriModaleOrdine(cliente) {
     });
 }
 
-// Funzione per costruire il catalogo articoli unico da tutti i clienti ORD (per listino)
+// Funzione per costruire il catalogo articoli da LIST.txt (già in listinoData)
 function getCatalogoArticoli() {
-    const mappaArticoli = new Map(); // key: codice articolo
-    for (let cliente of datiOrd) {
-        if (!cliente.articoli) continue;
-        for (let art of cliente.articoli) {
-            if (!mappaArticoli.has(art.codice)) {
-                // Dati reali da ORD
-                mappaArticoli.set(art.codice, {
-                    codice: art.codice,
-                    descrizione: art.descrizione,
-                    // Campi mancanti: generiamo placeholder realistici
-                    ean: `EAN${art.codice}`,
-                    stock: Math.floor(Math.random() * 200), // finto stock
-                    um: "PZ",
-                    gm: "0,00",
-                    mOrd: 1,
-                    iva: "22%"
-                });
-            }
-        }
-    }
-    return Array.from(mappaArticoli.values());
+    return listinoData;
 }
 
-// Modale LISTINO (con ricerca e tabella)
-function apriListinoModal() {
-    if (!agenteCorrente) {
-        alert("Seleziona prima un agente.");
-        return;
-    }
-    const catalogo = getCatalogoArticoli();
-    if (catalogo.length === 0) {
-        alert("Nessun articolo trovato. Carica prima un file ORD.");
-        return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    const isMobile = !isDesktop();
-    modal.innerHTML = `
-        <div class="modal-content listino-modal">
-            <h3>📋 LISTINO ARTICOLI</h3>
-            <input type="text" id="searchListino" class="listino-search" placeholder="Cerca per codice o descrizione...">
-            <div style="overflow-x: auto;">
-                <table class="listino-tabella" id="tabellaListino">
-                    <thead>
-                        <tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>S T O K</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr>
-                    </thead>
-                    <tbody id="listaArticoliListino"></tbody>
-                </table>
-            </div>
-            <button id="chiudiListino" class="btn-primary" style="margin-top:15px;">CHIUDI</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    function renderListino(searchTerm = "") {
-        const tbody = document.getElementById("listaArticoliListino");
-        let filtrati = catalogo;
-        if (searchTerm) {
-            const low = searchTerm.toLowerCase();
-            filtrati = catalogo.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
-        }
-        if (filtrati.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Nessun articolo trovato</td></tr>';
-            return;
-        }
-        let html = "";
-        for (let art of filtrati) {
-            html += `<tr>
-                        <td>${art.codice}</td>
-                        <td>${art.codice}</td>
-                        <td>${art.ean}</td>
-                        <td>${art.stock}</td>
-                        <td>${art.descrizione}</td>
-                        <td>${art.um}</td>
-                        <td>${art.gm}</td>
-                        <td>${art.mOrd}</td>
-                        <td>${art.iva}</td>
-                     </tr>`;
-        }
-        tbody.innerHTML = html;
-    }
-    
-    renderListino();
-    const searchInput = document.getElementById("searchListino");
-    searchInput.addEventListener("input", (e) => renderListino(e.target.value));
-    
-    document.getElementById("chiudiListino").onclick = () => modal.remove();
-}
-
+// Aggiornamento clienti e visualizzazione
 function aggiornaClienti() {
     let mappa = new Map();
     for (let c of datiOrd) {
@@ -1023,32 +1166,51 @@ function filtraArticoli() {
 
 function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
     let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
+    // Per LIST.txt, tipo speciale 'LIST'
+    if (tipo === 'LIST') {
+        return baseName.toUpperCase() === 'LIST';
+    }
     let match = baseName.match(/^([A-Z]+)(\d+)$/i);
     if (!match) return false;
     if (match[1].toUpperCase() !== tipo) return false;
     return parseInt(match[2],10) === parseInt(codiceAgente,10);
 }
+
 async function caricaFile(files) {
     if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
-    if (files.length !== 2) { alert("Servono ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
+    if (files.length !== 3) { alert("Servono ESATTAMENTE 3 file: ORDxx.txt, SCAxx.txt, LIST.txt"); return false; }
     let codAgente = agenteCorrente.codice;
-    let trovati = { ord: false, sca: false };
-    let ordText = null, scaText = null, errori = [];
+    let trovati = { ord: false, sca: false, list: false };
+    let ordText = null, scaText = null, listText = null;
+    let errori = [];
     for (let file of files) {
         let nome = file.name;
         if (nomeFileCorrisponde(nome, codAgente, 'ORD')) { trovati.ord = true; ordText = await file.text(); }
         else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) { trovati.sca = true; scaText = await file.text(); }
+        else if (nomeFileCorrisponde(nome, codAgente, 'LIST')) { trovati.list = true; listText = await file.text(); }
         else errori.push(nome);
     }
     if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
-    if (!trovati.ord || !trovati.sca) { alert("FILE MANCANTI: ORD" + codAgente + ".txt e SCA" + codAgente + ".txt"); return false; }
-    datiOrd = []; datiSca = [];
+    if (!trovati.ord || !trovati.sca || !trovati.list) {
+        alert("FILE MANCANTI: servono ORD" + codAgente + ".txt, SCA" + codAgente + ".txt e LIST.txt");
+        return false;
+    }
+    datiOrd = [];
+    datiSca = [];
     if (ordText) { datiOrd = parseORD(ordText); }
     if (scaText) { datiSca = parseSCA(scaText); }
+    if (listText) { 
+        listinoData = parseLIST(listText);
+        listinoMap.clear();
+        for (let item of listinoData) {
+            listinoMap.set(item.codiceArticolo, item);
+        }
+        console.log("Listino caricato:", listinoData.length, "articoli");
+    }
     await salvaDatiAgente();
     aggiornaClienti();
-    document.getElementById('fileStatusInline').innerHTML = "OK ORD: " + datiOrd.length + " | SCA: " + datiSca.length;
-    alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti\nTotale clienti unici: " + clientiUnici.length);
+    document.getElementById('fileStatusInline').innerHTML = "OK ORD: " + datiOrd.length + " | SCA: " + datiSca.length + " | LIST: " + listinoData.length;
+    alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti\nLIST: " + listinoData.length + " articoli\nTotale clienti unici: " + clientiUnici.length);
     return true;
 }
 
@@ -1082,7 +1244,6 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
         alert("Cliente non trovato!");
     }
 };
-// Pulsante LISTINO nell'header (PC)
 const btnListinoHeader = document.getElementById('btnListinoHeader');
 if (btnListinoHeader) btnListinoHeader.onclick = () => apriListinoModal();
 
