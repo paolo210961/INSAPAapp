@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>inSAPA - Contabilità vC.5.57</title>
+    <title>inSAPA - Contabilità vC.5.58</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -217,6 +217,7 @@
         .summary-header span { font-weight: bold; margin-left: 5px; font-size: 1.1rem; }
         .positive { color: #158c3a; }
         .negative { color: #e74c3c; }
+        .cassa-blue { color: #0055cc; font-weight: bold; }
         .row2 {
             display: flex;
             justify-content: space-between;
@@ -739,11 +740,11 @@
 </div>
 
 <!-- MINIBOX VERSIONE -->
-<div class="version-box" id="versionBox" title="Clicca per copiare la versione">📌 vC.5.57</div>
+<div class="version-box" id="versionBox" title="Clicca per copiare la versione">📌 vC.5.58</div>
 
 <script>
 // ==================== VERSIONE ====================
-const APP_VERSION = "vC.5.57";
+const APP_VERSION = "vC.5.58";
 
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
@@ -1257,7 +1258,7 @@ async function cancellaAnnoCorrente() {
     } catch(e) { showToast("Errore durante l'eliminazione dell'anno", true); }
 }
 
-// ==================== FUNZIONE AGGIORNA RIEPILOGO ====================
+// ==================== FUNZIONE AGGIORNA RIEPILOGO con CASSA BLU ====================
 function aggiornaRiepilogoHeader() {
     const summaryDiv = document.getElementById('summaryHeader');
     if (!summaryDiv) return;
@@ -1266,7 +1267,10 @@ function aggiornaRiepilogoHeader() {
         let td = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
         let tc = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
         let sal = saldoIniziale + ta - td;
-        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div><div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div><div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div><div>🏦 CASSA: <span class="positive">${formatNumber(tc)} €</span></div>`;
+        summaryDiv.innerHTML = `<div>📈 Avere: <span class="positive">${formatNumber(ta)} €</span></div>
+                                <div>📉 Dare: <span class="negative">${formatNumber(td)} €</span></div>
+                                <div>💰 Saldo: <span class="${sal>=0?'positive':'negative'}">${formatNumber(sal)} €</span></div>
+                                <div>🏦 CASSA: <span class="cassa-blue">${formatNumber(tc)} €</span></div>`;
     } else if (currentScheda === 'contanti') {
         let tc = contanti.reduce((s, r) => s + (parseNumber(r.importo) || 0), 0);
         summaryDiv.innerHTML = `<div>💵 Incasso contanti: <span class="positive">${formatNumber(tc)} €</span></div>`;
@@ -1281,14 +1285,46 @@ function aggiornaRiepilogoHeader() {
     }
 }
 
-// ===== REPORT PDF PER RAGIONIERE (usa window.print) =====
+// ===== FUNZIONE PER SELEZIONARE TUTTE LE RIGHE DELLA PRIMA NOTA =====
+function setupSelectAllPrimaNota() {
+    const selectAllCheckbox = document.getElementById('selectAllPrimaNota');
+    if (!selectAllCheckbox) return;
+    
+    selectAllCheckbox.addEventListener('change', function(e) {
+        const isChecked = e.target.checked;
+        
+        // Seleziona/deseleziona tutte le checkbox della tabella PRIMA NOTA (PC)
+        const tableCheckboxes = document.querySelectorAll('#primaNotaBody .row-check-prima');
+        tableCheckboxes.forEach(chk => {
+            chk.checked = isChecked;
+        });
+        
+        // Seleziona/deseleziona tutte le checkbox delle card (mobile)
+        const cardCheckboxes = document.querySelectorAll('.card-select-checkbox[data-tipo="primanota"]');
+        cardCheckboxes.forEach(chk => {
+            chk.checked = isChecked;
+        });
+        
+        // Aggiorna i pulsanti di azione
+        aggiornaPulsantiAzione();
+        
+        // Se è in selezione multipla, rimuovi eventuali modalità edit
+        if (isChecked) {
+            // Rimuovi eventuali righe in modalità edit
+            document.querySelectorAll('#primaNotaBody tr.edit-mode').forEach(row => {
+                row.classList.remove('edit-mode');
+            });
+        }
+    });
+}
+
+// ===== REPORT PDF PER RAGIONIERE =====
 function esportaReportRagioniere() {
     const totaleAvere = primaNota.reduce((s, r) => s + (parseNumber(r.avere) || 0), 0);
     const totaleDare = primaNota.reduce((s, r) => s + (parseNumber(r.dare) || 0), 0);
     const totaleCassa = primaNota.reduce((s, r) => s + (parseNumber(r.cassa) || 0), 0);
     const saldoFinale = saldoIniziale + totaleAvere - totaleDare;
     
-    // Costruisco l'HTML per la stampa
     let rowsHtml = '';
     primaNota.forEach((item, idx) => {
         rowsHtml += `
@@ -1365,6 +1401,7 @@ function esportaReportRagioniere() {
                 }
                 .positive { color: #158c3a; }
                 .negative { color: #c0392b; }
+                .cassa-blue { color: #0055cc; }
                 table {
                     width: 100%;
                     border-collapse: collapse;
@@ -1436,7 +1473,7 @@ function esportaReportRagioniere() {
                 </div>
                 <div class="summary-item">
                     <div class="label">🏦 Totale Cassa</div>
-                    <div class="value positive">${formatNumber(totaleCassa)} €</div>
+                    <div class="value cassa-blue">${formatNumber(totaleCassa)} €</div>
                 </div>
                 <div class="summary-item">
                     <div class="label">📌 Saldo Finale</div>
@@ -1458,7 +1495,7 @@ function esportaReportRagioniere() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td></tr>'}
+                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td><tr>'}
                 </tbody>
                 <tfoot>
                     <tr style="background: #f8f9fa; font-weight: bold;">
@@ -1479,13 +1516,11 @@ function esportaReportRagioniere() {
         </html>
     `;
     
-    // Apro una nuova finestra per la stampa
     const printWindow = window.open('', '_blank');
     printWindow.document.write(printHtml);
     printWindow.document.close();
     printWindow.focus();
     
-    // Attendo che il contenuto sia caricato poi apro la finestra di stampa
     printWindow.onload = () => {
         printWindow.print();
         showToast("✅ Report PDF pronto per il salvataggio");
@@ -1504,6 +1539,7 @@ function esportaPDFMese() {
             th{background:#f0f0f0;}
             .positive { color: #158c3a; }
             .negative { color: #c0392b; }
+            .cassa-blue { color: #0055cc; }
             .text-right { text-align: right; }
             @media print {
                 body { padding: 0; margin: 0; }
@@ -1562,7 +1598,7 @@ function esportaPDFMese() {
         </table>
         
         <h3>📄 FORNITORI</h3>
-        <table>
+        <tr>
         <thead><tr><th>Data</th><th>Fornitore</th><th>N. Fattura</th><th>N° interno</th></tr></thead>
         <tbody>`;
         
@@ -2435,7 +2471,7 @@ function mostraModaleSaldiMobile() {
         const saldoFinale = saldoIniziale + ta - td;
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong class="big-number">Avere:</strong> <span class="positive big-number">${formatNumber(ta)} €</span></p><p><strong class="big-number">Dare:</strong> <span class="negative big-number">${formatNumber(td)} €</span></p><p><strong class="big-number">CASSA:</strong> <span class="positive big-number">${formatNumber(tc)} €</span></p><p><strong class="big-number">Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'} big-number">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
+        modal.innerHTML = `<div class="modal-content"><h3>💰 RIEPILOGO PRIMA NOTA</h3><p><strong class="big-number">Avere:</strong> <span class="positive big-number">${formatNumber(ta)} €</span></p><p><strong class="big-number">Dare:</strong> <span class="negative big-number">${formatNumber(td)} €</span></p><p><strong class="big-number">CASSA:</strong> <span style="color:#0055cc;font-weight:bold;" class="big-number">${formatNumber(tc)} €</span></p><p><strong class="big-number">Saldo finale:</strong> <span class="${saldoFinale>=0?'positive':'negative'} big-number">${formatNumber(saldoFinale)} €</span></p><button id="modalSaldiClose" class="btn-primary">CHIUDI</button></div>`;
         document.body.appendChild(modal);
         document.getElementById('modalSaldiClose').onclick = () => modal.remove();
     } else if (currentScheda === 'contanti') {
@@ -2768,6 +2804,9 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     setScheda('primanota');
     toggleMobileLayout();
     window.addEventListener('resize', toggleMobileLayout);
+    
+    // Setup del checkbox "Seleziona tutti" per la Prima Nota
+    setupSelectAllPrimaNota();
 });
 </script>
 </body>
