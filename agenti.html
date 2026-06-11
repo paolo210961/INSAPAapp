@@ -1,198 +1,4 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.73</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
-        .header { background: white; padding: 15px 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 15px; }
-        .header-row-bottom { background: #fff3cd; border: 1px solid #ffecb3; border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
-        .logo-area { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; }
-        .logo-rettangolo { width: 300px; height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
-        .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .logo-rettangolo span { font-size: 1.5rem; }
-        .logo-tooltip { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; white-space: nowrap; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
-        .logo-rettangolo:hover .logo-tooltip { opacity: 1; }
-        .nav-box { background: #f1c40f; border-radius: 16px; padding: 10px 20px; }
-        .hamburger-btn { display: none; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #2c3e50; }
-        .nav-grid { display: flex; gap: 10px; }
-        .nav-btn { background: white; color: #2c3e50; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
-        .nav-btn:hover { background: #e67e22; color: white; transform: translateY(-1px); }
-        .nav-btn.disabled { background: #ecf0f1; color: #95a5a6; cursor: not-allowed; opacity: 0.8; }
-        .action-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .action-group label { font-weight: bold; color: #2c3e50; margin-right: 5px; }
-        .action-group select, .action-group button, .action-group input { margin: 0; width: auto; padding: 6px 12px; }
-        .action-group select { min-width: 180px; }
-        .action-group input { min-width: 200px; }
-        .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-ordine-header { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
-        .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
-        .tooltip-wrapper { position: relative; display: inline-block; }
-        .tooltip-wrapper .tooltip-text { visibility: hidden; width: 280px; background-color: #2c3e50; color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.7rem; font-weight: normal; white-space: normal; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        .tooltip-wrapper .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #2c3e50 transparent transparent transparent; }
-        .tooltip-wrapper:hover .tooltip-text { visibility: visible; opacity: 1; }
-        .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
-        .sidebar { width: 340px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 200px; height: fit-content; max-height: calc(100vh - 220px); overflow-y: auto; }
-        .content-area { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
-        button { background: #3498db; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin: 5px 0; font-weight: bold; }
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
-        select, input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
-        .scadenze-box { background: #f8f9fa; border-left: 4px solid #27ae60; padding: 15px; margin-bottom: 25px; border-radius: 10px; overflow-x: auto; position: relative; }
-        .scadenze-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
-        .btn-whatsapp { background: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; width: auto; margin: 0; }
-        .btn-whatsapp:hover { background: #128C7E; transform: translateY(-1px); }
-        .btn-listino-mini { background: #8e44ad; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; margin-left: 10px; }
-        .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
-        .articolo-item:hover { background-color: #fff3cd; transform: translateX(5px); }
-        .articolo-titolo { font-weight: bold; }
-        .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 2px solid #3498db; font-size: 0.75rem; display: none; }
-        .storico-ordini.visible { display: block; }
-        .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 4px 8px; margin: 3px; border-radius: 6px; }
-        .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
-        .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
-        footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; text-align: center; }
-        .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group-modal button { margin: 0; }
-        .toast-message { position: fixed; bottom: 80px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
-        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
-        .avviso-modifiche { position: sticky; top: 110px; background: #e74c3c; color: white; padding: 10px 20px; text-align: center; font-weight: bold; font-size: 0.85rem; z-index: 998; display: none; border-bottom: 2px solid #c0392b; }
-        .avviso-modifiche.show { display: block; }
-        
-        .ordine-articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: white; }
-        .ordine-articolo-info { margin-bottom: 8px; }
-        .ordine-articolo-codice { font-weight: bold; color: #2c3e50; }
-        .ordine-articolo-desc { font-size: 0.85rem; color: #666; margin-top: 3px; }
-        .ordine-articolo-qta { display: flex; align-items: center; gap: 10px; }
-        .ordine-articolo-qta label { font-size: 0.8rem; color: #555; }
-        .ordine-articolo-qta input { width: 80px; padding: 6px; text-align: center; margin: 0; }
-        .lista-articoli-ordine { max-height: 400px; overflow-y: auto; margin: 15px 0; text-align: left; }
-        .ricerca-articolo-ordine { margin: 15px 0; }
-        .ricerca-articolo-ordine input { width: 100%; padding: 10px; font-size: 0.9rem; }
-        .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
-        .cliente-info-modale p { margin: 5px 0; }
-        
-        .listino-modal { max-width: 95vw; width: 1200px; max-height: 85vh; overflow-y: auto; padding: 20px; }
-        .listino-search { margin-bottom: 20px; width: 100%; padding: 12px; font-size: 1rem; }
-        .listino-tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .listino-tabella th, .listino-tabella td { border: 1px solid #aaa; padding: 8px; text-align: left; vertical-align: top; }
-        .listino-tabella th { background: #f1c40f; position: sticky; top: 0; }
-        .listino-tabella td:nth-child(3) { text-align: right; }
-        .listino-tabella td:last-child { text-align: center; }
-        
-        .listino-card-container { display: flex; flex-direction: column; gap: 12px; max-height: 60vh; overflow-y: auto; padding: 5px; }
-        .listino-card { background: #f9f9f9; border-radius: 12px; padding: 12px; border: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .listino-card-row { display: flex; flex-wrap: wrap; margin-bottom: 6px; font-size: 0.85rem; }
-        .listino-card-label { font-weight: bold; width: 100px; flex-shrink: 0; color: #2c3e50; }
-        .listino-card-value { flex: 1; color: #333; }
-        
-        .nota-field { margin: 15px 0; text-align: left; }
-        .nota-field label { font-weight: bold; display: block; margin-bottom: 5px; }
-        .nota-field textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; }
-        
-        @media (max-width: 768px) {
-            .header-row { flex-direction: column; align-items: stretch; }
-            .header-row-bottom { flex-direction: column; align-items: stretch; }
-            .logo-area { justify-content: center; flex-direction: column; }
-            .logo-rettangolo { width: 250px; height: 70px; margin: 0 auto; }
-            .logo-tooltip { display: none; }
-            .nav-box { position: relative; width: 100%; text-align: center; }
-            .hamburger-btn { display: block; margin: 0 auto; }
-            .nav-grid { display: none; flex-direction: column; position: absolute; top: 100%; right: 0; left: 0; background: #f1c40f; border-radius: 12px; padding: 10px; margin-top: 5px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-            .nav-grid.open { display: flex; }
-            .nav-btn { width: 100%; text-align: center; }
-            .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-            .action-group label { display: none; }
-            .action-group select, .action-group button, .action-group input { width: 100%; padding: 10px; font-size: 0.9rem; margin: 0; }
-            .action-group select { min-width: unset; }
-            .action-group input { min-width: unset; }
-            .action-group:first-child { grid-template-columns: 1fr; }
-            .action-group:first-child select { width: 100%; }
-            .main-container { flex-direction: column; }
-            .sidebar { width: 100%; position: static; top: 0; max-height: none; margin-bottom: 20px; }
-            .content-area { width: 100%; }
-            button, .btn-success, .btn-primary, .btn-danger, .btn-whatsapp { padding: 10px; font-size: 0.9rem; }
-            body { font-size: 15px; }
-            h3 { font-size: 1.1rem; }
-            select, input { padding: 10px; font-size: 0.9rem; }
-            .scadenze-box { overflow-x: auto; }
-            .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
-            .btn-whatsapp { width: 100%; justify-content: center; }
-            .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
-            .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
-            .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
-            .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
-            .modal-content { width: 95%; padding: 15px; }
-            .lista-articoli-ordine { max-height: 50vh; }
-        }
-        .pc-only { display: inline-flex; }
-        @media (max-width: 768px) { .pc-only { display: none; } }
-    </style>
-</head>
-<body>
-<div class="header">
-    <div class="header-row">
-        <div class="logo-area">
-            <div id="logoRettangolo" class="logo-rettangolo">
-                <img id="logoImmagine" style="display:none;">
-                <span id="logoSpan">LOGO</span>
-                <div class="logo-tooltip">1 tap: Link1 | 2 tap: Link2</div>
-            </div>
-        </div>
-        <div class="nav-box">
-            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
-            <div id="navGrid" class="nav-grid">
-                <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
-                <button class="nav-btn disabled" disabled>AGENTI</button>
-                <button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button>
-            </div>
-        </div>
-    </div>
-    <div class="header-row-bottom">
-        <div class="action-group">
-            <select id="selectAgente"><option value="">-- Seleziona agente --</option></select>
-            <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
-        </div>
-        <div class="action-group">
-            <div class="tooltip-wrapper" id="tooltipOrdsca">
-                <button id="btnCaricaFile" class="btn-primary">ORD+SCA+LIST</button>
-                <span class="tooltip-text">Carica 3 file: ORDxx.txt, SCAxx.txt, LIST.txt (LIST uguale per tutti)</span>
-            </div>
-            <button id="btnListinoHeader" class="btn-primary pc-only">📋 LISTINO</button>
-            <button id="btnCompilaOrdine" class="btn-ordine-header">📝 COMPILA ORDINE</button>
-            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
-            <span id="fileStatusInline" class="file-status-inline"></span>
-        </div>
-    </div>
-</div>
-
-<div class="avviso-modifiche" id="avvisoModifiche">ATTENZIONE: Ci sono modifiche non salvate! Premi "SALVA" prima di cambiare.</div>
-
-<div class="main-container">
-    <div class="sidebar">
-        <h3>Cerca Cliente</h3>
-        <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
-        <h3 style="margin-top:20px;">Seleziona Cliente</h3>
-        <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select>
-    </div>
-    <div class="content-area">
-        <div id="dettaglioAgenti"></div>
-    </div>
-</div>
-<footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.73 - Listino parser split multi-spazio, 8 colonne, bordi verticali</div>
-
-<script>
-    const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
     projectId: "insapa-database",
@@ -293,9 +99,57 @@ async function caricaDatiAgente(codice) {
         datiOrd = []; ordSnapshot.forEach(doc => datiOrd.push(doc.data()));
         const scaSnapshot = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
         datiSca = []; scaSnapshot.forEach(doc => datiSca.push(doc.data()));
-        document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        
+        // Aggiorna status
+        let statusText = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        if (listinoData.length > 0) statusText += " | LIST: "+listinoData.length;
+        document.getElementById('fileStatusInline').innerHTML = statusText;
         return true;
-    } catch(e) { console.error(e); return false; }
+    } catch(e) { 
+        console.error("Errore caricamento:", e);
+        return false;
+    }
+}
+
+// 💾 SALVA LISTINO SU FIREBASE
+async function salvaListinoSuFirebase() {
+    if (!listinoData.length) return false;
+    try {
+        await db.collection('dati_condivisi').doc('listino').set({
+            articoli: listinoData,
+            ultimoAggiornamento: new Date().toISOString(),
+            numeroArticoli: listinoData.length
+        });
+        console.log("Listino salvato su Firebase:", listinoData.length, "articoli");
+        return true;
+    } catch(e) {
+        console.error("Errore salvataggio listino:", e);
+        return false;
+    }
+}
+
+// 📥 CARICA LISTINO DA FIREBASE
+async function caricaListinoDaFirebase() {
+    try {
+        const doc = await db.collection('dati_condivisi').doc('listino').get();
+        if (doc.exists && doc.data().articoli) {
+            listinoData = doc.data().articoli;
+            listinoMap.clear();
+            for (let item of listinoData) {
+                listinoMap.set(item.codiceArticolo, item);
+            }
+            console.log("Listino caricato da Firebase:", listinoData.length, "articoli");
+            let statusText = document.getElementById('fileStatusInline').innerHTML;
+            if (!statusText.includes("LIST")) {
+                document.getElementById('fileStatusInline').innerHTML = statusText + " | LIST: "+listinoData.length;
+            }
+            return true;
+        }
+        return false;
+    } catch(e) {
+        console.error("Errore caricamento listino da Firebase:", e);
+        return false;
+    }
 }
 
 async function selezionaAgente(codice) {
@@ -303,6 +157,10 @@ async function selezionaAgente(codice) {
     if (!agenteCorrente) return;
     localStorage.setItem('ultimoAgenteSelezionato', codice);
     await caricaDatiAgente(codice);
+    
+    // 🔄 CARICA LISTINO DA FIREBASE (se esiste)
+    await caricaListinoDaFirebase();
+    
     ordiniMemorizzati = {};
     aggiornaClienti();
     document.getElementById('cercaCliente').value = '';
@@ -323,7 +181,7 @@ async function salvaDatiAgente() {
         for (let cliente of datiSca) { const docRef = scaRef.doc(cliente.codice.toString()); batch.set(docRef, { codice: cliente.codice, ragione: cliente.ragione, scadenze: cliente.scadenze }); }
         await batch.commit();
         await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
-        document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length + (listinoData.length ? " | LIST: "+listinoData.length : "");
         resetModificheNonSalvate();
         showToast("Dati salvati!");
         return true;
@@ -419,7 +277,7 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
-// PARSER CORRETTO (basato su spazi multipli, come nella prima versione funzionante)
+// PARSER LISTINO (split per spazi multipli)
 function parseLIST(text) {
     const lines = text.split(/\r?\n/);
     const articoli = [];
@@ -433,7 +291,6 @@ function parseLIST(text) {
         let cleanLine = line.replace(/\r/g, '').trimEnd();
         if (cleanLine.length < 30) continue;
         
-        // Dividi per 2 o più spazi (così separa le colonne)
         let parti = cleanLine.split(/\s{2,}/);
         if (parti.length < 3) continue;
         
@@ -442,20 +299,17 @@ function parseLIST(text) {
         
         let idx = 1;
         let ean = "";
-        // Se il secondo campo è un EAN valido (13 cifre o inizia con 800/801)
         if (parti.length > idx && (parti[idx].trim().match(/^8[0-9]{12}$/) || parti[idx].trim().match(/^[0-9]{13}$/))) {
             ean = parti[idx].trim();
             idx++;
         }
         
-        // Stock
         let stockRaw = parti[idx].trim().replace(',', '.');
         let stock = parseFloat(stockRaw);
         if (isNaN(stock)) stock = 0;
         let stockStr = stock.toFixed(4).replace('.', ',');
         idx++;
         
-        // Il resto contiene descrizione + UM + GM + M.Ord + eventuale Iva
         let resto = parti.slice(idx).join(" ");
         let iva = "22";
         let ivaMatch = resto.match(/(\d{2})\s*$/);
@@ -470,7 +324,6 @@ function parseLIST(text) {
         let gm = "";
         let mOrd = "";
         
-        // Di solito gli ultimi 3 token sono UM, GM, M.Ord (es. "GCVH 10 0")
         if (parole.length >= 4) {
             mOrd = parole.pop();
             gm = parole.pop();
@@ -526,7 +379,7 @@ function generaHtmlOrdine(cliente, articoliConQta, note = "") {
             </div>
             <table style="width: 100%; border-collapse: collapse; margin-top: 15px;"><thead><tr style="background: #f1c40f;"><th style="border:1px solid #ddd;padding:10px;text-align:left;">Codice Articolo</th><th style="border:1px solid #ddd;padding:10px;text-align:left;">Descrizione</th><th style="border:1px solid #ddd;padding:10px;text-align:center;">Quantità</th></tr></thead><tbody>`;
     for (let item of articoliConQta) {
-        html += `<tr><td style="border:1px solid #ddd;padding:8px;">${item.codice}</td><td style="border:1px solid #ddd;padding:8px;">${item.descrizione}</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">${item.quantita} pz</td></tr>`;
+        html += `<tr><td style="border:1px solid #ddd;padding:8px;">${item.codice}</td><td style="border:1px solid #ddd;padding:8px;">${item.descrizione}</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">${item.quantita} pz</tr>`;
     }
     html += `</tbody>}</div>`;
     if (note && note.trim()) html += `<div style="margin-top:20px;background:#fff9e6;padding:12px;border-left:4px solid #f1c40f;"><strong>📝 NOTE:</strong><br>${note.replace(/\n/g, '<br>')}</div>`;
@@ -569,9 +422,9 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     });
 }
 
-// MODALE LISTINO CON RIGHE VERTICALI E RICERCA (8 colonne)
+// MODALE LISTINO CON RIGHE VERTICALI
 function apriListinoModal() {
-    if (!listinoData.length) { alert("Nessun dato listino disponibile. Carica il file LIST.txt."); return; }
+    if (!listinoData.length) { alert("Nessun dato listino disponibile. Carica il file LIST.txt la prima volta."); return; }
     const isMobile = !isDesktop();
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -608,7 +461,7 @@ function apriListinoModal() {
         const searchInput = document.getElementById('searchListinoPC');
         function renderTable(term = "") {
             let filtrati = term ? listinoData.filter(a => a.codiceArticolo.toLowerCase().includes(term) || a.descrizione.toLowerCase().includes(term)) : listinoData;
-            if (!filtrati.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Nessun articolo trovato</td></tr>'; return; }
+            if (!filtrati.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Nessun articolo trovato</tr>'; return; }
             let html = '';
             for (let art of filtrati) {
                 html += `<tr>
@@ -620,7 +473,7 @@ function apriListinoModal() {
                             <td>${escapeHtml(art.gm)}</td>
                             <td>${escapeHtml(art.mOrd)}</td>
                             <td style="text-align:center">${escapeHtml(art.iva)}</td>
-                         </tr>`;
+                          </tr>`;
             }
             tbody.innerHTML = html;
         }
@@ -765,7 +618,7 @@ function buildScadenzeHtml(cliente) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += '</tbody>}</div>';
+    html += '</tbody></table></div>';
     return html;
 }
 function mostraDettaglioCliente(codice) {
@@ -854,8 +707,11 @@ async function caricaFile(files) {
     if (listText) {
         listinoData = parseLIST(listText);
         listinoMap.clear();
-        for (let item of listinoData) listinoMap.set(item.codiceArticolo, item);
-        console.log("Listino caricato:", listinoData.length, "articoli");
+        for (let item of listinoData) {
+            listinoMap.set(item.codiceArticolo, item);
+        }
+        // 💾 Salva listino su Firebase
+        await salvaListinoSuFirebase();
     }
     await salvaDatiAgente();
     aggiornaClienti();
