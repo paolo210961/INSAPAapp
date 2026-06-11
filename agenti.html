@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.70</title>
+    <title>inSAPA - Agenti vA.5.71</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -82,37 +82,13 @@
         .cliente-info-modale p { margin: 5px 0; }
         .btn-listino-mini { background: #8e44ad; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; font-weight: bold; margin-top: 8px; width: auto; }
         
-        /* Stili per la stampa PDF */
-        @media print {
-            .modal-overlay, .modal-content, .btn-group-modal, .ricerca-articolo-ordine, .ordine-articolo-qta input, .ordine-articolo-qta label {
-                display: none !important;
-            }
-            .print-area {
-                display: block !important;
-            }
-            .ordine-articolo-item {
-                border: none;
-                border-bottom: 1px solid #ddd;
-                page-break-inside: avoid;
-            }
-        }
-        
-        .print-area {
-            display: none;
-            padding: 20px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .print-area h2 { color: #2c3e50; }
-        .print-area table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .print-area th, .print-area td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .print-area th { background: #f1c40f; }
-        
-        /* Stili per modale listino (PC tabella, mobile card) */
+        /* Stili per listino PC (tabella con righe alternate) */
         .listino-modal { max-width: 95vw; width: 1200px; max-height: 85vh; overflow-y: auto; padding: 20px; }
         .listino-search { margin-bottom: 20px; width: 100%; padding: 12px; font-size: 1rem; }
         .listino-tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         .listino-tabella th, .listino-tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         .listino-tabella th { background: #f1c40f; position: sticky; top: 0; }
+        .listino-tabella tr:nth-child(even) { background-color: #f2f2f2; }
         .nota-field { margin: 15px 0; text-align: left; }
         .nota-field label { font-weight: bold; display: block; margin-bottom: 5px; }
         .nota-field textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; }
@@ -159,13 +135,10 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
-            /* Nascondi il pulsante ORD+SCA su mobile */
             .btn-carica-file-mobile-hide { display: none !important; }
-            /* Listino modal adattato a mobile (bottom sheet) */
             .listino-modal { border-radius: 28px 28px 0 0; margin: auto 0 0 0; max-height: 90vh; width: 100%; }
             .modal-overlay { align-items: flex-end; }
         }
-        /* Desktop: mostra normalmente */
         @media (min-width: 769px) {
             .btn-carica-file-mobile-hide { display: inline-flex; }
         }
@@ -204,11 +177,8 @@
                 <button id="btnCaricaFile" class="btn-primary">ORD+SCA+LIST</button>
                 <span class="tooltip-text">Servono 3 file: ORD{codice}.txt, SCA{codice}.txt, LIST.txt (fisso)</span>
             </div>
-            <!-- Pulsante LISTINO aggiuntivo per PC (tra ORD+SCA+LIST e COMPILA ORDINE) -->
             <button id="btnListinoHeader" class="btn-primary pc-only">📋 LISTINO</button>
-            <button id="btnCompilaOrdine" class="btn-ordine-header">
-                📝 COMPILA ORDINE
-            </button>
+            <button id="btnCompilaOrdine" class="btn-ordine-header">📝 COMPILA ORDINE</button>
             <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
             <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
@@ -229,9 +199,10 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.70 - Stampa PDF/Email con persistenza quantità/note, Listino</div>
+<div class="version">vA.5.71 - Stampa PDF/Email con persistenza quantità/note, Listino</div>
 
 <script>
+// --------------------------- FIREBASE CONFIG ---------------------------
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -243,6 +214,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// --------------------------- VARIABILI GLOBALI ---------------------------
 let agentiLista = [];
 let agenteCorrente = null;
 let datiOrd = [];
@@ -250,93 +222,58 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
+let listinoData = [];      // array degli articoli del listino
+let ordiniMemorizzati = {}; // persistenza quantità/note per cliente
 
+// Link per il logo
 let linkPrincipale = "", linkSecondario = "";
 
-// Variabile globale per il listino
-let listinoData = []; // array di oggetti con campi: codiceArtic, codice, ean, stok, descrizione, um, gm, mOrd, iva
-
-// Oggetto per memorizzare quantità e note per cliente (persistente fino a invio)
-let ordiniMemorizzati = {}; // struttura: { [codiceCliente]: { quantities: { codiceArt: qta }, note: "" } }
-
-// Funzione per rilevare se è desktop/PC (non touch o mouse preciso)
+// --------------------------- FUNZIONI DI SUPPORTO ---------------------------
 function isDesktop() {
     return window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
 }
 
-// ====================== PARSER LIST.TXT a larghezza fissa ======================
-function parseListino(text) {
-    const lines = text.split(/\r?\n/);
-    const articoli = [];
-    // I campi sono posizionali in base all'intestazione visibile:
-    // "Codice Artic. Codice EAN                S T O K    Descrizione                    UM  G.M.  M.Ord                                Iva"
-    // Usiamo una regex robusta che cattura i campi sfruttando spazi multipli.
-    // L'idea: ogni riga valida inizia con un codice a 5-6 cifre, poi eventuale codice/EAN, poi prezzo, poi descrizione lunga, poi UM, G.M., M.Ord, Iva.
-    // Dato che i dati sono disallineati, utilizziamo un approccio per estrarre i token significativi.
-    for (let line of lines) {
-        line = line.trimEnd();
-        if (!line) continue;
-        // Salta righe di separazione o intestazione
-        if (line.startsWith('==') || line.startsWith('---') || line.startsWith('\\') || line.startsWith('Codice') || line.startsWith('================================================================')) continue;
-        // Riga articolo: deve iniziare con un codice numerico (almeno 5 cifre)
-        let matchCodice = line.match(/^(\d{5,6})/);
-        if (!matchCodice) continue;
-        let codiceArtic = matchCodice[1];
-        let resto = line.substring(codiceArtic.length).trim();
-        // EAN: 13 cifre consecutive
-        let ean = "";
-        let matchEan = resto.match(/^(\d{13})/);
-        if (matchEan) {
-            ean = matchEan[1];
-            resto = resto.substring(ean.length).trim();
-        }
-        // STOK: numero con virgola (es. 7,3800)
-        let stok = "";
-        let matchStok = resto.match(/^([\d\.,]+)/);
-        if (matchStok) {
-            stok = matchStok[1];
-            resto = resto.substring(stok.length).trim();
-        }
-        // Ora la parte restante contiene: descrizione, UM, G.M., M.Ord, Iva
-        // Suddividiamo in parole
-        let parole = resto.split(/\s+/);
-        // Le ultime 4 parole sono: Iva, M.Ord, G.M., UM (in ordine inverso)
-        if (parole.length >= 4) {
-            let iva = parole.pop();
-            let mOrd = parole.pop();
-            let gm = parole.pop();
-            let um = parole.pop();
-            let descrizione = parole.join(" ");
-            articoli.push({
-                codiceArtic: codiceArtic,
-                codice: codiceArtic,  // stesso codice
-                ean: ean,
-                stok: stok,
-                descrizione: descrizione,
-                um: um,
-                gm: gm,
-                mOrd: mOrd,
-                iva: iva
-            });
-        } else {
-            // Fallback: descrizione e basta
-            articoli.push({
-                codiceArtic: codiceArtic,
-                codice: codiceArtic,
-                ean: ean,
-                stok: stok,
-                descrizione: resto,
-                um: "",
-                gm: "",
-                mOrd: "",
-                iva: ""
-            });
-        }
-    }
-    console.log("Articoli listino caricati:", articoli.length);
-    return articoli;
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
 }
 
+function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
+function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
+function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
+
+function normalizzaCodiceAgente(codice) { return codice.toString(); }
+
+// --------------------------- PERSISTENZA LISTINO ---------------------------
+function salvaListinoPersistente() {
+    if (listinoData.length) {
+        localStorage.setItem('listinoData', JSON.stringify(listinoData));
+        localStorage.setItem('listinoData_agente', agenteCorrente ? agenteCorrente.codice : '');
+    }
+}
+function caricaListinoPersistente() {
+    const saved = localStorage.getItem('listinoData');
+    const savedAgente = localStorage.getItem('listinoData_agente');
+    if (saved && savedAgente === (agenteCorrente ? agenteCorrente.codice : '')) {
+        listinoData = JSON.parse(saved);
+        console.log(`Listino caricato da localStorage: ${listinoData.length} articoli`);
+        aggiornaStatusFile();
+        return true;
+    }
+    return false;
+}
+
+function aggiornaStatusFile() {
+    const ordCount = datiOrd.length;
+    const scaCount = datiSca.length;
+    const listCount = listinoData.length;
+    document.getElementById('fileStatusInline').innerHTML = `ORD: ${ordCount} | SCA: ${scaCount} | LIST: ${listCount}`;
+}
+    // --------------------------- GESTIONE LOGO E LINK ---------------------------
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -365,37 +302,18 @@ logoDivElemAgenti.addEventListener('click', (e) => {
 });
 caricaLogoSaved();
 
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
-    toast.innerText = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
-}
-function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
-function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
-function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
-
-function normalizzaCodiceAgente(codice) { 
-    return codice.toString(); 
-}
-
+// --------------------------- FIREBASE: AGENTI ---------------------------
 async function pulisciVecchiDocumentiMonolitici(codice) {
     try {
         const vecchioOrd = await db.collection('agenti_dati').doc('ord_'+codice).get();
         if (vecchioOrd.exists && vecchioOrd.data().dati) {
             await db.collection('agenti_dati').doc('ord_'+codice).delete();
-            console.log("Vecchio documento ORD monolitico eliminato per agente", codice);
         }
         const vecchioSca = await db.collection('agenti_dati').doc('sca_'+codice).get();
         if (vecchioSca.exists && vecchioSca.data().dati) {
             await db.collection('agenti_dati').doc('sca_'+codice).delete();
-            console.log("Vecchio documento SCA monolitico eliminato per agente", codice);
         }
-    } catch(e) { 
-        console.log("Nessun vecchio documento da pulire o errore:", e.message); 
-    }
+    } catch(e) { console.log(e.message); }
 }
 
 async function caricaAgenti() {
@@ -421,22 +339,13 @@ async function caricaDatiAgente(codice) {
     try {
         const ordSnapshot = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
         datiOrd = [];
-        ordSnapshot.forEach(doc => {
-            datiOrd.push(doc.data());
-        });
-        
+        ordSnapshot.forEach(doc => { datiOrd.push(doc.data()); });
         const scaSnapshot = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
         datiSca = [];
-        scaSnapshot.forEach(doc => {
-            datiSca.push(doc.data());
-        });
-        
-        document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        scaSnapshot.forEach(doc => { datiSca.push(doc.data()); });
+        aggiornaStatusFile();
         return true;
-    } catch(e) { 
-        console.error("Errore caricamento:", e);
-        return false;
-    }
+    } catch(e) { console.error(e); return false; }
 }
 
 async function selezionaAgente(codice) {
@@ -444,8 +353,8 @@ async function selezionaAgente(codice) {
     if (!agenteCorrente) return;
     localStorage.setItem('ultimoAgenteSelezionato', codice);
     await caricaDatiAgente(codice);
-    // Reset memorie ordini quando cambia agente
     ordiniMemorizzati = {};
+    caricaListinoPersistente();   // tenta di ripristinare listino per questo agente
     aggiornaClienti();
     document.getElementById('cercaCliente').value = '';
     document.getElementById('cercaArticoloInline').value = '';
@@ -458,46 +367,29 @@ async function salvaDatiAgente() {
     try {
         const ordRef = db.collection('agenti_dati').doc('ord_' + agenteCorrente.codice).collection('clienti');
         const batch = db.batch();
-        
         const vecchiOrd = await ordRef.get();
         vecchiOrd.forEach(doc => batch.delete(doc.ref));
-        
         for (let cliente of datiOrd) {
             const docRef = ordRef.doc(cliente.codice.toString());
-            batch.set(docRef, {
-                codice: cliente.codice,
-                ragione: cliente.ragione,
-                articoli: cliente.articoli
-            });
+            batch.set(docRef, { codice: cliente.codice, ragione: cliente.ragione, articoli: cliente.articoli });
         }
-        
         const scaRef = db.collection('agenti_dati').doc('sca_' + agenteCorrente.codice).collection('clienti');
-        
         const vecchiSca = await scaRef.get();
         vecchiSca.forEach(doc => batch.delete(doc.ref));
-        
         for (let cliente of datiSca) {
             const docRef = scaRef.doc(cliente.codice.toString());
-            batch.set(docRef, {
-                codice: cliente.codice,
-                ragione: cliente.ragione,
-                scadenze: cliente.scadenze
-            });
+            batch.set(docRef, { codice: cliente.codice, ragione: cliente.ragione, scadenze: cliente.scadenze });
         }
-        
         await batch.commit();
         await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
-        
-        document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+        aggiornaStatusFile();
         resetModificheNonSalvate();
         showToast("Dati salvati!");
         return true;
-    } catch(e) { 
-        alert("Errore salvataggio: "+e.message); 
-        return false;
-    }
+    } catch(e) { alert("Errore salvataggio: "+e.message); return false; }
 }
 
+// --------------------------- PARSE ORD / SCA ---------------------------
 function convertiImportoItaliano(importoStr) {
     if (!importoStr) return 0;
     let isNegative = importoStr.endsWith('-');
@@ -550,12 +442,7 @@ function parseSCA(text) {
     let currentCliente = null;
     const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+-?/;
     for (let lineOriginale of lines) {
-        let line = lineOriginale
-            .replace(/\uFEFF/g, '')
-            .replace(/\f/g, ' ')
-            .replace(/\t/g, ' ')
-            .replace(/\*/g, ' ')
-            .trim();
+        let line = lineOriginale.replace(/\uFEFF/g, '').replace(/\f/g, ' ').replace(/\t/g, ' ').replace(/\*/g, ' ').trim();
         if (!line) continue;
         if (/^=+/.test(line)) continue;
         if (/^-+/.test(line)) continue;
@@ -592,6 +479,7 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
+// --------------------------- WHATSAPP SCADENZE ---------------------------
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
     let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
@@ -605,186 +493,81 @@ function inviaScadenzeWhatsApp(cliente) {
 }
 function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
-// Funzione per generare HTML dell'ordine (usato sia per email che per stampa) con NOTE
+// --------------------------- GENERAZIONE ORDINE (HTML, STAMPA, EMAIL) ---------------------------
 function generaHtmlOrdine(cliente, articoliConQta, note = "") {
-    let html = `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-            <h2 style="color: #2c3e50; border-bottom: 2px solid #f1c40f; padding-bottom: 10px;">📝 ORDINE DA CLIENTE</h2>
-            <div style="background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    let html = `<div style="font-family:'Segoe UI',Arial,sans-serif;padding:20px;max-width:800px;margin:0 auto;">
+            <h2 style="color:#2c3e50;border-bottom:2px solid #f1c40f;padding-bottom:10px;">📝 ORDINE DA CLIENTE</h2>
+            <div style="background:#eef2f5;padding:15px;border-radius:8px;margin-bottom:20px;">
                 <p><strong>Codice Cliente:</strong> ${cliente.codice}</p>
                 <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
                 <p><strong>Data Ordine:</strong> ${new Date().toLocaleDateString('it-IT')}</p>
             </div>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-                <thead>
-                    <tr style="background: #f1c40f;">
-                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Codice Articolo</th>
-                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Descrizione</th>
-                        <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">Quantità</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
+            <table style="width:100%;border-collapse:collapse;margin-top:15px;"><thead><tr style="background:#f1c40f;"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>`;
     for (let item of articoliConQta) {
-        html += `
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">${item.codice}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${item.descrizione}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantita} pz</td>
-            </tr>
-        `;
+        html += `<tr><td style="border:1px solid #ddd;padding:8px;">${item.codice}</td><td style="border:1px solid #ddd;padding:8px;">${item.descrizione}</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">${item.quantita} pz</td></tr>`;
     }
-    html += `
-                </tbody>
-            </table>
-    `;
-    if (note && note.trim()) {
-        html += `<div style="margin-top: 20px; background: #fff9e6; padding: 12px; border-left: 4px solid #f1c40f;">
-                    <strong>📝 NOTE:</strong><br>${note.replace(/\n/g, '<br>')}
-                 </div>`;
-    }
-    html += `
-            <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 10px;">
-                Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}
-            </div>
-        </div>
-    `;
+    html += `</tbody></table>`;
+    if (note && note.trim()) html += `<div style="margin-top:20px;background:#fff9e6;padding:12px;border-left:4px solid #f1c40f;"><strong>📝 NOTE:</strong><br>${note.replace(/\n/g,'<br>')}</div>`;
+    html += `<div style="margin-top:20px;text-align:center;font-size:12px;color:#999;">Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}</div></div>`;
     return html;
 }
 
-// Funzione per stampare PDF (PC)
 function stampaPDF(cliente, articoliConQta, note = "") {
     const htmlContent = generaHtmlOrdine(cliente, articoliConQta, note);
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Ordine_${cliente.codice}_${new Date().toLocaleDateString('it-IT').replace(/\//g, '-')}</title>
-            <meta charset="UTF-8">
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
-                @media print {
-                    body { margin: 0; padding: 0; }
-                }
-            </style>
-        </head>
-        <body>
-            ${htmlContent}
-            <script>
-                window.onload = function() {
-                    window.print();
-                    window.onafterprint = function() {
-                        window.close();
-                    };
-                };
-            <\/script>
-        </body>
-        </html>
-    `);
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Ordine_${cliente.codice}_${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}</title><meta charset="UTF-8"><style>body{font-family:'Segoe UI',Arial,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>${htmlContent}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>`);
     printWindow.document.close();
 }
 
-// Funzione per inviare email (mobile)
 function inviaEmailOrdine(cliente, articoliConQta, note = "") {
     let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
-    let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
-    corpo += `ARTICOLI ORDINATI:\n`;
-    corpo += `----------------------------------------\n`;
-    for (let item of articoliConQta) {
-        corpo += `📦 ${item.codice} - ${item.descrizione}\n`;
-        corpo += `   Quantità: ${item.quantita} pz\n\n`;
-    }
-    if (note && note.trim()) {
-        corpo += `----------------------------------------\n📝 NOTE:\n${note}\n\n`;
-    }
-    corpo += `----------------------------------------\n`;
-    corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
-    
+    let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\nARTICOLI ORDINATI:\n----------------------------------------\n`;
+    for (let item of articoliConQta) corpo += `📦 ${item.codice} - ${item.descrizione}\n   Quantità: ${item.quantita} pz\n\n`;
+    if (note && note.trim()) corpo += `----------------------------------------\n📝 NOTE:\n${note}\n\n`;
+    corpo += `----------------------------------------\nOrdine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
     window.location.href = `mailto:?subject=${encodeURIComponent(soggetto)}&body=${encodeURIComponent(corpo)}`;
 }
 
-// Calcola ultima data acquisto per ogni articolo
+// --------------------------- FUNZIONI PER MODALE ORDINE ---------------------------
 function calcolaUltimaDataArticolo(articolo) {
     if (!articolo.coppie || articolo.coppie.length === 0) return null;
-    let dateObj = articolo.coppie.map(c => ({
-        data: c.data,
-        timestamp: new Date(c.data.split('/').reverse().join('-')).getTime()
-    }));
+    let dateObj = articolo.coppie.map(c => ({ data: c.data, timestamp: new Date(c.data.split('/').reverse().join('-')).getTime() }));
     dateObj.sort((a,b) => b.timestamp - a.timestamp);
     return dateObj[0];
 }
 
-// Gestisce l'input quantità (zero nascosto, selezione automatica)
 function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     inputElement.value = '';
     inputElement.placeholder = '0';
-    
-    inputElement.addEventListener('focus', function() {
-        if (this.value === '0') this.value = '';
-    });
-    
+    inputElement.addEventListener('focus', function() { if (this.value === '0') this.value = ''; });
     inputElement.addEventListener('blur', function() {
         let val = this.value.trim();
-        if (val === '' || val === '0') {
-            this.value = '';
-            quantitaInputs[articoloCodice] = 0;
-        } else {
-            let num = parseInt(val, 10);
-            if (isNaN(num) || num < 0) num = 0;
-            this.value = num;
-            quantitaInputs[articoloCodice] = num;
-        }
+        if (val === '' || val === '0') { this.value = ''; quantitaInputs[articoloCodice] = 0; }
+        else { let num = parseInt(val,10); if (isNaN(num) || num < 0) num = 0; this.value = num; quantitaInputs[articoloCodice] = num; }
     });
-    
     inputElement.addEventListener('input', function() {
         let val = this.value.trim();
-        if (val === '') {
-            quantitaInputs[articoloCodice] = 0;
-        } else {
-            let num = parseInt(val, 10);
-            if (!isNaN(num) && num >= 0) {
-                quantitaInputs[articoloCodice] = num;
-            }
-        }
+        if (val === '') quantitaInputs[articoloCodice] = 0;
+        else { let num = parseInt(val,10); if (!isNaN(num) && num >= 0) quantitaInputs[articoloCodice] = num; }
     });
 }
 
-// Apre modale listino (PC tabella, mobile card)
+// --------------------------- MODALE LISTINO (PC e MOBILE) ---------------------------
 function apriListinoModale() {
-    if (!agenteCorrente) {
-        alert("Seleziona prima un agente.");
-        return;
-    }
-    if (!listinoData.length) {
-        alert("Nessun listino caricato. Carica il file LIST.txt con il pulsante ORD+SCA+LIST.");
-        return;
-    }
+    if (!agenteCorrente) { alert("Seleziona prima un agente."); return; }
+    if (!listinoData.length) { alert("Nessun listino caricato. Carica il file LIST.txt con il pulsante ORD+SCA+LIST."); return; }
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     const isMobile = !isDesktop();
-    modal.innerHTML = `
-        <div class="modal-content listino-modal">
-            <h3>📋 LISTINO ARTICOLI</h3>
-            <input type="text" id="searchListino" class="listino-search" placeholder="Cerca per codice o descrizione...">
-            <div id="listinoResult"></div>
-            <button id="chiudiListino" class="btn-primary" style="margin-top:15px;">CHIUDI</button>
-        </div>
-    `;
+    modal.innerHTML = `<div class="modal-content listino-modal"><h3>📋 LISTINO ARTICOLI</h3><input type="text" id="searchListino" class="listino-search" placeholder="Cerca per codice o descrizione..."><div id="listinoResult"></div><button id="chiudiListino" class="btn-primary" style="margin-top:15px;">CHIUDI</button></div>`;
     document.body.appendChild(modal);
     const searchInput = document.getElementById('searchListino');
     const resultDiv = document.getElementById('listinoResult');
-    
     function renderListino(searchTerm = "") {
         const term = searchTerm.toLowerCase();
         const filtrati = listinoData.filter(a => a.codiceArtic.toLowerCase().includes(term) || a.descrizione.toLowerCase().includes(term));
-        if (!filtrati.length) {
-            resultDiv.innerHTML = '<p style="text-align:center;">Nessun articolo trovato</p>';
-            return;
-        }
+        if (!filtrati.length) { resultDiv.innerHTML = '<p style="text-align:center;">Nessun articolo trovato</p>'; return; }
         if (isMobile) {
-            // Card layout
             let html = '<div class="listino-card-container">';
             for (let art of filtrati) {
                 html += `<div class="listino-card">
@@ -802,7 +585,6 @@ function apriListinoModale() {
             html += '</div>';
             resultDiv.innerHTML = html;
         } else {
-            // Tabella PC
             let html = `<table class="listino-tabella"><thead><tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>STOK</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr></thead><tbody>`;
             for (let art of filtrati) {
                 html += `<tr><td>${art.codiceArtic}</td><td>${art.codice}</td><td>${art.ean || '-'}</td><td>${art.stok || '-'}</td><td>${art.descrizione}</td><td>${art.um || '-'}</td><td>${art.gm || '-'}</td><td>${art.mOrd || '-'}</td><td>${art.iva || '-'}</td></tr>`;
@@ -814,7 +596,6 @@ function apriListinoModale() {
     renderListino();
     searchInput.addEventListener('input', (e) => renderListino(e.target.value));
     document.getElementById('chiudiListino').onclick = () => modal.remove();
-    // Gestione ESC per PC, back button per mobile
     if (!isMobile) {
         const escHandler = (e) => { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', escHandler); } };
         document.addEventListener('keydown', escHandler);
@@ -826,235 +607,93 @@ function apriListinoModale() {
     }
 }
 
-// Apre modale compila ordine con persistenza quantità e note + pulsante LISTINO mobile
+// --------------------------- MODALE ORDINE (con persistenza e listino mobile) ---------------------------
 function apriModaleOrdine(cliente) {
-    if (!cliente) {
-        alert("Seleziona un cliente prima di compilare l'ordine!");
-        return;
-    }
-    
-    if (!cliente.ordini || cliente.ordini.length === 0) {
-        alert("Questo cliente non ha articoli disponibili (nessun dato ORD caricato)!");
-        return;
-    }
-    
-    // Carica eventuali quantità e nota memorizzate per questo cliente
+    if (!cliente) { alert("Seleziona un cliente prima di compilare l'ordine!"); return; }
+    if (!cliente.ordini || cliente.ordini.length === 0) { alert("Questo cliente non ha articoli disponibili (nessun dato ORD caricato)!"); return; }
     const memorizzato = ordiniMemorizzati[cliente.codice] || { quantities: {}, note: "" };
     let quantitaInputs = { ...memorizzato.quantities };
     let noteCorrente = memorizzato.note || "";
-    
-    // Ordina articoli per ultimo acquisto
     let articoliOrdinati = [...cliente.ordini];
-    articoliOrdinati.sort((a,b) => {
-        let dataA = calcolaUltimaDataArticolo(a);
-        let dataB = calcolaUltimaDataArticolo(b);
-        if (!dataA && !dataB) return 0;
-        if (!dataA) return 1;
-        if (!dataB) return -1;
-        return dataB.timestamp - dataA.timestamp;
-    });
-    
+    articoliOrdinati.sort((a,b) => { let da = calcolaUltimaDataArticolo(a), db = calcolaUltimaDataArticolo(b); if (!da && !db) return 0; if (!da) return 1; if (!db) return -1; return db.timestamp - da.timestamp; });
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
-    
     const isDesktopDevice = isDesktop();
     const pulsanteTesto = isDesktopDevice ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
-    
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>📝 ORDINE DA CLIENTE</h3>
-            <div class="cliente-info-modale">
-                <p><strong>Codice:</strong> ${cliente.codice}</p>
-                <p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>
-                ${!isDesktopDevice ? '<button id="btnListinoDaOrdine" class="btn-listino-mini">📋 LISTINO</button>' : ''}
-            </div>
-            <div class="ricerca-articolo-ordine">
-                <input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione (storico cliente)...">
-            </div>
-            <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
-            <div class="nota-field">
-                <label>📝 NOTE (opzionali):</label>
-                <textarea id="noteOrdine" rows="3" placeholder="Inserisci eventuali note per questo ordine...">${noteCorrente.replace(/</g, '&lt;')}</textarea>
-            </div>
-            <div class="btn-group-modal">
-                <button id="btnConfermaOrdine" class="btn-success">${pulsanteTesto}</button>
-                <button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button>
-            </div>
-        </div>
-    `;
+    modal.innerHTML = `<div class="modal-content"><h3>📝 ORDINE DA CLIENTE</h3><div class="cliente-info-modale"><p><strong>Codice:</strong> ${cliente.codice}</p><p><strong>Ragione Sociale:</strong> ${cliente.ragione}</p>${!isDesktopDevice ? '<button id="btnListinoDaOrdine" class="btn-listino-mini">📋 LISTINO</button>' : ''}</div><div class="ricerca-articolo-ordine"><input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione (storico cliente)..."></div><div class="lista-articoli-ordine" id="listaArticoliOrdine"></div><div class="nota-field"><label>📝 NOTE (opzionali):</label><textarea id="noteOrdine" rows="3" placeholder="Inserisci eventuali note...">${noteCorrente.replace(/</g, '&lt;')}</textarea></div><div class="btn-group-modal"><button id="btnConfermaOrdine" class="btn-success">${pulsanteTesto}</button><button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
     function renderListaArticoli(searchText = '') {
         const container = document.getElementById('listaArticoliOrdine');
         let filtrati = articoliOrdinati;
-        if (searchText) {
-            const lowerSearch = searchText.toLowerCase();
-            filtrati = articoliOrdinati.filter(art => 
-                art.codice.toLowerCase().includes(lowerSearch) || 
-                art.descrizione.toLowerCase().includes(lowerSearch)
-            );
-        }
-        
-        if (filtrati.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999;">Nessun articolo trovato</p>';
-            return;
-        }
-        
+        if (searchText) { const low = searchText.toLowerCase(); filtrati = articoliOrdinati.filter(art => art.codice.toLowerCase().includes(low) || art.descrizione.toLowerCase().includes(low)); }
+        if (!filtrati.length) { container.innerHTML = '<p style="text-align:center;">Nessun articolo trovato</p>'; return; }
         let html = '';
         for (let art of filtrati) {
-            const ultimoAcquisto = calcolaUltimaDataArticolo(art);
-            const ultimoTesto = ultimoAcquisto ? `Ultimo acquisto: ${ultimoAcquisto.data}` : 'Mai acquistato';
-            const qtaCorrente = quantitaInputs[art.codice] || 0;
-            html += `
-                <div class="ordine-articolo-item" data-codice="${art.codice}">
-                    <div class="ordine-articolo-info">
-                        <div class="ordine-articolo-codice">${art.codice}</div>
-                        <div class="ordine-articolo-desc">${art.descrizione}</div>
-                        <div class="ordine-articolo-desc" style="font-size:0.7rem; color:#888;">${ultimoTesto}</div>
-                    </div>
-                    <div class="ordine-articolo-qta">
-                        <label>Quantità:</label>
-                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" style="text-align:center;" value="${qtaCorrente > 0 ? qtaCorrente : ''}">
-                    </div>
-                </div>
-            `;
+            const ultimo = calcolaUltimaDataArticolo(art);
+            const ultimoTesto = ultimo ? `Ultimo acquisto: ${ultimo.data}` : 'Mai acquistato';
+            const qta = quantitaInputs[art.codice] || 0;
+            html += `<div class="ordine-articolo-item"><div class="ordine-articolo-info"><div class="ordine-articolo-codice">${art.codice}</div><div class="ordine-articolo-desc">${art.descrizione}</div><div class="ordine-articolo-desc" style="font-size:0.7rem;color:#888;">${ultimoTesto}</div></div><div class="ordine-articolo-qta"><label>Quantità:</label><input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g,'_')}" min="0" step="1" value="${qta > 0 ? qta : ''}" placeholder="0"></div></div>`;
         }
         container.innerHTML = html;
-        
         for (let art of filtrati) {
-            const inputId = `qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const input = document.getElementById(inputId);
-            if (input) {
-                const currentQta = quantitaInputs[art.codice] || 0;
-                if (currentQta > 0) input.value = currentQta;
-                setupQuantitaInput(input, art.codice, quantitaInputs);
-            }
+            const input = document.getElementById(`qta_${art.codice.replace(/[^a-zA-Z0-9]/g,'_')}`);
+            if (input) setupQuantitaInput(input, art.codice, quantitaInputs);
         }
     }
-    
     renderListaArticoli();
-    
     const ricercaInput = document.getElementById('ricercaArticoloOrdine');
-    ricercaInput.addEventListener('input', (e) => {
-        renderListaArticoli(e.target.value);
-    });
-    
-    // Aggiorna nota in tempo reale
+    ricercaInput.addEventListener('input', (e) => renderListaArticoli(e.target.value));
     const noteTextarea = document.getElementById('noteOrdine');
-    noteTextarea.addEventListener('input', (e) => {
-        noteCorrente = e.target.value;
-        ordiniMemorizzati[cliente.codice] = {
-            quantities: quantitaInputs,
-            note: noteCorrente
-        };
-    });
-    
-    function saveCurrentState() {
-        ordiniMemorizzati[cliente.codice] = {
-            quantities: { ...quantitaInputs },
-            note: noteTextarea.value
-        };
-    }
-    
-    // Pulsante LISTINO per mobile (apre modale listino interno)
+    noteTextarea.addEventListener('input', (e) => { noteCorrente = e.target.value; ordiniMemorizzati[cliente.codice] = { quantities: quantitaInputs, note: noteCorrente }; });
+    function saveCurrentState() { ordiniMemorizzati[cliente.codice] = { quantities: { ...quantitaInputs }, note: noteTextarea.value }; }
+    document.getElementById('btnConfermaOrdine').onclick = () => {
+        let articoliConQta = [];
+        for (let art of articoliOrdinati) { let qta = quantitaInputs[art.codice] || 0; if (qta > 0) articoliConQta.push({ codice: art.codice, descrizione: art.descrizione, quantita: qta }); }
+        if (articoliConQta.length === 0) { alert("Inserisci almeno una quantità maggiore di zero!"); return; }
+        const noteFinale = noteTextarea.value;
+        if (isDesktopDevice) stampaPDF(cliente, articoliConQta, noteFinale);
+        else inviaEmailOrdine(cliente, articoliConQta, noteFinale);
+        delete ordiniMemorizzati[cliente.codice];
+        modal.remove();
+    };
+    document.getElementById('btnAnnullaOrdine').onclick = () => { saveCurrentState(); modal.remove(); };
+    // Pulsante LISTINO per mobile
     const btnListinoModale = document.getElementById('btnListinoDaOrdine');
     if (btnListinoModale) {
         btnListinoModale.onclick = () => {
-            if (!listinoData.length) {
-                alert("Nessun listino caricato. Carica il file LIST.txt.");
-                return;
-            }
+            if (!listinoData.length) { alert("Nessun listino caricato. Carica il file LIST.txt."); return; }
             const listinoModal = document.createElement('div');
             listinoModal.className = 'modal-overlay';
-            listinoModal.innerHTML = `
-                <div class="modal-content listino-modal" style="max-width:95vw;">
-                    <h3>📋 LISTINO</h3>
-                    <input type="text" id="searchListinoMobile" class="listino-search" placeholder="Cerca per codice o descrizione...">
-                    <div id="listinoResultMobile" class="listino-card-container" style="max-height:50vh; overflow-y:auto;"></div>
-                    <button id="chiudiListinoMobile" class="btn-primary">CHIUDI</button>
-                </div>
-            `;
+            listinoModal.innerHTML = `<div class="modal-content listino-modal" style="max-width:95vw;"><h3>📋 LISTINO</h3><input type="text" id="searchListinoMobile" class="listino-search" placeholder="Cerca per codice o descrizione..."><div id="listinoResultMobile" class="listino-card-container" style="max-height:50vh; overflow-y:auto;"></div><button id="chiudiListinoMobile" class="btn-primary">CHIUDI</button></div>`;
             document.body.appendChild(listinoModal);
             const searchMobile = document.getElementById('searchListinoMobile');
             const resultMobile = document.getElementById('listinoResultMobile');
-            
             function renderMobileListino(term = "") {
                 const low = term.toLowerCase();
                 const filtrati = listinoData.filter(a => a.codiceArtic.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
-                if (!filtrati.length) {
-                    resultMobile.innerHTML = '<p style="text-align:center;">Nessun articolo trovato</p>';
-                    return;
-                }
+                if (!filtrati.length) { resultMobile.innerHTML = '<p style="text-align:center;">Nessun articolo trovato</p>'; return; }
                 let html = '';
                 for (let art of filtrati) {
-                    html += `<div class="listino-card">
-                                <div class="listino-card-row"><span class="listino-card-label">Codice:</span><span class="listino-card-value">${art.codiceArtic}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">EAN:</span><span class="listino-card-value">${art.ean || '-'}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">STOK:</span><span class="listino-card-value">${art.stok || '-'}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">Descrizione:</span><span class="listino-card-value">${art.descrizione}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">UM:</span><span class="listino-card-value">${art.um || '-'}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">G.M.:</span><span class="listino-card-value">${art.gm || '-'}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">M.Ord:</span><span class="listino-card-value">${art.mOrd || '-'}</span></div>
-                                <div class="listino-card-row"><span class="listino-card-label">Iva:</span><span class="listino-card-value">${art.iva || '-'}</span></div>
-                              </div>`;
+                    html += `<div class="listino-card"><div class="listino-card-row"><span class="listino-card-label">Codice:</span><span class="listino-card-value">${art.codiceArtic}</span></div><div class="listino-card-row"><span class="listino-card-label">EAN:</span><span class="listino-card-value">${art.ean || '-'}</span></div><div class="listino-card-row"><span class="listino-card-label">STOK:</span><span class="listino-card-value">${art.stok || '-'}</span></div><div class="listino-card-row"><span class="listino-card-label">Descrizione:</span><span class="listino-card-value">${art.descrizione}</span></div><div class="listino-card-row"><span class="listino-card-label">UM:</span><span class="listino-card-value">${art.um || '-'}</span></div><div class="listino-card-row"><span class="listino-card-label">G.M.:</span><span class="listino-card-value">${art.gm || '-'}</span></div><div class="listino-card-row"><span class="listino-card-label">M.Ord:</span><span class="listino-card-value">${art.mOrd || '-'}</span></div><div class="listino-card-row"><span class="listino-card-label">Iva:</span><span class="listino-card-value">${art.iva || '-'}</span></div></div>`;
                 }
                 resultMobile.innerHTML = html;
             }
             renderMobileListino();
             searchMobile.addEventListener('input', (e) => renderMobileListino(e.target.value));
             document.getElementById('chiudiListinoMobile').onclick = () => listinoModal.remove();
-            // Back button per chiudere listino
             history.pushState({ listinoInterno: true }, '');
             const popHandler = () => { if (listinoModal.parentNode) { listinoModal.remove(); history.back(); } window.removeEventListener('popstate', popHandler); };
             window.addEventListener('popstate', popHandler);
         };
     }
-    
-    document.getElementById('btnConfermaOrdine').onclick = () => {
-        let articoliConQta = [];
-        for (let art of articoliOrdinati) {
-            let qta = quantitaInputs[art.codice] || 0;
-            if (qta > 0) {
-                articoliConQta.push({
-                    codice: art.codice,
-                    descrizione: art.descrizione,
-                    quantita: qta
-                });
-            }
-        }
-        
-        if (articoliConQta.length === 0) {
-            alert("Inserisci almeno una quantità maggiore di zero!");
-            return;
-        }
-        
-        const noteFinale = noteTextarea.value;
-        
-        if (isDesktopDevice) {
-            stampaPDF(cliente, articoliConQta, noteFinale);
-            showToast("Apertura finestra di stampa...");
-        } else {
-            inviaEmailOrdine(cliente, articoliConQta, noteFinale);
-            showToast("Apertura email in corso...");
-        }
-        
-        // Dopo invio, azzera la memoria per questo cliente (nuovo ordine)
-        delete ordiniMemorizzati[cliente.codice];
-        modal.remove();
-    };
-    
-    document.getElementById('btnAnnullaOrdine').onclick = () => {
-        saveCurrentState();
-        modal.remove();
-    };
-    
-    // Gestione back button per chiudere modale ordine
+    // Gestione back button per modale ordine
     history.pushState({ ordineOpen: true }, '');
     const popHandlerOrdine = () => { if (modal.parentNode) { modal.remove(); history.back(); } window.removeEventListener('popstate', popHandlerOrdine); };
     window.addEventListener('popstate', popHandlerOrdine);
     modal.addEventListener('click', (e) => { if (e.target === modal) { modal.remove(); history.back(); } });
 }
 
+// --------------------------- GESTIONE CLIENTI E VISUALIZZAZIONE ---------------------------
 function aggiornaClienti() {
     let mappa = new Map();
     for (let c of datiOrd) {
@@ -1094,12 +733,7 @@ function buildScadenzeHtml(cliente) {
     html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
     for (let s of cliente.scadenze) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-        html += '<tr>';
-        html += '<td style="white-space:nowrap" data-label="Scadenza">' + s.scadenza + '</td>';
-        html += '<td style="white-space:nowrap" data-label="Data Doc.">' + (s.dataDoc || '') + '</td>';
-        html += '<td data-label="N.Doc">' + s.numDoc + '</td>';
-        html += '<td style="text-align:right" ' + classeImporto + ' data-label="Importo">' + s.importo.toFixed(2) + ' €</td>';
-        html += '</tr>';
+        html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
     }
     html += '</tbody></table></div>';
     return html;
@@ -1163,6 +797,65 @@ function filtraArticoli() {
     if (btnListino) btnListino.onclick = () => apriListinoModale();
 }
 
+// --------------------------- CARICAMENTO FILE (3 OBBLIGATORI) E PARSER LISTINO ---------------------------
+function parseListino(text) {
+    const lines = text.split(/\r?\n/);
+    const articoli = [];
+    for (let line of lines) {
+        line = line.trimEnd();
+        if (!line) continue;
+        if (line.startsWith('==') || line.startsWith('---') || line.startsWith('\\') || line.startsWith('Codice') || line.includes('Azienda:')) continue;
+        let parts = line.split(/\t/);
+        if (parts.length === 1) {
+            parts = line.split(/\s{8,}/);
+        }
+        for (let part of parts) {
+            part = part.trim();
+            if (!part) continue;
+            let padded = part.padEnd(90, ' ');
+            let codiceArtic = padded.substring(0, 12).trim();
+            if (!codiceArtic || !codiceArtic.match(/^[A-Z0-9]+$/i)) continue;
+            let ean = padded.substring(16, 30).trim();
+            let stok = padded.substring(30, 40).trim();
+            let descrizione = padded.substring(40, 70).trim();
+            let um = padded.substring(70, 75).trim();
+            let gm = padded.substring(75, 80).trim();
+            let mOrd = padded.substring(80, 85).trim();
+            let iva = padded.substring(85, 90).trim();
+            if (stok === "0,0000" || stok === "0" || stok === "0,00") continue;
+            let descParts = descrizione.split(/\s+/);
+            if (descParts.length >= 2 && descParts[0].match(/^[A-Z]$/) && descParts[1].match(/^[\d\.,]+$/)) {
+                if (!stok || stok === "0") {
+                    stok = descParts[1];
+                    descParts.splice(0, 2);
+                    descrizione = descParts.join(" ");
+                }
+            }
+            articoli.push({
+                codiceArtic: codiceArtic,
+                codice: codiceArtic,
+                ean: ean,
+                stok: stok,
+                descrizione: descrizione,
+                um: um,
+                gm: gm,
+                mOrd: mOrd,
+                iva: iva
+            });
+        }
+    }
+    const unique = [];
+    const seen = new Set();
+    for (let a of articoli) {
+        const key = a.codiceArtic + a.descrizione;
+        if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(a);
+        }
+    }
+    return unique;
+}
+
 function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
     let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
     if (tipo === 'LIST') return baseName.toUpperCase() === 'LIST';
@@ -1171,6 +864,7 @@ function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
     if (match[1].toUpperCase() !== tipo) return false;
     return parseInt(match[2],10) === parseInt(codiceAgente,10);
 }
+
 async function caricaFile(files) {
     if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
     if (files.length !== 3) { alert("Servono ESATTAMENTE 3 file: ORDxx.txt, SCAxx.txt, LIST.txt"); return false; }
@@ -1186,17 +880,18 @@ async function caricaFile(files) {
     }
     if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
     if (!trovati.ord || !trovati.sca || !trovati.list) { alert("FILE MANCANTI: ORD" + codAgente + ".txt, SCA" + codAgente + ".txt, LIST.txt"); return false; }
-    datiOrd = []; datiSca = [];
-    if (ordText) { datiOrd = parseORD(ordText); }
-    if (scaText) { datiSca = parseSCA(scaText); }
-    if (listText) { listinoData = parseListino(listText); }
+    datiOrd = parseORD(ordText);
+    datiSca = parseSCA(scaText);
+    listinoData = parseListino(listText);
     await salvaDatiAgente();
+    salvaListinoPersistente();
     aggiornaClienti();
-    document.getElementById('fileStatusInline').innerHTML = "OK ORD: " + datiOrd.length + " | SCA: " + datiSca.length + " | LIST: " + listinoData.length;
+    aggiornaStatusFile();
     alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti\nLIST: " + listinoData.length + " articoli");
     return true;
 }
 
+// --------------------------- HAMBURGER MENU ---------------------------
 const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
 const navGridAgenti = document.getElementById('navGrid');
 if (hamburgerBtnAgenti && navGridAgenti) {
@@ -1204,6 +899,7 @@ if (hamburgerBtnAgenti && navGridAgenti) {
     document.addEventListener('click', (e) => { if (!navGridAgenti.contains(e.target) && !hamburgerBtnAgenti.contains(e.target)) navGridAgenti.classList.remove('open'); });
 }
 
+// --------------------------- EVENT LISTENER ---------------------------
 document.getElementById('selectAgente').onchange = (e) => {
     if (e.target.value && modificheNonSalvate) {
         if (confirm("Modifiche non salvate. Salvare prima di cambiare?")) salvaDatiAgente().then(() => selezionaAgente(e.target.value));
@@ -1216,23 +912,15 @@ document.getElementById('cercaArticoloInline').oninput = () => { let c = documen
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnCompilaOrdine').onclick = () => {
     let clienteCodice = document.getElementById('selectClienteAgenti').value;
-    if (!clienteCodice) {
-        alert("Seleziona prima un cliente dalla lista!");
-        return;
-    }
+    if (!clienteCodice) { alert("Seleziona prima un cliente dalla lista!"); return; }
     let cliente = clientiUnici.find(c => c.codice === clienteCodice);
-    if (cliente) {
-        apriModaleOrdine(cliente);
-    } else {
-        alert("Cliente non trovato!");
-    }
+    if (cliente) apriModaleOrdine(cliente);
+    else alert("Cliente non trovato!");
 };
-// Pulsante LISTINO nell'header (PC)
-const btnListinoHeader = document.getElementById('btnListinoHeader');
-if (btnListinoHeader) btnListinoHeader.onclick = () => apriListinoModale();
-
+document.getElementById('btnListinoHeader').onclick = () => apriListinoModale();
 document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 
+// --------------------------- AVVIO ---------------------------
 Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
 </script>
 </body>
