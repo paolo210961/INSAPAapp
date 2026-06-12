@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.02</title>
+    <title>inSAPA - Agenti vA.6.03</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -68,25 +68,139 @@
         .iframe-container { flex: 1; background: white; }
         .iframe-container iframe { width: 100%; height: 100%; border: none; }
         
-        /* Modal ordine */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; text-align: center; position: relative; }
-        .modal-content .minimize-btn { position: absolute; top: 15px; left: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; width: auto; margin: 0; padding: 0 8px; }
-        .modal-content .close-modal-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; width: auto; margin: 0; padding: 0 8px; }
-        .ordine-articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: white; }
-        .ordine-articolo-info { margin-bottom: 8px; }
-        .ordine-articolo-codice { font-weight: bold; color: #2c3e50; }
-        .ordine-articolo-desc { font-size: 0.85rem; color: #666; margin-top: 3px; }
-        .ordine-articolo-qta { display: flex; align-items: center; gap: 10px; }
-        .ordine-articolo-qta label { font-size: 0.8rem; color: #555; }
-        .ordine-articolo-qta input { width: 80px; padding: 6px; text-align: center; margin: 0; }
-        .lista-articoli-ordine { max-height: 400px; overflow-y: auto; margin: 15px 0; text-align: left; }
-        .ricerca-articolo-ordine { margin: 15px 0; }
-        .ricerca-articolo-ordine input { width: 100%; padding: 10px; font-size: 0.9rem; }
-        .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
-        .cliente-info-modale p { margin: 5px 0; }
-        .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group-modal button { margin: 0; }
+        /* ----------------------------- */
+        /* MODALE ORDINE - STILE TABELLA (PC e Mobile con testata fissa) */
+        /* ----------------------------- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-ordine-content {
+            background: white;
+            border-radius: 24px;
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        /* Intestazione fissa */
+        .modal-ordine-header {
+            background: #e67e22;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .modal-ordine-header h3 { margin: 0; flex: 1; text-align: center; }
+        .modal-ordine-header .minimize-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 12px 0 0; }
+        .modal-ordine-header .close-modal-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 0 0 12px; }
+        
+        /* Corpo del modale con scroll solo sulla tabella */
+        .modal-ordine-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+        }
+        /* Info cliente fissa */
+        .cliente-info-modale {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            border-left: 4px solid #e67e22;
+        }
+        .cliente-info-modale p { margin: 5px 0; font-size: 0.9rem; }
+        /* Barra ricerca fissa */
+        .ricerca-articolo-ordine {
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        .ricerca-articolo-ordine input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .ricerca-articolo-ordine input:focus { border-color: #e67e22; }
+        /* Pulsanti fissi */
+        .btn-group-modal {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-shrink: 0;
+        }
+        .btn-group-modal button {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        /* Tabella articoli scrollabile */
+        .tabella-articoli-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        /* Scrollbar personalizzata (più spessa) */
+        .tabella-articoli-container::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        .tabella-articoli-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .tabella-articoli-container::-webkit-scrollbar-thumb {
+            background: #e67e22;
+            border-radius: 10px;
+        }
+        .tabella-articoli-container::-webkit-scrollbar-thumb:hover {
+            background: #d35400;
+        }
+        /* Stile tabella */
+        .ordine-tabella {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .ordine-tabella th {
+            background: #e67e22;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .ordine-tabella td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        .ordine-tabella tr:hover td {
+            background-color: #fff3e0;
+        }
+        .ordine-tabella input {
+            width: 80px;
+            padding: 6px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .codice-col { font-weight: bold; font-family: monospace; }
+        .descrizione-col { max-width: 300px; word-break: break-word; }
+        .ultimo-acquisto { font-size: 0.7rem; color: #888; margin-top: 3px; }
         
         /* Barretta minimizzata in fondo */
         .minimized-bar-container { position: fixed; bottom: 0; left: 0; right: 0; z-index: 3000; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; }
@@ -133,13 +247,19 @@
             .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
             .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
-            .modal-content { width: 95%; padding: 15px; }
-            .lista-articoli-ordine { max-height: 50vh; }
+            .modal-ordine-content { width: 95%; height: 85vh; }
             .modal-iframe-content { width: 95%; height: 85vh; }
             .pc-only { display: none !important; }
             .minimized-bar-container { padding: 6px; gap: 6px; }
             .minimized-bar { padding: 6px 12px; }
             .minimized-bar .bar-title { font-size: 0.75rem; }
+            /* Mobile: tabella adattata */
+            .ordine-tabella th, .ordine-tabella td { padding: 8px 4px; font-size: 0.75rem; }
+            .codice-col { min-width: 70px; }
+            .descrizione-col { max-width: 180px; }
+            .ordine-tabella input { width: 60px; padding: 4px; }
+            .cliente-info-modale p { font-size: 0.8rem; }
+            .btn-group-modal button { font-size: 0.8rem; padding: 8px; }
         }
     </style>
 </head>
@@ -202,7 +322,7 @@
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.6.02 - Listino via iframe</div>
+<div class="version">vA.6.03 - Modale ordine con tabella stile listino</div>
 
 <script>
 // Firebase configuration
@@ -227,7 +347,7 @@ let modificheNonSalvate = false;
 
 let linkPrincipale = "", linkSecondario = "";
 
-// Gestione modali minimizzabili (solo per ordine e listino-iframe)
+// Gestione modali minimizzabili
 let modaliAperti = [];
 let nextModalId = 1;
 
@@ -275,7 +395,7 @@ function chiudiModale(id) {
     if (index !== -1) modaliAperti.splice(index, 1);
 }
 
-// Funzione per aprire modale con iframe che carica listino.html
+// Funzione per aprire modale listino via iframe
 function apriModaleListinoIframe() {
     const id = nextModalId++;
     const modal = document.createElement('div');
@@ -299,7 +419,7 @@ function apriModaleListinoIframe() {
     modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
-// ================== TUTTO IL RESTO (ordini, clienti, ORD/SCA, ecc.) INVARIATO ==================
+// ================== FUNZIONI PER ORDINI, CLIENTI, ECC. ==================
 function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
 async function caricaLinkDaFile() {
     try {
@@ -487,7 +607,7 @@ function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScad
 function generaHtmlOrdine(cliente, articoli) {
     let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
     for (let a of articoli) html += '<tr><td>'+a.codice+'</td><td>'+a.descrizione+'</td><td>'+a.quantita+' pz</td></tr>';
-    html += '</tbody></table><div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
+    html += '</tbody><tr><div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
     return html;
 }
 function stampaPDF(cliente, articoli) {
@@ -510,14 +630,7 @@ function calcolaUltimaDataArticolo(art) {
     return dates[0];
 }
 
-function setupQuantitaInput(inp, codice, qMap) {
-    inp.value = '';
-    inp.placeholder = '0';
-    inp.onfocus = () => { if (inp.value === '0') inp.value = ''; };
-    inp.onblur = () => { let v = inp.value.trim(); if (v === '' || v === '0') { inp.value = ''; qMap[codice] = 0; } else { let n = parseInt(v,10); if (isNaN(n) || n<0) n=0; inp.value = n; qMap[codice] = n; } };
-    inp.oninput = () => { let v = inp.value.trim(); if (v === '') qMap[codice] = 0; else { let n = parseInt(v,10); if (!isNaN(n) && n>=0) qMap[codice] = n; } };
-}
-
+// NUOVA FUNZIONE PER IL MODALE ORDINE CON TABELLA STILE LISTINO
 function apriModaleOrdine(cliente) {
     if (!cliente) { alert("Seleziona un cliente!"); return; }
     if (!cliente.ordini || !cliente.ordini.length) { alert("Nessun articolo disponibile per questo cliente."); return; }
@@ -532,55 +645,110 @@ function apriModaleOrdine(cliente) {
     const id = nextModalId++;
     const isDesktop = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
     const btnText = isDesktop ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
+    
     const modalDiv = document.createElement('div');
     modalDiv.className = 'modal-overlay';
     modalDiv.style.display = 'flex';
     modalDiv.innerHTML = `
-        <div class="modal-content">
-            <button class="minimize-btn" title="Minimizza">−</button>
-            <button class="close-modal-btn" title="Chiudi">✕</button>
-            <h3>📝 ORDINE DA CLIENTE</h3>
-            <div class="cliente-info-modale">
-                <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)}</p>
-                <p><strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
-                <p><strong>Scadenze:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0} in sospeso</p>
+        <div class="modal-ordine-content">
+            <div class="modal-ordine-header">
+                <button class="minimize-btn" title="Minimizza">−</button>
+                <h3>📝 ORDINE CLIENTE</h3>
+                <button class="close-modal-btn" title="Chiudi">✕</button>
             </div>
-            <div class="ricerca-articolo-ordine">
-                <input type="text" id="ricercaOrd_${id}" placeholder="🔍 Cerca articolo...">
-            </div>
-            <div class="lista-articoli-ordine" id="listaOrd_${id}"></div>
-            <div class="btn-group-modal">
-                <button id="btnConferma_${id}" class="btn-success">${btnText}</button>
-                <button id="btnApriListino_${id}" class="btn-primary">📋 APRI LISTINO</button>
+            <div class="modal-ordine-body">
+                <div class="cliente-info-modale">
+                    <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
+                    <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
+                </div>
+                <div class="ricerca-articolo-ordine">
+                    <input type="text" id="ricercaOrd_${id}" placeholder="🔍 Cerca articolo per codice o descrizione...">
+                </div>
+                <div class="tabella-articoli-container" id="tabellaContainer_${id}">
+                    <table class="ordine-tabella" id="tabellaOrdine_${id}">
+                        <thead>
+                            <tr>
+                                <th>Codice</th>
+                                <th>Descrizione</th>
+                                <th>Ultimo acquisto</th>
+                                <th style="text-align:center">Quantità</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabellaBody_${id}"></tbody>
+                    </table>
+                </div>
+                <div class="btn-group-modal">
+                    <button id="btnConferma_${id}" class="btn-success">${btnText}</button>
+                    <button id="btnApriListino_${id}" class="btn-primary">📋 APRI LISTINO</button>
+                </div>
             </div>
         </div>
     `;
     document.body.appendChild(modalDiv);
+    
     let qMap = {};
     modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap });
-
-    function renderLista(search = '') {
-        const container = document.getElementById(`listaOrd_${id}`);
+    
+    function renderTabella(search = '') {
+        const tbody = document.getElementById(`tabellaBody_${id}`);
         let filtered = articoli;
-        if (search) { const low = search.toLowerCase(); filtered = articoli.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low)); }
-        if (!filtered.length) { container.innerHTML = '<p style="text-align:center;color:#999;">Nessun articolo</p>'; return; }
+        if (search) {
+            const low = search.toLowerCase();
+            filtered = articoli.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
+        }
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px;">Nessun articolo trovato</td></tr>';
+            return;
+        }
         let html = '';
         for (let a of filtered) {
             const ultimo = calcolaUltimaDataArticolo(a);
-            const ultimoTesto = ultimo ? "Ultimo acquisto: "+ultimo.data : "Mai acquistato";
-            html += `<div class="ordine-articolo-item"><div class="ordine-articolo-info"><div class="ordine-articolo-codice">${escapeHtml(a.codice)}</div><div class="ordine-articolo-desc">${escapeHtml(a.descrizione)}</div><div class="ordine-articolo-desc" style="font-size:0.7rem;color:#888;">${ultimoTesto}</div></div><div class="ordine-articolo-qta"><label>Quantità:</label><input type="number" id="qta_${id}_${a.codice.replace(/[^a-zA-Z0-9]/g,'_')}" min="0" step="1" style="text-align:center;"></div></div>`;
+            const ultimoTesto = ultimo ? ultimo.data : 'Mai acquistato';
+            const inputId = `qta_${id}_${a.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            html += `
+                <tr>
+                    <td class="codice-col">${escapeHtml(a.codice)}</td>
+                    <td class="descrizione-col">${escapeHtml(a.descrizione)}</td>
+                    <td style="font-size:0.75rem; color:#666;">${ultimoTesto}</td>
+                    <td style="text-align:center">
+                        <input type="number" id="${inputId}" min="0" step="1" value="${qMap[a.codice] || ''}" placeholder="0" style="text-align:center;">
+                    </td>
+                </tr>
+            `;
         }
-        container.innerHTML = html;
+        tbody.innerHTML = html;
+        // Attacca gli eventi agli input
         for (let a of filtered) {
-            const inp = document.getElementById(`qta_${id}_${a.codice.replace(/[^a-zA-Z0-9]/g,'_')}`);
-            if (inp) { if (qMap[a.codice] === undefined) qMap[a.codice] = 0; setupQuantitaInput(inp, a.codice, qMap); }
+            const inputId = `qta_${id}_${a.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const input = document.getElementById(inputId);
+            if (input) {
+                if (qMap[a.codice] === undefined) qMap[a.codice] = 0;
+                // Setup evento
+                input.onfocus = () => { if (input.value === '0') input.value = ''; };
+                input.onblur = () => {
+                    let v = input.value.trim();
+                    if (v === '' || v === '0') { input.value = ''; qMap[a.codice] = 0; }
+                    else { let n = parseInt(v,10); if (isNaN(n) || n<0) n=0; input.value = n; qMap[a.codice] = n; }
+                };
+                input.oninput = () => {
+                    let v = input.value.trim();
+                    if (v === '') qMap[a.codice] = 0;
+                    else { let n = parseInt(v,10); if (!isNaN(n) && n>=0) qMap[a.codice] = n; }
+                };
+            }
         }
     }
-    renderLista();
-    document.getElementById(`ricercaOrd_${id}`).addEventListener('input', e => renderLista(e.target.value));
+    
+    renderTabella();
+    const searchInput = document.getElementById(`ricercaOrd_${id}`);
+    searchInput.addEventListener('input', (e) => renderTabella(e.target.value));
+    
     document.getElementById(`btnConferma_${id}`).onclick = () => {
         let selected = [];
-        for (let a of articoli) { let q = qMap[a.codice] || 0; if (q > 0) selected.push({ codice: a.codice, descrizione: a.descrizione, quantita: q }); }
+        for (let a of articoli) {
+            let q = qMap[a.codice] || 0;
+            if (q > 0) selected.push({ codice: a.codice, descrizione: a.descrizione, quantita: q });
+        }
         if (!selected.length) { alert("Inserisci almeno una quantità > 0"); return; }
         if (isDesktop) stampaPDF(cliente, selected);
         else inviaEmailOrdine(cliente, selected);
@@ -630,10 +798,10 @@ function filtraClienti() {
 function buildScadenzeHtml(cliente) {
     let html = `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
                 <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div>
-                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></td></thead><tbody>`;
+                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
     for (let s of cliente.scadenze) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-        html += `<tr><td>${s.scadenza}</td><td>${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
+        html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
     html += `</tbody></table></div>`;
     return html;
@@ -764,7 +932,7 @@ document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => { if (document.getElementById('selectClienteAgenti').value) filtraArticoli(); };
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnCaricaListino').onclick = () => document.getElementById('fileListinoInput').click();
-document.getElementById('btnListinoVerde').onclick = () => apriModaleListinoIframe(); // <-- MODIFICATO: apre modale iframe
+document.getElementById('btnListinoVerde').onclick = () => apriModaleListinoIframe();
 document.getElementById('btnCompilaOrdine').onclick = () => {
     let cod = document.getElementById('selectClienteAgenti').value;
     if (!cod) { alert("Seleziona prima un cliente!"); return; }
