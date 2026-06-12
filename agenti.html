@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.01</title>
+    <title>inSAPA - Agenti vA.6.02</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -58,27 +58,15 @@
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         
-        /* Modal listino - stile card come vA.5.71 */
-        .modal-listino-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-listino-content { background: white; border-radius: 24px; width: 90%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .modal-listino-header { background: #27ae60; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .modal-listino-header h3 { margin: 0; flex: 1; text-align: center; }
-        .modal-listino-header .minimize-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 12px 0 0; }
-        .modal-listino-header .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 0 0 12px; }
-        .modal-listino-body { padding: 20px; overflow-y: auto; flex: 1; }
-        .modal-listino-search { margin-bottom: 20px; }
-        .modal-listino-search input { width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid #ddd; border-radius: 30px; }
-        .listino-stats { background: #eef2f5; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; display: inline-block; }
-        .listino-cards-container { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; }
-        .listino-card { background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
-        .listino-card:hover { background: #f9f9f9; transform: translateX(3px); }
-        .listino-card-codice { font-weight: bold; font-family: monospace; font-size: 0.85rem; background: #f0f0f0; display: inline-block; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
-        .listino-card-descrizione { font-size: 0.9rem; font-weight: 500; margin: 5px 0; color: #1a2c3e; }
-        .listino-card-dettagli { font-size: 0.75rem; color: #666; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
-        .listino-card-prezzo { font-weight: bold; color: #27ae60; font-size: 1rem; }
-        .listino-card-um { background: #eef2f5; padding: 2px 6px; border-radius: 4px; }
-        .mord-bold { font-weight: bold; }
-        .highlight { background-color: #fff3c9; border-radius: 4px; padding: 0 2px; }
+        /* Modale listino con iframe */
+        .modal-iframe-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-iframe-content { background: white; border-radius: 24px; width: 95%; max-width: 1200px; height: 90vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .modal-iframe-header { background: #27ae60; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-iframe-header h3 { margin: 0; flex: 1; text-align: center; }
+        .modal-iframe-header .minimize-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 12px 0 0; }
+        .modal-iframe-header .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 0 0 12px; }
+        .iframe-container { flex: 1; background: white; }
+        .iframe-container iframe { width: 100%; height: 100%; border: none; }
         
         /* Modal ordine */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
@@ -147,8 +135,7 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
-            .modal-listino-content { width: 95%; max-height: 85vh; }
-            .listino-cards-container { max-height: 55vh; }
+            .modal-iframe-content { width: 95%; height: 85vh; }
             .pc-only { display: none !important; }
             .minimized-bar-container { padding: 6px; gap: 6px; }
             .minimized-bar { padding: 6px 12px; }
@@ -215,7 +202,7 @@
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.6.01 - Card listino, minimizzazione fix</div>
+<div class="version">vA.6.02 - Listino via iframe</div>
 
 <script>
 // Firebase configuration
@@ -239,10 +226,8 @@ let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
 
 let linkPrincipale = "", linkSecondario = "";
-let listinoGlobale = [];
-let listinoCaricato = false;
 
-// Gestione modali minimizzabili
+// Gestione modali minimizzabili (solo per ordine e listino-iframe)
 let modaliAperti = [];
 let nextModalId = 1;
 
@@ -290,14 +275,32 @@ function chiudiModale(id) {
     if (index !== -1) modaliAperti.splice(index, 1);
 }
 
-function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
-function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-function highlightText(text, searchTerm) {
-    if (!searchTerm || !searchTerm.trim()) return escapeHtml(text);
-    const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
-    return escapeHtml(text).replace(regex, `<span class="highlight">$1</span>`);
+// Funzione per aprire modale con iframe che carica listino.html
+function apriModaleListinoIframe() {
+    const id = nextModalId++;
+    const modal = document.createElement('div');
+    modal.className = 'modal-iframe-overlay';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+        <div class="modal-iframe-content">
+            <div class="modal-iframe-header">
+                <button class="minimize-btn" title="Minimizza">−</button>
+                <h3>📋 LISTINO PREZZI</h3>
+                <button class="close-btn" title="Chiudi">✕</button>
+            </div>
+            <div class="iframe-container">
+                <iframe src="listino.html" title="Listino Prezzi"></iframe>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modaliAperti.push({ id, tipo: 'listino', modalElement: modal, minimizzato: false });
+    modal.querySelector('.minimize-btn').onclick = () => minimizzaModale(id);
+    modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
+// ================== TUTTO IL RESTO (ordini, clienti, ORD/SCA, ecc.) INVARIATO ==================
+function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -311,7 +314,6 @@ async function caricaLinkDaFile() {
 }
 function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("Link principale"); } else showToast("Link principale non configurato", true); }
 function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("Link secondario"); } else showToast("Link secondario non configurato", true); }
-
 function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
@@ -584,70 +586,9 @@ function apriModaleOrdine(cliente) {
         else inviaEmailOrdine(cliente, selected);
         chiudiModale(id);
     };
-    document.getElementById(`btnApriListino_${id}`).onclick = () => { apriModaleListino(); };
+    document.getElementById(`btnApriListino_${id}`).onclick = () => { apriModaleListinoIframe(); };
     modalDiv.querySelector('.minimize-btn').onclick = () => minimizzaModale(id);
     modalDiv.querySelector('.close-modal-btn').onclick = () => chiudiModale(id);
-}
-
-function apriModaleListino() {
-    if (!listinoGlobale || !listinoGlobale.length) { alert("Nessun listino disponibile. Usa CAR_LIST per caricarlo."); return; }
-    const id = nextModalId++;
-    let searchTerm = '';
-    const modal = document.createElement('div');
-    modal.className = 'modal-listino-overlay';
-    modal.style.display = 'flex';
-    modal.innerHTML = `
-        <div class="modal-listino-content">
-            <div class="modal-listino-header">
-                <button class="minimize-btn" title="Minimizza">−</button>
-                <h3>📋 LISTINO PREZZI</h3>
-                <button class="close-btn" title="Chiudi">✕</button>
-            </div>
-            <div class="modal-listino-body">
-                <div class="modal-listino-search">
-                    <input type="text" id="searchListino_${id}" placeholder="🔍 Cerca per CODICE o DESCRIZIONE...">
-                </div>
-                <div id="listinoStats_${id}" class="listino-stats"></div>
-                <div id="listinoCards_${id}" class="listino-cards-container"></div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    modaliAperti.push({ id, tipo: 'listino', modalElement: modal, minimizzato: false });
-
-    function render() {
-        const container = document.getElementById(`listinoCards_${id}`);
-        let filtrati = listinoGlobale;
-        if (searchTerm.trim()) {
-            const low = searchTerm.toLowerCase();
-            filtrati = listinoGlobale.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
-        }
-        if (!filtrati.length) {
-            container.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">Nessun articolo trovato</div>';
-            document.getElementById(`listinoStats_${id}`).innerHTML = `📋 0 su ${listinoGlobale.length}`;
-            return;
-        }
-        let html = '';
-        for (let a of filtrati) {
-            const codEv = highlightText(a.codice, searchTerm);
-            const descEv = highlightText(a.descrizione, searchTerm);
-            html += `<div class="listino-card">
-                        <div class="listino-card-codice">${codEv}</div>
-                        <div class="listino-card-descrizione">${descEv}</div>
-                        <div class="listino-card-dettagli">
-                            <span class="listino-card-prezzo">€ ${parseFloat(a.prezzo).toFixed(2)}</span>
-                            <span class="listino-card-um">${escapeHtml(a.um)}</span>
-                            <span class="info-text">GM: ${escapeHtml(a.gm)} | <strong class="mord-bold">M.Ord: ${a.m_ord}</strong></span>
-                        </div>
-                    </div>`;
-        }
-        container.innerHTML = html;
-        document.getElementById(`listinoStats_${id}`).innerHTML = `📋 ${filtrati.length} articoli su ${listinoGlobale.length} totali`;
-    }
-    render();
-    document.getElementById(`searchListino_${id}`).addEventListener('input', e => { searchTerm = e.target.value; render(); });
-    modal.querySelector('.minimize-btn').onclick = () => minimizzaModale(id);
-    modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
 function aggiornaClienti() {
@@ -689,7 +630,7 @@ function filtraClienti() {
 function buildScadenzeHtml(cliente) {
     let html = `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
                 <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div>
-                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></td></thead><tbody>`;
     for (let s of cliente.scadenze) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td>${s.scadenza}</td><td>${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
@@ -803,20 +744,10 @@ async function caricaListinoGlobale(file) {
         }
         if (!articoli.length) { alert("Nessun articolo valido"); return false; }
         await db.collection('listini_generali').doc('listino_globale').set({ articoli, ultimoAggiornamento: new Date().toISOString(), numeroArticoli: articoli.length });
-        listinoGlobale = articoli;
-        listinoCaricato = true;
         showToast("Listino caricato! "+articoli.length+" articoli");
         alert("Listino salvato. Ora disponibile a tutti gli agenti.");
         return true;
     } catch(e) { alert("Errore: "+e.message); return false; }
-}
-
-async function caricaListinoDaDB() {
-    try {
-        const doc = await db.collection('listini_generali').doc('listino_globale').get();
-        if (doc.exists) { listinoGlobale = doc.data().articoli || []; listinoCaricato = true; }
-        else { listinoGlobale = []; listinoCaricato = false; }
-    } catch(e) { listinoGlobale = []; }
 }
 
 // Event listeners
@@ -833,7 +764,7 @@ document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => { if (document.getElementById('selectClienteAgenti').value) filtraArticoli(); };
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnCaricaListino').onclick = () => document.getElementById('fileListinoInput').click();
-document.getElementById('btnListinoVerde').onclick = () => apriModaleListino();
+document.getElementById('btnListinoVerde').onclick = () => apriModaleListinoIframe(); // <-- MODIFICATO: apre modale iframe
 document.getElementById('btnCompilaOrdine').onclick = () => {
     let cod = document.getElementById('selectClienteAgenti').value;
     if (!cod) { alert("Seleziona prima un cliente!"); return; }
@@ -844,7 +775,7 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
 document.getElementById('fileInput').onchange = async (e) => { if (e.target.files.length) await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('fileListinoInput').onchange = async (e) => { if (e.target.files.length) { await caricaListinoGlobale(e.target.files[0]); e.target.value = ''; } };
 
-Promise.all([caricaLinkDaFile(), caricaAgenti(), caricaListinoDaDB()]).then(() => caricaLogoSaved());
+Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
 </script>
 </body>
 </html>
