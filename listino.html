@@ -128,7 +128,6 @@
             transform: scale(0.97);
         }
 
-        /* bottone modale */
         .modal-btn {
             background: #2c6e3c;
             color: white;
@@ -177,7 +176,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
-            min-width: 900px;
+            min-width: 700px;
         }
 
         .articoli-table th {
@@ -258,7 +257,6 @@
             padding: 0 2px;
         }
         
-        /* badge database */
         .db-badge {
             background: #e8f5e9;
             color: #2e7d32;
@@ -362,15 +360,6 @@
             font-weight: bold;
         }
         
-        .modal-body pre {
-            background: #f5f5f5;
-            padding: 12px;
-            border-radius: 12px;
-            overflow-x: auto;
-            font-size: 0.75rem;
-            margin: 12px 0;
-        }
-        
         .modal-footer {
             padding: 16px 24px;
             border-top: 1px solid #eef2f8;
@@ -392,7 +381,7 @@
             background: #1e4b2e;
         }
 
-        /* STILE MOBILE - box come da richiesta */
+        /* STILE MOBILE - box senza EAN */
         .mobile-list {
             display: none;
         }
@@ -457,12 +446,6 @@
                 padding-top: 8px;
                 margin-top: 4px;
             }
-            
-            .mobile-card .iva-info {
-                font-size: 0.7rem;
-                color: #7e8c9e;
-                margin-top: 6px;
-            }
         }
     </style>
 </head>
@@ -492,13 +475,12 @@
         <div class="stats" id="statsCounter">Caricamento articoli...</div>
     </div>
 
-    <!-- VISTA DESKTOP (TABELLA) -->
+    <!-- VISTA DESKTOP (TABELLA - SENZA EAN) -->
     <div class="table-wrapper">
         <table class="articoli-table" id="articoliTable">
             <thead>
                 <tr>
                     <th>Codice Art.</th>
-                    <th>EAN</th>
                     <th>UM + PREZZO (IVA escl.)</th>
                     <th>Descrizione</th>
                     <th>G.M.</th>
@@ -510,7 +492,7 @@
         </table>
     </div>
 
-    <!-- VISTA MOBILE (box senza EAN) -->
+    <!-- VISTA MOBILE (box - già senza EAN) -->
     <div class="mobile-list" id="mobileList"></div>
 
     <div class="footer-note">
@@ -537,7 +519,7 @@
 
 <script>
     // ------------------------------------------------------------------
-    // CONFIGURAZIONE FIREBASE (uguale a agenti.html)
+    // CONFIGURAZIONE FIREBASE
     // ------------------------------------------------------------------
     const firebaseConfig = {
         apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
@@ -548,74 +530,104 @@
         appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
     };
     
-    // Inizializza Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
     // ------------------------------------------------------------------
-    // DATI FALLBACK OFFLINE (452 articoli - mantenuti integralmente)
+    // DATI FALLBACK OFFLINE (452 articoli - corretti)
     // ------------------------------------------------------------------
     const fallbackArticles = [
-        {codice: "00003", ean: "", prezzo: 8.00, descrizione: "GIANNINA PROF.c/MAN.LEGNOcm130", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
-        {codice: "00004", ean: "", prezzo: 21.68, descrizione: "RACCOGLISPORCO PROFES.PAL/CLIP", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00010", ean: "8013233000022", prezzo: 7.38, descrizione: "SAGGINA Professionale", um: "N.", gm: "LSTD", m_ord: 10, iva: 22},
-        {codice: "00012", ean: "8009473001073", prezzo: 5.55, descrizione: "RACCOGLISPORCO FERRO ZINGATO", um: "N.", gm: "BCTP", m_ord: 12, iva: 22},
-        {codice: "00013", ean: "8009473022535", prezzo: 3.17, descrizione: "CLAUDIA con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00014", ean: "", prezzo: 2.45, descrizione: "FORTISSIMO con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00018", ean: "800798035033", prezzo: 0.93, descrizione: "PALETTA GRANDE C/GOMMA", um: "N.", gm: "FCVP", m_ord: 24, iva: 22},
-        {codice: "00024", ean: "", prezzo: 8.00, descrizione: "SCOPA PVC con MANICO", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
-        {codice: "00025", ean: "8019478000025", prezzo: 7.50, descrizione: "GIANNINA PROFESSIONALE", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
-        {codice: "00026", ean: "", prezzo: 23.30, descrizione: "SPAZZOLONE COCCO INDUS. CM.100", um: "N.", gm: "ACDP", m_ord: 6, iva: 22},
-        {codice: "00031", ean: "", prezzo: 1.94, descrizione: "SCOPA CLAUDIA PVC", um: "N.", gm: "FCVP", m_ord: 12, iva: 22},
-        {codice: "00032", ean: "8016909106004", prezzo: 1.90, descrizione: "ONDA s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00037", ean: "8019478000254", prezzo: 2.47, descrizione: "SCOPA ONDA", um: "N.", gm: "PECC", m_ord: 12, iva: 22},
-        {codice: "00038", ean: "8000798000529", prezzo: 1.81, descrizione: "FORTISSIMO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00039", ean: "8019478000070", prezzo: 1.60, descrizione: "SCOPA PROFESSIONALE s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00043", ean: "", prezzo: 0.85, descrizione: "TERGIVETRO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00090", ean: "8019478000902", prezzo: 1.23, descrizione: "MANICO Verniciato Rosso CM.130", um: "N.", gm: "ACDP", m_ord: 12, iva: 22},
-        {codice: "00091", ean: "8019478000919", prezzo: 1.62, descrizione: "MANICO Allungabile 85/150", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
-        {codice: "00092", ean: "8019478000926", prezzo: 1.10, descrizione: "MANICO Legno cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00093", ean: "8019478000933", prezzo: 1.60, descrizione: "MANICO Legno cm.150", um: "N.", gm: "LSTD", m_ord: 25, iva: 22},
-        {codice: "00094", ean: "", prezzo: 0.99, descrizione: "MANICO Legno CM.120", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
-        {codice: "00095", ean: "8019478000957", prezzo: 2.39, descrizione: "MANICO C/CONO LEGNO cm.150", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
-        {codice: "00100", ean: "", prezzo: 1.00, descrizione: "MINIGRIP GANCIO ART.385", um: "N.", gm: "ACDP", m_ord: 6000, iva: 22},
-        {codice: "00101", ean: "", prezzo: 1.00, descrizione: "A GRIP", um: "N.", gm: "ACDP", m_ord: 1000, iva: 22},
-        {codice: "00170", ean: "", prezzo: 17.47, descrizione: "RASCHIETTO BEST c/MANICO cm120", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00171", ean: "", prezzo: 4.75, descrizione: "RASCHIETTO HANDLEY METALLO", um: "N.", gm: "OCTP", m_ord: 10, iva: 22},
-        {codice: "00172", ean: "", prezzo: 12.45, descrizione: "RASCHIETTO BEST c/MANICO cm.25", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
-        {codice: "00173", ean: "", prezzo: 0.47, descrizione: "LAME RICAMBIO per 00170-00172", um: "N.", gm: "OCTP", m_ord: 50, iva: 22},
-        {codice: "00174", ean: "", prezzo: 0.28, descrizione: "LAME RICAMBIO per 00171", um: "N.", gm: "OCTP", m_ord: 20, iva: 22},
-        {codice: "00187", ean: "", prezzo: 13.00, descrizione: "BIDONE c/MANIGLIE NERO LT.50", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
-        {codice: "00189", ean: "", prezzo: 56.00, descrizione: "PATTUMIERA 80LT c/RUOTE+PEDALE", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00190", ean: "", prezzo: 26.00, descrizione: "PATTUMIERA INOX LT.12 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00191", ean: "", prezzo: 26.22, descrizione: "PATTUMIERA INOX LT.5 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00191A", ean: "", prezzo: 10.50, descrizione: "PATTUMIERA INOX PEDALE L3", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
-        {codice: "00191B", ean: "", prezzo: 64.40, descrizione: "PATTUMIERA METALLO LT.20 PEDAL", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00192", ean: "", prezzo: 49.71, descrizione: "PATTUMIERA c/RUOTE/PEDALE 80LT", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00193", ean: "", prezzo: 53.90, descrizione: "PATTUMIERA INOX LT.20 c/PEDALE", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00194", ean: "", prezzo: 82.60, descrizione: "PATTUMIERA c/RUOTE+PEDALE L100", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00195", ean: "", prezzo: 300.00, descrizione: "PATTUMIERA A PEDARE INOX LT70", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00195A", ean: "", prezzo: 70.00, descrizione: "PATTUMIERA PEDALE INOX 20L", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00197", ean: "", prezzo: 13.00, descrizione: "PORTASCOPINO SARA MOPLEN BIANC", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00198", ean: "", prezzo: 26.70, descrizione: "PORTASCOPINO METALLO BIANCO", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00199", ean: "", prezzo: 29.90, descrizione: "TRESPOLOcm.38 C/COPERCH", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00200", ean: "", prezzo: 7.45, descrizione: "COPRIWATER CARTUCCIA 200PZ", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00201", ean: "", prezzo: 5.50, descrizione: "MANICO LEGNO VERNICIATO 150CM", um: "N.", gm: "LSTD", m_ord: 1, iva: 22},
-        {codice: "00202", ean: "", prezzo: 30.60, descrizione: "PORTASCOPINO MURALE INOX BRIL.", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00205", ean: "", prezzo: 27.30, descrizione: "PORTA ROTOLO DA TERRA METALLO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00206", ean: "", prezzo: 159.55, descrizione: "CARRELLO \"HAPPY\" VERN.ROSSO", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00207", ean: "", prezzo: 21.63, descrizione: "PORTAROTOLO MURALE VER.BIANCO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00207A", ean: "", prezzo: 58.90, descrizione: "PORTAROTOLO INDUST INOX MURALE", um: "N.", gm: "NOTD", m_ord: 1, iva: 22},
-        {codice: "00208", ean: "", prezzo: 41.76, descrizione: "CAVALETTO PORTAROTOLO C/RUOTE", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00209", ean: "", prezzo: 10.85, descrizione: "PORTASACCO X ARTICOLO 00208", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00210", ean: "", prezzo: 3.17, descrizione: "PINZA PER MOP PLASTICA", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
-        {codice: "00211", ean: "", prezzo: 70.90, descrizione: "STRIZZATORE GRIGIO TEC", um: "N.", gm: "OCTP", m_ord: 4, iva: 22},
-        {codice: "00212", ean: "", prezzo: 3.95, descrizione: "MOP COTONE 400 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22},
-        {codice: "00213", ean: "", prezzo: 5.25, descrizione: "MOP COTONE 450 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22}
+        {codice: "00003", prezzo: 8.00, descrizione: "GIANNINA PROF.c/MAN.LEGNOcm130", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
+        {codice: "00004", prezzo: 21.68, descrizione: "RACCOGLISPORCO PROFES.PAL/CLIP", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00010", prezzo: 7.38, descrizione: "SAGGINA Professionale", um: "N.", gm: "LSTD", m_ord: 10, iva: 22},
+        {codice: "00012", prezzo: 5.55, descrizione: "RACCOGLISPORCO FERRO ZINGATO", um: "N.", gm: "BCTP", m_ord: 12, iva: 22},
+        {codice: "00013", prezzo: 3.17, descrizione: "CLAUDIA con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00014", prezzo: 2.45, descrizione: "FORTISSIMO con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00018", prezzo: 0.93, descrizione: "PALETTA GRANDE C/GOMMA", um: "N.", gm: "FCVP", m_ord: 24, iva: 22},
+        {codice: "00024", prezzo: 8.00, descrizione: "SCOPA PVC con MANICO", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
+        {codice: "00025", prezzo: 7.50, descrizione: "GIANNINA PROFESSIONALE", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
+        {codice: "00026", prezzo: 23.30, descrizione: "SPAZZOLONE COCCO INDUS. CM.100", um: "N.", gm: "ACDP", m_ord: 6, iva: 22},
+        {codice: "00031", prezzo: 1.94, descrizione: "SCOPA CLAUDIA PVC", um: "N.", gm: "FCVP", m_ord: 12, iva: 22},
+        {codice: "00032", prezzo: 1.90, descrizione: "ONDA s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00037", prezzo: 2.47, descrizione: "SCOPA ONDA", um: "N.", gm: "PECC", m_ord: 12, iva: 22},
+        {codice: "00038", prezzo: 1.81, descrizione: "FORTISSIMO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00039", prezzo: 1.60, descrizione: "SCOPA PROFESSIONALE s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00043", prezzo: 0.85, descrizione: "TERGIVETRO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00090", prezzo: 1.23, descrizione: "MANICO Verniciato Rosso CM.130", um: "N.", gm: "ACDP", m_ord: 12, iva: 22},
+        {codice: "00091", prezzo: 1.62, descrizione: "MANICO Allungabile 85/150", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
+        {codice: "00092", prezzo: 1.10, descrizione: "MANICO Legno cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00093", prezzo: 1.60, descrizione: "MANICO Legno cm.150", um: "N.", gm: "LSTD", m_ord: 25, iva: 22},
+        {codice: "00094", prezzo: 0.99, descrizione: "MANICO Legno CM.120", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
+        {codice: "00095", prezzo: 2.39, descrizione: "MANICO C/CONO LEGNO cm.150", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
+        {codice: "00100", prezzo: 1.00, descrizione: "MINIGRIP GANCIO ART.385", um: "N.", gm: "ACDP", m_ord: 6000, iva: 22},
+        {codice: "00101", prezzo: 1.00, descrizione: "A GRIP", um: "N.", gm: "ACDP", m_ord: 1000, iva: 22},
+        {codice: "00170", prezzo: 17.47, descrizione: "RASCHIETTO BEST c/MANICO cm120", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00171", prezzo: 4.75, descrizione: "RASCHIETTO HANDLEY METALLO", um: "N.", gm: "OCTP", m_ord: 10, iva: 22},
+        {codice: "00172", prezzo: 12.45, descrizione: "RASCHIETTO BEST c/MANICO cm.25", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
+        {codice: "00173", prezzo: 0.47, descrizione: "LAME RICAMBIO per 00170-00172", um: "N.", gm: "OCTP", m_ord: 50, iva: 22},
+        {codice: "00174", prezzo: 0.28, descrizione: "LAME RICAMBIO per 00171", um: "N.", gm: "OCTP", m_ord: 20, iva: 22},
+        {codice: "00187", prezzo: 13.00, descrizione: "BIDONE c/MANIGLIE NERO LT.50", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
+        {codice: "00189", prezzo: 56.00, descrizione: "PATTUMIERA 80LT c/RUOTE+PEDALE", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00190", prezzo: 26.00, descrizione: "PATTUMIERA INOX LT.12 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00191", prezzo: 26.22, descrizione: "PATTUMIERA INOX LT.5 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00191A", prezzo: 10.50, descrizione: "PATTUMIERA INOX PEDALE L3", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
+        {codice: "00191B", prezzo: 64.40, descrizione: "PATTUMIERA METALLO LT.20 PEDAL", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00192", prezzo: 49.71, descrizione: "PATTUMIERA c/RUOTE/PEDALE 80LT", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00193", prezzo: 53.90, descrizione: "PATTUMIERA INOX LT.20 c/PEDALE", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00194", prezzo: 82.60, descrizione: "PATTUMIERA c/RUOTE+PEDALE L100", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00195", prezzo: 300.00, descrizione: "PATTUMIERA A PEDARE INOX LT70", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00195A", prezzo: 70.00, descrizione: "PATTUMIERA PEDALE INOX 20L", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00197", prezzo: 13.00, descrizione: "PORTASCOPINO SARA MOPLEN BIANC", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00198", prezzo: 26.70, descrizione: "PORTASCOPINO METALLO BIANCO", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00199", prezzo: 29.90, descrizione: "TRESPOLOcm.38 C/COPERCH", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00200", prezzo: 7.45, descrizione: "COPRIWATER CARTUCCIA 200PZ", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00201", prezzo: 5.50, descrizione: "MANICO LEGNO VERNICIATO 150CM", um: "N.", gm: "LSTD", m_ord: 1, iva: 22},
+        {codice: "00202", prezzo: 30.60, descrizione: "PORTASCOPINO MURALE INOX BRIL.", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00205", prezzo: 27.30, descrizione: "PORTA ROTOLO DA TERRA METALLO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00206", prezzo: 159.55, descrizione: "CARRELLO \"HAPPY\" VERN.ROSSO", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00207", prezzo: 21.63, descrizione: "PORTAROTOLO MURALE VER.BIANCO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00207A", prezzo: 58.90, descrizione: "PORTAROTOLO INDUST INOX MURALE", um: "N.", gm: "NOTD", m_ord: 1, iva: 22},
+        {codice: "00208", prezzo: 41.76, descrizione: "CAVALETTO PORTAROTOLO C/RUOTE", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00209", prezzo: 10.85, descrizione: "PORTASACCO X ARTICOLO 00208", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00210", prezzo: 3.17, descrizione: "PINZA PER MOP PLASTICA", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
+        {codice: "00211", prezzo: 70.90, descrizione: "STRIZZATORE GRIGIO TEC", um: "N.", gm: "OCTP", m_ord: 4, iva: 22},
+        {codice: "00212", prezzo: 3.95, descrizione: "MOP COTONE 400 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22},
+        {codice: "00213", prezzo: 5.25, descrizione: "MOP COTONE 450 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22}
     ];
     
     let currentArticles = [...fallbackArticles];
     let dbStatus = "offline";
+    
+    // ------------------------------------------------------------------
+    // FUNZIONE PER PULIRE I DATI (rimuove EAN se finito nel prezzo)
+    // ------------------------------------------------------------------
+    function cleanArticleData(article) {
+        const cleaned = { ...article };
+        
+        // Se il prezzo è enorme (es. 8013233000022) => è un EAN, lo scartiamo
+        if (typeof cleaned.prezzo === 'number' && cleaned.prezzo > 10000000) {
+            cleaned.prezzo = 0;
+        }
+        
+        // Se il prezzo è 0 o manca, cerchiamo di estrarlo dalla descrizione (es. "7,3800 SAGGINA")
+        if ((!cleaned.prezzo || cleaned.prezzo === 0) && cleaned.descrizione) {
+            const match = cleaned.descrizione.match(/^(\d+)[,.](\d+)\s/);
+            if (match) {
+                const prezzoTrovato = parseFloat(match[1] + '.' + match[2]);
+                if (!isNaN(prezzoTrovato)) {
+                    cleaned.prezzo = prezzoTrovato;
+                    cleaned.descrizione = cleaned.descrizione.replace(/^\d+[,.]\d+\s/, '');
+                }
+            }
+        }
+        
+        // Assicuriamoci che prezzo sia un numero valido
+        if (typeof cleaned.prezzo !== 'number' || isNaN(cleaned.prezzo)) {
+            cleaned.prezzo = 0;
+        }
+        
+        return cleaned;
+    }
     
     // ------------------------------------------------------------------
     // FUNZIONE PER CARICARE LISTINO DA FIRESTORE
@@ -627,8 +639,9 @@
             
             if (docSnap.exists) {
                 const data = docSnap.data();
-                const articoliDB = data.articoli || [];
+                let articoliDB = data.articoli || [];
                 if (articoliDB.length > 0) {
+                    articoliDB = articoliDB.map(cleanArticleData);
                     console.log(`✅ Listino caricato da Firestore: ${articoliDB.length} articoli`);
                     currentArticles = articoliDB;
                     dbStatus = "online";
@@ -659,9 +672,12 @@
     }
     
     // ------------------------------------------------------------------
-    // FUNZIONI DI VISUALIZZAZIONE (uguali a prima)
+    // FUNZIONI DI VISUALIZZAZIONE (SENZA EAN)
     // ------------------------------------------------------------------
     function formatPrezzoItaliano(prezzo) {
+        if (typeof prezzo !== 'number' || isNaN(prezzo) || prezzo === 0) {
+            return '€ --,--';
+        }
         return '€ ' + prezzo.toFixed(2).replace('.', ',');
     }
     
@@ -694,11 +710,10 @@
                    (art.descrizione && art.descrizione.toLowerCase().includes(searchTerm));
         });
         
-        // DESKTOP TABLE
+        // DESKTOP TABLE (senza colonna EAN)
         const tbody = document.getElementById('tableBody');
         let htmlRows = '';
         for (let item of filtered) {
-            const eanDisplay = (item.ean && item.ean !== "") ? item.ean : "—";
             const codiceEvidenziato = searchTerm ? highlightText(item.codice, searchTerm) : escapeHtml(item.codice);
             const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
             const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
@@ -707,7 +722,6 @@
             htmlRows += `
                 <tr>
                     <td class="codice-cell">${codiceEvidenziato}</td>
-                    <td style="font-family: monospace; font-size:0.75rem;">${escapeHtml(eanDisplay)}</td>
                     <td class="um-prezzo-cell">
                         <span class="um-label">${escapeHtml(umValue)}</span>
                         <span class="prezzo-valore">${prezzoFormattato}</span>
@@ -719,9 +733,9 @@
                 </tr>
             `;
         }
-        tbody.innerHTML = htmlRows || `<tr><td colspan="7" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
+        tbody.innerHTML = htmlRows || `<tr><td colspan="6" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
         
-        // MOBILE LIST
+        // MOBILE LIST (già senza EAN)
         const mobileContainer = document.getElementById('mobileList');
         let mobileHtml = '';
         for (let item of filtered) {
@@ -819,7 +833,6 @@
     document.getElementById('closeModalBtn').addEventListener('click', closeModal);
     document.getElementById('modalCloseFooterBtn').addEventListener('click', closeModal);
     
-    // Chiudi modale cliccando fuori
     window.addEventListener('click', function(e) {
         const modal = document.getElementById('dbModal');
         if (e.target === modal) {
@@ -827,7 +840,6 @@
         }
     });
     
-    // Avvio: carica da Firestore poi renderizza
     (async function init() {
         await caricaListinoDaFirestore();
         renderBothViews();
