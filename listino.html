@@ -446,6 +446,27 @@
                 padding-top: 8px;
                 margin-top: 4px;
             }
+
+            /* ===== BARRA DI SCORRIMENTO PERSONALIZZATA (SOLO MOBILE) ===== */
+            body {
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #2c6e3c #e2e8f0;
+            }
+            body::-webkit-scrollbar {
+                width: 8px;
+            }
+            body::-webkit-scrollbar-track {
+                background: #e2e8f0;
+                border-radius: 10px;
+            }
+            body::-webkit-scrollbar-thumb {
+                background: #2c6e3c;
+                border-radius: 10px;
+            }
+            body::-webkit-scrollbar-thumb:hover {
+                background: #1e4b2e;
+            }
         }
     </style>
 </head>
