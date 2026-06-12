@@ -449,12 +449,12 @@
 
             /* ===== BARRA DI SCORRIMENTO PERSONALIZZATA (SOLO MOBILE) ===== */
             body {
-                overflow-y: auto;
-                scrollbar-width: thin;
+                overflow-y: scroll;  /* Forza la scrollbar sempre visibile */
+                scrollbar-width: thick;
                 scrollbar-color: #2c6e3c #e2e8f0;
             }
             body::-webkit-scrollbar {
-                width: 8px;
+                width: 12px;  /* Più spessa per Android */
             }
             body::-webkit-scrollbar-track {
                 background: #e2e8f0;
@@ -463,6 +463,7 @@
             body::-webkit-scrollbar-thumb {
                 background: #2c6e3c;
                 border-radius: 10px;
+                border: 1px solid #cbd5e1;
             }
             body::-webkit-scrollbar-thumb:hover {
                 background: #1e4b2e;
