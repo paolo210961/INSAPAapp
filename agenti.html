@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.69</title>
+    <title>inSAPA - Agenti vA.5.70</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -59,7 +59,7 @@
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         
-        /* Modal listino per PC e Mobile */
+        /* Modal listino */
         .modal-listino-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-listino-content { background: white; border-radius: 24px; width: 90%; max-width: 1200px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .modal-listino-header { background: #27ae60; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -80,9 +80,11 @@
         .listino-card-prezzo { font-weight: bold; color: #27ae60; font-size: 1rem; }
         .listino-card-um { background: #eef2f5; padding: 2px 6px; border-radius: 4px; }
         .highlight { background-color: #fff3c9; border-radius: 4px; padding: 0 2px; }
-        .info-text { font-size: 0.7rem; color: #666; margin-top: 5px; }
+        .mord-bold { font-weight: bold; }
         
-        /* Stili per il modale ordine */
+        /* Modal ordine */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; text-align: center; }
         .ordine-articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: white; }
         .ordine-articolo-info { margin-bottom: 8px; }
         .ordine-articolo-codice { font-weight: bold; color: #2c3e50; }
@@ -95,21 +97,12 @@
         .ricerca-articolo-ordine input { width: 100%; padding: 10px; font-size: 0.9rem; }
         .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
         .cliente-info-modale p { margin: 5px 0; }
+        .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group-modal button { margin: 0; }
         
-        /* Stili per la stampa PDF */
-        @media print {
-            .modal-overlay, .modal-content, .btn-group-modal, .ricerca-articolo-ordine, .ordine-articolo-qta input, .ordine-articolo-qta label {
-                display: none !important;
-            }
-            .print-area { display: block !important; }
-            .ordine-articolo-item { border: none; border-bottom: 1px solid #ddd; page-break-inside: avoid; }
+        @media (min-width: 769px) {
+            .mobile-only { display: none !important; }
         }
-        
-        .print-area { display: none; padding: 20px; font-family: 'Segoe UI', sans-serif; }
-        .print-area h2 { color: #2c3e50; }
-        .print-area table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .print-area th, .print-area td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .print-area th { background: #f1c40f; }
         
         @media (max-width: 768px) {
             .header-row { flex-direction: column; align-items: stretch; }
@@ -148,6 +141,12 @@
             .lista-articoli-ordine { max-height: 50vh; }
             .modal-listino-content { width: 95%; max-height: 85vh; }
             .listino-cards-container { max-height: 55vh; }
+            /* Nascondi CAR_LIST e ORD+SCA su mobile */
+            .pc-only { display: none !important; }
+        }
+        
+        @media (min-width: 769px) {
+            .pc-only { display: inline-flex !important; }
         }
     </style>
 </head>
@@ -176,19 +175,19 @@
             <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
         <div class="action-group">
-            <!-- TASTO LISTINO VERDE (SINISTRA di ORD+SCA) -->
+            <!-- TASTO LISTINO VERDE (sempre visibile) -->
             <button id="btnListinoVerde" class="btn-listino-verde">
                 📋 LISTINO
             </button>
-            <!-- TASTO ORD+SCA -->
-            <div class="tooltip-wrapper">
+            <!-- TASTO ORD+SCA (solo PC) -->
+            <div class="tooltip-wrapper pc-only">
                 <button id="btnCaricaFile" class="btn-ordine-header">ORD+SCA</button>
-                <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt - Esempio: ORD01.txt e SCA01.txt (accetta anche ORD1.txt e SCA1.txt)</span>
+                <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt</span>
             </div>
-            <!-- TASTO CAR_LIST (DESTRA di ORD+SCA) -->
-            <div class="tooltip-wrapper">
+            <!-- TASTO CAR_LIST (solo PC) -->
+            <div class="tooltip-wrapper pc-only">
                 <button id="btnCaricaListino" class="btn-ordine-header">CAR_LIST</button>
-                <span class="tooltip-text">Carica file listino.txt - verrà salvato e visibile a TUTTI gli agenti</span>
+                <span class="tooltip-text">Carica file listino.txt - visibile a TUTTI gli agenti</span>
             </div>
             <!-- TASTO COMPILA ORDINE (sempre visibile) -->
             <button id="btnCompilaOrdine" class="btn-ordine-header">
@@ -215,7 +214,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.69 - Listino modale con ricerca</div>
+<div class="version">vA.5.70</div>
 
 <script>
 // Firebase configuration
@@ -338,8 +337,7 @@ async function caricaAgenti() {
         if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) { document.getElementById('selectAgente').value = ultimoAgente; selezionaAgente(ultimoAgente); }
     } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
-
-function aggiornaSelectAgenti() {
+    function aggiornaSelectAgenti() {
     let select = document.getElementById('selectAgente');
     let oldValue = select.value;
     select.innerHTML = '<option value="">-- Seleziona agente --</option>';
@@ -400,7 +398,8 @@ async function salvaDatiAgente() {
         return true;
     } catch(e) { alert("Errore salvataggio: "+e.message); return false; }
 }
-    function convertiImportoItaliano(importoStr) {
+
+function convertiImportoItaliano(importoStr) {
     if (!importoStr) return 0;
     let isNegative = importoStr.endsWith('-');
     if (isNegative) importoStr = importoStr.slice(0, -1);
@@ -652,8 +651,7 @@ function buildScadenzeHtml(cliente) {
     html += '</tbody></table></div>';
     return html;
 }
-
-function mostraDettaglioCliente(codice) {
+    function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
     clienteScadenzeCorrente = cliente;
@@ -738,7 +736,8 @@ async function caricaFile(files) {
     alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti\nTotale clienti unici: " + clientiUnici.length);
     return true;
 }
-    async function caricaListinoGlobale(file) {
+
+async function caricaListinoGlobale(file) {
     if (!file) { alert("Seleziona un file listino.txt"); return false; }
     try {
         const text = await file.text();
@@ -821,7 +820,7 @@ function apriModaleListino() {
                     <div class="listino-card-dettagli">
                         <span class="listino-card-prezzo">€ ${parseFloat(art.prezzo).toFixed(2)}</span>
                         <span class="listino-card-um">${escapeHtml(art.um)}</span>
-                        <span class="info-text">GM: ${escapeHtml(art.gm)} | M.Ord: ${art.m_ord}</span>
+                        <span class="info-text">GM: ${escapeHtml(art.gm)} | <strong class="mord-bold">M.Ord: ${art.m_ord}</strong></span>
                     </div>
                 </div>
             `;
@@ -860,13 +859,6 @@ function apriModaleListino() {
     
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
-    });
-    
-    document.addEventListener('keydown', function escHandler(e) {
-        if (e.key === 'Escape') {
-            modal.remove();
-            document.removeEventListener('keydown', escHandler);
-        }
     });
 }
 
