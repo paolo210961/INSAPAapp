@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.00</title>
+    <title>inSAPA - Agenti vA.6.01</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -58,41 +58,33 @@
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         
-        /* Modal ordine e listino con supporto minimizzazione */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; text-align: center; position: relative; }
-        .modal-content .minimize-btn { position: absolute; top: 15px; right: 50px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; width: auto; margin: 0; padding: 0 8px; }
-        .modal-content .close-modal-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; width: auto; margin: 0; padding: 0 8px; }
-        
-        /* Barretta minimizzata in fondo */
-        .minimized-bar-container { position: fixed; bottom: 0; left: 0; right: 0; z-index: 3000; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; }
-        .minimized-bar { background: #2c3e50; color: white; border-radius: 40px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        .minimized-bar:hover { background: #27ae60; transform: scale(1.02); }
-        .minimized-bar .bar-title { font-size: 0.85rem; font-weight: bold; }
-        .minimized-bar .bar-restore { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; width: auto; margin: 0; padding: 0 4px; }
-        .minimized-bar .bar-restore:hover { color: #f1c40f; transform: none; }
-        
-        /* Modale listino */
+        /* Modal listino - stile card come vA.5.71 */
         .modal-listino-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-listino-content { background: white; border-radius: 24px; width: 90%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .modal-listino-header { background: #27ae60; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .modal-listino-header h3 { margin: 0; }
-        .modal-listino-header .minimize-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 8px; }
-        .modal-listino-header .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 8px; }
+        .modal-listino-header h3 { margin: 0; flex: 1; text-align: center; }
+        .modal-listino-header .minimize-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 12px 0 0; }
+        .modal-listino-header .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 0 0 12px; }
         .modal-listino-body { padding: 20px; overflow-y: auto; flex: 1; }
         .modal-listino-search { margin-bottom: 20px; }
         .modal-listino-search input { width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid #ddd; border-radius: 30px; }
         .listino-stats { background: #eef2f5; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; display: inline-block; }
         .listino-cards-container { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; }
-        .listino-card { background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .listino-card { background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
+        .listino-card:hover { background: #f9f9f9; transform: translateX(3px); }
         .listino-card-codice { font-weight: bold; font-family: monospace; font-size: 0.85rem; background: #f0f0f0; display: inline-block; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
         .listino-card-descrizione { font-size: 0.9rem; font-weight: 500; margin: 5px 0; color: #1a2c3e; }
         .listino-card-dettagli { font-size: 0.75rem; color: #666; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
         .listino-card-prezzo { font-weight: bold; color: #27ae60; font-size: 1rem; }
+        .listino-card-um { background: #eef2f5; padding: 2px 6px; border-radius: 4px; }
         .mord-bold { font-weight: bold; }
         .highlight { background-color: #fff3c9; border-radius: 4px; padding: 0 2px; }
         
-        /* Modale ordine articoli */
+        /* Modal ordine */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; text-align: center; position: relative; }
+        .modal-content .minimize-btn { position: absolute; top: 15px; left: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; width: auto; margin: 0; padding: 0 8px; }
+        .modal-content .close-modal-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; width: auto; margin: 0; padding: 0 8px; }
         .ordine-articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: white; }
         .ordine-articolo-info { margin-bottom: 8px; }
         .ordine-articolo-codice { font-weight: bold; color: #2c3e50; }
@@ -107,6 +99,14 @@
         .cliente-info-modale p { margin: 5px 0; }
         .btn-group-modal { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group-modal button { margin: 0; }
+        
+        /* Barretta minimizzata in fondo */
+        .minimized-bar-container { position: fixed; bottom: 0; left: 0; right: 0; z-index: 3000; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; }
+        .minimized-bar { background: #2c3e50; color: white; border-radius: 40px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .minimized-bar:hover { background: #27ae60; transform: scale(1.02); }
+        .minimized-bar .bar-title { font-size: 0.85rem; font-weight: bold; }
+        .minimized-bar .bar-restore { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; width: auto; margin: 0; padding: 0 4px; }
+        .minimized-bar .bar-restore:hover { color: #f1c40f; transform: none; }
         
         @media (min-width: 769px) {
             .pc-only { display: inline-flex !important; }
@@ -212,11 +212,10 @@
     </div>
 </div>
 
-<!-- Contenitore per barrette minimizzate in fondo pagina -->
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.6.00 - Modali minimizzabili</div>
+<div class="version">vA.6.01 - Card listino, minimizzazione fix</div>
 
 <script>
 // Firebase configuration
@@ -244,31 +243,19 @@ let listinoGlobale = [];
 let listinoCaricato = false;
 
 // Gestione modali minimizzabili
-let modaliAperti = []; // traccia { id, tipo, modalElement, modalData }
+let modaliAperti = [];
 let nextModalId = 1;
 
-function aggiungiBarrettaMinimizzata(id, titolo, tipo) {
+function aggiungiBarrettaMinimizzata(id, titolo) {
     const container = document.getElementById('minimizedBarContainer');
     if (!container) return;
-    
-    // Evita duplicati
     if (document.getElementById(`minimized-bar-${id}`)) return;
-    
     const bar = document.createElement('div');
     bar.className = 'minimized-bar';
     bar.id = `minimized-bar-${id}`;
-    bar.innerHTML = `
-        <span class="bar-title">${titolo}</span>
-        <button class="bar-restore" data-id="${id}">↑</button>
-    `;
-    bar.onclick = (e) => {
-        if (e.target.classList.contains('bar-restore')) return;
-        ripristinaModale(id);
-    };
-    bar.querySelector('.bar-restore').onclick = (e) => {
-        e.stopPropagation();
-        ripristinaModale(id);
-    };
+    bar.innerHTML = `<span class="bar-title">${titolo}</span><button class="bar-restore" data-id="${id}">↑</button>`;
+    bar.onclick = (e) => { if (!e.target.classList.contains('bar-restore')) ripristinaModale(id); };
+    bar.querySelector('.bar-restore').onclick = (e) => { e.stopPropagation(); ripristinaModale(id); };
     container.appendChild(bar);
 }
 
@@ -279,33 +266,17 @@ function rimuoviBarrettaMinimizzata(id) {
 
 function minimizzaModale(id) {
     const modale = modaliAperti.find(m => m.id === id);
-    if (!modale) return;
-    
-    // Nascondi il modale
-    if (modale.modalElement) {
-        modale.modalElement.style.display = 'none';
-    }
-    
-    // Aggiungi barretta
-    let titolo = "";
-    if (modale.tipo === 'ordine') titolo = "📝 Ordine in corso";
-    else if (modale.tipo === 'listino') titolo = "📋 Listino";
-    else titolo = "Modal";
-    
-    aggiungiBarrettaMinimizzata(id, titolo, modale.tipo);
+    if (!modale || modale.minimizzato) return;
+    if (modale.modalElement) modale.modalElement.style.display = 'none';
+    let titolo = modale.tipo === 'ordine' ? '📝 Ordine in corso' : '📋 Listino';
+    aggiungiBarrettaMinimizzata(id, titolo);
     modale.minimizzato = true;
 }
 
 function ripristinaModale(id) {
     const modale = modaliAperti.find(m => m.id === id);
     if (!modale) return;
-    
-    // Mostra il modale
-    if (modale.modalElement) {
-        modale.modalElement.style.display = 'flex';
-    }
-    
-    // Rimuovi barretta
+    if (modale.modalElement) modale.modalElement.style.display = 'flex';
     rimuoviBarrettaMinimizzata(id);
     modale.minimizzato = false;
 }
@@ -313,35 +284,16 @@ function ripristinaModale(id) {
 function chiudiModale(id) {
     const modale = modaliAperti.find(m => m.id === id);
     if (!modale) return;
-    
-    // Rimuovi barretta se presente
     rimuoviBarrettaMinimizzata(id);
-    
-    // Rimuovi il modale dal DOM
-    if (modale.modalElement && modale.modalElement.parentNode) {
-        modale.modalElement.parentNode.removeChild(modale.modalElement);
-    }
-    
-    // Rimuovi dal registro
+    if (modale.modalElement && modale.modalElement.parentNode) modale.modalElement.remove();
     const index = modaliAperti.findIndex(m => m.id === id);
     if (index !== -1) modaliAperti.splice(index, 1);
 }
-    function escapeHtml(str) {
-    if (!str) return "";
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
 
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
+function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function highlightText(text, searchTerm) {
-    if (!searchTerm || searchTerm.trim() === "") return escapeHtml(text);
+    if (!searchTerm || !searchTerm.trim()) return escapeHtml(text);
     const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
     return escapeHtml(text).replace(regex, `<span class="highlight">$1</span>`);
 }
@@ -351,13 +303,12 @@ async function caricaLinkDaFile() {
         const response = await fetch('link.html');
         if (response.ok) {
             const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('<'));
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
         }
     } catch(e) {}
 }
-
 function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("Link principale"); } else showToast("Link principale non configurato", true); }
 function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("Link secondario"); } else showToast("Link secondario non configurato", true); }
 
@@ -366,80 +317,60 @@ function caricaLogoSaved() {
     const logoSpan = document.getElementById('logoSpan');
     fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
-
-const logoDivElemAgenti = document.getElementById('logoRettangolo');
-let lastTapAgenti = 0;
-logoDivElemAgenti.addEventListener('click', (e) => {
-    const now = new Date().getTime();
-    const tapLength = now - lastTapAgenti;
-    if (tapLength < 300 && tapLength > 0) { e.stopPropagation(); apriLinkSecondario(); lastTapAgenti = 0; }
-    else { lastTapAgenti = now; setTimeout(() => { if (lastTapAgenti !== 0 && (new Date().getTime() - lastTapAgenti) > 300) { apriLinkPrincipale(); lastTapAgenti = 0; } }, 300); }
+const logoDiv = document.getElementById('logoRettangolo');
+let lastTap = 0;
+logoDiv.addEventListener('click', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300) { e.stopPropagation(); apriLinkSecondario(); lastTap = 0; }
+    else { lastTap = now; setTimeout(() => { if (lastTap && Date.now() - lastTap > 300) { apriLinkPrincipale(); lastTap = 0; } }, 300); }
 });
 caricaLogoSaved();
 
-function showToast(message, isError = false) {
+function showToast(msg, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
     toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
-    toast.innerText = message;
+    toast.innerText = msg;
     document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+    setTimeout(() => toast.remove(), 3000);
 }
-
 function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
 function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
 function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
-
-function normalizzaCodiceAgente(codice) { return codice.toString(); }
+function normalizzaCodiceAgente(c) { return c.toString(); }
 
 async function pulisciVecchiDocumentiMonolitici(codice) {
     try {
-        const vecchioOrd = await db.collection('agenti_dati').doc('ord_'+codice).get();
-        if (vecchioOrd.exists && vecchioOrd.data().dati) {
-            await db.collection('agenti_dati').doc('ord_'+codice).delete();
-            console.log("Vecchio ORD eliminato", codice);
-        }
-        const vecchioSca = await db.collection('agenti_dati').doc('sca_'+codice).get();
-        if (vecchioSca.exists && vecchioSca.data().dati) {
-            await db.collection('agenti_dati').doc('sca_'+codice).delete();
-            console.log("Vecchio SCA eliminato", codice);
-        }
-    } catch(e) { console.log("Errore pulizia:", e.message); }
+        const ordOld = await db.collection('agenti_dati').doc('ord_'+codice).get();
+        if (ordOld.exists && ordOld.data().dati) await db.collection('agenti_dati').doc('ord_'+codice).delete();
+        const scaOld = await db.collection('agenti_dati').doc('sca_'+codice).get();
+        if (scaOld.exists && scaOld.data().dati) await db.collection('agenti_dati').doc('sca_'+codice).delete();
+    } catch(e) {}
 }
 
 async function caricaAgenti() {
     try {
-        const snapshot = await db.collection('agenti_lista').get();
+        const snap = await db.collection('agenti_lista').get();
         agentiLista = [];
-        snapshot.forEach(doc => { let data = doc.data(); data.codice = normalizzaCodiceAgente(data.codice); agentiLista.push(data); });
+        snap.forEach(doc => { let d = doc.data(); d.codice = normalizzaCodiceAgente(d.codice); agentiLista.push(d); });
         agentiLista.sort((a,b) => a.codice.localeCompare(b.codice));
-        aggiornaSelectAgenti();
-        const ultimoAgente = localStorage.getItem('ultimoAgenteSelezionato');
-        if (ultimoAgente && agentiLista.find(a => a.codice === ultimoAgente)) { document.getElementById('selectAgente').value = ultimoAgente; selezionaAgente(ultimoAgente); }
+        const select = document.getElementById('selectAgente');
+        select.innerHTML = '<option value="">-- Seleziona agente --</option>';
+        for (let a of agentiLista) { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = a.codice+" - "+a.nome; select.appendChild(opt); }
+        const last = localStorage.getItem('ultimoAgenteSelezionato');
+        if (last && agentiLista.find(a => a.codice === last)) { select.value = last; selezionaAgente(last); }
     } catch(e) { alert("Errore caricamento agenti: "+e.message); }
-}
-
-function aggiornaSelectAgenti() {
-    let select = document.getElementById('selectAgente');
-    let oldValue = select.value;
-    select.innerHTML = '<option value="">-- Seleziona agente --</option>';
-    for (let a of agentiLista) { let opt = document.createElement('option'); opt.value = a.codice; opt.textContent = a.codice+" - "+a.nome; select.appendChild(opt); }
-    if (oldValue && agentiLista.find(a => a.codice === oldValue)) { select.value = oldValue; selezionaAgente(oldValue); }
 }
 
 async function caricaDatiAgente(codice) {
     try {
-        const ordSnapshot = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
-        datiOrd = [];
-        ordSnapshot.forEach(doc => { datiOrd.push(doc.data()); });
-        
-        const scaSnapshot = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
-        datiSca = [];
-        scaSnapshot.forEach(doc => { datiSca.push(doc.data()); });
-        
+        const ordSnap = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
+        datiOrd = []; ordSnap.forEach(doc => datiOrd.push(doc.data()));
+        const scaSnap = await db.collection('agenti_dati').doc('sca_'+codice).collection('clienti').get();
+        datiSca = []; scaSnap.forEach(doc => datiSca.push(doc.data()));
         document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
         return true;
-    } catch(e) { console.error("Errore caricamento:", e); return false; }
+    } catch(e) { return false; }
 }
 
 async function selezionaAgente(codice) {
@@ -459,19 +390,13 @@ async function salvaDatiAgente() {
     try {
         const ordRef = db.collection('agenti_dati').doc('ord_' + agenteCorrente.codice).collection('clienti');
         const batch = db.batch();
-        const vecchiOrd = await ordRef.get();
-        vecchiOrd.forEach(doc => batch.delete(doc.ref));
-        for (let cliente of datiOrd) {
-            const docRef = ordRef.doc(cliente.codice.toString());
-            batch.set(docRef, { codice: cliente.codice, ragione: cliente.ragione, articoli: cliente.articoli });
-        }
+        const oldOrd = await ordRef.get();
+        oldOrd.forEach(doc => batch.delete(doc.ref));
+        for (let cl of datiOrd) { batch.set(ordRef.doc(cl.codice.toString()), { codice: cl.codice, ragione: cl.ragione, articoli: cl.articoli }); }
         const scaRef = db.collection('agenti_dati').doc('sca_' + agenteCorrente.codice).collection('clienti');
-        const vecchiSca = await scaRef.get();
-        vecchiSca.forEach(doc => batch.delete(doc.ref));
-        for (let cliente of datiSca) {
-            const docRef = scaRef.doc(cliente.codice.toString());
-            batch.set(docRef, { codice: cliente.codice, ragione: cliente.ragione, scadenze: cliente.scadenze });
-        }
+        const oldSca = await scaRef.get();
+        oldSca.forEach(doc => batch.delete(doc.ref));
+        for (let cl of datiSca) { batch.set(scaRef.doc(cl.codice.toString()), { codice: cl.codice, ragione: cl.ragione, scadenze: cl.scadenze }); }
         await batch.commit();
         await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
         document.getElementById('fileStatusInline').innerHTML = "OK ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
@@ -481,48 +406,42 @@ async function salvaDatiAgente() {
     } catch(e) { alert("Errore salvataggio: "+e.message); return false; }
 }
 
-function convertiImportoItaliano(importoStr) {
-    if (!importoStr) return 0;
-    let isNegative = importoStr.endsWith('-');
-    if (isNegative) importoStr = importoStr.slice(0, -1);
-    let importoPulito = importoStr.replace(/\./g, '').replace(',', '.');
-    let importo = parseFloat(importoPulito);
-    if (isNegative && !isNaN(importo)) importo = -importo;
-    return isNaN(importo) ? 0 : importo;
+function convertiImportoItaliano(s) {
+    if (!s) return 0;
+    let neg = s.endsWith('-');
+    if (neg) s = s.slice(0,-1);
+    let num = parseFloat(s.replace(/\./g,'').replace(',','.'));
+    if (neg && !isNaN(num)) num = -num;
+    return isNaN(num) ? 0 : num;
 }
 
 function parseORD(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
-    let currentCliente = null;
+    let curr = null;
     const reCliente = /^Cliente\s+:\s+(\d+)\s+(.+?)(?:\s{2,}|$)/;
     const reCoppia = /(\d+(?:,\d+)?)\s+(\d{2}\/\d{2}\/\d{4})/g;
     for (let line of lines) {
         line = line.trimEnd();
-        if (line === "") continue;
-        let mCliente = line.match(reCliente);
-        if (mCliente) { 
-            currentCliente = { codice: mCliente[1].toString(), ragione: mCliente[2].trim(), articoli: [] }; 
-            clienti.set(currentCliente.codice, currentCliente); 
-            continue; 
-        }
-        if (!currentCliente) continue;
+        if (!line) continue;
+        let m = line.match(reCliente);
+        if (m) { curr = { codice: m[1].toString(), ragione: m[2].trim(), articoli: [] }; clienti.set(curr.codice, curr); continue; }
+        if (!curr) continue;
         if (line.startsWith("Destinaz.") || line.startsWith("Telefoni") || line.includes("INESISTENTE") || line.includes("ELIMINATO")) continue;
         let coppie = [], match;
-        while ((match = reCoppia.exec(line)) !== null) { let qta = parseFloat(match[1].replace(',', '.')); let data = match[2]; coppie.push({ qta, data, start: match.index, end: match.index + match[0].length }); }
-        if (coppie.length === 0) continue;
-        let firstCoppiaStart = coppie[0].start;
-        let descrizioneRaw = line.substring(0, firstCoppiaStart).trim();
-        let tokens = descrizioneRaw.split(/\s+/);
-        let codice = tokens[0].toString();
+        while ((match = reCoppia.exec(line)) !== null) { let qta = parseFloat(match[1].replace(',','.')); let data = match[2]; coppie.push({ qta, data, start: match.index, end: match.index+match[0].length }); }
+        if (!coppie.length) continue;
+        let first = coppie[0].start;
+        let descRaw = line.substring(0, first).trim();
+        let tokens = descRaw.split(/\s+/);
+        let codice = tokens[0];
         let descrizione = tokens.slice(1).join(" ");
-        let lastCoppiaEnd = coppie[coppie.length-1].end;
-        let afterCoppie = line.substring(lastCoppiaEnd).trim();
-        let numTokens = afterCoppie.split(/\s+/);
+        let lastEnd = coppie[coppie.length-1].end;
+        let after = line.substring(lastEnd).trim().split(/\s+/);
         let prezzo = 0, sconto1 = 0;
-        if (numTokens.length >= 2) { prezzo = parseFloat(numTokens[0].replace(',', '.')); sconto1 = parseFloat(numTokens[1].replace(',', '.')); }
+        if (after.length >= 2) { prezzo = parseFloat(after[0].replace(',','.')); sconto1 = parseFloat(after[1].replace(',','.')); }
         coppie.sort((a,b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
-        currentCliente.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
+        curr.articoli.push({ codice, descrizione, coppie, prezzo, sconto1 });
     }
     return Array.from(clienti.values());
 }
@@ -530,131 +449,91 @@ function parseORD(text) {
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
-    let currentCliente = null;
+    let curr = null;
     const reCliente = /^CLIENTE:\s+(\d+)\s+(.+?)\s+Saldo\s+[\d\.,]+-?/;
-    for (let lineOriginale of lines) {
-        let line = lineOriginale.replace(/\uFEFF/g, '').replace(/\f/g, ' ').replace(/\t/g, ' ').replace(/\*/g, ' ').trim();
-        if (!line) continue;
-        if (/^=+/.test(line)) continue;
-        if (/^-+/.test(line)) continue;
-        if (line.startsWith("Scadenza")) continue;
-        if (line.startsWith("VOSTRO DARE")) continue;
-        if (line.startsWith("TOTALE") || line.startsWith("TOT.")) continue;
-        if (line.startsWith("AGENTE:")) continue;
-        if (line.startsWith("TUTTE")) continue;
-        if (line.startsWith("inSAPA")) continue;
-        if (line.startsWith("STAMPA")) continue;
-        let mCliente = line.match(reCliente);
-        if (mCliente) {
-            let codice = mCliente[1].toString();
-            let ragione = mCliente[2].trim();
-            currentCliente = { codice, ragione, scadenze: [] };
-            clienti.set(codice, currentCliente);
-            continue;
-        }
-        if (currentCliente) {
-            line = line.replace(/\s+/g, ' ').trim();
-            let parts = line.split(' ');
-            let euroIndex = parts.findIndex(p => p.toLowerCase() === "euro");
-            if (euroIndex === -1) continue;
-            let scadenza = parts[0] || '';
+    for (let orig of lines) {
+        let line = orig.replace(/\uFEFF/g,'').replace(/\f/g,' ').replace(/\t/g,' ').replace(/\*/g,' ').trim();
+        if (!line || /^=+/.test(line) || /^-+/.test(line) || line.startsWith("Scadenza") || line.startsWith("VOSTRO DARE") || line.startsWith("TOTALE") || line.startsWith("TOT.") || line.startsWith("AGENTE:") || line.startsWith("TUTTE") || line.startsWith("inSAPA") || line.startsWith("STAMPA")) continue;
+        let m = line.match(reCliente);
+        if (m) { curr = { codice: m[1].toString(), ragione: m[2].trim(), scadenze: [] }; clienti.set(curr.codice, curr); continue; }
+        if (curr) {
+            let parts = line.replace(/\s+/g,' ').split(' ');
+            let euroIdx = parts.findIndex(p => p.toLowerCase() === "euro");
+            if (euroIdx === -1) continue;
+            let scadenza = parts[0];
             if (!/^\d{2}\/\d{2}\/\d{4}$/.test(scadenza)) continue;
-            let importoStr = parts[euroIndex + 1] || '0';
-            let importo = convertiImportoItaliano(importoStr);
-            let dataDoc = parts[euroIndex - 1] || '';
-            let numDoc = parts[euroIndex - 2] || '';
-            let descrizione = parts.slice(1, euroIndex - 2).join(" ");
-            currentCliente.scadenze.push({ scadenza, descrizione, numDoc, dataDoc, importo });
+            let importo = convertiImportoItaliano(parts[euroIdx+1] || '0');
+            let dataDoc = parts[euroIdx-1] || '';
+            let numDoc = parts[euroIdx-2] || '';
+            let descrizione = parts.slice(1, euroIdx-2).join(" ");
+            curr.scadenze.push({ scadenza, descrizione, numDoc, dataDoc, importo });
         }
     }
     return Array.from(clienti.values());
 }
 
 function inviaScadenzeWhatsApp(cliente) {
-    if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
-    let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
-    let totale = 0;
-    for (let s of cliente.scadenze) {
-        messaggio += "Scadenza: " + s.scadenza + "\nData Doc: " + s.dataDoc + "\nN.Documento: " + s.numDoc + "\nImporto: EUR " + s.importo.toFixed(2) + "\n---\n";
-        totale += s.importo;
-    }
-    messaggio += "\nTOTALE: EUR " + totale.toFixed(2);
-    window.open("https://wa.me/?text=" + encodeURIComponent(messaggio), '_blank');
+    if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza"); return; }
+    let msg = "SCADENZE CLIENTE\n"+cliente.codice+" - "+cliente.ragione+"\n\n";
+    let tot = 0;
+    for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
+    msg += "\nTOTALE: EUR "+tot.toFixed(2);
+    window.open("https://wa.me/?text="+encodeURIComponent(msg), '_blank');
 }
+function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
-function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
-
-function generaHtmlOrdine(cliente, articoliConQta) {
-    let html = '<div style="font-family: Segoe UI, Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;"><h2 style="color: #2c3e50; border-bottom: 2px solid #f1c40f; padding-bottom: 10px;">📝 ORDINE DA CLIENTE</h2><div style="background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><p><strong>Codice Cliente:</strong> ' + cliente.codice + '</p><p><strong>Ragione Sociale:</strong> ' + cliente.ragione + '</p><p><strong>Data Ordine:</strong> ' + new Date().toLocaleDateString('it-IT') + '</p></div><table style="width: 100%; border-collapse: collapse; margin-top: 15px;"><thead><tr style="background: #f1c40f;"><th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Codice</th><th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Descrizione</th><th style="border: 1px solid #ddd; padding: 10px; text-align: center;">Qtà</th></tr></thead><tbody>';
-    for (let item of articoliConQta) {
-        html += '<tr><td style="border: 1px solid #ddd; padding: 8px;">' + item.codice + '</td><td style="border: 1px solid #ddd; padding: 8px;">' + item.descrizione + '</td><td style="border: 1px solid #ddd; padding: 8px; text-align: center;">' + item.quantita + ' pz</td></tr>';
-    }
-    html += '</tbody></table><div style="margin-top: 20px; text-align: center; font-size: 12px; color: #999;">Documento generato da inSAPA Agenti il ' + new Date().toLocaleString('it-IT') + '</div></div>';
+function generaHtmlOrdine(cliente, articoli) {
+    let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
+    for (let a of articoli) html += '<tr><td>'+a.codice+'</td><td>'+a.descrizione+'</td><td>'+a.quantita+' pz</td></tr>';
+    html += '</tbody></table><div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
     return html;
 }
-
-function stampaPDF(cliente, articoliConQta) {
-    const htmlContent = generaHtmlOrdine(cliente, articoliConQta);
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write('<!DOCTYPE html><html><head><title>Ordine_' + cliente.codice + '_' + new Date().toLocaleDateString('it-IT').replace(/\//g, '-') + '</title><meta charset="UTF-8"><style>*{margin:0;padding:0;}body{font-family:"Segoe UI",sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>' + htmlContent + '<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
-    printWindow.document.close();
+function stampaPDF(cliente, articoli) {
+    const w = window.open('', '_blank');
+    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente,articoli)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
+    w.document.close();
+}
+function inviaEmailOrdine(cliente, articoli) {
+    let subj = "ORDINE da "+cliente.codice+" - "+cliente.ragione;
+    let body = "ORDINE CLIENTE: "+cliente.codice+" - "+cliente.ragione+"\n\nARTICOLI ORDINATI:\n----------------------------------------\n";
+    for (let a of articoli) body += "📦 "+a.codice+" - "+a.descrizione+"\n   Quantità: "+a.quantita+" pz\n\n";
+    body += "----------------------------------------\nOrdine generato da inSAPA Agenti il "+new Date().toLocaleDateString('it-IT');
+    window.location.href = "mailto:?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
 }
 
-function inviaEmailOrdine(cliente, articoliConQta) {
-    let soggetto = "ORDINE da " + cliente.codice + " - " + cliente.ragione;
-    let corpo = "ORDINE CLIENTE: " + cliente.codice + " - " + cliente.ragione + "\n\nARTICOLI ORDINATI:\n----------------------------------------\n";
-    for (let item of articoliConQta) {
-        corpo += "📦 " + item.codice + " - " + item.descrizione + "\n   Quantità: " + item.quantita + " pz\n\n";
-    }
-    corpo += "----------------------------------------\nOrdine generato da inSAPA Agenti il " + new Date().toLocaleDateString('it-IT');
-    window.location.href = "mailto:?subject=" + encodeURIComponent(soggetto) + "&body=" + encodeURIComponent(corpo);
+function calcolaUltimaDataArticolo(art) {
+    if (!art.coppie || !art.coppie.length) return null;
+    let dates = art.coppie.map(c => ({ data: c.data, ts: new Date(c.data.split('/').reverse().join('-')).getTime() }));
+    dates.sort((a,b) => b.ts - a.ts);
+    return dates[0];
 }
 
-function calcolaUltimaDataArticolo(articolo) {
-    if (!articolo.coppie || articolo.coppie.length === 0) return null;
-    let dateObj = articolo.coppie.map(c => ({ data: c.data, timestamp: new Date(c.data.split('/').reverse().join('-')).getTime() }));
-    dateObj.sort((a,b) => b.timestamp - a.timestamp);
-    return dateObj[0];
+function setupQuantitaInput(inp, codice, qMap) {
+    inp.value = '';
+    inp.placeholder = '0';
+    inp.onfocus = () => { if (inp.value === '0') inp.value = ''; };
+    inp.onblur = () => { let v = inp.value.trim(); if (v === '' || v === '0') { inp.value = ''; qMap[codice] = 0; } else { let n = parseInt(v,10); if (isNaN(n) || n<0) n=0; inp.value = n; qMap[codice] = n; } };
+    inp.oninput = () => { let v = inp.value.trim(); if (v === '') qMap[codice] = 0; else { let n = parseInt(v,10); if (!isNaN(n) && n>=0) qMap[codice] = n; } };
 }
 
-function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
-    inputElement.value = '';
-    inputElement.placeholder = '0';
-    inputElement.addEventListener('focus', function() { if (this.value === '0') this.value = ''; });
-    inputElement.addEventListener('blur', function() {
-        let val = this.value.trim();
-        if (val === '' || val === '0') { this.value = ''; quantitaInputs[articoloCodice] = 0; }
-        else { let num = parseInt(val, 10); if (isNaN(num) || num < 0) num = 0; this.value = num; quantitaInputs[articoloCodice] = num; }
+function apriModaleOrdine(cliente) {
+    if (!cliente) { alert("Seleziona un cliente!"); return; }
+    if (!cliente.ordini || !cliente.ordini.length) { alert("Nessun articolo disponibile per questo cliente."); return; }
+    let articoli = [...cliente.ordini];
+    articoli.sort((a,b) => {
+        let da = calcolaUltimaDataArticolo(a), db = calcolaUltimaDataArticolo(b);
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        return db.ts - da.ts;
     });
-    inputElement.addEventListener('input', function() {
-        let val = this.value.trim();
-        if (val === '') { quantitaInputs[articoloCodice] = 0; }
-        else { let num = parseInt(val, 10); if (!isNaN(num) && num >= 0) { quantitaInputs[articoloCodice] = num; } }
-    });
-}
-    function apriModaleOrdine(cliente) {
-    if (!cliente) { alert("Seleziona un cliente prima di compilare l'ordine!"); return; }
-    if (!cliente.ordini || cliente.ordini.length === 0) { alert("Questo cliente non ha articoli disponibili (nessun dato ORD caricato)!"); return; }
-    
-    let articoliOrdinati = [...cliente.ordini];
-    articoliOrdinati.sort((a,b) => {
-        let dataA = calcolaUltimaDataArticolo(a);
-        let dataB = calcolaUltimaDataArticolo(b);
-        if (!dataA && !dataB) return 0;
-        if (!dataA) return 1;
-        if (!dataB) return -1;
-        return dataB.timestamp - dataA.timestamp;
-    });
-    
-    const modalId = nextModalId++;
-    const isDesktopDevice = isDesktop();
-    const pulsanteTesto = isDesktopDevice ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.style.display = 'flex';
-    
-    modal.innerHTML = `
+    const id = nextModalId++;
+    const isDesktop = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
+    const btnText = isDesktop ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal-overlay';
+    modalDiv.style.display = 'flex';
+    modalDiv.innerHTML = `
         <div class="modal-content">
             <button class="minimize-btn" title="Minimizza">−</button>
             <button class="close-modal-btn" title="Chiudi">✕</button>
@@ -665,431 +544,306 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
                 <p><strong>Scadenze:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0} in sospeso</p>
             </div>
             <div class="ricerca-articolo-ordine">
-                <input type="text" id="ricercaArticoloOrdine_${modalId}" placeholder="🔍 Cerca articolo per codice o descrizione...">
+                <input type="text" id="ricercaOrd_${id}" placeholder="🔍 Cerca articolo...">
             </div>
-            <div class="lista-articoli-ordine" id="listaArticoliOrdine_${modalId}"></div>
+            <div class="lista-articoli-ordine" id="listaOrd_${id}"></div>
             <div class="btn-group-modal">
-                <button id="btnConfermaOrdine_${modalId}" class="btn-success">${pulsanteTesto}</button>
-                <button id="btnApriListino_${modalId}" class="btn-primary">📋 APRI LISTINO</button>
+                <button id="btnConferma_${id}" class="btn-success">${btnText}</button>
+                <button id="btnApriListino_${id}" class="btn-primary">📋 APRI LISTINO</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalDiv);
+    let qMap = {};
+    modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap });
+
+    function renderLista(search = '') {
+        const container = document.getElementById(`listaOrd_${id}`);
+        let filtered = articoli;
+        if (search) { const low = search.toLowerCase(); filtered = articoli.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low)); }
+        if (!filtered.length) { container.innerHTML = '<p style="text-align:center;color:#999;">Nessun articolo</p>'; return; }
+        let html = '';
+        for (let a of filtered) {
+            const ultimo = calcolaUltimaDataArticolo(a);
+            const ultimoTesto = ultimo ? "Ultimo acquisto: "+ultimo.data : "Mai acquistato";
+            html += `<div class="ordine-articolo-item"><div class="ordine-articolo-info"><div class="ordine-articolo-codice">${escapeHtml(a.codice)}</div><div class="ordine-articolo-desc">${escapeHtml(a.descrizione)}</div><div class="ordine-articolo-desc" style="font-size:0.7rem;color:#888;">${ultimoTesto}</div></div><div class="ordine-articolo-qta"><label>Quantità:</label><input type="number" id="qta_${id}_${a.codice.replace(/[^a-zA-Z0-9]/g,'_')}" min="0" step="1" style="text-align:center;"></div></div>`;
+        }
+        container.innerHTML = html;
+        for (let a of filtered) {
+            const inp = document.getElementById(`qta_${id}_${a.codice.replace(/[^a-zA-Z0-9]/g,'_')}`);
+            if (inp) { if (qMap[a.codice] === undefined) qMap[a.codice] = 0; setupQuantitaInput(inp, a.codice, qMap); }
+        }
+    }
+    renderLista();
+    document.getElementById(`ricercaOrd_${id}`).addEventListener('input', e => renderLista(e.target.value));
+    document.getElementById(`btnConferma_${id}`).onclick = () => {
+        let selected = [];
+        for (let a of articoli) { let q = qMap[a.codice] || 0; if (q > 0) selected.push({ codice: a.codice, descrizione: a.descrizione, quantita: q }); }
+        if (!selected.length) { alert("Inserisci almeno una quantità > 0"); return; }
+        if (isDesktop) stampaPDF(cliente, selected);
+        else inviaEmailOrdine(cliente, selected);
+        chiudiModale(id);
+    };
+    document.getElementById(`btnApriListino_${id}`).onclick = () => { apriModaleListino(); };
+    modalDiv.querySelector('.minimize-btn').onclick = () => minimizzaModale(id);
+    modalDiv.querySelector('.close-modal-btn').onclick = () => chiudiModale(id);
+}
+
+function apriModaleListino() {
+    if (!listinoGlobale || !listinoGlobale.length) { alert("Nessun listino disponibile. Usa CAR_LIST per caricarlo."); return; }
+    const id = nextModalId++;
+    let searchTerm = '';
+    const modal = document.createElement('div');
+    modal.className = 'modal-listino-overlay';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+        <div class="modal-listino-content">
+            <div class="modal-listino-header">
+                <button class="minimize-btn" title="Minimizza">−</button>
+                <h3>📋 LISTINO PREZZI</h3>
+                <button class="close-btn" title="Chiudi">✕</button>
+            </div>
+            <div class="modal-listino-body">
+                <div class="modal-listino-search">
+                    <input type="text" id="searchListino_${id}" placeholder="🔍 Cerca per CODICE o DESCRIZIONE...">
+                </div>
+                <div id="listinoStats_${id}" class="listino-stats"></div>
+                <div id="listinoCards_${id}" class="listino-cards-container"></div>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
-    
-    let quantitaInputs = {};
-    
-    // Registra il modale
-    modaliAperti.push({
-        id: modalId,
-        tipo: 'ordine',
-        modalElement: modal,
-        minimizzato: false,
-        cliente: cliente,
-        articoliOrdinati: articoliOrdinati,
-        quantitaInputs: quantitaInputs
-    });
-    
-    function renderListaArticoli(searchText = '') {
-        const container = document.getElementById(`listaArticoliOrdine_${modalId}`);
-        let filtrati = articoliOrdinati;
-        if (searchText) {
-            const lowerSearch = searchText.toLowerCase();
-            filtrati = articoliOrdinati.filter(art => 
-                art.codice.toLowerCase().includes(lowerSearch) || 
-                art.descrizione.toLowerCase().includes(lowerSearch)
-            );
+    modaliAperti.push({ id, tipo: 'listino', modalElement: modal, minimizzato: false });
+
+    function render() {
+        const container = document.getElementById(`listinoCards_${id}`);
+        let filtrati = listinoGlobale;
+        if (searchTerm.trim()) {
+            const low = searchTerm.toLowerCase();
+            filtrati = listinoGlobale.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
         }
-        if (filtrati.length === 0) { 
-            container.innerHTML = '<p style="text-align:center; color:#999;">Nessun articolo trovato</p>'; 
-            return; 
+        if (!filtrati.length) {
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">Nessun articolo trovato</div>';
+            document.getElementById(`listinoStats_${id}`).innerHTML = `📋 0 su ${listinoGlobale.length}`;
+            return;
         }
         let html = '';
-        for (let art of filtrati) {
-            const ultimoAcquisto = calcolaUltimaDataArticolo(art);
-            const ultimoTesto = ultimoAcquisto ? "Ultimo acquisto: " + ultimoAcquisto.data : "Mai acquistato";
-            html += `<div class="ordine-articolo-item" data-codice="${escapeHtml(art.codice)}">
-                        <div class="ordine-articolo-info">
-                            <div class="ordine-articolo-codice">${escapeHtml(art.codice)}</div>
-                            <div class="ordine-articolo-desc">${escapeHtml(art.descrizione)}</div>
-                            <div class="ordine-articolo-desc" style="font-size:0.7rem; color:#888;">${ultimoTesto}</div>
-                        </div>
-                        <div class="ordine-articolo-qta">
-                            <label>Quantità:</label>
-                            <input type="number" id="qta_${modalId}_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" style="text-align:center;">
+        for (let a of filtrati) {
+            const codEv = highlightText(a.codice, searchTerm);
+            const descEv = highlightText(a.descrizione, searchTerm);
+            html += `<div class="listino-card">
+                        <div class="listino-card-codice">${codEv}</div>
+                        <div class="listino-card-descrizione">${descEv}</div>
+                        <div class="listino-card-dettagli">
+                            <span class="listino-card-prezzo">€ ${parseFloat(a.prezzo).toFixed(2)}</span>
+                            <span class="listino-card-um">${escapeHtml(a.um)}</span>
+                            <span class="info-text">GM: ${escapeHtml(a.gm)} | <strong class="mord-bold">M.Ord: ${a.m_ord}</strong></span>
                         </div>
                     </div>`;
         }
         container.innerHTML = html;
-        for (let art of filtrati) {
-            const inputId = `qta_${modalId}_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const input = document.getElementById(inputId);
-            if (input) {
-                if (quantitaInputs[art.codice] === undefined) quantitaInputs[art.codice] = 0;
-                setupQuantitaInput(input, art.codice, quantitaInputs);
-            }
-        }
+        document.getElementById(`listinoStats_${id}`).innerHTML = `📋 ${filtrati.length} articoli su ${listinoGlobale.length} totali`;
     }
-    
-    renderListaArticoli();
-    
-    const ricercaInput = document.getElementById(`ricercaArticoloOrdine_${modalId}`);
-    ricercaInput.addEventListener('input', (e) => { renderListaArticoli(e.target.value); });
-    
-    document.getElementById(`btnConfermaOrdine_${modalId}`).onclick = () => {
-        let articoliConQta = [];
-        for (let art of articoliOrdinati) {
-            let qta = quantitaInputs[art.codice] || 0;
-            if (qta > 0) {
-                articoliConQta.push({ codice: art.codice, descrizione: art.descrizione, quantita: qta });
-            }
-        }
-        if (articoliConQta.length === 0) { alert("Inserisci almeno una quantità maggiore di zero!"); return; }
-        if (isDesktopDevice) { stampaPDF(cliente, articoliConQta); showToast("Apertura finestra di stampa..."); }
-        else { inviaEmailOrdine(cliente, articoliConQta); showToast("Apertura email in corso..."); }
-        chiudiModale(modalId);
-    };
-    
-    document.getElementById(`btnApriListino_${modalId}`).onclick = () => {
-        apriModaleListino();
-    };
-    
-    modal.querySelector('.minimize-btn').onclick = () => {
-        minimizzaModale(modalId);
-    };
-    
-    modal.querySelector('.close-modal-btn').onclick = () => {
-        chiudiModale(modalId);
-    };
-}
-
-function apriModaleListino() {
-    if (!listinoGlobale || listinoGlobale.length === 0) {
-        alert("Nessun listino disponibile. Usa CAR_LIST per caricare un listino.");
-        return;
-    }
-    
-    const modalId = nextModalId++;
-    let searchTerm = '';
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal-listino-overlay';
-    modal.style.display = 'flex';
-    
-    modal.innerHTML = `
-        <div class="modal-listino-content">
-            <div class="modal-listino-header">
-                <h3>📋 LISTINO PREZZI</h3>
-                <div>
-                    <button class="minimize-btn" title="Minimizza">−</button>
-                    <button class="close-btn" title="Chiudi">✕</button>
-                </div>
-            </div>
-            <div class="modal-listino-body">
-                <div class="modal-listino-search">
-                    <input type="text" id="searchListinoInput_${modalId}" placeholder="🔍 Cerca per CODICE o DESCRIZIONE..." autocomplete="off">
-                </div>
-                <div id="listinoStats_${modalId}" class="listino-stats"></div>
-                <div id="listinoCardsContainer_${modalId}" class="listino-cards-container"></div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // Registra il modale
-    modaliAperti.push({
-        id: modalId,
-        tipo: 'listino',
-        modalElement: modal,
-        minimizzato: false
-    });
-    
-    function renderListino() {
-        const container = document.getElementById(`listinoCardsContainer_${modalId}`);
-        let filtrati = listinoGlobale;
-        if (searchTerm.trim() !== '') {
-            const lowerSearch = searchTerm.toLowerCase();
-            filtrati = listinoGlobale.filter(art => 
-                art.codice.toLowerCase().includes(lowerSearch) || 
-                art.descrizione.toLowerCase().includes(lowerSearch)
-            );
-        }
-        if (filtrati.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">Nessun articolo trovato</div>';
-            document.getElementById(`listinoStats_${modalId}`).innerHTML = `📋 0 articoli su ${listinoGlobale.length} totali`;
-            return;
-        }
-        let html = '';
-        for (let art of filtrati) {
-            const codiceEvidenziato = searchTerm ? highlightText(art.codice, searchTerm) : escapeHtml(art.codice);
-            const descrizioneEvidenziata = searchTerm ? highlightText(art.descrizione, searchTerm) : escapeHtml(art.descrizione);
-            html += `
-                <div class="listino-card">
-                    <div class="listino-card-codice">${codiceEvidenziato}</div>
-                    <div class="listino-card-descrizione">${descrizioneEvidenziata}</div>
-                    <div class="listino-card-dettagli">
-                        <span class="listino-card-prezzo">€ ${parseFloat(art.prezzo).toFixed(2)}</span>
-                        <span class="listino-card-um">${escapeHtml(art.um)}</span>
-                        <span class="info-text">GM: ${escapeHtml(art.gm)} | <strong class="mord-bold">M.Ord: ${art.m_ord}</strong></span>
-                    </div>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-        document.getElementById(`listinoStats_${modalId}`).innerHTML = `📋 ${filtrati.length} articoli su ${listinoGlobale.length} totali`;
-    }
-    
-    renderListino();
-    
-    const searchInput = document.getElementById(`searchListinoInput_${modalId}`);
-    searchInput.addEventListener('input', (e) => {
-        searchTerm = e.target.value;
-        renderListino();
-    });
-    
-    modal.querySelector('.minimize-btn').onclick = () => {
-        minimizzaModale(modalId);
-    };
-    
-    modal.querySelector('.close-btn').onclick = () => {
-        chiudiModale(modalId);
-    };
+    render();
+    document.getElementById(`searchListino_${id}`).addEventListener('input', e => { searchTerm = e.target.value; render(); });
+    modal.querySelector('.minimize-btn').onclick = () => minimizzaModale(id);
+    modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
 function aggiornaClienti() {
-    let mappa = new Map();
-    for (let c of datiOrd) {
-        let codiceNorm = c.codice.toString();
-        mappa.set(codiceNorm, { codice: codiceNorm, ragione: c.ragione, hasScadenze: false, scadenze: [], ordini: c.articoli });
-    }
+    const map = new Map();
+    for (let c of datiOrd) { map.set(c.codice.toString(), { codice: c.codice.toString(), ragione: c.ragione, hasScadenze: false, scadenze: [], ordini: c.articoli }); }
     for (let c of datiSca) {
-        let codiceNormalizzato = c.codice.toString();
-        let match = mappa.get(codiceNormalizzato);
-        if (match) { match.hasScadenze = true; match.scadenze = c.scadenze; }
-        else { mappa.set(codiceNormalizzato, { codice: codiceNormalizzato, ragione: c.ragione, hasScadenze: true, scadenze: c.scadenze, ordini: [] }); }
+        let k = c.codice.toString();
+        let existing = map.get(k);
+        if (existing) { existing.hasScadenze = true; existing.scadenze = c.scadenze; }
+        else { map.set(k, { codice: k, ragione: c.ragione, hasScadenze: true, scadenze: c.scadenze, ordini: [] }); }
     }
-    clientiUnici = Array.from(mappa.values());
+    clientiUnici = Array.from(map.values());
     filtraClienti();
 }
 
 function filtraClienti() {
-    let searchText = document.getElementById('cercaCliente').value.toLowerCase();
-    let clientiFiltrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(searchText) || c.ragione.toLowerCase().includes(searchText));
-    clientiFiltrati.sort((a,b) => { 
-        let aHas = a.hasScadenze && a.scadenze.length; 
-        let bHas = b.hasScadenze && b.scadenze.length; 
-        if (aHas && !bHas) return -1; 
-        if (!aHas && bHas) return 1; 
-        return a.ragione.localeCompare(b.ragione); 
+    let txt = document.getElementById('cercaCliente').value.toLowerCase();
+    let filtrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(txt) || c.ragione.toLowerCase().includes(txt));
+    filtrati.sort((a,b) => {
+        let aHas = a.hasScadenze && a.scadenze.length;
+        let bHas = b.hasScadenze && b.scadenze.length;
+        if (aHas && !bHas) return -1;
+        if (!aHas && bHas) return 1;
+        return a.ragione.localeCompare(b.ragione);
     });
-    let select = document.getElementById('selectClienteAgenti');
-    select.innerHTML = '<option value="">-- Seleziona cliente --</option>';
-    for (let c of clientiFiltrati) {
+    let sel = document.getElementById('selectClienteAgenti');
+    sel.innerHTML = '<option value="">-- Seleziona cliente --</option>';
+    for (let c of filtrati) {
         let opt = document.createElement('option');
         opt.value = c.codice;
-        let hasScad = c.hasScadenze && c.scadenze.length;
-        if (hasScad) { 
-            opt.style.color = '#c0392b'; 
-            opt.style.fontWeight = 'bold'; 
-            opt.textContent = "[R] " + c.codice + " - " + c.ragione + " (" + c.scadenze.length + " scad.)"; 
-        } else { 
-            opt.textContent = c.codice + " - " + c.ragione; 
-        }
-        select.appendChild(opt);
+        let has = c.hasScadenze && c.scadenze.length;
+        if (has) { opt.style.color = '#c0392b'; opt.style.fontWeight = 'bold'; opt.textContent = "[R] " + c.codice + " - " + c.ragione + " (" + c.scadenze.length + " scad.)"; }
+        else opt.textContent = c.codice + " - " + c.ragione;
+        sel.appendChild(opt);
     }
-    if (clientiFiltrati.length === 0) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
+    if (!filtrati.length) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
 }
 
 function buildScadenzeHtml(cliente) {
-    let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
-    html += '<button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button>';
-    html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
+    let html = `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
+                <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div>
+                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
     for (let s of cliente.scadenze) {
-        let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-        html += '<tr><td style="white-space:nowrap">' + s.scadenza + '</td><td style="white-space:nowrap">' + (s.dataDoc || '') + '</td><td>' + s.numDoc + '</td><td style="text-align:right" ' + classeImporto + '>' + s.importo.toFixed(2) + ' €</td></tr>';
+        let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
+        html += `<tr><td>${s.scadenza}</td><td>${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += '</tbody></table></div>';
+    html += `</tbody></table></div>`;
     return html;
 }
-    function mostraDettaglioCliente(codice) {
+
+function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
     clienteScadenzeCorrente = cliente;
     let html = '';
-    let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
-    if (hasScadenze) html += buildScadenzeHtml(cliente);
+    if (cliente.hasScadenze && cliente.scadenze.length) html += buildScadenzeHtml(cliente);
     else html += '<div class="scadenze-box">Nessuna scadenza per ' + cliente.ragione + '</div>';
     if (cliente.ordini && cliente.ordini.length) {
-        html += '<div class="scadenze-box"><h3>ORD - ' + cliente.codice + ' ' + cliente.ragione + ' (' + cliente.ordini.length + ' articoli)</h3>';
+        html += `<div class="scadenze-box"><h3>ORD - ${cliente.codice} ${cliente.ragione} (${cliente.ordini.length} articoli)</h3>`;
         for (let art of cliente.ordini) {
-            let storicoHtml = '';
+            let storico = '';
             if (art.coppie && art.coppie.length) {
-                let mostrati = art.coppie.slice(0,4);
-                storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '"><strong>STORICO ORDINI (ultimi 4):</strong><br>';
-                for (let ord of mostrati) storicoHtml += '<span>' + ord.data + ' Q.ta: ' + ord.qta + '</span> ';
-                storicoHtml += '</div>';
-            } else { storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '">Nessun ordine registrato</div>'; }
-            html += '<div class="articolo-item" data-codice="' + art.codice + '"><div class="articolo-titolo"><strong>' + art.codice + ' ' + art.descrizione + '</strong></div><div>EUR ' + art.prezzo.toFixed(2) + ' - Sc. ' + art.sconto1.toFixed(2) + '%</div>' + storicoHtml + '</div>';
+                let ultimi = art.coppie.slice(0,4);
+                storico = `<div class="storico-ordini"><strong>STORICO ORDINI (ultimi 4):</strong><br>${ultimi.map(o => `<span>${o.data} Q.ta: ${o.qta}</span>`).join(' ')}</div>`;
+            } else { storico = '<div class="storico-ordini">Nessun ordine registrato</div>'; }
+            html += `<div class="articolo-item"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>EUR ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`;
         }
-        html += '</div>';
+        html += `</div>`;
     } else { html += '<div class="scadenze-box">Nessun ordine per ' + cliente.ragione + '</div>'; }
     document.getElementById('dettaglioAgenti').innerHTML = html;
-    document.querySelectorAll('.articolo-item').forEach(el => { 
-        el.onclick = (e) => { 
-            e.stopPropagation(); 
-            let storicoDiv = el.querySelector('.storico-ordini'); 
-            if (storicoDiv) storicoDiv.classList.toggle('visible'); 
-        }; 
+    document.querySelectorAll('.articolo-item').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
 }
 
 function filtraArticoli() {
-    let clienteCodice = document.getElementById('selectClienteAgenti').value;
-    if (!clienteCodice) return;
-    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
+    let cod = document.getElementById('selectClienteAgenti').value;
+    if (!cod) return;
+    let cliente = clientiUnici.find(c => c.codice === cod);
     if (!cliente || !cliente.ordini) return;
-    let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
-    let filtrati = cliente.ordini.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
+    let search = document.getElementById('cercaArticoloInline').value.toLowerCase();
+    let filtrati = cliente.ordini.filter(a => a.codice.toLowerCase().includes(search) || a.descrizione.toLowerCase().includes(search));
     let html = '';
-    let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
-    if (hasScadenze) html += buildScadenzeHtml(cliente);
+    if (cliente.hasScadenze && cliente.scadenze.length) html += buildScadenzeHtml(cliente);
     if (filtrati.length) {
-        html += '<div class="scadenze-box"><h3>ORD - ' + cliente.codice + ' ' + cliente.ragione + ' (' + filtrati.length + ' articoli)</h3>';
+        html += `<div class="scadenze-box"><h3>ORD - ${cliente.codice} ${cliente.ragione} (${filtrati.length} articoli)</h3>`;
         for (let art of filtrati) {
-            let storicoHtml = '';
+            let storico = '';
             if (art.coppie && art.coppie.length) {
-                let mostrati = art.coppie.slice(0,4);
-                storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '"><strong>STORICO ORDINI (ultimi 4):</strong><br>';
-                for (let ord of mostrati) storicoHtml += '<span>' + ord.data + ' Q.ta: ' + ord.qta + '</span> ';
-                storicoHtml += '</div>';
-            } else { storicoHtml = '<div class="storico-ordini" data-articolo="' + art.codice + '">Nessun ordine registrato</div>'; }
-            html += '<div class="articolo-item" data-codice="' + art.codice + '"><div class="articolo-titolo"><strong>' + art.codice + ' ' + art.descrizione + '</strong></div><div>EUR ' + art.prezzo.toFixed(2) + ' - Sc. ' + art.sconto1.toFixed(2) + '%</div>' + storicoHtml + '</div>';
+                let ultimi = art.coppie.slice(0,4);
+                storico = `<div class="storico-ordini"><strong>STORICO ORDINI (ultimi 4):</strong><br>${ultimi.map(o => `<span>${o.data} Q.ta: ${o.qta}</span>`).join(' ')}</div>`;
+            } else { storico = '<div class="storico-ordini">Nessun ordine registrato</div>'; }
+            html += `<div class="articolo-item"><div class="articolo-titolo"><strong>${art.codice} ${art.descrizione}</strong></div><div>EUR ${art.prezzo.toFixed(2)} - Sc. ${art.sconto1.toFixed(2)}%</div>${storico}</div>`;
         }
-        html += '</div>';
-    } else { html += '<div class="scadenze-box">Nessun articolo trovato per "' + searchText + '"</div>'; }
+        html += `</div>`;
+    } else { html += '<div class="scadenze-box">Nessun articolo trovato</div>'; }
     document.getElementById('dettaglioAgenti').innerHTML = html;
-    document.querySelectorAll('.articolo-item').forEach(el => { 
-        el.onclick = (e) => { 
-            e.stopPropagation(); 
-            let storicoDiv = el.querySelector('.storico-ordini'); 
-            if (storicoDiv) storicoDiv.classList.toggle('visible'); 
-        }; 
+    document.querySelectorAll('.articolo-item').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
 }
 
-function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
-    let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
-    let match = baseName.match(/^([A-Z]+)(\d+)$/i);
-    if (!match) return false;
-    if (match[1].toUpperCase() !== tipo) return false;
-    return parseInt(match[2],10) === parseInt(codiceAgente,10);
+function nomeFileCorrisponde(nome, codice, tipo) {
+    let base = nome.replace(/\.[a-zA-Z0-9]+$/, '');
+    let m = base.match(/^([A-Z]+)(\d+)$/i);
+    if (!m) return false;
+    if (m[1].toUpperCase() !== tipo) return false;
+    return parseInt(m[2],10) === parseInt(codice,10);
 }
 
 async function caricaFile(files) {
     if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
     if (files.length !== 2) { alert("Servono ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
-    let codAgente = agenteCorrente.codice;
+    let cod = agenteCorrente.codice;
     let trovati = { ord: false, sca: false };
     let ordText = null, scaText = null, errori = [];
-    for (let file of files) {
-        let nome = file.name;
-        if (nomeFileCorrisponde(nome, codAgente, 'ORD')) { trovati.ord = true; ordText = await file.text(); }
-        else if (nomeFileCorrisponde(nome, codAgente, 'SCA')) { trovati.sca = true; scaText = await file.text(); }
-        else errori.push(nome);
+    for (let f of files) {
+        if (nomeFileCorrisponde(f.name, cod, 'ORD')) { trovati.ord = true; ordText = await f.text(); }
+        else if (nomeFileCorrisponde(f.name, cod, 'SCA')) { trovati.sca = true; scaText = await f.text(); }
+        else errori.push(f.name);
     }
-    if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
-    if (!trovati.ord || !trovati.sca) { alert("FILE MANCANTI: ORD" + codAgente + ".txt e SCA" + codAgente + ".txt"); return false; }
-    datiOrd = []; datiSca = [];
-    if (ordText) { datiOrd = parseORD(ordText); }
-    if (scaText) { datiSca = parseSCA(scaText); }
+    if (errori.length) { alert("File non validi: "+errori.join(', ')); return false; }
+    if (!trovati.ord || !trovati.sca) { alert("Mancano ORD"+cod+".txt o SCA"+cod+".txt"); return false; }
+    datiOrd = ordText ? parseORD(ordText) : [];
+    datiSca = scaText ? parseSCA(scaText) : [];
     await salvaDatiAgente();
     aggiornaClienti();
-    document.getElementById('fileStatusInline').innerHTML = "ORD: " + datiOrd.length + " | SCA: " + datiSca.length;
-    alert("CARICAMENTO COMPLETATO!\nORD: " + datiOrd.length + " clienti\nSCA: " + datiSca.length + " clienti");
+    document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
+    alert("Caricato! ORD: "+datiOrd.length+" clienti, SCA: "+datiSca.length+" clienti");
     return true;
 }
 
 async function caricaListinoGlobale(file) {
-    if (!file) { alert("Seleziona un file listino.txt"); return false; }
+    if (!file) { alert("Seleziona file listino.txt"); return false; }
     try {
         const text = await file.text();
         const lines = text.split(/\r?\n/);
         const articoli = [];
         for (let line of lines) {
             line = line.trim();
-            if (line === "" || line.startsWith("===") || line.startsWith("---") || line.startsWith("Codice")) continue;
+            if (!line || line.startsWith("===") || line.startsWith("---") || line.startsWith("Codice")) continue;
             const parts = line.split(/\s+/);
             if (parts.length < 5) continue;
             let codice = parts[0];
-            let prezzoStr = parts[1].replace(',', '.');
-            let prezzo = parseFloat(prezzoStr);
+            let prezzo = parseFloat(parts[1].replace(',', '.'));
             let descrizione = parts.slice(2, -4).join(" ");
-            let um = parts[parts.length - 4];
-            let gm = parts[parts.length - 3];
-            let mord = parts[parts.length - 2];
-            let iva = parts[parts.length - 1];
+            let um = parts[parts.length-4];
+            let gm = parts[parts.length-3];
+            let mord = parts[parts.length-2];
+            let iva = parts[parts.length-1];
             if (isNaN(prezzo)) continue;
             articoli.push({ codice, prezzo, descrizione, um, gm, m_ord: mord, iva });
         }
-        if (articoli.length === 0) { alert("Nessun articolo valido trovato!"); return false; }
-        const listinoRef = db.collection('listini_generali').doc('listino_globale');
-        await listinoRef.set({ articoli: articoli, ultimoAggiornamento: new Date().toISOString(), numeroArticoli: articoli.length });
+        if (!articoli.length) { alert("Nessun articolo valido"); return false; }
+        await db.collection('listini_generali').doc('listino_globale').set({ articoli, ultimoAggiornamento: new Date().toISOString(), numeroArticoli: articoli.length });
         listinoGlobale = articoli;
         listinoCaricato = true;
-        showToast("Listino caricato! " + articoli.length + " articoli");
-        alert("CARICAMENTO LISTINO COMPLETATO!\n" + articoli.length + " articoli salvati.");
+        showToast("Listino caricato! "+articoli.length+" articoli");
+        alert("Listino salvato. Ora disponibile a tutti gli agenti.");
         return true;
-    } catch(e) { alert("Errore: " + e.message); return false; }
+    } catch(e) { alert("Errore: "+e.message); return false; }
 }
 
 async function caricaListinoDaDB() {
     try {
-        const docSnap = await db.collection('listini_generali').doc('listino_globale').get();
-        if (docSnap.exists) {
-            listinoGlobale = docSnap.data().articoli || [];
-            listinoCaricato = true;
-            console.log("Listino caricato: " + listinoGlobale.length + " articoli");
-        } else { listinoGlobale = []; listinoCaricato = false; }
-    } catch(e) { console.error("Errore:", e); listinoGlobale = []; }
+        const doc = await db.collection('listini_generali').doc('listino_globale').get();
+        if (doc.exists) { listinoGlobale = doc.data().articoli || []; listinoCaricato = true; }
+        else { listinoGlobale = []; listinoCaricato = false; }
+    } catch(e) { listinoGlobale = []; }
 }
 
 // Event listeners
-const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
-const navGridAgenti = document.getElementById('navGrid');
-if (hamburgerBtnAgenti && navGridAgenti) {
-    hamburgerBtnAgenti.addEventListener('click', (e) => { e.stopPropagation(); navGridAgenti.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!navGridAgenti.contains(e.target) && !hamburgerBtnAgenti.contains(e.target)) navGridAgenti.classList.remove('open'); });
-}
-
+document.getElementById('hamburgerBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); };
+document.addEventListener('click', (e) => { let nav = document.getElementById('navGrid'); if (!nav.contains(e.target) && !document.getElementById('hamburgerBtn').contains(e.target)) nav.classList.remove('open'); });
 document.getElementById('selectAgente').onchange = (e) => {
     if (e.target.value && modificheNonSalvate) {
         if (confirm("Modifiche non salvate. Salvare?")) salvaDatiAgente().then(() => selezionaAgente(e.target.value));
         else selezionaAgente(e.target.value);
     } else if (e.target.value) selezionaAgente(e.target.value);
 };
-
 document.getElementById('selectClienteAgenti').onchange = (e) => { if (e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
-document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if (c) filtraArticoli(); };
+document.getElementById('cercaArticoloInline').oninput = () => { if (document.getElementById('selectClienteAgenti').value) filtraArticoli(); };
 document.getElementById('btnCaricaFile').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnCaricaListino').onclick = () => document.getElementById('fileListinoInput').click();
-document.getElementById('btnListinoVerde').onclick = () => { apriModaleListino(); };
+document.getElementById('btnListinoVerde').onclick = () => apriModaleListino();
 document.getElementById('btnCompilaOrdine').onclick = () => {
-    let clienteCodice = document.getElementById('selectClienteAgenti').value;
-    if (!clienteCodice) { alert("Seleziona prima un cliente!"); return; }
-    let cliente = clientiUnici.find(c => c.codice === clienteCodice);
-    if (cliente) { apriModaleOrdine(cliente); }
-    else { alert("Cliente non trovato!"); }
+    let cod = document.getElementById('selectClienteAgenti').value;
+    if (!cod) { alert("Seleziona prima un cliente!"); return; }
+    let cliente = clientiUnici.find(c => c.codice === cod);
+    if (cliente) apriModaleOrdine(cliente);
+    else alert("Cliente non trovato!");
 };
+document.getElementById('fileInput').onchange = async (e) => { if (e.target.files.length) await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
+document.getElementById('fileListinoInput').onchange = async (e) => { if (e.target.files.length) { await caricaListinoGlobale(e.target.files[0]); e.target.value = ''; } };
 
-document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
-document.getElementById('fileListinoInput').onchange = async (e) => { 
-    if (e.target.files.length > 0) {
-        await caricaListinoGlobale(e.target.files[0]);
-        e.target.value = '';
-    }
-};
-
-// All'avvio
 Promise.all([caricaLinkDaFile(), caricaAgenti(), caricaListinoDaDB()]).then(() => caricaLogoSaved());
 </script>
 </body>
