@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.70</title>
+    <title>inSAPA - Agenti vA.5.71</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -58,29 +58,6 @@
         .file-status { font-size: 0.7rem; color: #27ae60; margin-top: 5px; text-align: center; }
         .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
-        
-        /* Modal listino */
-        .modal-listino-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-listino-content { background: white; border-radius: 24px; width: 90%; max-width: 1200px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .modal-listino-header { background: #27ae60; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .modal-listino-header h3 { margin: 0; }
-        .modal-listino-header .close-btn { background: none; border: none; color: white; font-size: 28px; cursor: pointer; width: auto; padding: 0 10px; margin: 0; }
-        .modal-listino-header .close-btn:hover { opacity: 0.8; transform: none; }
-        .modal-listino-body { padding: 20px; overflow-y: auto; flex: 1; }
-        .modal-listino-search { margin-bottom: 20px; }
-        .modal-listino-search input { width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid #ddd; border-radius: 30px; }
-        .modal-listino-search input:focus { outline: none; border-color: #27ae60; }
-        .listino-stats { background: #eef2f5; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; display: inline-block; }
-        .listino-cards-container { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
-        .listino-card { background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
-        .listino-card:hover { background: #f9f9f9; transform: translateX(3px); }
-        .listino-card-codice { font-weight: bold; font-family: monospace; font-size: 0.85rem; background: #f0f0f0; display: inline-block; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
-        .listino-card-descrizione { font-size: 0.9rem; font-weight: 500; margin: 5px 0; color: #1a2c3e; }
-        .listino-card-dettagli { font-size: 0.75rem; color: #666; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
-        .listino-card-prezzo { font-weight: bold; color: #27ae60; font-size: 1rem; }
-        .listino-card-um { background: #eef2f5; padding: 2px 6px; border-radius: 4px; }
-        .highlight { background-color: #fff3c9; border-radius: 4px; padding: 0 2px; }
-        .mord-bold { font-weight: bold; }
         
         /* Modal ordine */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
@@ -139,8 +116,6 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
-            .modal-listino-content { width: 95%; max-height: 85vh; }
-            .listino-cards-container { max-height: 55vh; }
             /* Nascondi CAR_LIST e ORD+SCA su mobile */
             .pc-only { display: none !important; }
         }
@@ -175,7 +150,7 @@
             <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
         <div class="action-group">
-            <!-- TASTO LISTINO VERDE (sempre visibile) -->
+            <!-- TASTO LISTINO VERDE (sempre visibile) - APRE listino.html -->
             <button id="btnListinoVerde" class="btn-listino-verde">
                 📋 LISTINO
             </button>
@@ -214,7 +189,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.70</div>
+<div class="version">vA.5.71</div>
 
 <script>
 // Firebase configuration
@@ -253,16 +228,6 @@ function escapeHtml(str) {
         if (m === '>') return '&gt;';
         return m;
     });
-}
-
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function highlightText(text, searchTerm) {
-    if (!searchTerm || searchTerm.trim() === "") return escapeHtml(text);
-    const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
-    return escapeHtml(text).replace(regex, `<span class="highlight">$1</span>`);
 }
 
 async function caricaLinkDaFile() {
@@ -781,87 +746,6 @@ async function caricaListinoDaDB() {
     } catch(e) { console.error("Errore caricamento listino da DB:", e); listinoGlobale = []; listinoCaricato = false; }
 }
 
-// MODALE LISTINO (PC e Mobile) con ricerca unica per codice e descrizione
-function apriModaleListino() {
-    if (!listinoGlobale || listinoGlobale.length === 0) {
-        alert("Nessun listino disponibile. Usa CAR_LIST per caricare un listino.");
-        return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal-listino-overlay';
-    
-    let searchTerm = '';
-    
-    function renderListino() {
-        const container = document.getElementById('listinoCardsContainer');
-        let filtrati = listinoGlobale;
-        if (searchTerm.trim() !== '') {
-            const lowerSearch = searchTerm.toLowerCase();
-            filtrati = listinoGlobale.filter(art => 
-                art.codice.toLowerCase().includes(lowerSearch) || 
-                art.descrizione.toLowerCase().includes(lowerSearch)
-            );
-        }
-        
-        if (filtrati.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">Nessun articolo trovato per "' + escapeHtml(searchTerm) + '"</div>';
-            return;
-        }
-        
-        let html = '';
-        for (let art of filtrati) {
-            const codiceEvidenziato = searchTerm ? highlightText(art.codice, searchTerm) : escapeHtml(art.codice);
-            const descrizioneEvidenziata = searchTerm ? highlightText(art.descrizione, searchTerm) : escapeHtml(art.descrizione);
-            html += `
-                <div class="listino-card">
-                    <div class="listino-card-codice">${codiceEvidenziato}</div>
-                    <div class="listino-card-descrizione">${descrizioneEvidenziata}</div>
-                    <div class="listino-card-dettagli">
-                        <span class="listino-card-prezzo">€ ${parseFloat(art.prezzo).toFixed(2)}</span>
-                        <span class="listino-card-um">${escapeHtml(art.um)}</span>
-                        <span class="info-text">GM: ${escapeHtml(art.gm)} | <strong class="mord-bold">M.Ord: ${art.m_ord}</strong></span>
-                    </div>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-        document.getElementById('listinoStats').innerHTML = `📋 ${filtrati.length} articoli su ${listinoGlobale.length} totali`;
-    }
-    
-    modal.innerHTML = `
-        <div class="modal-listino-content">
-            <div class="modal-listino-header">
-                <h3>📋 LISTINO PREZZI</h3>
-                <button class="close-btn" id="closeListinoModal">&times;</button>
-            </div>
-            <div class="modal-listino-body">
-                <div class="modal-listino-search">
-                    <input type="text" id="searchListinoInput" placeholder="🔍 Cerca per CODICE o DESCRIZIONE..." autocomplete="off">
-                </div>
-                <div id="listinoStats" class="listino-stats"></div>
-                <div id="listinoCardsContainer" class="listino-cards-container"></div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    renderListino();
-    
-    const searchInput = document.getElementById('searchListinoInput');
-    searchInput.addEventListener('input', (e) => {
-        searchTerm = e.target.value;
-        renderListino();
-    });
-    
-    const closeBtn = document.getElementById('closeListinoModal');
-    closeBtn.onclick = () => { modal.remove(); };
-    
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
-}
-
 // Event listeners
 const hamburgerBtnAgenti = document.getElementById('hamburgerBtn');
 const navGridAgenti = document.getElementById('navGrid');
@@ -890,9 +774,9 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
     else { alert("Cliente non trovato!"); }
 };
 
-// Tasto LISTINO VERDE - apre modale con ricerca (PC e Mobile)
+// Tasto LISTINO VERDE - APRE listino.html (file esterno)
 document.getElementById('btnListinoVerde').onclick = () => {
-    apriModaleListino();
+    window.open('listino.html', '_blank');
 };
 
 document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
