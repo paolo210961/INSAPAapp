@@ -381,7 +381,7 @@
             background: #1e4b2e;
         }
 
-        /* STILE MOBILE - box senza EAN + SCROLLBAR PERSONALIZZATA */
+        /* STILE MOBILE - box senza EAN + SCROLLBAR PERSONALIZZATA DEFINITIVA */
         .mobile-list {
             display: none;
         }
@@ -393,25 +393,30 @@
             
             .mobile-list {
                 display: block;
-                max-height: calc(100vh - 280px);
+                height: 70vh;                /* altezza fissa per attivare scroll */
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
                 padding-right: 4px;
+                /* Firefox */
+                scrollbar-width: thick !important;
+                scrollbar-color: #2c6e3c #f1f1f1 !important;
             }
             
-            /* SCROLLBAR PERSONALIZZATA (stessa tecnica di agenti.html) */
+            /* WebKit (Chrome, Brave, Edge) */
             .mobile-list::-webkit-scrollbar {
-                width: 12px;
+                width: 12px !important;
+                height: 12px !important;
             }
             .mobile-list::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 10px;
+                background: #f1f1f1 !important;
+                border-radius: 10px !important;
             }
             .mobile-list::-webkit-scrollbar-thumb {
-                background: #2c6e3c;
-                border-radius: 10px;
+                background: #2c6e3c !important;
+                border-radius: 10px !important;
             }
             .mobile-list::-webkit-scrollbar-thumb:hover {
-                background: #1e4b2e;
+                background: #1e4b2e !important;
             }
             
             .mobile-card {
@@ -511,7 +516,7 @@
         </table>
     </div>
 
-    <!-- VISTA MOBILE (box - già senza EAN, ora con scrollbar personalizzata) -->
+    <!-- VISTA MOBILE (box + scrollbar personalizzata definitiva) -->
     <div class="mobile-list" id="mobileList"></div>
 
     <div class="footer-note">
@@ -699,7 +704,7 @@
                    (art.descrizione && art.descrizione.toLowerCase().includes(searchTerm));
         });
         
-        // DESKTOP
+        // DESKTOP TABLE
         const tbody = document.getElementById('tableBody');
         let htmlRows = '';
         for (let item of filtered) {
@@ -720,7 +725,7 @@
         }
         tbody.innerHTML = htmlRows || `<tr><td colspan="6" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
         
-        // MOBILE
+        // MOBILE LIST (scrollbar personalizzata applicata al contenitore)
         const mobileContainer = document.getElementById('mobileList');
         let mobileHtml = '';
         for (let item of filtered) {
