@@ -18,83 +18,71 @@
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             background: #f0f2f5;
             margin: 0;
-            padding: 24px 20px;
+            padding: 0;
             color: #1a2c3e;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* header azienda */
-        .company-header {
+        /* BOX FISSO SUPERIORE (non scrollabile) */
+        .fixed-header {
             background: white;
-            border-radius: 24px;
-            padding: 20px 28px;
-            margin-bottom: 28px;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e9edf2;
+            border-radius: 0 0 24px 24px;
+            padding: 20px 24px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #e9edf2;
+            flex-shrink: 0;
         }
 
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
         .company-name {
-            font-size: 1.9rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            letter-spacing: -0.3px;
             background: linear-gradient(135deg, #1e4b2e, #2c6e3c);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            margin-bottom: 6px;
+            margin: 0;
+        }
+        .info-date {
+            background: #eef2f6;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c6e3c;
         }
 
-        .company-meta {
+        .search-row {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: baseline;
-            border-top: 1px solid #eef2f6;
-            padding-top: 12px;
-            margin-top: 8px;
-            font-size: 0.85rem;
-            color: #5e6f8d;
-        }
-
-        /* ricerca singola */
-        .search-panel {
-            background: white;
-            border-radius: 28px;
-            padding: 20px 28px;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            border: 1px solid #e9edf2;
-        }
-
-        .search-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
+            gap: 12px;
+            margin-bottom: 16px;
             align-items: flex-end;
         }
-
         .search-group {
             flex: 1;
-            min-width: 250px;
+            min-width: 200px;
         }
-
         .search-group label {
             display: block;
+            font-size: 0.7rem;
             font-weight: 700;
-            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: #1e4b2e;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
-
         .search-group input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 18px;
             font-size: 1rem;
             border: 2px solid #e2e8f0;
             border-radius: 48px;
@@ -102,17 +90,15 @@
             transition: 0.2s;
             font-family: inherit;
         }
-
         .search-group input:focus {
             outline: none;
             border-color: #2c6e3c;
             box-shadow: 0 0 0 3px rgba(44,110,60,0.15);
         }
-
         .reset-btn {
             background: #f1f5f9;
             border: none;
-            padding: 14px 28px;
+            padding: 12px 24px;
             border-radius: 48px;
             font-weight: 700;
             color: #2c3e50;
@@ -120,47 +106,34 @@
             transition: 0.2s;
             font-family: inherit;
             font-size: 0.9rem;
-            margin-bottom: 2px;
+            height: 48px;
+            align-self: flex-end;
         }
-
         .reset-btn:hover {
             background: #e2e8f0;
-            transform: scale(0.97);
-        }
-
-        .modal-btn {
-            background: #2c6e3c;
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 48px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-            font-size: 0.9rem;
-            margin-bottom: 2px;
-        }
-        
-        .modal-btn:hover {
-            background: #1e4b2e;
             transform: scale(0.97);
         }
 
         .stats {
             background: #eef2f6;
             border-radius: 60px;
-            padding: 8px 22px;
+            padding: 8px 20px;
             display: inline-block;
             font-size: 0.85rem;
             font-weight: 500;
-            margin-top: 18px;
             color: #1f3b4c;
         }
-        
         .stats small {
             font-weight: normal;
             color: #2c6e3c;
+        }
+
+        /* AREA ARTICOLI SCROLLABILE */
+        .scrollable-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 20px 20px 20px;
+            margin-top: 0;
         }
 
         /* tabella desktop */
@@ -236,14 +209,6 @@
             text-align: center;
         }
 
-        .footer-note {
-            margin-top: 18px;
-            text-align: right;
-            font-size: 0.7rem;
-            color: #7e8c9e;
-            padding-right: 8px;
-        }
-
         .no-results {
             text-align: center;
             padding: 48px 20px;
@@ -256,132 +221,8 @@
             border-radius: 4px;
             padding: 0 2px;
         }
-        
-        .db-badge {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-left: 12px;
-        }
 
-        /* MODALE STYLES */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal-container {
-            background: white;
-            border-radius: 28px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            animation: modalFadeIn 0.2s ease;
-        }
-        
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .modal-header {
-            background: #1e4b2e;
-            color: white;
-            padding: 18px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            transition: 0.2s;
-        }
-        
-        .modal-close:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .modal-body {
-            padding: 24px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        
-        .modal-body p {
-            margin: 10px 0;
-            line-height: 1.5;
-        }
-        
-        .modal-body .status-ok {
-            color: #2e7d32;
-            font-weight: bold;
-        }
-        
-        .modal-body .status-error {
-            color: #c62828;
-            font-weight: bold;
-        }
-        
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid #eef2f8;
-            display: flex;
-            justify-content: flex-end;
-        }
-        
-        .modal-footer button {
-            background: #2c6e3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 48px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        
-        .modal-footer button:hover {
-            background: #1e4b2e;
-        }
-
-        /* STILE MOBILE - box senza EAN + SCROLLBAR PERSONALIZZATA DEFINITIVA */
+        /* STILE MOBILE - box articoli con scrollbar personalizzata */
         .mobile-list {
             display: none;
         }
@@ -390,35 +231,29 @@
             .table-wrapper {
                 display: none;
             }
-            
             .mobile-list {
                 display: block;
-                height: 70vh;                /* altezza fissa per attivare scroll */
+                height: 100%;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
-                padding-right: 4px;
-                /* Firefox */
-                scrollbar-width: thick !important;
-                scrollbar-color: #2c6e3c #f1f1f1 !important;
+                scrollbar-width: thick;
+                scrollbar-color: #2c6e3c #f1f1f1;
             }
-            
-            /* WebKit (Chrome, Brave, Edge) */
             .mobile-list::-webkit-scrollbar {
-                width: 12px !important;
-                height: 12px !important;
+                width: 12px;
+                height: 12px;
             }
             .mobile-list::-webkit-scrollbar-track {
-                background: #f1f1f1 !important;
-                border-radius: 10px !important;
+                background: #f1f1f1;
+                border-radius: 10px;
             }
             .mobile-list::-webkit-scrollbar-thumb {
-                background: #2c6e3c !important;
-                border-radius: 10px !important;
+                background: #2c6e3c;
+                border-radius: 10px;
             }
             .mobile-list::-webkit-scrollbar-thumb:hover {
-                background: #1e4b2e !important;
+                background: #1e4b2e;
             }
-            
             .mobile-card {
                 background: white;
                 border-radius: 20px;
@@ -427,7 +262,6 @@
                 box-shadow: 0 2px 8px rgba(0,0,0,0.05);
                 border: 1px solid #eef2f8;
             }
-            
             .mobile-card .codice {
                 font-weight: 800;
                 font-family: monospace;
@@ -435,7 +269,6 @@
                 color: #1e4b2e;
                 margin-bottom: 8px;
             }
-            
             .mobile-card .descrizione {
                 font-weight: 600;
                 font-size: 1rem;
@@ -443,7 +276,6 @@
                 color: #1a2c3e;
                 line-height: 1.4;
             }
-            
             .mobile-card .um-prezzo-row {
                 display: flex;
                 align-items: baseline;
@@ -451,18 +283,15 @@
                 margin-bottom: 10px;
                 font-size: 1rem;
             }
-            
             .mobile-card .um-label {
                 font-weight: 700;
                 color: #2c3e50;
             }
-            
             .mobile-card .prezzo-valore {
                 font-weight: 800;
                 font-size: 1rem;
                 color: #1e5e2d;
             }
-            
             .mobile-card .gm-mord {
                 font-size: 0.75rem;
                 color: #5e6f8d;
@@ -474,31 +303,23 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="company-header">
+
+<div class="fixed-header">
+    <div class="title-row">
         <div class="company-name">🏢 inSAPA s.a.s.</div>
-        <div>LISTINO PREZZI · MAGAZZINO 00 · Data 11/06/2026</div>
-        <div class="company-meta">
-            <span>💰 Prezzi IVA esclusa · IVA 22%</span>
-            <span>🔎 Cerca per CODICE o DESCRIZIONE</span>
-            <span class="db-badge" id="dbBadge">📡 DATABASE OFFLINE</span>
-        </div>
+        <div class="info-date" id="infoDate">📅 Caricamento: --</div>
     </div>
-
-    <div class="search-panel">
-        <div class="search-wrapper">
-            <div class="search-group">
-                <label>🔍 CERCA PER CODICE O DESCRIZIONE</label>
-                <input type="text" id="searchInput" placeholder="Es: 00190, SCOPA, PATTUMIERA, MANICO, 00025 ..." autocomplete="off">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="modal-btn" id="openModalBtn">📡 STATO DATABASE</button>
-                <button class="reset-btn" id="resetBtn">⟳ Azzera ricerca</button>
-            </div>
+    <div class="search-row">
+        <div class="search-group">
+            <label>🔍 CERCA PER CODICE O DESCRIZIONE</label>
+            <input type="text" id="searchInput" placeholder="Es: 00190, SCOPA, PATTUMIERA, 00025 ..." autocomplete="off">
         </div>
-        <div class="stats" id="statsCounter">Caricamento articoli...</div>
+        <button class="reset-btn" id="resetBtn">⟳ Azzera ricerca</button>
     </div>
+    <div class="stats" id="statsCounter">Caricamento articoli...</div>
+</div>
 
+<div class="scrollable-area">
     <!-- VISTA DESKTOP (TABELLA - SENZA EAN) -->
     <div class="table-wrapper">
         <table class="articoli-table" id="articoliTable">
@@ -516,29 +337,8 @@
         </table>
     </div>
 
-    <!-- VISTA MOBILE (box + scrollbar personalizzata definitiva) -->
+    <!-- VISTA MOBILE (box + scrollbar personalizzata) -->
     <div class="mobile-list" id="mobileList"></div>
-
-    <div class="footer-note">
-        ✔️ Listino prezzi - Prezzo Unitario (€) IVA esclusa · IVA 22%<br>
-        * Cerca contemporaneamente in Codice Articolo e Descrizione
-    </div>
-</div>
-
-<!-- MODALE (popup senza cambiare pagina) -->
-<div id="dbModal" class="modal-overlay">
-    <div class="modal-container">
-        <div class="modal-header">
-            <h3>📡 Stato Connessione Database</h3>
-            <button class="modal-close" id="closeModalBtn">&times;</button>
-        </div>
-        <div class="modal-body" id="modalBody">
-            <p>Caricamento informazioni...</p>
-        </div>
-        <div class="modal-footer">
-            <button id="modalCloseFooterBtn">Chiudi</button>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -621,6 +421,7 @@
     
     let currentArticles = [...fallbackArticles];
     let dbStatus = "offline";
+    let lastUpdateDate = "11/06/2026 (dati locali)";
     
     // ------------------------------------------------------------------
     // FUNZIONE PER PULIRE I DATI (rimuove EAN se finito nel prezzo)
@@ -653,25 +454,27 @@
                     articoliDB = articoliDB.map(cleanArticleData);
                     currentArticles = articoliDB;
                     dbStatus = "online";
-                    document.getElementById('dbBadge').innerHTML = "☁️ DATABASE ONLINE";
-                    document.getElementById('dbBadge').style.background = "#e8f5e9";
-                    document.getElementById('dbBadge').style.color = "#2e7d32";
+                    if (data.ultimoAggiornamento) {
+                        const dateObj = new Date(data.ultimoAggiornamento);
+                        lastUpdateDate = dateObj.toLocaleDateString('it-IT') + " " + dateObj.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+                    } else {
+                        lastUpdateDate = new Date().toLocaleDateString('it-IT') + " (database)";
+                    }
+                    document.getElementById('infoDate').innerHTML = `📅 Caricamento: ${lastUpdateDate}`;
                     return true;
                 } else {
                     dbStatus = "empty";
-                    document.getElementById('dbBadge').innerHTML = "📁 DATABASE VUOTO (fallback)";
+                    document.getElementById('infoDate').innerHTML = "📅 Caricamento: dati locali (db vuoto)";
                     return false;
                 }
             } else {
                 dbStatus = "missing";
-                document.getElementById('dbBadge').innerHTML = "📁 LISTINO NON TROVATO (fallback)";
+                document.getElementById('infoDate').innerHTML = "📅 Caricamento: dati locali (nessun listino)";
                 return false;
             }
         } catch(error) {
             dbStatus = "error";
-            document.getElementById('dbBadge').innerHTML = "⚠️ DATABASE OFFLINE (fallback)";
-            document.getElementById('dbBadge').style.background = "#ffebee";
-            document.getElementById('dbBadge').style.color = "#c62828";
+            document.getElementById('infoDate').innerHTML = "📅 Caricamento: dati locali (offline)";
             return false;
         }
     }
@@ -725,7 +528,7 @@
         }
         tbody.innerHTML = htmlRows || `<tr><td colspan="6" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
         
-        // MOBILE LIST (scrollbar personalizzata applicata al contenitore)
+        // MOBILE LIST
         const mobileContainer = document.getElementById('mobileList');
         let mobileHtml = '';
         for (let item of filtered) {
@@ -755,29 +558,8 @@
         renderBothViews();
     }
     
-    // MODALE
-    function showModal() {
-        const modal = document.getElementById('dbModal');
-        const modalBody = document.getElementById('modalBody');
-        let statusHtml = '';
-        if (dbStatus === "online") {
-            statusHtml = `<p><span class="status-ok">✅ DATABASE CONNESSO</span></p><p>Il listino è stato caricato da <strong>Firestore</strong>.</p><p>📊 Numero articoli: <strong>${currentArticles.length}</strong></p><hr><p>💡 <em>I dati vengono sincronizzati automaticamente da agenti.html quando premi CAR_LIST</em></p>`;
-        } else if (dbStatus === "offline" || dbStatus === "error") {
-            statusHtml = `<p><span class="status-error">⚠️ IMPOSSIBILE CONTATTARE FIRESTORE</span></p><p>Il listino sta usando i <strong>dati locali di fallback</strong> (${currentArticles.length} articoli).</p><p>Possibili cause: nessuna connessione internet, Firebase non accessibile.</p><hr><p>💡 <em>Il listino funziona comunque con i dati locali integrati.</em></p>`;
-        } else {
-            statusHtml = `<p><span class="status-error">📁 DATABASE SENZA LISTINO</span></p><p>Il database è stato contattato ma non contiene un listino valido.</p><p>🔥 In uso: <strong>dati di fallback</strong> (${currentArticles.length} articoli).</p><hr><p>Per caricare un listino nel database: apri agenti.html, inserisci i dati, clicca su CAR_LIST.</p>`;
-        }
-        modalBody.innerHTML = statusHtml;
-        modal.classList.add('active');
-    }
-    function closeModal() { document.getElementById('dbModal').classList.remove('active'); }
-    
     document.getElementById('searchInput').addEventListener('input', renderBothViews);
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
-    document.getElementById('openModalBtn').addEventListener('click', showModal);
-    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-    document.getElementById('modalCloseFooterBtn').addEventListener('click', closeModal);
-    window.addEventListener('click', (e) => { if (e.target === document.getElementById('dbModal')) closeModal(); });
     
     (async function init() {
         await caricaListinoDaFirestore();
