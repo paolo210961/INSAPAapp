@@ -144,13 +144,13 @@
             <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
         <div class="action-group">
-            <!-- Pulsanti per PC -->
+            <!-- Pulsanti per PC - MODIFICATI: ORD+SCA+LIST e LISTINO -->
             <div class="pc-only">
                 <button id="btnCaricaFileMulti" class="btn-primary">ORD+SCA+LIST</button>
                 <span id="btnMostraListinoPc" style="cursor:pointer; background:#f39c12; padding:6px 12px; border-radius:8px; font-weight:bold; color:white;">📋 LISTINO</span>
                 <button id="btnCompilaOrdine" class="btn-ordine-header">📝 COMPILA ORDINE</button>
             </div>
-            <!-- Pulsante per mobile -->
+            <!-- Pulsante per mobile - MODIFICATO: solo LISTINO -->
             <div class="mobile-only">
                 <button id="btnListinoMobile" class="btn-primary">📋 LISTINO</button>
             </div>
@@ -177,7 +177,7 @@
 <div class="version">vA.6.0 - LISTINO integrato</div>
 
 <script>
-// Firebase config invariata
+// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -198,7 +198,7 @@ let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
 let linkPrincipale = "", linkSecondario = "";
 
-// ---- PARSER LISTINO (basato sul formato originale LIST.txt) ----
+// ========== NUOVA FUNZIONE: Parser per LIST.txt ==========
 function parseListinoLine(line) {
     if (!line.trim() || line.startsWith('===') || line.startsWith('Codice Artic.') || line.startsWith('---') || line.includes('LISTINO ARTICOLI')) return null;
     let cleanLine = line.replace(/\r?\n/, '').trim();
@@ -240,6 +240,7 @@ function parseListinoLine(line) {
     if (codice.length === 0 || descrizione.length === 0) return null;
     return { codice, ean, stock, descrizione, um, gm, mOrd, iva };
 }
+
 function parseListinoFile(content) {
     const lines = content.split(/\r?\n/);
     const items = [];
@@ -250,7 +251,7 @@ function parseListinoFile(content) {
     return items;
 }
 
-// ---- Salvataggio listino su Firebase ----
+// ========== NUOVA FUNZIONE: Salvataggio listino su Firebase ==========
 async function salvaListinoAgente(codiceAgente, articoliListino) {
     const listinoRef = db.collection('agenti_dati').doc('listino_' + codiceAgente).collection('articoli');
     const batch = db.batch();
@@ -264,7 +265,7 @@ async function salvaListinoAgente(codiceAgente, articoliListino) {
     console.log(`Listino agente ${codiceAgente} salvato (${articoliListino.length} articoli)`);
 }
 
-// ---- Caricamento file multipli (ORD, SCA, LIST) ----
+// ========== MODIFICATA: caricaFileMulti - ora richiede 3 file ==========
 function nomeFileCorrispondeMulti(nomeFile, codiceAgente, tipo) {
     let baseName = nomeFile.replace(/\.[a-zA-Z0-9]+$/, '');
     let match = baseName.match(/^([A-Z]+)(\d+)$/i);
@@ -272,6 +273,7 @@ function nomeFileCorrispondeMulti(nomeFile, codiceAgente, tipo) {
     if (match[1].toUpperCase() !== tipo) return false;
     return parseInt(match[2],10) === parseInt(codiceAgente,10);
 }
+
 async function caricaFileMulti(files) {
     if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
     if (files.length !== 3) { alert("Servono ESATTAMENTE 3 file: ORDxx.txt, SCAxx.txt, LISTxx.txt"); return false; }
@@ -289,14 +291,12 @@ async function caricaFileMulti(files) {
     if (errori.length) { alert("FILE NON VALIDI: " + errori.join(', ')); return false; }
     if (!trovati.ord || !trovati.sca || !trovati.list) { alert("FILE MANCANTI: sono richiesti ORD" + codAgente + ".txt, SCA" + codAgente + ".txt, LIST" + codAgente + ".txt"); return false; }
     
-    // Processa ORD e SCA come prima
     let nuoviOrd = parseORD(ordText);
     let nuoviSca = parseSCA(scaText);
     datiOrd = nuoviOrd;
     datiSca = nuoviSca;
-    await salvaDatiAgente();  // salva ORD/SCA su Firestore (funzione già esistente)
+    await salvaDatiAgente();
     
-    // Processa LIST
     let listinoArticoli = parseListinoFile(listText);
     if (listinoArticoli.length === 0) { alert("Il file LIST.txt non contiene articoli validi."); return false; }
     await salvaListinoAgente(codAgente, listinoArticoli);
@@ -307,7 +307,7 @@ async function caricaFileMulti(files) {
     return true;
 }
 
-// ---- Visualizzazione listino (modale) ----
+// ========== NUOVA FUNZIONE: mostra listino in modale ==========
 async function mostraListino() {
     if (!agenteCorrente) { alert("Seleziona prima un agente."); return; }
     const codice = agenteCorrente.codice;
@@ -354,8 +354,7 @@ async function mostraListino() {
     document.getElementById('closeListinoBtn').onclick = () => modal.remove();
 }
 
-// ---- Funzioni preesistenti (parseORD, parseSCA, salvaDatiAgente, etc.) ----
-// (mantenute identiche all'originale per non alterare la logica di ORD/SCA)
+// ========== FUNZIONI ORIGINALI (parseORD, parseSCA, ecc.) ==========
 function parseORD(text) { 
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
@@ -391,6 +390,7 @@ function parseORD(text) {
     }
     return Array.from(clienti.values());
 }
+
 function parseSCA(text) { 
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
@@ -433,6 +433,7 @@ function parseSCA(text) {
     }
     return Array.from(clienti.values());
 }
+
 function convertiImportoItaliano(importoStr) {
     if (!importoStr) return 0;
     let isNegative = importoStr.endsWith('-');
@@ -442,6 +443,7 @@ function convertiImportoItaliano(importoStr) {
     if (isNegative && !isNaN(importo)) importo = -importo;
     return isNaN(importo) ? 0 : importo;
 }
+
 async function salvaDatiAgente() { 
     if (!agenteCorrente) return;
     try {
@@ -459,16 +461,10 @@ async function salvaDatiAgente() {
         return true;
     } catch(e) { alert("Errore salvataggio: "+e.message); return false; }
 }
+
 function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
 function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
-function showToast(msg, isErr=false) { 
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.style.backgroundColor = isErr ? '#e74c3c' : '#27ae60';
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
-}
+
 function aggiornaClienti() {
     let mappa = new Map();
     for (let c of datiOrd) {
@@ -484,6 +480,7 @@ function aggiornaClienti() {
     clientiUnici = Array.from(mappa.values());
     filtraClienti();
 }
+
 function filtraClienti() {
     let searchText = document.getElementById('cercaCliente').value.toLowerCase();
     let clientiFiltrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(searchText) || c.ragione.toLowerCase().includes(searchText));
@@ -500,17 +497,19 @@ function filtraClienti() {
     }
     if (clientiFiltrati.length === 0) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
 }
+
 function buildScadenzeHtml(cliente) {
     let html = '<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ' + cliente.codice + ' ' + cliente.ragione + '</h3>';
     html += '<button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button>';
     html += '</div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>';
     for (let s of cliente.scadenze) {
         let classeImporto = s.importo < 0 ? 'style="color:#e74c3c"' : '';
-        html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</td></tr>`;
+        html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td style="text-align:right" ${classeImporto}>${s.importo.toFixed(2)} €</tr>`;
     }
-    html += '</tbody></table></div>';
+    html += '</tbody>}</div>';
     return html;
 }
+
 function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
@@ -536,6 +535,7 @@ function mostraDettaglioCliente(codice) {
     document.getElementById('dettaglioAgenti').innerHTML = html;
     document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
 }
+
 function filtraArticoli() {
     let clienteCodice = document.getElementById('selectClienteAgenti').value;
     if (!clienteCodice) return;
@@ -563,6 +563,7 @@ function filtraArticoli() {
     document.getElementById('dettaglioAgenti').innerHTML = html;
     document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
 }
+
 function apriModaleOrdine(cliente) {
     if (!cliente) { alert("Seleziona un cliente prima di compilare l'ordine!"); return; }
     if (!cliente.ordini || cliente.ordini.length === 0) { alert("Questo cliente non ha articoli disponibili (nessun dato ORD caricato)!"); return; }
@@ -645,6 +646,7 @@ function apriModaleOrdine(cliente) {
     };
     document.getElementById('btnAnnullaOrdine').onclick = () => modal.remove();
 }
+
 function generaHtmlOrdine(cliente, articoliConQta) {
     return `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 0 auto;">
@@ -656,12 +658,13 @@ function generaHtmlOrdine(cliente, articoliConQta) {
             </div>
             <table>
                 <thead><tr><th>Codice Articolo</th><th>Descrizione</th><th>Quantità</th></tr></thead>
-                <tbody>${articoliConQta.map(item => `<tr><td>${item.codice}</td><td>${item.descrizione}</td><td style="text-align:center">${item.quantita} pz</td></tr>`).join('')}</tbody>
+                <tbody>${articoliConQta.map(item => `<tr><td>${item.codice}</td><td>${item.descrizione}</td><td style="text-align:center">${item.quantita} pz</tr>`).join('')}</tbody>
             </table>
             <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #999;">Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}</div>
         </div>
     `;
 }
+
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || cliente.scadenze.length === 0) { alert("Nessuna scadenza"); return; }
     let messaggio = "SCADENZE CLIENTE\n" + cliente.codice + " - " + cliente.ragione + "\n\n";
@@ -673,8 +676,7 @@ function inviaScadenzeWhatsApp(cliente) {
     messaggio += "\nTOTALE: EUR " + totale.toFixed(2) + "\nMessaggio generato da inSAPA Agenti";
     window.open("https://wa.me/?text=" + encodeURIComponent(messaggio), '_blank');
 }
-function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
-function calcolaUltimaDataArticolo(art) { if (!art.coppie || art.coppie.length === 0) return null; let dateObj = art.coppie.map(c => ({ data: c.data, timestamp: new Date(c.data.split('/').reverse().join('-')).getTime() })); dateObj.sort((a,b) => b.timestamp - a.timestamp); return dateObj[0]; }
+
 function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
 async function caricaAgenti() {
@@ -692,6 +694,7 @@ async function caricaAgenti() {
         else if (oldValue && agentiLista.find(a => a.codice === oldValue)) { select.value = oldValue; selezionaAgente(oldValue); }
     } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
+
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
@@ -709,6 +712,7 @@ async function selezionaAgente(codice) {
         resetModificheNonSalvate();
     } catch(e) { console.error(e); }
 }
+
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -720,13 +724,25 @@ async function caricaLinkDaFile() {
         }
     } catch(e) {}
 }
+
 function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("Link principale"); } else showToast("Link principale non configurato", true); }
 function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("Link secondario"); } else showToast("Link secondario non configurato", true); }
+
 function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
+
+function showToast(msg, isErr) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isErr ? '#e74c3c' : '#27ae60';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
 const logoDivElemAgenti = document.getElementById('logoRettangolo');
 let lastTapAgenti = 0;
 logoDivElemAgenti.addEventListener('click', (e) => {
@@ -735,9 +751,12 @@ logoDivElemAgenti.addEventListener('click', (e) => {
     if (tapLength < 300 && tapLength > 0) { e.stopPropagation(); apriLinkSecondario(); lastTapAgenti = 0; }
     else { lastTapAgenti = now; setTimeout(() => { if (lastTapAgenti !== 0 && (new Date().getTime() - lastTapAgenti) > 300) { apriLinkPrincipale(); lastTapAgenti = 0; } }, 300); }
 });
+
 caricaLogoSaved();
+
 document.getElementById('hamburgerBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); });
 document.addEventListener('click', (e) => { const nav = document.getElementById('navGrid'); if (!nav.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) nav.classList.remove('open'); });
+
 document.getElementById('btnCaricaFileMulti').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('btnListinoMobile').onclick = () => mostraListino();
 document.getElementById('btnMostraListinoPc').onclick = () => mostraListino();
@@ -747,6 +766,7 @@ document.getElementById('selectAgente').onchange = (e) => { if(e.target.value) s
 document.getElementById('selectClienteAgenti').onchange = (e) => { if(e.target.value) mostraDettaglioCliente(e.target.value); };
 document.getElementById('cercaCliente').oninput = () => filtraClienti();
 document.getElementById('cercaArticoloInline').oninput = () => { let c = document.getElementById('selectClienteAgenti').value; if(c) filtraArticoli(); };
+
 caricaLinkDaFile();
 caricaAgenti();
 </script>
