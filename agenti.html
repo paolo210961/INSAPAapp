@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.5.68</title>
+    <title>inSAPA - Agenti vA.5.67</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -48,7 +48,6 @@
         .scadenze-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
         .btn-whatsapp { background: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; width: auto; margin: 0; }
         .btn-whatsapp:hover { background: #128C7E; transform: translateY(-1px); }
-        .btn-listino-mini { background: #8e44ad; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; margin-left: 10px; }
         .articolo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
         .articolo-item:hover { background-color: #fff3cd; transform: translateX(5px); }
         .articolo-titolo { font-weight: bold; }
@@ -82,15 +81,30 @@
         .cliente-info-modale { background: #eef2f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
         .cliente-info-modale p { margin: 5px 0; }
         
-        /* Stili per il modale listino (responsive) */
-        .listino-modal { max-width: 95vw; width: 1200px; max-height: 85vh; overflow-y: auto; padding: 20px; }
-        .listino-search { margin-bottom: 20px; width: 100%; padding: 12px; font-size: 1rem; }
-        .listino-tabella { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .listino-tabella th, .listino-tabella td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .listino-tabella th { background: #f1c40f; position: sticky; top: 0; }
-        .nota-field { margin: 15px 0; text-align: left; }
-        .nota-field label { font-weight: bold; display: block; margin-bottom: 5px; }
-        .nota-field textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; }
+        /* Stili per la stampa PDF */
+        @media print {
+            .modal-overlay, .modal-content, .btn-group-modal, .ricerca-articolo-ordine, .ordine-articolo-qta input, .ordine-articolo-qta label {
+                display: none !important;
+            }
+            .print-area {
+                display: block !important;
+            }
+            .ordine-articolo-item {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+        
+        .print-area {
+            display: none;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .print-area h2 { color: #2c3e50; }
+        .print-area table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .print-area th, .print-area td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .print-area th { background: #f1c40f; }
         
         @media (max-width: 768px) {
             .header-row { flex-direction: column; align-items: stretch; }
@@ -110,6 +124,7 @@
             .action-group input { min-width: unset; }
             .action-group:first-child { grid-template-columns: 1fr; }
             .action-group:first-child select { width: 100%; }
+            .action-group:first-child input { display: none; }
             .main-container { flex-direction: column; }
             .sidebar { width: 100%; position: static; top: 0; max-height: none; margin-bottom: 20px; }
             .content-area { width: 100%; }
@@ -126,19 +141,6 @@
             .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
             .modal-content { width: 95%; padding: 15px; }
             .lista-articoli-ordine { max-height: 50vh; }
-            /* Nascondi il pulsante ORD+SCA su mobile */
-            .btn-carica-file-mobile-hide { display: none !important; }
-            /* Listino modal adattato a mobile (bottom sheet) */
-            .listino-modal { border-radius: 28px 28px 0 0; margin: auto 0 0 0; max-height: 90vh; width: 100%; }
-            .modal-overlay { align-items: flex-end; }
-        }
-        /* Desktop: mostra normalmente */
-        @media (min-width: 769px) {
-            .btn-carica-file-mobile-hide { display: inline-flex; }
-        }
-        .pc-only { display: none; }
-        @media (min-width: 769px) {
-            .pc-only { display: inline-flex; }
         }
     </style>
 </head>
@@ -167,12 +169,10 @@
             <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
         <div class="action-group">
-            <div class="tooltip-wrapper btn-carica-file-mobile-hide" id="tooltipOrdsca">
-                <button id="btnCaricaFile" class="btn-primary">ORD+SCA+LIST</button>
+            <div class="tooltip-wrapper">
+                <button id="btnCaricaFile" class="btn-primary">ORD+SCA</button>
                 <span class="tooltip-text">I file devono essere nominati: ORD{codice}.txt e SCA{codice}.txt - Esempio: ORD01.txt e SCA01.txt (accetta anche ORD1.txt e SCA1.txt)</span>
             </div>
-            <!-- Pulsante LISTINO aggiuntivo per PC (tra ORD+SCA+LIST e COMPILA ORDINE) -->
-            <button id="btnListinoHeader" class="btn-primary pc-only">📋 LISTINO</button>
             <button id="btnCompilaOrdine" class="btn-ordine-header">
                 📝 COMPILA ORDINE
             </button>
@@ -196,7 +196,7 @@
     </div>
 </div>
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.5.68 - Stampa PDF/Email con persistenza quantità e note, Listino</div>
+<div class="version">vA.5.67 - Stampa PDF su PC / Email su Mobile</div>
 
 <script>
 const firebaseConfig = {
@@ -218,11 +218,9 @@ let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
 
-// Oggetto per memorizzare quantità e note per cliente (persistente fino a invio)
-let ordiniMemorizzati = {}; // struttura: { [codiceCliente]: { quantities: { codiceArt: qta }, note: "" } }
-
 let linkPrincipale = "", linkSecondario = "";
 
+// Funzione per rilevare se è desktop/PC (non touch o mouse preciso)
 function isDesktop() {
     return window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
 }
@@ -334,8 +332,6 @@ async function selezionaAgente(codice) {
     if (!agenteCorrente) return;
     localStorage.setItem('ultimoAgenteSelezionato', codice);
     await caricaDatiAgente(codice);
-    // Reset memorie ordini quando cambia agente
-    ordiniMemorizzati = {};
     aggiornaClienti();
     document.getElementById('cercaCliente').value = '';
     document.getElementById('cercaArticoloInline').value = '';
@@ -495,8 +491,8 @@ function inviaScadenzeWhatsApp(cliente) {
 }
 function inviaScadenzeClienteCorrente() { if (!clienteScadenzeCorrente) alert("Seleziona un cliente"); else inviaScadenzeWhatsApp(clienteScadenzeCorrente); }
 
-// Funzione per generare HTML dell'ordine (usato sia per email che per stampa) con NOTE
-function generaHtmlOrdine(cliente, articoliConQta, note = "") {
+// Funzione per generare HTML dell'ordine (usato sia per email che per stampa)
+function generaHtmlOrdine(cliente, articoliConQta) {
     let html = `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
             <h2 style="color: #2c3e50; border-bottom: 2px solid #f1c40f; padding-bottom: 10px;">📝 ORDINE DA CLIENTE</h2>
@@ -527,13 +523,6 @@ function generaHtmlOrdine(cliente, articoliConQta, note = "") {
     html += `
                 </tbody>
             </table>
-    `;
-    if (note && note.trim()) {
-        html += `<div style="margin-top: 20px; background: #fff9e6; padding: 12px; border-left: 4px solid #f1c40f;">
-                    <strong>📝 NOTE:</strong><br>${note.replace(/\n/g, '<br>')}
-                 </div>`;
-    }
-    html += `
             <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 10px;">
                 Documento generato da inSAPA Agenti il ${new Date().toLocaleString('it-IT')}
             </div>
@@ -543,8 +532,8 @@ function generaHtmlOrdine(cliente, articoliConQta, note = "") {
 }
 
 // Funzione per stampare PDF (PC)
-function stampaPDF(cliente, articoliConQta, note = "") {
-    const htmlContent = generaHtmlOrdine(cliente, articoliConQta, note);
+function stampaPDF(cliente, articoliConQta) {
+    const htmlContent = generaHtmlOrdine(cliente, articoliConQta);
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <!DOCTYPE html>
@@ -577,7 +566,7 @@ function stampaPDF(cliente, articoliConQta, note = "") {
 }
 
 // Funzione per inviare email (mobile)
-function inviaEmailOrdine(cliente, articoliConQta, note = "") {
+function inviaEmailOrdine(cliente, articoliConQta) {
     let soggetto = `ORDINE da ${cliente.codice} - ${cliente.ragione}`;
     let corpo = `ORDINE CLIENTE: ${cliente.codice} - ${cliente.ragione}\n\n`;
     corpo += `ARTICOLI ORDINATI:\n`;
@@ -585,9 +574,6 @@ function inviaEmailOrdine(cliente, articoliConQta, note = "") {
     for (let item of articoliConQta) {
         corpo += `📦 ${item.codice} - ${item.descrizione}\n`;
         corpo += `   Quantità: ${item.quantita} pz\n\n`;
-    }
-    if (note && note.trim()) {
-        corpo += `----------------------------------------\n📝 NOTE:\n${note}\n\n`;
     }
     corpo += `----------------------------------------\n`;
     corpo += `Ordine generato da inSAPA Agenti il ${new Date().toLocaleDateString('it-IT')}`;
@@ -641,7 +627,7 @@ function setupQuantitaInput(inputElement, articoloCodice, quantitaInputs) {
     });
 }
 
-// Apre modale compila ordine con persistenza quantità e note
+// Apre modale compila ordine
 function apriModaleOrdine(cliente) {
     if (!cliente) {
         alert("Seleziona un cliente prima di compilare l'ordine!");
@@ -653,12 +639,7 @@ function apriModaleOrdine(cliente) {
         return;
     }
     
-    // Carica eventuali quantità e nota memorizzate per questo cliente
-    const memorizzato = ordiniMemorizzati[cliente.codice] || { quantities: {}, note: "" };
-    let quantitaInputs = { ...memorizzato.quantities };
-    let noteCorrente = memorizzato.note || "";
-    
-    // Ordina articoli per ultimo acquisto
+    // Ordina articoli per ultimo acquisto (più recente in cima)
     let articoliOrdinati = [...cliente.ordini];
     articoliOrdinati.sort((a,b) => {
         let dataA = calcolaUltimaDataArticolo(a);
@@ -669,6 +650,7 @@ function apriModaleOrdine(cliente) {
         return dataB.timestamp - dataA.timestamp;
     });
     
+    // Crea modale
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     
@@ -686,10 +668,6 @@ function apriModaleOrdine(cliente) {
                 <input type="text" id="ricercaArticoloOrdine" placeholder="🔍 Cerca articolo per codice o descrizione...">
             </div>
             <div class="lista-articoli-ordine" id="listaArticoliOrdine"></div>
-            <div class="nota-field">
-                <label>📝 NOTE (opzionali):</label>
-                <textarea id="noteOrdine" rows="3" placeholder="Inserisci eventuali note per questo ordine...">${noteCorrente.replace(/</g, '&lt;')}</textarea>
-            </div>
             <div class="btn-group-modal">
                 <button id="btnConfermaOrdine" class="btn-success">${pulsanteTesto}</button>
                 <button id="btnAnnullaOrdine" class="btn-primary">ANNULLA</button>
@@ -697,6 +675,8 @@ function apriModaleOrdine(cliente) {
         </div>
     `;
     document.body.appendChild(modal);
+    
+    let quantitaInputs = {};
     
     function renderListaArticoli(searchText = '') {
         const container = document.getElementById('listaArticoliOrdine');
@@ -718,7 +698,6 @@ function apriModaleOrdine(cliente) {
         for (let art of filtrati) {
             const ultimoAcquisto = calcolaUltimaDataArticolo(art);
             const ultimoTesto = ultimoAcquisto ? `Ultimo acquisto: ${ultimoAcquisto.data}` : 'Mai acquistato';
-            const qtaCorrente = quantitaInputs[art.codice] || 0;
             html += `
                 <div class="ordine-articolo-item" data-codice="${art.codice}">
                     <div class="ordine-articolo-info">
@@ -728,7 +707,7 @@ function apriModaleOrdine(cliente) {
                     </div>
                     <div class="ordine-articolo-qta">
                         <label>Quantità:</label>
-                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" style="text-align:center;" value="${qtaCorrente > 0 ? qtaCorrente : ''}">
+                        <input type="number" id="qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" step="1" style="text-align:center;">
                     </div>
                 </div>
             `;
@@ -739,8 +718,7 @@ function apriModaleOrdine(cliente) {
             const inputId = `qta_${art.codice.replace(/[^a-zA-Z0-9]/g, '_')}`;
             const input = document.getElementById(inputId);
             if (input) {
-                const currentQta = quantitaInputs[art.codice] || 0;
-                if (currentQta > 0) input.value = currentQta;
+                if (quantitaInputs[art.codice] === undefined) quantitaInputs[art.codice] = 0;
                 setupQuantitaInput(input, art.codice, quantitaInputs);
             }
         }
@@ -752,25 +730,6 @@ function apriModaleOrdine(cliente) {
     ricercaInput.addEventListener('input', (e) => {
         renderListaArticoli(e.target.value);
     });
-    
-    // Aggiorna nota in tempo reale
-    const noteTextarea = document.getElementById('noteOrdine');
-    noteTextarea.addEventListener('input', (e) => {
-        noteCorrente = e.target.value;
-        // salva in memoria temporanea
-        ordiniMemorizzati[cliente.codice] = {
-            quantities: quantitaInputs,
-            note: noteCorrente
-        };
-    });
-    
-    // Salva quantità su ogni modifica tramite setupQuantitaInput già agganciato, ma per sicurezza aggiorniamo anche su blur
-    function saveCurrentState() {
-        ordiniMemorizzati[cliente.codice] = {
-            quantities: { ...quantitaInputs },
-            note: noteTextarea.value
-        };
-    }
     
     document.getElementById('btnConfermaOrdine').onclick = () => {
         let articoliConQta = [];
@@ -790,127 +749,20 @@ function apriModaleOrdine(cliente) {
             return;
         }
         
-        const noteFinale = noteTextarea.value;
-        
         if (isDesktopDevice) {
-            stampaPDF(cliente, articoliConQta, noteFinale);
+            stampaPDF(cliente, articoliConQta);
             showToast("Apertura finestra di stampa...");
         } else {
-            inviaEmailOrdine(cliente, articoliConQta, noteFinale);
+            inviaEmailOrdine(cliente, articoliConQta);
             showToast("Apertura email in corso...");
         }
         
-        // Dopo invio, azzera la memoria per questo cliente (nuovo ordine)
-        delete ordiniMemorizzati[cliente.codice];
         modal.remove();
     };
     
     document.getElementById('btnAnnullaOrdine').onclick = () => {
-        // Salva lo stato prima di chiudere (se l'utente ha modificato qualcosa)
-        saveCurrentState();
         modal.remove();
     };
-    
-    // Salva anche quando si chiude cliccando fuori? gestiamo con cleanup
-    window.addEventListener('click', function modalClickOutside(e) {
-        if (e.target === modal) {
-            saveCurrentState();
-            modal.remove();
-            window.removeEventListener('click', modalClickOutside);
-        }
-    });
-}
-
-// Funzione per costruire il catalogo articoli unico da tutti i clienti ORD (per listino)
-function getCatalogoArticoli() {
-    const mappaArticoli = new Map(); // key: codice articolo
-    for (let cliente of datiOrd) {
-        if (!cliente.articoli) continue;
-        for (let art of cliente.articoli) {
-            if (!mappaArticoli.has(art.codice)) {
-                // Dati reali da ORD
-                mappaArticoli.set(art.codice, {
-                    codice: art.codice,
-                    descrizione: art.descrizione,
-                    // Campi mancanti: generiamo placeholder realistici
-                    ean: `EAN${art.codice}`,
-                    stock: Math.floor(Math.random() * 200), // finto stock
-                    um: "PZ",
-                    gm: "0,00",
-                    mOrd: 1,
-                    iva: "22%"
-                });
-            }
-        }
-    }
-    return Array.from(mappaArticoli.values());
-}
-
-// Modale LISTINO (con ricerca e tabella)
-function apriListinoModal() {
-    if (!agenteCorrente) {
-        alert("Seleziona prima un agente.");
-        return;
-    }
-    const catalogo = getCatalogoArticoli();
-    if (catalogo.length === 0) {
-        alert("Nessun articolo trovato. Carica prima un file ORD.");
-        return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    const isMobile = !isDesktop();
-    modal.innerHTML = `
-        <div class="modal-content listino-modal">
-            <h3>📋 LISTINO ARTICOLI</h3>
-            <input type="text" id="searchListino" class="listino-search" placeholder="Cerca per codice o descrizione...">
-            <div style="overflow-x: auto;">
-                <table class="listino-tabella" id="tabellaListino">
-                    <thead>
-                        <tr><th>Codice Artic.</th><th>Codice</th><th>EAN</th><th>S T O K</th><th>Descrizione</th><th>UM</th><th>G.M.</th><th>M.Ord</th><th>Iva</th></tr>
-                    </thead>
-                    <tbody id="listaArticoliListino"></tbody>
-                </table>
-            </div>
-            <button id="chiudiListino" class="btn-primary" style="margin-top:15px;">CHIUDI</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    function renderListino(searchTerm = "") {
-        const tbody = document.getElementById("listaArticoliListino");
-        let filtrati = catalogo;
-        if (searchTerm) {
-            const low = searchTerm.toLowerCase();
-            filtrati = catalogo.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
-        }
-        if (filtrati.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Nessun articolo trovato</td></tr>';
-            return;
-        }
-        let html = "";
-        for (let art of filtrati) {
-            html += `<tr>
-                        <td>${art.codice}</td>
-                        <td>${art.codice}</td>
-                        <td>${art.ean}</td>
-                        <td>${art.stock}</td>
-                        <td>${art.descrizione}</td>
-                        <td>${art.um}</td>
-                        <td>${art.gm}</td>
-                        <td>${art.mOrd}</td>
-                        <td>${art.iva}</td>
-                     </tr>`;
-        }
-        tbody.innerHTML = html;
-    }
-    
-    renderListino();
-    const searchInput = document.getElementById("searchListino");
-    searchInput.addEventListener("input", (e) => renderListino(e.target.value));
-    
-    document.getElementById("chiudiListino").onclick = () => modal.remove();
 }
 
 function aggiornaClienti() {
@@ -967,7 +819,7 @@ function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
     clienteScadenzeCorrente = cliente;
-    let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h2 style="margin:0;">Cliente: ' + cliente.codice + ' - ' + cliente.ragione + '</h2><button id="btnListinoSottoCliente" class="btn-listino-mini">📋 LISTINO</button></div>';
+    let html = '';
     let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
     if (hasScadenze) html += buildScadenzeHtml(cliente);
     else html += '<div class="scadenze-box">Nessuna scadenza per ' + cliente.ragione + '</div>';
@@ -987,8 +839,6 @@ function mostraDettaglioCliente(codice) {
     } else html += '<div class="scadenze-box">Nessun ordine per ' + cliente.ragione + '</div>';
     document.getElementById('dettaglioAgenti').innerHTML = html;
     document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
-    const btnListino = document.getElementById('btnListinoSottoCliente');
-    if (btnListino) btnListino.onclick = () => apriListinoModal();
 }
 
 function filtraArticoli() {
@@ -998,7 +848,7 @@ function filtraArticoli() {
     if (!cliente || !cliente.ordini) return;
     let searchText = document.getElementById('cercaArticoloInline').value.toLowerCase();
     let filtrati = cliente.ordini.filter(art => art.codice.toLowerCase().includes(searchText) || art.descrizione.toLowerCase().includes(searchText));
-    let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h2 style="margin:0;">Cliente: ' + cliente.codice + ' - ' + cliente.ragione + '</h2><button id="btnListinoSottoCliente" class="btn-listino-mini">📋 LISTINO</button></div>';
+    let html = '';
     let hasScadenze = cliente.hasScadenze && cliente.scadenze.length;
     if (hasScadenze) html += buildScadenzeHtml(cliente);
     if (filtrati.length) {
@@ -1017,8 +867,6 @@ function filtraArticoli() {
     } else html += '<div class="scadenze-box">Nessun articolo trovato per "' + searchText + '"</div>';
     document.getElementById('dettaglioAgenti').innerHTML = html;
     document.querySelectorAll('.articolo-item').forEach(el => { el.onclick = (e) => { e.stopPropagation(); let storicoDiv = el.querySelector('.storico-ordini'); if (storicoDiv) storicoDiv.classList.toggle('visible'); }; });
-    const btnListino = document.getElementById('btnListinoSottoCliente');
-    if (btnListino) btnListino.onclick = () => apriListinoModal();
 }
 
 function nomeFileCorrisponde(nomeFile, codiceAgente, tipo) {
@@ -1082,10 +930,6 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
         alert("Cliente non trovato!");
     }
 };
-// Pulsante LISTINO nell'header (PC)
-const btnListinoHeader = document.getElementById('btnListinoHeader');
-if (btnListinoHeader) btnListinoHeader.onclick = () => apriListinoModal();
-
 document.getElementById('fileInput').onchange = async (e) => { await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 
 Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => caricaLogoSaved());
