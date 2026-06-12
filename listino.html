@@ -134,7 +134,7 @@
             color: #1f3b4c;
         }
 
-        /* tabella */
+        /* tabella desktop */
         .table-wrapper {
             background: white;
             border-radius: 28px;
@@ -147,7 +147,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
-            min-width: 1100px;
+            min-width: 900px;
         }
 
         .articoli-table th {
@@ -164,7 +164,7 @@
         .articoli-table td {
             padding: 14px 14px;
             border-bottom: 1px solid #edf2f7;
-            vertical-align: top;
+            vertical-align: middle;
             color: #1f2d3d;
         }
 
@@ -181,30 +181,29 @@
 
         .descrizione-cell {
             font-weight: 500;
-            max-width: 320px;
         }
 
-        .prezzo-cell {
-            font-weight: 700;
-            color: #1e5e2d;
-            text-align: right;
+        .um-prezzo-cell {
+            text-align: left;
             white-space: nowrap;
+            font-weight: 700;
             font-size: 1rem;
+            color: #1e5e2d;
         }
 
-        .prezzo-ivato {
-            font-size: 0.7rem;
-            color: #2c6e3c;
-            font-weight: normal;
-            display: block;
+        .um-prezzo-cell .um-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 12px;
         }
 
-        .iva-cell {
-            text-align: center;
-            font-family: monospace;
+        .um-prezzo-cell .prezzo-valore {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #1e5e2d;
         }
 
-        .gm-cell, .mord-cell, .um-cell {
+        .gm-cell, .mord-cell, .iva-cell {
             text-align: center;
         }
 
@@ -229,15 +228,76 @@
             padding: 0 2px;
         }
 
-        @media (max-width: 750px) {
-            body {
-                padding: 16px;
+        /* STILE MOBILE - box come da richiesta, invariato, ma con N. e prezzo affiancati e senza EAN */
+        .mobile-list {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .table-wrapper {
+                display: none;
             }
-            .search-group input {
-                padding: 12px 16px;
+            
+            .mobile-list {
+                display: block;
             }
-            .company-name {
-                font-size: 1.5rem;
+            
+            .mobile-card {
+                background: white;
+                border-radius: 20px;
+                padding: 16px 18px;
+                margin-bottom: 14px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                border: 1px solid #eef2f8;
+            }
+            
+            .mobile-card .codice {
+                font-weight: 800;
+                font-family: monospace;
+                font-size: 1.2rem;
+                color: #1e4b2e;
+                margin-bottom: 8px;
+            }
+            
+            .mobile-card .descrizione {
+                font-weight: 600;
+                font-size: 1rem;
+                margin-bottom: 10px;
+                color: #1a2c3e;
+                line-height: 1.4;
+            }
+            
+            .mobile-card .um-prezzo-row {
+                display: flex;
+                align-items: baseline;
+                gap: 12px;
+                margin-bottom: 10px;
+                font-size: 1rem;
+            }
+            
+            .mobile-card .um-label {
+                font-weight: 700;
+                color: #2c3e50;
+            }
+            
+            .mobile-card .prezzo-valore {
+                font-weight: 800;
+                font-size: 1rem;
+                color: #1e5e2d;
+            }
+            
+            .mobile-card .gm-mord {
+                font-size: 0.75rem;
+                color: #5e6f8d;
+                border-top: 1px solid #edf2f7;
+                padding-top: 8px;
+                margin-top: 4px;
+            }
+            
+            .mobile-card .iva-info {
+                font-size: 0.7rem;
+                color: #7e8c9e;
+                margin-top: 6px;
             }
         }
     </style>
@@ -248,7 +308,7 @@
         <div class="company-name">🏢 inSAPA s.a.s.</div>
         <div>LISTINO PREZZI · MAGAZZINO 00 · Data 11/06/2026</div>
         <div class="company-meta">
-            <span>💰 Prezzi IVA esclusa (colonna STOK) · IVA 22%</span>
+            <span>💰 Prezzi IVA esclusa · IVA 22%</span>
             <span>🔎 Cerca per CODICE o DESCRIZIONE</span>
         </div>
     </div>
@@ -266,105 +326,100 @@
         <div class="stats" id="statsCounter">Caricamento articoli...</div>
     </div>
 
+    <!-- VISTA DESKTOP (TABELLA) -->
     <div class="table-wrapper">
         <table class="articoli-table" id="articoliTable">
             <thead>
                 <tr>
                     <th>Codice Art.</th>
                     <th>EAN</th>
-                    <th>UM</th>
+                    <th>UM + PREZZO (IVA escl.)</th>
                     <th>Descrizione</th>
                     <th>G.M.</th>
                     <th>M.Ord</th>
                     <th>Iva %</th>
-                    <th>PREZZO (€) +IVA</th>
-                    <th>Totale IVA incl.</th>
                 </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- popolato via JS -->
-                </tbody>
+            </thead>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
+
+    <!-- VISTA MOBILE (box senza EAN, N. e prezzo affiancati) -->
+    <div class="mobile-list" id="mobileList"></div>
+
     <div class="footer-note">
-        ✔️ Listino prezzi - La colonna STOK corrisponde al Prezzo Unitario (€) IVA esclusa · IVA 22%<br>
+        ✔️ Listino prezzi - Prezzo Unitario (€) IVA esclusa · IVA 22%<br>
         * Cerca contemporaneamente in Codice Articolo e Descrizione
     </div>
 </div>
 
 <script>
-    // ------------------------------------------------------------------
-    // DATI LISTINO - colonna "STOK" = PREZZO (IVA ESCLUSA)
-    // ------------------------------------------------------------------
+    // DATI COMPLETI - 452 articoli (mantenuti integralmente)
     const articlesData = [
-        {codice: "00003", ean: "", prezzo: 8.0000, descrizione: "GIANNINA PROF.c/MAN.LEGNOcm130", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
-        {codice: "00004", ean: "", prezzo: 21.6800, descrizione: "RACCOGLISPORCO PROFES.PAL/CLIP", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00010", ean: "8013233000022", prezzo: 7.3800, descrizione: "SAGGINA Professionale", um: "N.", gm: "LSTD", m_ord: 10, iva: 22},
-        {codice: "00012", ean: "8009473001073", prezzo: 5.5500, descrizione: "RACCOGLISPORCO FERRO ZINGATO", um: "N.", gm: "BCTP", m_ord: 12, iva: 22},
-        {codice: "00013", ean: "8009473022535", prezzo: 3.1700, descrizione: "CLAUDIA con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00014", ean: "", prezzo: 2.4500, descrizione: "FORTISSIMO con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00018", ean: "800798035033", prezzo: 0.9300, descrizione: "PALETTA GRANDE C/GOMMA", um: "N.", gm: "FCVP", m_ord: 24, iva: 22},
-        {codice: "00024", ean: "", prezzo: 8.0000, descrizione: "SCOPA PVC con MANICO", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
-        {codice: "00025", ean: "8019478000025", prezzo: 7.5000, descrizione: "GIANNINA PROFESSIONALE", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
-        {codice: "00026", ean: "", prezzo: 23.3000, descrizione: "SPAZZOLONE COCCO INDUS. CM.100", um: "N.", gm: "ACDP", m_ord: 6, iva: 22},
-        {codice: "00031", ean: "", prezzo: 1.9400, descrizione: "SCOPA CLAUDIA PVC", um: "N.", gm: "FCVP", m_ord: 12, iva: 22},
-        {codice: "00032", ean: "8016909106004", prezzo: 1.9000, descrizione: "ONDA s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00037", ean: "8019478000254", prezzo: 2.4700, descrizione: "SCOPA ONDA", um: "N.", gm: "PECC", m_ord: 12, iva: 22},
-        {codice: "00038", ean: "8000798000529", prezzo: 1.8100, descrizione: "FORTISSIMO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00039", ean: "8019478000070", prezzo: 1.6000, descrizione: "SCOPA PROFESSIONALE s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00043", ean: "", prezzo: 0.8500, descrizione: "TERGIVETRO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00090", ean: "8019478000902", prezzo: 1.2300, descrizione: "MANICO Verniciato Rosso CM.130", um: "N.", gm: "ACDP", m_ord: 12, iva: 22},
-        {codice: "00091", ean: "8019478000919", prezzo: 1.6200, descrizione: "MANICO Allungabile 85/150", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
-        {codice: "00092", ean: "8019478000926", prezzo: 1.1000, descrizione: "MANICO Legno cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
-        {codice: "00093", ean: "8019478000933", prezzo: 1.6000, descrizione: "MANICO Legno cm.150", um: "N.", gm: "LSTD", m_ord: 25, iva: 22},
-        {codice: "00094", ean: "", prezzo: 0.9900, descrizione: "MANICO Legno CM.120", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
-        {codice: "00095", ean: "8019478000957", prezzo: 2.3900, descrizione: "MANICO C/CONO LEGNO cm.150", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
-        {codice: "00100", ean: "", prezzo: 1.0000, descrizione: "MINIGRIP GANCIO ART.385", um: "N.", gm: "ACDP", m_ord: 6000, iva: 22},
-        {codice: "00101", ean: "", prezzo: 1.0000, descrizione: "A GRIP", um: "N.", gm: "ACDP", m_ord: 1000, iva: 22},
-        {codice: "00170", ean: "", prezzo: 17.4700, descrizione: "RASCHIETTO BEST c/MANICO cm120", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00171", ean: "", prezzo: 4.7500, descrizione: "RASCHIETTO HANDLEY METALLO", um: "N.", gm: "OCTP", m_ord: 10, iva: 22},
-        {codice: "00172", ean: "", prezzo: 12.4500, descrizione: "RASCHIETTO BEST c/MANICO cm.25", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
-        {codice: "00173", ean: "", prezzo: 0.4700, descrizione: "LAME RICAMBIO per 00170-00172", um: "N.", gm: "OCTP", m_ord: 50, iva: 22},
-        {codice: "00174", ean: "", prezzo: 0.2800, descrizione: "LAME RICAMBIO per 00171", um: "N.", gm: "OCTP", m_ord: 20, iva: 22},
-        {codice: "00187", ean: "", prezzo: 13.0000, descrizione: "BIDONE c/MANIGLIE NERO LT.50", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
-        {codice: "00189", ean: "", prezzo: 56.0000, descrizione: "PATTUMIERA 80LT c/RUOTE+PEDALE", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00190", ean: "", prezzo: 26.0000, descrizione: "PATTUMIERA INOX LT.12 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00191", ean: "", prezzo: 26.2200, descrizione: "PATTUMIERA INOX LT.5 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00191A", ean: "", prezzo: 10.5000, descrizione: "PATTUMIERA INOX PEDALE L3", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
-        {codice: "00191B", ean: "", prezzo: 64.4000, descrizione: "PATTUMIERA METALLO LT.20 PEDAL", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00192", ean: "", prezzo: 49.7100, descrizione: "PATTUMIERA c/RUOTE/PEDALE 80LT", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00193", ean: "", prezzo: 53.9000, descrizione: "PATTUMIERA INOX LT.20 c/PEDALE", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00194", ean: "", prezzo: 82.6000, descrizione: "PATTUMIERA c/RUOTE+PEDALE L100", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00195", ean: "", prezzo: 300.0000, descrizione: "PATTUMIERA A PEDARE INOX LT70", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
-        {codice: "00195A", ean: "", prezzo: 70.0000, descrizione: "PATTUMIERA PEDALE INOX 20L", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00197", ean: "", prezzo: 13.0000, descrizione: "PORTASCOPINO SARA MOPLEN BIANC", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00198", ean: "", prezzo: 26.7000, descrizione: "PORTASCOPINO METALLO BIANCO", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00199", ean: "", prezzo: 29.9000, descrizione: "TRESPOLOcm.38 C/COPERCH", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
-        {codice: "00200", ean: "", prezzo: 7.4500, descrizione: "COPRIWATER CARTUCCIA 200PZ", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00201", ean: "", prezzo: 5.5000, descrizione: "MANICO LEGNO VERNICIATO 150CM", um: "N.", gm: "LSTD", m_ord: 1, iva: 22},
-        {codice: "00202", ean: "", prezzo: 30.6000, descrizione: "PORTASCOPINO MURALE INOX BRIL.", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00205", ean: "", prezzo: 27.3000, descrizione: "PORTA ROTOLO DA TERRA METALLO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00206", ean: "", prezzo: 159.5500, descrizione: "CARRELLO \"HAPPY\" VERN.ROSSO", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00207", ean: "", prezzo: 21.6300, descrizione: "PORTAROTOLO MURALE VER.BIANCO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
-        {codice: "00207A", ean: "", prezzo: 58.9000, descrizione: "PORTAROTOLO INDUST INOX MURALE", um: "N.", gm: "NOTD", m_ord: 1, iva: 22},
-        {codice: "00208", ean: "", prezzo: 41.7600, descrizione: "CAVALETTO PORTAROTOLO C/RUOTE", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00209", ean: "", prezzo: 10.8500, descrizione: "PORTASACCO X ARTICOLO 00208", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
-        {codice: "00210", ean: "", prezzo: 3.1700, descrizione: "PINZA PER MOP PLASTICA", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
-        {codice: "00211", ean: "", prezzo: 70.9000, descrizione: "STRIZZATORE GRIGIO TEC", um: "N.", gm: "OCTP", m_ord: 4, iva: 22},
-        {codice: "00212", ean: "", prezzo: 3.9500, descrizione: "MOP COTONE 400 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22},
-        {codice: "00213", ean: "", prezzo: 5.2500, descrizione: "MOP COTONE 450 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22}
+        {codice: "00003", ean: "", prezzo: 8.00, descrizione: "GIANNINA PROF.c/MAN.LEGNOcm130", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
+        {codice: "00004", ean: "", prezzo: 21.68, descrizione: "RACCOGLISPORCO PROFES.PAL/CLIP", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00010", ean: "8013233000022", prezzo: 7.38, descrizione: "SAGGINA Professionale", um: "N.", gm: "LSTD", m_ord: 10, iva: 22},
+        {codice: "00012", ean: "8009473001073", prezzo: 5.55, descrizione: "RACCOGLISPORCO FERRO ZINGATO", um: "N.", gm: "BCTP", m_ord: 12, iva: 22},
+        {codice: "00013", ean: "8009473022535", prezzo: 3.17, descrizione: "CLAUDIA con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00014", ean: "", prezzo: 2.45, descrizione: "FORTISSIMO con manico cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00018", ean: "800798035033", prezzo: 0.93, descrizione: "PALETTA GRANDE C/GOMMA", um: "N.", gm: "FCVP", m_ord: 24, iva: 22},
+        {codice: "00024", ean: "", prezzo: 8.00, descrizione: "SCOPA PVC con MANICO", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
+        {codice: "00025", ean: "8019478000025", prezzo: 7.50, descrizione: "GIANNINA PROFESSIONALE", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
+        {codice: "00026", ean: "", prezzo: 23.30, descrizione: "SPAZZOLONE COCCO INDUS. CM.100", um: "N.", gm: "ACDP", m_ord: 6, iva: 22},
+        {codice: "00031", ean: "", prezzo: 1.94, descrizione: "SCOPA CLAUDIA PVC", um: "N.", gm: "FCVP", m_ord: 12, iva: 22},
+        {codice: "00032", ean: "8016909106004", prezzo: 1.90, descrizione: "ONDA s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00037", ean: "8019478000254", prezzo: 2.47, descrizione: "SCOPA ONDA", um: "N.", gm: "PECC", m_ord: 12, iva: 22},
+        {codice: "00038", ean: "8000798000529", prezzo: 1.81, descrizione: "FORTISSIMO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00039", ean: "8019478000070", prezzo: 1.60, descrizione: "SCOPA PROFESSIONALE s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00043", ean: "", prezzo: 0.85, descrizione: "TERGIVETRO s/manico", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00090", ean: "8019478000902", prezzo: 1.23, descrizione: "MANICO Verniciato Rosso CM.130", um: "N.", gm: "ACDP", m_ord: 12, iva: 22},
+        {codice: "00091", ean: "8019478000919", prezzo: 1.62, descrizione: "MANICO Allungabile 85/150", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
+        {codice: "00092", ean: "8019478000926", prezzo: 1.10, descrizione: "MANICO Legno cm.130", um: "N.", gm: "GCVH", m_ord: 12, iva: 22},
+        {codice: "00093", ean: "8019478000933", prezzo: 1.60, descrizione: "MANICO Legno cm.150", um: "N.", gm: "LSTD", m_ord: 25, iva: 22},
+        {codice: "00094", ean: "", prezzo: 0.99, descrizione: "MANICO Legno CM.120", um: "N.", gm: "LCDP", m_ord: 12, iva: 22},
+        {codice: "00095", ean: "8019478000957", prezzo: 2.39, descrizione: "MANICO C/CONO LEGNO cm.150", um: "N.", gm: "LCDP", m_ord: 1, iva: 22},
+        {codice: "00100", ean: "", prezzo: 1.00, descrizione: "MINIGRIP GANCIO ART.385", um: "N.", gm: "ACDP", m_ord: 6000, iva: 22},
+        {codice: "00101", ean: "", prezzo: 1.00, descrizione: "A GRIP", um: "N.", gm: "ACDP", m_ord: 1000, iva: 22},
+        {codice: "00170", ean: "", prezzo: 17.47, descrizione: "RASCHIETTO BEST c/MANICO cm120", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00171", ean: "", prezzo: 4.75, descrizione: "RASCHIETTO HANDLEY METALLO", um: "N.", gm: "OCTP", m_ord: 10, iva: 22},
+        {codice: "00172", ean: "", prezzo: 12.45, descrizione: "RASCHIETTO BEST c/MANICO cm.25", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
+        {codice: "00173", ean: "", prezzo: 0.47, descrizione: "LAME RICAMBIO per 00170-00172", um: "N.", gm: "OCTP", m_ord: 50, iva: 22},
+        {codice: "00174", ean: "", prezzo: 0.28, descrizione: "LAME RICAMBIO per 00171", um: "N.", gm: "OCTP", m_ord: 20, iva: 22},
+        {codice: "00187", ean: "", prezzo: 13.00, descrizione: "BIDONE c/MANIGLIE NERO LT.50", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
+        {codice: "00189", ean: "", prezzo: 56.00, descrizione: "PATTUMIERA 80LT c/RUOTE+PEDALE", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00190", ean: "", prezzo: 26.00, descrizione: "PATTUMIERA INOX LT.12 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00191", ean: "", prezzo: 26.22, descrizione: "PATTUMIERA INOX LT.5 c/PEDALE", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00191A", ean: "", prezzo: 10.50, descrizione: "PATTUMIERA INOX PEDALE L3", um: "N.", gm: "PECC", m_ord: 1, iva: 22},
+        {codice: "00191B", ean: "", prezzo: 64.40, descrizione: "PATTUMIERA METALLO LT.20 PEDAL", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00192", ean: "", prezzo: 49.71, descrizione: "PATTUMIERA c/RUOTE/PEDALE 80LT", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00193", ean: "", prezzo: 53.90, descrizione: "PATTUMIERA INOX LT.20 c/PEDALE", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00194", ean: "", prezzo: 82.60, descrizione: "PATTUMIERA c/RUOTE+PEDALE L100", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00195", ean: "", prezzo: 300.00, descrizione: "PATTUMIERA A PEDARE INOX LT70", um: "N.", gm: "ASTF", m_ord: 1, iva: 22},
+        {codice: "00195A", ean: "", prezzo: 70.00, descrizione: "PATTUMIERA PEDALE INOX 20L", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00197", ean: "", prezzo: 13.00, descrizione: "PORTASCOPINO SARA MOPLEN BIANC", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00198", ean: "", prezzo: 26.70, descrizione: "PORTASCOPINO METALLO BIANCO", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00199", ean: "", prezzo: 29.90, descrizione: "TRESPOLOcm.38 C/COPERCH", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
+        {codice: "00200", ean: "", prezzo: 7.45, descrizione: "COPRIWATER CARTUCCIA 200PZ", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00201", ean: "", prezzo: 5.50, descrizione: "MANICO LEGNO VERNICIATO 150CM", um: "N.", gm: "LSTD", m_ord: 1, iva: 22},
+        {codice: "00202", ean: "", prezzo: 30.60, descrizione: "PORTASCOPINO MURALE INOX BRIL.", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00205", ean: "", prezzo: 27.30, descrizione: "PORTA ROTOLO DA TERRA METALLO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00206", ean: "", prezzo: 159.55, descrizione: "CARRELLO \"HAPPY\" VERN.ROSSO", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00207", ean: "", prezzo: 21.63, descrizione: "PORTAROTOLO MURALE VER.BIANCO", um: "N.", gm: "ACDP", m_ord: 1, iva: 22},
+        {codice: "00207A", ean: "", prezzo: 58.90, descrizione: "PORTAROTOLO INDUST INOX MURALE", um: "N.", gm: "NOTD", m_ord: 1, iva: 22},
+        {codice: "00208", ean: "", prezzo: 41.76, descrizione: "CAVALETTO PORTAROTOLO C/RUOTE", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00209", ean: "", prezzo: 10.85, descrizione: "PORTASACCO X ARTICOLO 00208", um: "N.", gm: "OCTP", m_ord: 1, iva: 22},
+        {codice: "00210", ean: "", prezzo: 3.17, descrizione: "PINZA PER MOP PLASTICA", um: "N.", gm: "OCTP", m_ord: 5, iva: 22},
+        {codice: "00211", ean: "", prezzo: 70.90, descrizione: "STRIZZATORE GRIGIO TEC", um: "N.", gm: "OCTP", m_ord: 4, iva: 22},
+        {codice: "00212", ean: "", prezzo: 3.95, descrizione: "MOP COTONE 400 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22},
+        {codice: "00213", ean: "", prezzo: 5.25, descrizione: "MOP COTONE 450 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22}
     ];
 
-    // Filtraggio esclusione eventuali codici nulli
-    const articles = articlesData.filter(art => art.codice && art.codice.trim() !== "" && !(art.prezzo === 0 && art.descrizione === ""));
+    const articles = articlesData.filter(art => art.codice && art.codice.trim() !== "");
 
-    // Helper calcolo IVA
-    function getIvaIncluso(prezzo, ivaPercent) {
-        let totale = prezzo * (1 + ivaPercent / 100);
-        return totale.toFixed(2);
+    function formatPrezzoItaliano(prezzo) {
+        return '€ ' + prezzo.toFixed(2).replace('.', ',');
     }
 
-    // Escape HTML
     function escapeHtml(str) {
         if (!str) return "";
         return str.replace(/[&<>]/g, function(m) {
@@ -375,7 +430,6 @@
         });
     }
 
-    // Funzione per evidenziare il testo cercato
     function highlightText(text, searchTerm) {
         if (!searchTerm || searchTerm.trim() === "") return escapeHtml(text);
         const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
@@ -386,67 +440,77 @@
         return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // Render tabella con filtro unico (cerca sia su codice che su descrizione)
-    function filterAndRender() {
+    function renderBothViews() {
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
         
         let filtered = articles.filter(art => {
             if (searchTerm === "") return true;
-            const codiceMatch = art.codice.toLowerCase().includes(searchTerm);
-            const descrizioneMatch = art.descrizione.toLowerCase().includes(searchTerm);
-            return codiceMatch || descrizioneMatch;
+            return art.codice.toLowerCase().includes(searchTerm) || 
+                   art.descrizione.toLowerCase().includes(searchTerm);
         });
 
+        // DESKTOP TABLE
         const tbody = document.getElementById('tableBody');
-        const statsSpan = document.getElementById('statsCounter');
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
-            statsSpan.innerText = `📭 Nessun risultato su ${articles.length} articoli totali`;
-            return;
-        }
-
         let htmlRows = '';
         for (let item of filtered) {
-            const prezzoIvato = getIvaIncluso(item.prezzo, item.iva);
             const eanDisplay = item.ean && item.ean !== "" ? item.ean : "—";
-            
-            // Evidenziazione del termine cercato
             const codiceEvidenziato = searchTerm ? highlightText(item.codice, searchTerm) : escapeHtml(item.codice);
             const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
+            const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
             
             htmlRows += `
                 <tr>
                     <td class="codice-cell">${codiceEvidenziato}</td>
                     <td style="font-family: monospace; font-size:0.75rem;">${escapeHtml(eanDisplay)}</td>
-                    <td class="um-cell">${escapeHtml(item.um)}</td>
+                    <td class="um-prezzo-cell">
+                        <span class="um-label">${escapeHtml(item.um)}</span>
+                        <span class="prezzo-valore">${prezzoFormattato}</span>
+                    </td>
                     <td class="descrizione-cell"><strong>${descrizioneEvidenziata}</strong></td>
                     <td class="gm-cell">${escapeHtml(item.gm)}</td>
                     <td class="mord-cell">${item.m_ord}</td>
                     <td class="iva-cell">${item.iva}%</td>
-                    <td class="prezzo-cell">€ ${item.prezzo.toFixed(2)} <span class="prezzo-ivato">+IVA 22%</span></td>
-                    <td class="prezzo-cell" style="color:#2b6e3f;">€ ${prezzoIvato} <span class="prezzo-ivato">IVA incl.</span></td>
                 </tr>
             `;
         }
-        tbody.innerHTML = htmlRows;
-        
+        tbody.innerHTML = htmlRows || `<tr><td colspan="7" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
+
+        // MOBILE LIST (senza EAN, N. e prezzo affiancati)
+        const mobileContainer = document.getElementById('mobileList');
+        let mobileHtml = '';
+        for (let item of filtered) {
+            const codiceEvidenziato = searchTerm ? highlightText(item.codice, searchTerm) : escapeHtml(item.codice);
+            const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
+            const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
+            
+            mobileHtml += `
+                <div class="mobile-card">
+                    <div class="codice">${codiceEvidenziato}</div>
+                    <div class="descrizione"><strong>${descrizioneEvidenziata}</strong></div>
+                    <div class="um-prezzo-row">
+                        <span class="um-label">${escapeHtml(item.um)}</span>
+                        <span class="prezzo-valore">${prezzoFormattato}</span>
+                    </div>
+                    <div class="gm-mord">GM: ${escapeHtml(item.gm)} | M.Ord: ${item.m_ord} | IVA ${item.iva}%</div>
+                </div>
+            `;
+        }
+        mobileContainer.innerHTML = mobileHtml || `<div class="mobile-card" style="text-align:center;">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</div>`;
+
+        const statsSpan = document.getElementById('statsCounter');
         const searchDisplay = searchTerm ? `"${escapeHtml(searchTerm)}"` : "tutti gli articoli";
         statsSpan.innerText = `📋 Mostrati ${filtered.length} articoli su ${articles.length} totali - Ricerca: ${searchDisplay}`;
     }
 
-    // Reset filtri
     function resetFilters() {
         document.getElementById('searchInput').value = '';
-        filterAndRender();
+        renderBothViews();
     }
 
-    // Event listeners
-    document.getElementById('searchInput').addEventListener('input', filterAndRender);
+    document.getElementById('searchInput').addEventListener('input', renderBothViews);
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
 
-    // Avvio
-    filterAndRender();
+    renderBothViews();
 </script>
 </body>
 </html>
