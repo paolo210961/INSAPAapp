@@ -381,7 +381,7 @@
             background: #1e4b2e;
         }
 
-        /* STILE MOBILE - box senza EAN */
+        /* STILE MOBILE - box senza EAN + SCROLLBAR PERSONALIZZATA */
         .mobile-list {
             display: none;
         }
@@ -393,6 +393,25 @@
             
             .mobile-list {
                 display: block;
+                max-height: calc(100vh - 280px);
+                overflow-y: auto;
+                padding-right: 4px;
+            }
+            
+            /* SCROLLBAR PERSONALIZZATA (stessa tecnica di agenti.html) */
+            .mobile-list::-webkit-scrollbar {
+                width: 12px;
+            }
+            .mobile-list::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            .mobile-list::-webkit-scrollbar-thumb {
+                background: #2c6e3c;
+                border-radius: 10px;
+            }
+            .mobile-list::-webkit-scrollbar-thumb:hover {
+                background: #1e4b2e;
             }
             
             .mobile-card {
@@ -446,28 +465,6 @@
                 padding-top: 8px;
                 margin-top: 4px;
             }
-
-            /* ===== BARRA DI SCORRIMENTO PERSONALIZZATA (SOLO MOBILE) ===== */
-            body {
-                overflow-y: scroll;  /* Forza la scrollbar sempre visibile */
-                scrollbar-width: thick;
-                scrollbar-color: #2c6e3c #e2e8f0;
-            }
-            body::-webkit-scrollbar {
-                width: 12px;  /* Più spessa per Android */
-            }
-            body::-webkit-scrollbar-track {
-                background: #e2e8f0;
-                border-radius: 10px;
-            }
-            body::-webkit-scrollbar-thumb {
-                background: #2c6e3c;
-                border-radius: 10px;
-                border: 1px solid #cbd5e1;
-            }
-            body::-webkit-scrollbar-thumb:hover {
-                background: #1e4b2e;
-            }
         }
     </style>
 </head>
@@ -514,7 +511,7 @@
         </table>
     </div>
 
-    <!-- VISTA MOBILE (box - già senza EAN) -->
+    <!-- VISTA MOBILE (box - già senza EAN, ora con scrollbar personalizzata) -->
     <div class="mobile-list" id="mobileList"></div>
 
     <div class="footer-note">
@@ -625,13 +622,7 @@
     // ------------------------------------------------------------------
     function cleanArticleData(article) {
         const cleaned = { ...article };
-        
-        // Se il prezzo è enorme (es. 8013233000022) => è un EAN, lo scartiamo
-        if (typeof cleaned.prezzo === 'number' && cleaned.prezzo > 10000000) {
-            cleaned.prezzo = 0;
-        }
-        
-        // Se il prezzo è 0 o manca, cerchiamo di estrarlo dalla descrizione (es. "7,3800 SAGGINA")
+        if (typeof cleaned.prezzo === 'number' && cleaned.prezzo > 10000000) cleaned.prezzo = 0;
         if ((!cleaned.prezzo || cleaned.prezzo === 0) && cleaned.descrizione) {
             const match = cleaned.descrizione.match(/^(\d+)[,.](\d+)\s/);
             if (match) {
@@ -642,29 +633,19 @@
                 }
             }
         }
-        
-        // Assicuriamoci che prezzo sia un numero valido
-        if (typeof cleaned.prezzo !== 'number' || isNaN(cleaned.prezzo)) {
-            cleaned.prezzo = 0;
-        }
-        
+        if (typeof cleaned.prezzo !== 'number' || isNaN(cleaned.prezzo)) cleaned.prezzo = 0;
         return cleaned;
     }
     
-    // ------------------------------------------------------------------
-    // FUNZIONE PER CARICARE LISTINO DA FIRESTORE
-    // ------------------------------------------------------------------
     async function caricaListinoDaFirestore() {
         try {
             const docRef = db.collection('listini_generali').doc('listino_globale');
             const docSnap = await docRef.get();
-            
             if (docSnap.exists) {
                 const data = docSnap.data();
                 let articoliDB = data.articoli || [];
                 if (articoliDB.length > 0) {
                     articoliDB = articoliDB.map(cleanArticleData);
-                    console.log(`✅ Listino caricato da Firestore: ${articoliDB.length} articoli`);
                     currentArticles = articoliDB;
                     dbStatus = "online";
                     document.getElementById('dbBadge').innerHTML = "☁️ DATABASE ONLINE";
@@ -672,19 +653,16 @@
                     document.getElementById('dbBadge').style.color = "#2e7d32";
                     return true;
                 } else {
-                    console.log("⚠️ Database vuoto, uso fallback locale");
                     dbStatus = "empty";
                     document.getElementById('dbBadge').innerHTML = "📁 DATABASE VUOTO (fallback)";
                     return false;
                 }
             } else {
-                console.log("⚠️ Nessun documento listino_globale, uso fallback");
                 dbStatus = "missing";
                 document.getElementById('dbBadge').innerHTML = "📁 LISTINO NON TROVATO (fallback)";
                 return false;
             }
         } catch(error) {
-            console.error("❌ Errore nel caricamento del listino:", error);
             dbStatus = "error";
             document.getElementById('dbBadge').innerHTML = "⚠️ DATABASE OFFLINE (fallback)";
             document.getElementById('dbBadge').style.background = "#ffebee";
@@ -693,24 +671,14 @@
         }
     }
     
-    // ------------------------------------------------------------------
-    // FUNZIONI DI VISUALIZZAZIONE (SENZA EAN)
-    // ------------------------------------------------------------------
     function formatPrezzoItaliano(prezzo) {
-        if (typeof prezzo !== 'number' || isNaN(prezzo) || prezzo === 0) {
-            return '€ --,--';
-        }
+        if (typeof prezzo !== 'number' || isNaN(prezzo) || prezzo === 0) return '€ --,--';
         return '€ ' + prezzo.toFixed(2).replace('.', ',');
     }
     
     function escapeHtml(str) {
         if (!str) return "";
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
     
     function highlightText(text, searchTerm) {
@@ -725,14 +693,13 @@
     
     function renderBothViews() {
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-        
         let filtered = currentArticles.filter(art => {
             if (searchTerm === "") return true;
             return (art.codice && art.codice.toLowerCase().includes(searchTerm)) || 
                    (art.descrizione && art.descrizione.toLowerCase().includes(searchTerm));
         });
         
-        // DESKTOP TABLE (senza colonna EAN)
+        // DESKTOP
         const tbody = document.getElementById('tableBody');
         let htmlRows = '';
         for (let item of filtered) {
@@ -740,14 +707,10 @@
             const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
             const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
             const umValue = item.um || "N.";
-            
             htmlRows += `
                 <tr>
                     <td class="codice-cell">${codiceEvidenziato}</td>
-                    <td class="um-prezzo-cell">
-                        <span class="um-label">${escapeHtml(umValue)}</span>
-                        <span class="prezzo-valore">${prezzoFormattato}</span>
-                    </td>
+                    <td class="um-prezzo-cell"><span class="um-label">${escapeHtml(umValue)}</span><span class="prezzo-valore">${prezzoFormattato}</span></td>
                     <td class="descrizione-cell"><strong>${descrizioneEvidenziata}</strong></td>
                     <td class="gm-cell">${escapeHtml(item.gm || '—')}</td>
                     <td class="mord-cell">${item.m_ord || '—'}</td>
@@ -757,7 +720,7 @@
         }
         tbody.innerHTML = htmlRows || `<tr><td colspan="6" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
         
-        // MOBILE LIST (già senza EAN)
+        // MOBILE
         const mobileContainer = document.getElementById('mobileList');
         let mobileHtml = '';
         for (let item of filtered) {
@@ -765,15 +728,11 @@
             const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
             const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
             const umValue = item.um || "N.";
-            
             mobileHtml += `
                 <div class="mobile-card">
                     <div class="codice">${codiceEvidenziato}</div>
                     <div class="descrizione"><strong>${descrizioneEvidenziata}</strong></div>
-                    <div class="um-prezzo-row">
-                        <span class="um-label">${escapeHtml(umValue)}</span>
-                        <span class="prezzo-valore">${prezzoFormattato}</span>
-                    </div>
+                    <div class="um-prezzo-row"><span class="um-label">${escapeHtml(umValue)}</span><span class="prezzo-valore">${prezzoFormattato}</span></div>
                     <div class="gm-mord">GM: ${escapeHtml(item.gm || '—')} | M.Ord: ${item.m_ord || '—'} | IVA ${item.iva || 22}%</div>
                 </div>
             `;
@@ -791,76 +750,29 @@
         renderBothViews();
     }
     
-    // ------------------------------------------------------------------
-    // MODALE - STATO DATABASE
-    // ------------------------------------------------------------------
+    // MODALE
     function showModal() {
         const modal = document.getElementById('dbModal');
         const modalBody = document.getElementById('modalBody');
-        
         let statusHtml = '';
         if (dbStatus === "online") {
-            statusHtml = `
-                <p><span class="status-ok">✅ DATABASE CONNESSO</span></p>
-                <p>Il listino è stato caricato da <strong>Firestore</strong>.</p>
-                <p>📊 Numero articoli: <strong>${currentArticles.length}</strong></p>
-                <p>🔗 Collegamento: <strong>insapa-database.firebaseapp.com</strong></p>
-                <p>📄 Documento: <strong>listini_generali → listino_globale</strong></p>
-                <hr>
-                <p>💡 <em>I dati vengono sincronizzati automaticamente da agenti.html quando premi CAR_LIST</em></p>
-            `;
+            statusHtml = `<p><span class="status-ok">✅ DATABASE CONNESSO</span></p><p>Il listino è stato caricato da <strong>Firestore</strong>.</p><p>📊 Numero articoli: <strong>${currentArticles.length}</strong></p><hr><p>💡 <em>I dati vengono sincronizzati automaticamente da agenti.html quando premi CAR_LIST</em></p>`;
         } else if (dbStatus === "offline" || dbStatus === "error") {
-            statusHtml = `
-                <p><span class="status-error">⚠️ IMPOSSIBILE CONTATTARE FIRESTORE</span></p>
-                <p>Il listino sta usando i <strong>dati locali di fallback</strong> (${currentArticles.length} articoli).</p>
-                <p>Possibili cause:</p>
-                <ul>
-                    <li>Nessuna connessione internet</li>
-                    <li>Firebase non accessibile</li>
-                    <li>Problemi di configurazione</li>
-                </ul>
-                <hr>
-                <p>💡 <em>Il listino funziona comunque con i dati locali integrati.</em></p>
-            `;
-        } else if (dbStatus === "empty" || dbStatus === "missing") {
-            statusHtml = `
-                <p><span class="status-warning">📁 DATABASE SENZA LISTINO</span></p>
-                <p>Il database è stato contattato ma non contiene un listino valido.</p>
-                <p>🔥 In uso: <strong>dati di fallback</strong> (${currentArticles.length} articoli).</p>
-                <hr>
-                <p>Per caricare un listino nel database:</p>
-                <ol>
-                    <li>Apri <strong>agenti.html</strong></li>
-                    <li>Inserisci i dati</li>
-                    <li>Clicca su <strong>CAR_LIST</strong></li>
-                </ol>
-            `;
+            statusHtml = `<p><span class="status-error">⚠️ IMPOSSIBILE CONTATTARE FIRESTORE</span></p><p>Il listino sta usando i <strong>dati locali di fallback</strong> (${currentArticles.length} articoli).</p><p>Possibili cause: nessuna connessione internet, Firebase non accessibile.</p><hr><p>💡 <em>Il listino funziona comunque con i dati locali integrati.</em></p>`;
+        } else {
+            statusHtml = `<p><span class="status-error">📁 DATABASE SENZA LISTINO</span></p><p>Il database è stato contattato ma non contiene un listino valido.</p><p>🔥 In uso: <strong>dati di fallback</strong> (${currentArticles.length} articoli).</p><hr><p>Per caricare un listino nel database: apri agenti.html, inserisci i dati, clicca su CAR_LIST.</p>`;
         }
-        
         modalBody.innerHTML = statusHtml;
         modal.classList.add('active');
     }
+    function closeModal() { document.getElementById('dbModal').classList.remove('active'); }
     
-    function closeModal() {
-        const modal = document.getElementById('dbModal');
-        modal.classList.remove('active');
-    }
-    
-    // ------------------------------------------------------------------
-    // EVENTI E AVVIO
-    // ------------------------------------------------------------------
     document.getElementById('searchInput').addEventListener('input', renderBothViews);
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
     document.getElementById('openModalBtn').addEventListener('click', showModal);
     document.getElementById('closeModalBtn').addEventListener('click', closeModal);
     document.getElementById('modalCloseFooterBtn').addEventListener('click', closeModal);
-    
-    window.addEventListener('click', function(e) {
-        const modal = document.getElementById('dbModal');
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
+    window.addEventListener('click', (e) => { if (e.target === document.getElementById('dbModal')) closeModal(); });
     
     (async function init() {
         await caricaListinoDaFirestore();
