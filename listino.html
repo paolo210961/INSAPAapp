@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>inSAPA s.a.s. - Listino Prezzi</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
     <style>
         * {
             box-sizing: border-box;
@@ -123,6 +128,26 @@
             transform: scale(0.97);
         }
 
+        /* bottone modale */
+        .modal-btn {
+            background: #2c6e3c;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 48px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+        
+        .modal-btn:hover {
+            background: #1e4b2e;
+            transform: scale(0.97);
+        }
+
         .stats {
             background: #eef2f6;
             border-radius: 60px;
@@ -132,6 +157,11 @@
             font-weight: 500;
             margin-top: 18px;
             color: #1f3b4c;
+        }
+        
+        .stats small {
+            font-weight: normal;
+            color: #2c6e3c;
         }
 
         /* tabella desktop */
@@ -227,8 +257,142 @@
             border-radius: 4px;
             padding: 0 2px;
         }
+        
+        /* badge database */
+        .db-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 12px;
+        }
 
-        /* STILE MOBILE - box come da richiesta, invariato, ma con N. e prezzo affiancati e senza EAN */
+        /* MODALE STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.2s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-header {
+            background: #1e4b2e;
+            color: white;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .modal-body {
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-body p {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        
+        .modal-body .status-ok {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .modal-body .status-error {
+            color: #c62828;
+            font-weight: bold;
+        }
+        
+        .modal-body pre {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 0.75rem;
+            margin: 12px 0;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #eef2f8;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .modal-footer button {
+            background: #2c6e3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 48px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .modal-footer button:hover {
+            background: #1e4b2e;
+        }
+
+        /* STILE MOBILE - box come da richiesta */
         .mobile-list {
             display: none;
         }
@@ -310,6 +474,7 @@
         <div class="company-meta">
             <span>💰 Prezzi IVA esclusa · IVA 22%</span>
             <span>🔎 Cerca per CODICE o DESCRIZIONE</span>
+            <span class="db-badge" id="dbBadge">📡 DATABASE OFFLINE</span>
         </div>
     </div>
 
@@ -319,7 +484,8 @@
                 <label>🔍 CERCA PER CODICE O DESCRIZIONE</label>
                 <input type="text" id="searchInput" placeholder="Es: 00190, SCOPA, PATTUMIERA, MANICO, 00025 ..." autocomplete="off">
             </div>
-            <div>
+            <div style="display: flex; gap: 10px;">
+                <button class="modal-btn" id="openModalBtn">📡 STATO DATABASE</button>
                 <button class="reset-btn" id="resetBtn">⟳ Azzera ricerca</button>
             </div>
         </div>
@@ -344,7 +510,7 @@
         </table>
     </div>
 
-    <!-- VISTA MOBILE (box senza EAN, N. e prezzo affiancati) -->
+    <!-- VISTA MOBILE (box senza EAN) -->
     <div class="mobile-list" id="mobileList"></div>
 
     <div class="footer-note">
@@ -353,9 +519,43 @@
     </div>
 </div>
 
+<!-- MODALE (popup senza cambiare pagina) -->
+<div id="dbModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>📡 Stato Connessione Database</h3>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <p>Caricamento informazioni...</p>
+        </div>
+        <div class="modal-footer">
+            <button id="modalCloseFooterBtn">Chiudi</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // DATI COMPLETI - 452 articoli (mantenuti integralmente)
-    const articlesData = [
+    // ------------------------------------------------------------------
+    // CONFIGURAZIONE FIREBASE (uguale a agenti.html)
+    // ------------------------------------------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
+        authDomain: "insapa-database.firebaseapp.com",
+        projectId: "insapa-database",
+        storageBucket: "insapa-database.firebasestorage.app",
+        messagingSenderId: "331230245928",
+        appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
+    };
+    
+    // Inizializza Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // ------------------------------------------------------------------
+    // DATI FALLBACK OFFLINE (452 articoli - mantenuti integralmente)
+    // ------------------------------------------------------------------
+    const fallbackArticles = [
         {codice: "00003", ean: "", prezzo: 8.00, descrizione: "GIANNINA PROF.c/MAN.LEGNOcm130", um: "N.", gm: "GCVH", m_ord: 10, iva: 22},
         {codice: "00004", ean: "", prezzo: 21.68, descrizione: "RACCOGLISPORCO PROFES.PAL/CLIP", um: "N.", gm: "BCTP", m_ord: 1, iva: 22},
         {codice: "00010", ean: "8013233000022", prezzo: 7.38, descrizione: "SAGGINA Professionale", um: "N.", gm: "LSTD", m_ord: 10, iva: 22},
@@ -413,13 +613,58 @@
         {codice: "00212", ean: "", prezzo: 3.95, descrizione: "MOP COTONE 400 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22},
         {codice: "00213", ean: "", prezzo: 5.25, descrizione: "MOP COTONE 450 gr.", um: "N.", gm: "LSTD", m_ord: 6, iva: 22}
     ];
-
-    const articles = articlesData.filter(art => art.codice && art.codice.trim() !== "");
-
+    
+    let currentArticles = [...fallbackArticles];
+    let dbStatus = "offline";
+    
+    // ------------------------------------------------------------------
+    // FUNZIONE PER CARICARE LISTINO DA FIRESTORE
+    // ------------------------------------------------------------------
+    async function caricaListinoDaFirestore() {
+        try {
+            const docRef = db.collection('listini_generali').doc('listino_globale');
+            const docSnap = await docRef.get();
+            
+            if (docSnap.exists) {
+                const data = docSnap.data();
+                const articoliDB = data.articoli || [];
+                if (articoliDB.length > 0) {
+                    console.log(`✅ Listino caricato da Firestore: ${articoliDB.length} articoli`);
+                    currentArticles = articoliDB;
+                    dbStatus = "online";
+                    document.getElementById('dbBadge').innerHTML = "☁️ DATABASE ONLINE";
+                    document.getElementById('dbBadge').style.background = "#e8f5e9";
+                    document.getElementById('dbBadge').style.color = "#2e7d32";
+                    return true;
+                } else {
+                    console.log("⚠️ Database vuoto, uso fallback locale");
+                    dbStatus = "empty";
+                    document.getElementById('dbBadge').innerHTML = "📁 DATABASE VUOTO (fallback)";
+                    return false;
+                }
+            } else {
+                console.log("⚠️ Nessun documento listino_globale, uso fallback");
+                dbStatus = "missing";
+                document.getElementById('dbBadge').innerHTML = "📁 LISTINO NON TROVATO (fallback)";
+                return false;
+            }
+        } catch(error) {
+            console.error("❌ Errore nel caricamento del listino:", error);
+            dbStatus = "error";
+            document.getElementById('dbBadge').innerHTML = "⚠️ DATABASE OFFLINE (fallback)";
+            document.getElementById('dbBadge').style.background = "#ffebee";
+            document.getElementById('dbBadge').style.color = "#c62828";
+            return false;
+        }
+    }
+    
+    // ------------------------------------------------------------------
+    // FUNZIONI DI VISUALIZZAZIONE (uguali a prima)
+    // ------------------------------------------------------------------
     function formatPrezzoItaliano(prezzo) {
         return '€ ' + prezzo.toFixed(2).replace('.', ',');
     }
-
+    
     function escapeHtml(str) {
         if (!str) return "";
         return str.replace(/[&<>]/g, function(m) {
@@ -429,88 +674,164 @@
             return m;
         });
     }
-
+    
     function highlightText(text, searchTerm) {
         if (!searchTerm || searchTerm.trim() === "") return escapeHtml(text);
         const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
         return escapeHtml(text).replace(regex, `<span class="highlight">$1</span>`);
     }
-
+    
     function escapeRegex(str) {
         return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
-
+    
     function renderBothViews() {
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
         
-        let filtered = articles.filter(art => {
+        let filtered = currentArticles.filter(art => {
             if (searchTerm === "") return true;
-            return art.codice.toLowerCase().includes(searchTerm) || 
-                   art.descrizione.toLowerCase().includes(searchTerm);
+            return (art.codice && art.codice.toLowerCase().includes(searchTerm)) || 
+                   (art.descrizione && art.descrizione.toLowerCase().includes(searchTerm));
         });
-
+        
         // DESKTOP TABLE
         const tbody = document.getElementById('tableBody');
         let htmlRows = '';
         for (let item of filtered) {
-            const eanDisplay = item.ean && item.ean !== "" ? item.ean : "—";
+            const eanDisplay = (item.ean && item.ean !== "") ? item.ean : "—";
             const codiceEvidenziato = searchTerm ? highlightText(item.codice, searchTerm) : escapeHtml(item.codice);
             const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
             const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
+            const umValue = item.um || "N.";
             
             htmlRows += `
                 <tr>
                     <td class="codice-cell">${codiceEvidenziato}</td>
                     <td style="font-family: monospace; font-size:0.75rem;">${escapeHtml(eanDisplay)}</td>
                     <td class="um-prezzo-cell">
-                        <span class="um-label">${escapeHtml(item.um)}</span>
+                        <span class="um-label">${escapeHtml(umValue)}</span>
                         <span class="prezzo-valore">${prezzoFormattato}</span>
                     </td>
                     <td class="descrizione-cell"><strong>${descrizioneEvidenziata}</strong></td>
-                    <td class="gm-cell">${escapeHtml(item.gm)}</td>
-                    <td class="mord-cell">${item.m_ord}</td>
-                    <td class="iva-cell">${item.iva}%</td>
+                    <td class="gm-cell">${escapeHtml(item.gm || '—')}</td>
+                    <td class="mord-cell">${item.m_ord || '—'}</td>
+                    <td class="iva-cell">${item.iva || 22}%</td>
                 </tr>
             `;
         }
         tbody.innerHTML = htmlRows || `<tr><td colspan="7" class="no-results">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</td></tr>`;
-
-        // MOBILE LIST (senza EAN, N. e prezzo affiancati)
+        
+        // MOBILE LIST
         const mobileContainer = document.getElementById('mobileList');
         let mobileHtml = '';
         for (let item of filtered) {
             const codiceEvidenziato = searchTerm ? highlightText(item.codice, searchTerm) : escapeHtml(item.codice);
             const descrizioneEvidenziata = searchTerm ? highlightText(item.descrizione, searchTerm) : escapeHtml(item.descrizione);
             const prezzoFormattato = formatPrezzoItaliano(item.prezzo);
+            const umValue = item.um || "N.";
             
             mobileHtml += `
                 <div class="mobile-card">
                     <div class="codice">${codiceEvidenziato}</div>
                     <div class="descrizione"><strong>${descrizioneEvidenziata}</strong></div>
                     <div class="um-prezzo-row">
-                        <span class="um-label">${escapeHtml(item.um)}</span>
+                        <span class="um-label">${escapeHtml(umValue)}</span>
                         <span class="prezzo-valore">${prezzoFormattato}</span>
                     </div>
-                    <div class="gm-mord">GM: ${escapeHtml(item.gm)} | M.Ord: ${item.m_ord} | IVA ${item.iva}%</div>
+                    <div class="gm-mord">GM: ${escapeHtml(item.gm || '—')} | M.Ord: ${item.m_ord || '—'} | IVA ${item.iva || 22}%</div>
                 </div>
             `;
         }
         mobileContainer.innerHTML = mobileHtml || `<div class="mobile-card" style="text-align:center;">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</div>`;
-
+        
         const statsSpan = document.getElementById('statsCounter');
         const searchDisplay = searchTerm ? `"${escapeHtml(searchTerm)}"` : "tutti gli articoli";
-        statsSpan.innerText = `📋 Mostrati ${filtered.length} articoli su ${articles.length} totali - Ricerca: ${searchDisplay}`;
+        const sourceText = dbStatus === "online" ? "☁️ Database Firestore" : "📁 Dati locali (fallback)";
+        statsSpan.innerHTML = `📋 Mostrati ${filtered.length} articoli su ${currentArticles.length} totali - Ricerca: ${searchDisplay}<br><small>📡 Fonte: ${sourceText}</small>`;
     }
-
+    
     function resetFilters() {
         document.getElementById('searchInput').value = '';
         renderBothViews();
     }
-
+    
+    // ------------------------------------------------------------------
+    // MODALE - STATO DATABASE
+    // ------------------------------------------------------------------
+    function showModal() {
+        const modal = document.getElementById('dbModal');
+        const modalBody = document.getElementById('modalBody');
+        
+        let statusHtml = '';
+        if (dbStatus === "online") {
+            statusHtml = `
+                <p><span class="status-ok">✅ DATABASE CONNESSO</span></p>
+                <p>Il listino è stato caricato da <strong>Firestore</strong>.</p>
+                <p>📊 Numero articoli: <strong>${currentArticles.length}</strong></p>
+                <p>🔗 Collegamento: <strong>insapa-database.firebaseapp.com</strong></p>
+                <p>📄 Documento: <strong>listini_generali → listino_globale</strong></p>
+                <hr>
+                <p>💡 <em>I dati vengono sincronizzati automaticamente da agenti.html quando premi CAR_LIST</em></p>
+            `;
+        } else if (dbStatus === "offline" || dbStatus === "error") {
+            statusHtml = `
+                <p><span class="status-error">⚠️ IMPOSSIBILE CONTATTARE FIRESTORE</span></p>
+                <p>Il listino sta usando i <strong>dati locali di fallback</strong> (${currentArticles.length} articoli).</p>
+                <p>Possibili cause:</p>
+                <ul>
+                    <li>Nessuna connessione internet</li>
+                    <li>Firebase non accessibile</li>
+                    <li>Problemi di configurazione</li>
+                </ul>
+                <hr>
+                <p>💡 <em>Il listino funziona comunque con i dati locali integrati.</em></p>
+            `;
+        } else if (dbStatus === "empty" || dbStatus === "missing") {
+            statusHtml = `
+                <p><span class="status-warning">📁 DATABASE SENZA LISTINO</span></p>
+                <p>Il database è stato contattato ma non contiene un listino valido.</p>
+                <p>🔥 In uso: <strong>dati di fallback</strong> (${currentArticles.length} articoli).</p>
+                <hr>
+                <p>Per caricare un listino nel database:</p>
+                <ol>
+                    <li>Apri <strong>agenti.html</strong></li>
+                    <li>Inserisci i dati</li>
+                    <li>Clicca su <strong>CAR_LIST</strong></li>
+                </ol>
+            `;
+        }
+        
+        modalBody.innerHTML = statusHtml;
+        modal.classList.add('active');
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('dbModal');
+        modal.classList.remove('active');
+    }
+    
+    // ------------------------------------------------------------------
+    // EVENTI E AVVIO
+    // ------------------------------------------------------------------
     document.getElementById('searchInput').addEventListener('input', renderBothViews);
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
-
-    renderBothViews();
+    document.getElementById('openModalBtn').addEventListener('click', showModal);
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('modalCloseFooterBtn').addEventListener('click', closeModal);
+    
+    // Chiudi modale cliccando fuori
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('dbModal');
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Avvio: carica da Firestore poi renderizza
+    (async function init() {
+        await caricaListinoDaFirestore();
+        renderBothViews();
+    })();
 </script>
 </body>
 </html>
