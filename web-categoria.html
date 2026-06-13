@@ -55,6 +55,10 @@
         }
         .btn-admin:hover { background: #e67e22; color: white; }
         .btn-admin.active { background: #27ae60; color: white; }
+        .btn-reload {
+            background: #3498db;
+            color: white;
+        }
         
         .categoria-header {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
@@ -452,6 +456,7 @@
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button id="btnCaricaFoto" class="btn-admin" style="display:none;">📸 CARICA FOTO</button>
             <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
+            <button id="btnRicarica" class="btn-admin btn-reload" style="display:none;">🔄 RICARICA</button>
             <div class="search-bar" id="searchBar" style="display:none;">
                 <input type="text" id="ricercaFamiglie" placeholder="🔍 Cerca famiglia (codice/nome)">
                 <input type="text" id="ricercaArticoli" placeholder="🔍 Cerca articolo (codice/descrizione)">
@@ -469,7 +474,6 @@
 
 <div class="articoli-container">
     <div class="header-buttons">
-        <!-- Titolo "Famiglie e Articoli" rimosso -->
         <div></div>
         <div>
             <button id="btnAggiungiFamiglia" class="btn-famiglia">🏷️ NUOVA FAMIGLIA</button>
@@ -482,7 +486,7 @@
 <footer><p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p></footer>
 
 <script>
-// FIREBASE CONFIG
+// ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -494,7 +498,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// VARIABILI GLOBALI
+// ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categoriaId = null;
@@ -505,7 +509,7 @@ let famigliaArticoliMap = new Map(); // famigliaId -> Set articoliId
 let sortableFamiglie = null;
 let pressTimer = null;
 
-// LOGO
+// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
@@ -516,7 +520,7 @@ function caricaLogo() {
 }
 caricaLogo();
 
-// LINK LOGO
+// ==================== LINK LOGO ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
     try {
@@ -537,7 +541,7 @@ document.getElementById('logoRettangolo').addEventListener('click',(e)=>{
     else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
 });
 
-// TASTO CARICA FOTO
+// ==================== TASTO CARICA FOTO ====================
 async function getFotoLink() {
     try {
         const doc = await db.collection('config').doc('link_tasto_extra').get();
@@ -567,13 +571,14 @@ function inizializzaTastoCaricaFoto() {
     btn.addEventListener('touchend', async ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; const link=await getFotoLink(); window.open(link,'_blank'); } });
 }
 
+// ==================== UTILS ====================
 function showToast(msg, isErr=false){
     const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg;
     document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
 }
 function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
-// CARICA DATI
+// ==================== CARICA DATI ====================
 async function caricaCategoria(){
     const urlParams = new URLSearchParams(window.location.search);
     categoriaId = urlParams.get('id');
@@ -599,6 +604,7 @@ async function caricaFamiglie(){
         const snap = await db.collection('web_famiglie').where('categoriaId','==',categoriaId).orderBy('ordine','asc').get();
         famiglie = [];
         snap.forEach(doc=>{ famiglie.push({ id:doc.id, ...doc.data() }); });
+        console.log("Famiglie caricate:", famiglie.length);
     } catch(e){ console.error(e); }
 }
 
@@ -608,6 +614,7 @@ async function caricaArticoli(){
         const snap = await db.collection('web_articoli').where('categoriaId','==',categoriaId).get();
         articoli = [];
         snap.forEach(doc=>{ articoli.push({ id:doc.id, ...doc.data() }); });
+        console.log("Articoli caricati:", articoli.length);
     } catch(e){ console.error(e); }
 }
 
@@ -623,6 +630,7 @@ async function caricaAssociazioni(){
             if(!famigliaArticoliMap.has(famigliaId)) famigliaArticoliMap.set(famigliaId, new Set());
             famigliaArticoliMap.get(famigliaId).add(articoloId);
         });
+        console.log("Associazioni caricate, famiglie con articoli:", famigliaArticoliMap.size);
     } catch(e){ console.warn(e); }
 }
 
@@ -634,7 +642,7 @@ async function caricaTutti(){
     visualizza();
 }
 
-// LIGHTBOX
+// ==================== LIGHTBOX ====================
 function apriLightbox(url){
     const lb = document.createElement('div');
     lb.className = 'lightbox';
@@ -643,7 +651,7 @@ function apriLightbox(url){
     document.body.appendChild(lb);
 }
 
-// VISUALIZZA
+// ==================== VISUALIZZA ====================
 function visualizza(){
     const famiglieContainer = document.getElementById('famiglieContainer');
     const senzaContainer = document.getElementById('senzaFamigliaContainer');
@@ -747,7 +755,7 @@ function visualizza(){
     }
     senzaContainer.innerHTML = senzaHtml;
     
-    // Eventi lightbox sulle immagini
+    // Lightbox sulle immagini
     document.querySelectorAll('.articolo-img').forEach(img => {
         img.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -777,7 +785,7 @@ function visualizza(){
     } else if(sortableFamiglie){ sortableFamiglie.destroy(); sortableFamiglie=null; }
 }
 
-// FUNZIONI PER FAMIGLIE
+// ==================== FUNZIONI FAMIGLIE ====================
 async function spostaFamiglia(id, direzione){
     const index = famiglie.findIndex(f=>f.id===id);
     if(index===-1) return;
@@ -804,10 +812,10 @@ async function eliminaFamiglia(id){
         await caricaFamiglie();
         await caricaAssociazioni();
         visualizza();
-    } catch(e){ showToast("Errore",true); }
+    } catch(e){ console.error(e); showToast("Errore eliminazione famiglia",true); }
 }
 
-// MODALE FAMIGLIA (esistente)
+// ==================== MODALE FAMIGLIA (MIGLIORATO) ====================
 async function modificaFamiglia(id){
     const famiglia = famiglie.find(f=>f.id===id);
     if(!famiglia) return;
@@ -918,6 +926,7 @@ function mostraModaleFamiglia(famiglia=null, associati=[]){
         try {
             if(isEdit){
                 await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, codice });
+                // Aggiorna associazioni
                 const oldAssoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get();
                 const batch = db.batch();
                 oldAssoc.forEach(doc => batch.delete(doc.ref));
@@ -945,7 +954,7 @@ function mostraModaleFamiglia(famiglia=null, associati=[]){
             await caricaAssociazioni();
             visualizza();
             modal.remove();
-        } catch(e){ console.error(e); showToast("Errore salvataggio", true); }
+        } catch(e){ console.error(e); showToast("Errore salvataggio: "+e.message, true); }
     };
     if(isEdit){
         document.getElementById('btnEliminaFamiglia').onclick = async () => {
@@ -967,7 +976,7 @@ function mostraModaleFamiglia(famiglia=null, associati=[]){
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
 
-// NUOVO ARTICOLO IN UNA FAMIGLIA SPECIFICA
+// ==================== NUOVO ARTICOLO IN UNA FAMIGLIA ====================
 async function nuovoArticoloInFamiglia(famigliaId){
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML = `
@@ -1004,7 +1013,6 @@ async function nuovoArticoloInFamiglia(famigliaId){
             const newArtRef = await db.collection('web_articoli').add({
                 categoriaId, codice, descrizione, fotoUrl, ordine: articoli.length
             });
-            // Associa alla famiglia
             await db.collection('web_famiglia_articoli').add({
                 categoriaId, famigliaId, articoloId: newArtRef.id
             });
@@ -1013,12 +1021,12 @@ async function nuovoArticoloInFamiglia(famigliaId){
             await caricaAssociazioni();
             visualizza();
             modal.remove();
-        } catch(e){ showToast("Errore", true); }
+        } catch(e){ console.error(e); showToast("Errore: "+e.message, true); }
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
 
-// MODALE ARTICOLO (generico)
+// ==================== MODALE ARTICOLO GENERICO ====================
 function mostraModaleArticolo(articolo=null){
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML = `
@@ -1064,7 +1072,7 @@ function mostraModaleArticolo(articolo=null){
             await caricaAssociazioni();
             visualizza();
             modal.remove();
-        } catch(e){ showToast("Errore salvataggio", true); }
+        } catch(e){ showToast("Errore: "+e.message, true); }
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
@@ -1084,7 +1092,7 @@ async function eliminaArticolo(id){
         await caricaArticoli();
         await caricaAssociazioni();
         visualizza();
-    } catch(e){ showToast("Errore",true); }
+    } catch(e){ showToast("Errore: "+e.message, true); }
 }
 async function rimuoviArticoloDaFamiglia(articoloId, famigliaId){
     if(!confirm("Rimuovere questo articolo dalla famiglia? L'articolo rimarrà nel sistema (nella sezione senza famiglia).")) return;
@@ -1100,15 +1108,16 @@ async function rimuoviArticoloDaFamiglia(articoloId, famigliaId){
         showToast("Articolo rimosso dalla famiglia");
         await caricaAssociazioni();
         visualizza();
-    } catch(e){ showToast("Errore",true); }
+    } catch(e){ showToast("Errore: "+e.message, true); }
 }
 
-// ADMIN MODE
+// ==================== ADMIN MODE ====================
 function aggiornaUIAdmin(){
     const btnAdmin = document.getElementById('btnAdmin');
     const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
     const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
     const btnCaricaFoto = document.getElementById('btnCaricaFoto');
+    const btnRicarica = document.getElementById('btnRicarica');
     const searchBar = document.getElementById('searchBar');
     if(isAdminMode){
         btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
@@ -1116,6 +1125,7 @@ function aggiornaUIAdmin(){
         btnAggiungiFamiglia.classList.add('show');
         btnAggiungiArticolo.classList.add('show');
         if(btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
+        if(btnRicarica) btnRicarica.style.display = 'inline-block';
         if(searchBar) searchBar.style.display = 'flex';
     } else {
         btnAdmin.textContent = "🔐 AREA ADMIN";
@@ -1123,6 +1133,7 @@ function aggiornaUIAdmin(){
         btnAggiungiFamiglia.classList.remove('show');
         btnAggiungiArticolo.classList.remove('show');
         if(btnCaricaFoto) btnCaricaFoto.style.display = 'none';
+        if(btnRicarica) btnRicarica.style.display = 'none';
         if(searchBar) searchBar.style.display = 'none';
         if(sortableFamiglie) sortableFamiglie.destroy();
         sortableFamiglie = null;
@@ -1150,17 +1161,23 @@ function disattivaAdmin(){
     showToast("Admin disattivata");
     aggiornaUIAdmin();
 }
+async function ricaricaDati(){
+    showToast("🔄 Ricaricamento dati...");
+    await caricaTutti();
+    showToast("✅ Dati ricaricati");
+}
 
-// EVENTI
+// ==================== EVENTI ====================
 document.getElementById('btnAdmin').onclick = ()=> isAdminMode ? disattivaAdmin() : mostraModalePassword();
 document.getElementById('btnAggiungiFamiglia').onclick = ()=>{ if(isAdminMode) mostraModaleFamiglia(null, []); };
 document.getElementById('btnAggiungiArticolo').onclick = ()=>{ if(isAdminMode) mostraModaleArticolo(null); };
 document.getElementById('btnTornaHome').onclick = ()=> window.location.href='web.html';
 document.getElementById('btnHome').onclick = ()=> window.location.href='web.html';
+document.getElementById('btnRicarica').onclick = ()=> ricaricaDati();
 document.getElementById('ricercaFamiglie').addEventListener('input', ()=> visualizza());
 document.getElementById('ricercaArticoli').addEventListener('input', ()=> visualizza());
 
-// AVVIO
+// ==================== AVVIO ====================
 const savedAdmin = localStorage.getItem('web_admin_mode');
 if(savedAdmin === 'true') isAdminMode = true;
 caricaLinkDaFile().then(()=>{
