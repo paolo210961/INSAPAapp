@@ -432,8 +432,9 @@
             </div>
         </div>
         <div>
-            <button id="btnTornaHome" class="btn-torna">◀ TORNA ALLA HOME</button>
+            <button id="btnCaricaFoto" class="btn-admin" style="display:none;">📸 CARICA FOTO</button>
             <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
+            <button id="btnTornaHome" class="btn-torna">◀ TORNA ALLA HOME</button>
         </div>
     </div>
 </div>
@@ -483,6 +484,96 @@ let famiglie = [];
 let sortableFamiglie = null;
 let sortableSenzaFamiglia = null;
 let isMobile = false;
+let pressTimer = null;
+
+// ==================== GESTIONE TASTO CARICA FOTO ====================
+async function getFotoLink() {
+    try {
+        const doc = await db.collection('config').doc('link_tasto_extra').get();
+        if (doc.exists && doc.data().url) {
+            return doc.data().url;
+        }
+    } catch(e) { console.warn(e); }
+    return 'https://imgur.com/upload';
+}
+
+async function setFotoLink(url) {
+    await db.collection('config').doc('link_tasto_extra').set({ url: url });
+}
+
+function mostraModaleLink() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-container">
+            <h3>🔗 MODIFICA LINK CARICA FOTO</h3>
+            <label>Inserisci il nuovo link (URL completo)</label>
+            <input type="text" id="nuovoLinkInput" placeholder="https://...">
+            <div class="modal-buttons">
+                <button id="btnSalvaLink" class="btn-salva-modal">💾 SALVA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnSalvaLink').onclick = async () => {
+        const nuovoLink = document.getElementById('nuovoLinkInput').value.trim();
+        if (nuovoLink && (nuovoLink.startsWith('http://') || nuovoLink.startsWith('https://'))) {
+            await setFotoLink(nuovoLink);
+            showToast("✅ Link salvato su Firebase!");
+        } else {
+            showToast("❌ Inserisci un link valido (http:// o https://)", true);
+        }
+        modal.remove();
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+function inizializzaTastoCaricaFoto() {
+    const btn = document.getElementById('btnCaricaFoto');
+    if (!btn) return;
+    
+    btn.addEventListener('mousedown', () => {
+        pressTimer = setTimeout(() => {
+            mostraModaleLink();
+            pressTimer = null;
+        }, 3000);
+    });
+    
+    btn.addEventListener('mouseup', async () => {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+            const link = await getFotoLink();
+            window.open(link, '_blank');
+        }
+    });
+    
+    btn.addEventListener('mouseleave', () => {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+    });
+    
+    // Per touch (mobile)
+    btn.addEventListener('touchstart', (e) => {
+        pressTimer = setTimeout(() => {
+            mostraModaleLink();
+            pressTimer = null;
+        }, 3000);
+    });
+    
+    btn.addEventListener('touchend', async (e) => {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+            const link = await getFotoLink();
+            window.open(link, '_blank');
+        }
+    });
+}
 
 // ==================== RILEVAZIONE MOBILE ====================
 function checkMobile() {
@@ -629,17 +720,20 @@ function aggiornaUIAdmin() {
     const btnAdmin = document.getElementById('btnAdmin');
     const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
     const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
+    const btnCaricaFoto = document.getElementById('btnCaricaFoto');
     
     if (isAdminMode) {
         btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
         btnAdmin.classList.add('active');
         btnAggiungiArticolo.classList.add('show');
         btnAggiungiFamiglia.classList.add('show');
+        if (btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
     } else {
         btnAdmin.textContent = "🔐 AREA ADMIN";
         btnAdmin.classList.remove('active');
         btnAggiungiArticolo.classList.remove('show');
         btnAggiungiFamiglia.classList.remove('show');
+        if (btnCaricaFoto) btnCaricaFoto.style.display = 'none';
         // Distruggi Sortable se attivi
         if (sortableFamiglie) sortableFamiglie.destroy();
         if (sortableSenzaFamiglia) sortableSenzaFamiglia.destroy();
@@ -972,13 +1066,10 @@ function mostraModaleArticolo(articolo = null) {
                 ${famiglie.map(f => `<option value="${f.id}" ${articolo && articolo.famigliaId === f.id ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
             </select>
             <label>🖼️ Immagine (URL da Imgur)</label>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="text" id="artFotoUrl" class="link-immagine" style="flex:1; margin:0;" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
-                <button type="button" class="btn-admin" style="padding: 8px 16px; white-space: nowrap;" onclick="window.open('https://imgur.com/upload', '_blank')">📸 CARICA FOTO</button>
-            </div>
+            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
             <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
             <div class="info-imgur">
-                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
+                📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto (.jpg)
             </div>
             <div class="modal-buttons">
                 <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
@@ -1074,6 +1165,7 @@ if (savedAdminMode === 'true') isAdminMode = true;
 
 Promise.all([caricaLinkDaFile(), caricaCategoria(), caricaArticoli()]).then(() => {
     aggiornaUIAdmin();
+    inizializzaTastoCaricaFoto();
 });
 </script>
 </body>
