@@ -972,10 +972,13 @@ function mostraModaleArticolo(articolo = null) {
                 ${famiglie.map(f => `<option value="${f.id}" ${articolo && articolo.famigliaId === f.id ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
             </select>
             <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="artFotoUrl" class="link-immagine" style="flex:1; margin:0;" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
+                <button type="button" class="btn-admin" style="padding: 8px 16px; white-space: nowrap;" onclick="window.open('https://imgur.com/upload', '_blank')">📸 CARICA FOTO</button>
+            </div>
             <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
             <div class="info-imgur">
-                📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto (.jpg)
+                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
             </div>
             <div class="modal-buttons">
                 <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
