@@ -966,7 +966,10 @@ function mostraModaleCategoria(categoria = null) {
             <label>📝 Descrizione</label>
             <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
             <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="catFotoUrl" class="link-immagine" style="flex:1; margin:0;" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
+                <button type="button" class="btn-admin" style="padding: 8px 16px; white-space: nowrap;" onclick="window.open('https://imgur.com/upload', '_blank')">📸 CARICA FOTO</button>
+            </div>
             <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
             <div class="info-imgur">
                 📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
