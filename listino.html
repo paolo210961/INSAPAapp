@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Listino Prezzi - inSAPA</title>
+    <title>Listino Prezzi</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -87,36 +87,43 @@
             box-shadow: 0 0 0 3px rgba(43,110,58,0.15);
         }
 
-        /* AREA PRINCIPALE SCORREVOLE – BARRA VERTICALE SEMPRE VISIBILE (come da richiesta) */
+        /* AREA PRINCIPALE SCORREVOLE – BARRA VERTICALE SEMPRE VISIBILE (forzata con overflow-y: scroll) */
         .scrollable-area {
             flex: 1;
-            overflow-y: scroll;    /* forza la barra verticale sempre visibile */
+            overflow-y: scroll;    /* Forza la barra verticale SEMPRE visibile, anche se il contenuto è poco */
             overflow-x: auto;
             padding: 0 20px 24px 20px;
-            /* SCROLLBAR PERSONALIZZATA – stile robusto, visibile, colorato */
-            scrollbar-width: thin;
+            /* Assicura altezza calcolata correttamente */
+            min-height: 0;
+            
+            /* SCROLLBAR PERSONALIZZATA – spessa e ben visibile (come da richiesta) */
+            scrollbar-width: auto;      /* Forza barra standard personalizzabile */
             scrollbar-color: #2c6e3c #e4ece4;
         }
-        /* WebKit: barra sempre visibile e con stile definito */
+        
+        /* WebKit (Brave, Chrome, Edge) - Barra sempre visibile con stile marcato */
         .scrollable-area::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
         }
         .scrollable-area::-webkit-scrollbar-track {
             background: #eef3ee;
             border-radius: 20px;
-            margin-block: 4px;
-            border: 1px solid #d4e2d4;
+            margin-block: 6px;
+            border: 1px solid #cde0cd;
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.02);
         }
         .scrollable-area::-webkit-scrollbar-thumb {
             background: #2c6e3c;
             border-radius: 20px;
-            border: 1px solid #c6dbc6;
+            border: 1px solid #bcd8bc;
+            min-height: 40px;
         }
         .scrollable-area::-webkit-scrollbar-thumb:hover {
             background: #1e542e;
+            cursor: pointer;
         }
-        /* Firefox: già scrollbar-color, ma assicuriamo consistenza */
+        /* Firefox – già scrollbar-color, ma diamo consistenza */
         .scrollable-area {
             scrollbar-width: auto;
         }
@@ -263,7 +270,7 @@
     </div>
 </div>
 
-<!-- AREA SCORREVOLE CON BARRA LATERALE SEMPRE VISIBILE (scroll personalizzato) -->
+<!-- AREA SCORREVOLE CON BARRA LATERALE SEMPRE VISIBILE (scroll forzato e personalizzato) -->
 <div class="scrollable-area" id="scrollableArea">
     <!-- DESKTOP TABLE -->
     <div class="desktop-table">
@@ -292,7 +299,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ---------- FALLBACK ESTESO (oltre 500 articoli per scorrimento realistico) ----------
+    // ---------- FALLBACK ESTESO (oltre 560 articoli per scorrimento realistico) ----------
     function generaFallbackCompleto() {
         const items = [];
         // Articoli reali dal listino originale
@@ -313,22 +320,23 @@
         ];
         for (let s of realSamples) items.push({...s});
 
-        // Generazione di articoli aggiuntivi per raggiungere oltre 500 prodotti
+        // Generazione di articoli aggiuntivi per raggiungere oltre 560 prodotti (barra sempre attiva)
         const descBase = [
             "SCOPA SINTETICA", "BALDEIA PROFESSIONALE", "STROFINACCIO MICROFIBRA", "DETERGENTE NEUTRO", "PASTA LUCIDANTE",
             "GUANTI PROTETTIVI", "SPAZZOLA CESPUGLI", "SECCHIO GALVANIZZATO", "CARRELLO PULIZIA", "MAPPA TESSUTO",
             "RACGLI RIFIUTI", "SACCHETTI BIODEGRAD", "SPRUZZATORE MANUALE", "ASPIRAPOLVERE", "PANNO ASSORBENTE",
-            "SPAZZOLA TAZZA", "LIQUIDO LAVAVETRI", "PASTIGLIE LAVASTOVIGLIE", "CEROTTO ANTISCIVOLO", "SIGILLO IGIENICO"
+            "SPAZZOLA TAZZA", "LIQUIDO LAVAVETRI", "PASTIGLIE LAVASTOVIGLIE", "CEROTTO ANTISCIVOLO", "SIGILLO IGIENICO",
+            "SPAZZA CESPUGLI LUNGO", "TUBO ASPIRANTE", "KIT PULIZIA VETRI", "STROCCIO IN MICROFIBRA"
         ];
         const gmList = ["GCVH","BCTP","LCDP","FCVP","LSTD","DSTR","CHM","SAC","MISC","PROF"];
         const umList = ["N.","PZ","BOT","LOTTO","PACCO","CONF","KG","L"];
 
-        // Obiettivo ~560 articoli totali (garantisce scorrimento lungo e barra sempre attiva)
-        const targetTotal = 560;
+        // Obiettivo ~570 articoli totali (scorrimento fluido e barra presente)
+        const targetTotal = 570;
         for (let i = items.length; i < targetTotal; i++) {
             const codiceNum = (100000 + i).toString().slice(-5);
-            const randomDesc = descBase[i % descBase.length] + " " + (Math.floor(Math.random()*200)+1);
-            const prezzo = (Math.random() * 45 + 1.2).toFixed(2);
+            const randomDesc = descBase[i % descBase.length] + " " + (Math.floor(Math.random()*250)+1);
+            const prezzo = (Math.random() * 48 + 1.2).toFixed(2);
             items.push({
                 codice: codiceNum,
                 prezzo: parseFloat(prezzo),
@@ -339,12 +347,12 @@
                 iva: 22
             });
         }
-        // ordine logico per codice
+        // ordine per codice
         items.sort((a,b) => a.codice.localeCompare(b.codice));
         return items;
     }
 
-    let currentArticles = generaFallbackCompleto();   // fallback con 560+ articoli
+    let currentArticles = generaFallbackCompleto();   // fallback con 570+ articoli
     let dbStatus = "offline";
     let lastUpdateDate = "12/06/2026 14:03 (dati locali)";
     
@@ -370,7 +378,7 @@
         return cleaned;
     }
 
-    // Caricamento Firestore
+    // Caricamento Firestore (tenta db, poi fallback)
     async function caricaListinoDaFirestore() {
         try {
             const docRef = db.collection('listini_generali').doc('listino_globale');
@@ -401,7 +409,6 @@
             }
         } catch(error) {
             dbStatus = "offline";
-            // manteniamo la data del fallback ma la personalizziamo
             lastUpdateDate = "12/06/2026 14:03 (dati locali archiviati)";
             return false;
         }
@@ -427,7 +434,7 @@
         return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // Funzione principale rendering + aggiornamento barra info unificata (nessun mini-box)
+    // Render completo con aggiornamento barra info unificata
     function renderBothViews() {
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
         let filtered = currentArticles.filter(art => {
@@ -476,7 +483,7 @@
         }
         mobileContainer.innerHTML = mobileHtml || `<div class="mobile-card" style="text-align:center;">🔍 Nessun articolo trovato per "${escapeHtml(searchTerm)}"</div>`;
         
-        // 3) BOX INFORMAZIONI UNIFICATO (nessun badge, nessun mini riquadro) – test chiaro
+        // 3) BOX INFORMAZIONI UNIFICATO (testo piatto, senza badge)
         const totali = currentArticles.length;
         const mostrati = filtered.length;
         const searchDisplay = searchTerm ? `"${escapeHtml(searchTerm)}"` : "tutti";
@@ -487,13 +494,10 @@
         infoDiv.innerHTML = infoString;
     }
     
-    // Reset ricerca: cancelliamo il campo input e ri-render (il tasto azzera non esiste, ma abbiamo bisogno di un reset implicito? No, nessun bottone. L'utente può cancellare manualmente. Per completezza nessun'altra azione.)
-    // Aggiungo comunque l'evento che se l'input viene svuotato, il rendering si aggiorna già.
+    // Evento di ricerca (nessun bottone reset)
     document.getElementById('searchInput').addEventListener('input', renderBothViews);
     
-    // eventuale doppio click o pulizia? Non serve bottone.
-    
-    // init: firestore + render
+    // Init: carica Firestore e renderizza
     (async function init() {
         await caricaListinoDaFirestore();
         renderBothViews();
