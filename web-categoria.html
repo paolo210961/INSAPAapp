@@ -25,7 +25,7 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
         }
         .logo-area {
             display: flex;
@@ -48,7 +48,7 @@
             background: #f1c40f;
             color: #2c3e50;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -60,17 +60,19 @@
         .categoria-header {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 30px 20px;
             text-align: center;
         }
-        .categoria-header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        .categoria-header p {
-            font-size: 1rem;
-            max-width: 600px;
-            margin: 0 auto;
+        .categoria-header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .categoria-header p { font-size: 1rem; max-width: 600px; margin: 0 auto; }
+        .categoria-img-header {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 15px auto 0;
+            border-radius: 12px;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: block;
         }
         
         .articoli-container {
@@ -85,10 +87,7 @@
             flex-wrap: wrap;
             margin-bottom: 30px;
         }
-        .header-buttons h2 {
-            font-size: 1.5rem;
-            color: #2c3e50;
-        }
+        .header-buttons h2 { font-size: 1.5rem; color: #2c3e50; }
         .btn-aggiungi {
             background: #27ae60;
             color: white;
@@ -135,6 +134,12 @@
             font-size: 1.3rem;
             color: #2c3e50;
         }
+        .famiglia-codice {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-family: monospace;
+            margin-right: 10px;
+        }
         .famiglia-descrizione {
             font-size: 0.85rem;
             color: #7f8c8d;
@@ -156,7 +161,6 @@
         }
         .famiglia-buttons .btn-move:hover { background: #2980b9; }
         
-        /* Articoli dentro famiglia - NON DRAGGABILI */
         .articoli-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -197,12 +201,6 @@
             color: #2c3e50;
             margin-bottom: 8px;
         }
-        .articolo-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 5px;
-            margin-top: 8px;
-        }
         .card-btn {
             background: rgba(0,0,0,0.6);
             color: white;
@@ -215,19 +213,7 @@
         }
         .card-btn.edit:hover { background: #3498db; }
         .card-btn:hover { background: #e74c3c; }
-        .btn-move-article {
-            background: #3498db;
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .btn-move-article:hover { background: #2980b9; }
         
-        /* Sezione senza famiglia - DRAGGABILE */
         .senza-famiglia-container {
             background: white;
             border-radius: 12px;
@@ -255,9 +241,7 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border: 1px solid #eee;
-            cursor: grab;
         }
-        .senza-famiglia-item:active { cursor: grabbing; }
         
         .modal-overlay {
             position: fixed;
@@ -276,18 +260,15 @@
             border-radius: 20px;
             padding: 25px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
         }
-        .modal-container h3 {
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-        }
+        .modal-container h3 { margin: 0 0 20px; color: #2c3e50; }
         .modal-container label {
             display: block;
             font-weight: bold;
-            margin: 15px 0 5px 0;
+            margin: 15px 0 5px;
             color: #2c3e50;
         }
         .modal-container input, .modal-container textarea, .modal-container select {
@@ -300,20 +281,36 @@
             min-height: 80px;
             resize: vertical;
         }
-        .link-immagine {
-            width: 100%;
-            padding: 10px;
+        .ricerca-articolo {
+            display: flex;
+            gap: 10px;
             margin: 10px 0;
-            border: 2px dashed #3498db;
-            border-radius: 8px;
-            background: #f8f9fa;
         }
-        .anteprima-img {
-            max-width: 100%;
-            max-height: 150px;
-            margin-top: 10px;
+        .ricerca-articolo input { flex: 1; }
+        .elenco-articoli {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            display: none;
+            margin: 10px 0;
+            padding: 5px;
+        }
+        .articolo-ricerca-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .articolo-ricerca-item:hover { background: #f0f0f0; }
+        .articolo-associato {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .modal-buttons {
             display: flex;
@@ -330,6 +327,7 @@
         }
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
         
         .toast-message {
             position: fixed;
@@ -369,50 +367,41 @@
             background: #95a5a6;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
         }
-        .btn-torna:hover { background: #7f8c8d; }
-        
         .info-imgur {
             font-size: 0.7rem;
             color: #7f8c8d;
             margin-top: 5px;
             text-align: center;
         }
-        .info-imgur a {
-            color: #3498db;
-            text-decoration: none;
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+            margin-right: 20px;
         }
-        
-        /* Drag & drop style */
-        .sortable-drag {
-            opacity: 0.5;
-            background: #f1c40f;
+        .search-bar input {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            width: 180px;
         }
-        .sortable-ghost {
-            opacity: 0.3;
-            background: #3498db;
-        }
-        
         @media (max-width: 1024px) {
             .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 768px) {
-            .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .articolo-img { height: 150px; }
-            .categoria-header h1 { font-size: 1.5rem; }
+            .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(2, 1fr); }
             .header-row { flex-direction: column; }
-            .header-buttons { flex-direction: column; gap: 10px; align-items: stretch; }
-            .btn-aggiungi, .btn-famiglia { width: 100%; text-align: center; }
-            .famiglia-titolo { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .search-bar { margin-left: 0; width: 100%; justify-content: center; }
+            .search-bar input { width: 100%; }
         }
         @media (max-width: 480px) {
             .articoli-grid, .senza-famiglia-grid { grid-template-columns: 1fr; }
         }
-        
         footer {
             background: #2c3e50;
             color: white;
@@ -420,6 +409,8 @@
             padding: 30px 20px;
             margin-top: 50px;
         }
+        .sortable-drag { opacity: 0.5; }
+        .sortable-ghost { opacity: 0.3; background: #3498db; }
     </style>
 </head>
 <body>
@@ -431,10 +422,14 @@
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
         </div>
-        <div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button id="btnCaricaFoto" class="btn-admin" style="display:none;">📸 CARICA FOTO</button>
             <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
-            <button id="btnTornaHome" class="btn-torna">◀ TORNA ALLA HOME</button>
+            <div class="search-bar" id="searchBar" style="display:none;">
+                <input type="text" id="ricercaFamiglie" placeholder="🔍 Cerca famiglia (codice/nome)">
+                <input type="text" id="ricercaArticoli" placeholder="🔍 Cerca articolo (codice/descrizione)">
+            </div>
+            <button id="btnTornaHome" class="btn-torna">◀ TORNA</button>
         </div>
     </div>
 </div>
@@ -442,11 +437,12 @@
 <div id="categoriaHeader" class="categoria-header">
     <h1 id="catNome">Caricamento...</h1>
     <p id="catDescrizione"></p>
+    <img id="catImmagine" class="categoria-img-header" style="display:none;">
 </div>
 
 <div class="articoli-container">
     <div class="header-buttons">
-        <h2>📦 Articoli</h2>
+        <h2>📦 Famiglie e Articoli</h2>
         <div>
             <button id="btnAggiungiFamiglia" class="btn-famiglia">🏷️ NUOVA FAMIGLIA</button>
             <button id="btnAggiungiArticolo" class="btn-aggiungi">➕ NUOVO ARTICOLO</button>
@@ -455,13 +451,10 @@
     <div id="famiglieContainer"></div>
     <div id="senzaFamigliaContainer"></div>
 </div>
-
-<footer>
-    <p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p>
-</footer>
+<footer><p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p></footer>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
+// FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -470,416 +463,203 @@ const firebaseConfig = {
     messagingSenderId: "331230245928",
     appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI ====================
+// VARIABILI GLOBALI
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categoriaId = null;
 let categoria = null;
-let articoli = [];
+// famiglie: array di oggetti con id, codice, nome, descrizione, ordine
 let famiglie = [];
+// articoli: tutti gli articoli della categoria
+let articoli = [];
+// associazioni: mappa famigliaId -> Set di articoliId (o array)
+let famigliaArticoliMap = new Map();
 let sortableFamiglie = null;
-let sortableSenzaFamiglia = null;
-let isMobile = false;
 let pressTimer = null;
 
-// ==================== GESTIONE TASTO CARICA FOTO ====================
-async function getFotoLink() {
-    try {
-        const doc = await db.collection('config').doc('link_tasto_extra').get();
-        if (doc.exists && doc.data().url) {
-            return doc.data().url;
-        }
-    } catch(e) { console.warn(e); }
-    return 'https://imgur.com/upload';
-}
-
-async function setFotoLink(url) {
-    await db.collection('config').doc('link_tasto_extra').set({ url: url });
-}
-
-function mostraModaleLink() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>🔗 MODIFICA LINK CARICA FOTO</h3>
-            <label>Inserisci il nuovo link (URL completo)</label>
-            <input type="text" id="nuovoLinkInput" placeholder="https://...">
-            <div class="modal-buttons">
-                <button id="btnSalvaLink" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnSalvaLink').onclick = async () => {
-        const nuovoLink = document.getElementById('nuovoLinkInput').value.trim();
-        if (nuovoLink && (nuovoLink.startsWith('http://') || nuovoLink.startsWith('https://'))) {
-            await setFotoLink(nuovoLink);
-            showToast("✅ Link salvato su Firebase!");
-        } else {
-            showToast("❌ Inserisci un link valido (http:// o https://)", true);
-        }
-        modal.remove();
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-function inizializzaTastoCaricaFoto() {
-    const btn = document.getElementById('btnCaricaFoto');
-    if (!btn) return;
-    
-    btn.addEventListener('mousedown', () => {
-        pressTimer = setTimeout(() => {
-            mostraModaleLink();
-            pressTimer = null;
-        }, 3000);
-    });
-    
-    btn.addEventListener('mouseup', async () => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-            const link = await getFotoLink();
-            window.open(link, '_blank');
-        }
-    });
-    
-    btn.addEventListener('mouseleave', () => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-    });
-    
-    // Per touch (mobile)
-    btn.addEventListener('touchstart', (e) => {
-        pressTimer = setTimeout(() => {
-            mostraModaleLink();
-            pressTimer = null;
-        }, 3000);
-    });
-    
-    btn.addEventListener('touchend', async (e) => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-            const link = await getFotoLink();
-            window.open(link, '_blank');
-        }
-    });
-}
-
-// ==================== RILEVAZIONE MOBILE ====================
-function checkMobile() {
-    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    return isMobile;
-}
-
-// ==================== LOGO ====================
+// LOGO E LINK
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    
     fetch('icons/logo.jpg').then(r => {
-        if (r.ok) {
-            logoImg.src = 'icons/logo.jpg';
-            logoImg.style.display = 'block';
-            logoSpan.style.display = 'none';
-        } else {
-            fetch('icons/logo.png').then(r2 => {
-                if (r2.ok) {
-                    logoImg.src = 'icons/logo.png';
-                    logoImg.style.display = 'block';
-                    logoSpan.style.display = 'none';
-                }
-            }).catch(() => {});
-        }
-    }).catch(() => {});
+        if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; }
+        else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); }
+    }).catch(()=>{});
 }
 caricaLogo();
 
-// ==================== GESTIONE LINK PER LOGO ====================
-let linkPrincipale = "";
-let linkSecondario = "";
-let lastTap = 0;
-
+let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
     try {
-        const response = await fetch('link.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
-            if (lines.length >= 1) linkPrincipale = lines[0].trim();
-            if (lines.length >= 2) linkSecondario = lines[1].trim();
+        const res = await fetch('link.html');
+        if(res.ok){
+            const text = await res.text();
+            const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<'));
+            if(lines.length>=1) linkPrincipale = lines[0].trim();
+            if(lines.length>=2) linkSecondario = lines[1].trim();
         }
-    } catch(e) { console.warn("link.html non trovato"); }
+    } catch(e){}
 }
-
-function apriLinkPrincipale() {
-    if (linkPrincipale && linkPrincipale !== "") {
-        window.open(linkPrincipale, '_blank');
-        showToast("🔗 Apertura link principale");
-    } else {
-        showToast("⚠️ Link principale non configurato", true);
-    }
-}
-
-function apriLinkSecondario() {
-    if (linkSecondario && linkSecondario !== "") {
-        window.open(linkSecondario, '_blank');
-        showToast("🔗 Apertura link secondario");
-    } else {
-        showToast("⚠️ Link secondario non configurato", true);
-    }
-}
-
-const logoSiti = document.getElementById('logoRettangolo');
-logoSiti.addEventListener('click', (e) => {
-    const now = new Date().getTime();
-    const tapLength = now - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
-        e.stopPropagation();
-        apriLinkSecondario();
-        lastTap = 0;
-    } else {
-        lastTap = now;
-        setTimeout(() => {
-            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
-                apriLinkPrincipale();
-                lastTap = 0;
-            }
-        }, 300);
-    }
+function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
+function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
+document.getElementById('logoRettangolo').addEventListener('click',(e)=>{
+    const now = Date.now();
+    if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }
+    else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
 });
 
-// ==================== FUNZIONI UTILI ====================
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
-    toast.innerText = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+// TASTO CARICA FOTO
+async function getFotoLink() {
+    try {
+        const doc = await db.collection('config').doc('link_tasto_extra').get();
+        if(doc.exists && doc.data().url) return doc.data().url;
+    } catch(e){}
+    return 'https://imgur.com/upload';
 }
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-// ==================== MODALITA' ADMIN ====================
-function mostraModalePassword() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO ADMIN</h3>
-            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
-            <div class="modal-buttons">
-                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+async function setFotoLink(url) { await db.collection('config').doc('link_tasto_extra').set({ url }); }
+function mostraModaleLink() {
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML=`<div class="modal-container"><h3>🔗 MODIFICA LINK</h3><input type="text" id="nuovoLinkInput" placeholder="https://..."><div class="modal-buttons"><button id="btnSalvaLink" class="btn-salva-modal">SALVA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
-    document.getElementById('btnVerifica').onclick = () => {
-        const pwd = document.getElementById('passwordAdmin').value;
-        if (pwd === ADMIN_PASSWORD) {
-            isAdminMode = true;
-            localStorage.setItem('web_admin_mode', 'true');
-            showToast("✅ Modalità admin attivata!");
-            aggiornaUIAdmin();
-            modal.remove();
-        } else {
-            showToast("❌ Password errata!", true);
-        }
+    document.getElementById('btnSalvaLink').onclick = async ()=>{
+        const nuovo = document.getElementById('nuovoLinkInput').value.trim();
+        if(nuovo && (nuovo.startsWith('http://')||nuovo.startsWith('https://'))){ await setFotoLink(nuovo); showToast("✅ Link salvato!"); modal.remove(); }
+        else showToast("Link non valido", true);
     };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
+}
+function inizializzaTastoCaricaFoto() {
+    const btn = document.getElementById('btnCaricaFoto');
+    if(!btn) return;
+    btn.addEventListener('mousedown', ()=>{ pressTimer = setTimeout(()=>{ mostraModaleLink(); pressTimer=null; },3000); });
+    btn.addEventListener('mouseup', async ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; const link=await getFotoLink(); window.open(link,'_blank'); } });
+    btn.addEventListener('mouseleave', ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+    btn.addEventListener('touchstart', ()=>{ pressTimer = setTimeout(()=>{ mostraModaleLink(); pressTimer=null; },3000); });
+    btn.addEventListener('touchend', async ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; const link=await getFotoLink(); window.open(link,'_blank'); } });
 }
 
-function disattivaModalitaAdmin() {
-    isAdminMode = false;
-    localStorage.removeItem('web_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIAdmin();
+function showToast(msg, isErr=false){
+    const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg;
+    document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
 }
+function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
-function aggiornaUIAdmin() {
-    const btnAdmin = document.getElementById('btnAdmin');
-    const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
-    const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
-    const btnCaricaFoto = document.getElementById('btnCaricaFoto');
-    
-    if (isAdminMode) {
-        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
-        btnAdmin.classList.add('active');
-        btnAggiungiArticolo.classList.add('show');
-        btnAggiungiFamiglia.classList.add('show');
-        if (btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
-    } else {
-        btnAdmin.textContent = "🔐 AREA ADMIN";
-        btnAdmin.classList.remove('active');
-        btnAggiungiArticolo.classList.remove('show');
-        btnAggiungiFamiglia.classList.remove('show');
-        if (btnCaricaFoto) btnCaricaFoto.style.display = 'none';
-        // Distruggi Sortable se attivi
-        if (sortableFamiglie) sortableFamiglie.destroy();
-        if (sortableSenzaFamiglia) sortableSenzaFamiglia.destroy();
-        sortableFamiglie = null;
-        sortableSenzaFamiglia = null;
-    }
-    visualizzaArticoli();
-}
-
-// ==================== CARICA DATI ====================
-async function caricaCategoria() {
+// CARICA DATI
+async function caricaCategoria(){
     const urlParams = new URLSearchParams(window.location.search);
     categoriaId = urlParams.get('id');
-    
-    if (!categoriaId) {
-        document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
-        return;
-    }
-    
-    try {
+    if(!categoriaId){ document.getElementById('categoriaHeader').innerHTML='<h1>Categoria non trovata</h1>'; return; }
+    try{
         const doc = await db.collection('web_categorie').doc(categoriaId).get();
-        if (doc.exists) {
-            categoria = { id: doc.id, ...doc.data() };
+        if(doc.exists){
+            categoria = { id:doc.id, ...doc.data() };
             document.getElementById('catNome').innerText = categoria.nome;
             document.getElementById('catDescrizione').innerText = categoria.descrizione || '';
-        } else {
-            document.getElementById('categoriaHeader').innerHTML = '<h1>Categoria non trovata</h1>';
-        }
-    } catch(e) { console.error(e); }
+            const imgHeader = document.getElementById('catImmagine');
+            if(categoria.fotoUrl){
+                imgHeader.src = categoria.fotoUrl;
+                imgHeader.style.display = 'block';
+            } else imgHeader.style.display = 'none';
+        } else document.getElementById('categoriaHeader').innerHTML='<h1>Categoria non trovata</h1>';
+    } catch(e){ console.error(e); }
 }
 
-async function caricaFamiglie() {
-    if (!categoriaId) return;
-    try {
-        const snapshot = await db.collection('web_famiglie')
-            .where('categoriaId', '==', categoriaId)
-            .orderBy('ordine', 'asc')
-            .get();
+async function caricaFamiglie(){
+    if(!categoriaId) return;
+    try{
+        const snap = await db.collection('web_famiglie').where('categoriaId','==',categoriaId).orderBy('ordine','asc').get();
         famiglie = [];
-        snapshot.forEach(doc => {
-            famiglie.push({ id: doc.id, ...doc.data() });
-        });
-    } catch(e) { console.error(e); }
+        snap.forEach(doc=>{ famiglie.push({ id:doc.id, ...doc.data() }); });
+    } catch(e){ console.error(e); }
 }
 
-async function caricaArticoli() {
-    if (!categoriaId) return;
-    try {
-        const snapshot = await db.collection('web_articoli')
-            .where('categoriaId', '==', categoriaId)
-            .get();
+async function caricaArticoli(){
+    if(!categoriaId) return;
+    try{
+        const snap = await db.collection('web_articoli').where('categoriaId','==',categoriaId).get();
         articoli = [];
-        snapshot.forEach(doc => {
-            articoli.push({ id: doc.id, ...doc.data() });
+        snap.forEach(doc=>{ articoli.push({ id:doc.id, ...doc.data() }); });
+    } catch(e){ console.error(e); }
+}
+
+async function caricaAssociazioni(){
+    if(!categoriaId) return;
+    famigliaArticoliMap.clear();
+    try{
+        const snap = await db.collection('web_famiglia_articoli').where('categoriaId','==',categoriaId).get();
+        snap.forEach(doc=>{
+            const data = doc.data();
+            const famigliaId = data.famigliaId;
+            const articoloId = data.articoloId;
+            if(!famigliaArticoliMap.has(famigliaId)) famigliaArticoliMap.set(famigliaId, new Set());
+            famigliaArticoliMap.get(famigliaId).add(articoloId);
         });
-        await caricaFamiglie();
-        visualizzaArticoli();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore caricamento articoli", true);
-    }
+    } catch(e){ console.warn(e); }
 }
 
-// ==================== SALVA ORDINE ====================
-async function salvaOrdineFamiglie(nuovoOrdine) {
-    for (let i = 0; i < nuovoOrdine.length; i++) {
-        const famigliaId = nuovoOrdine[i];
-        await db.collection('web_famiglie').doc(famigliaId).update({ ordine: i });
-    }
-    showToast("✅ Ordine famiglie salvato!");
+async function caricaTutti(){
+    await caricaCategoria();
     await caricaFamiglie();
-    visualizzaArticoli();
-}
-
-async function salvaOrdineSenzaFamiglia(nuovoOrdine) {
-    for (let i = 0; i < nuovoOrdine.length; i++) {
-        const articoloId = nuovoOrdine[i];
-        await db.collection('web_articoli').doc(articoloId).update({ ordine: i });
-    }
-    showToast("✅ Ordine articoli salvato!");
     await caricaArticoli();
+    await caricaAssociazioni();
+    visualizza();
 }
 
-// ==================== SPOSTA ARTICOLO SENZA FAMIGLIA CON FRECCIA ====================
-async function spostaArticolo(articoloId, direzione) {
-    const articoliSenza = articoli.filter(a => !a.famigliaId || a.famigliaId === '');
-    const index = articoliSenza.findIndex(a => a.id === articoloId);
-    if (index === -1) return;
-    
-    const nuovoIndex = direzione === 'su' ? index - 1 : index + 1;
-    if (nuovoIndex < 0 || nuovoIndex >= articoliSenza.length) return;
-    
-    const nuovoOrdine = [...articoliSenza];
-    [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]];
-    
-    for (let i = 0; i < nuovoOrdine.length; i++) {
-        await db.collection('web_articoli').doc(nuovoOrdine[i].id).update({ ordine: i });
-    }
-    showToast("✅ Articolo spostato!");
-    await caricaArticoli();
-}
-
-// ==================== SPOSTA FAMIGLIA CON FRECCIA ====================
-async function spostaFamiglia(famigliaId, direzione) {
-    const index = famiglie.findIndex(f => f.id === famigliaId);
-    if (index === -1) return;
-    
-    const nuovoIndex = direzione === 'su' ? index - 1 : index + 1;
-    if (nuovoIndex < 0 || nuovoIndex >= famiglie.length) return;
-    
-    const nuovoOrdine = [...famiglie];
-    [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]];
-    
-    for (let i = 0; i < nuovoOrdine.length; i++) {
-        await db.collection('web_famiglie').doc(nuovoOrdine[i].id).update({ ordine: i });
-    }
-    showToast("✅ Famiglia spostata!");
-    await caricaFamiglie();
-    visualizzaArticoli();
-}
-
-// ==================== VISUALIZZA ARTICOLI ====================
-function visualizzaArticoli() {
+// VISUALIZZA
+function visualizza(){
     const famiglieContainer = document.getElementById('famiglieContainer');
-    const senzaFamigliaContainer = document.getElementById('senzaFamigliaContainer');
+    const senzaContainer = document.getElementById('senzaFamigliaContainer');
+    const ricercaFamiglie = document.getElementById('ricercaFamiglie')?.value.toLowerCase() || '';
+    const ricercaArticoli = document.getElementById('ricercaArticoli')?.value.toLowerCase() || '';
     
-    const articoliConFamiglia = articoli.filter(a => a.famigliaId && a.famigliaId !== '');
-    const articoliSenzaFamiglia = articoli.filter(a => !a.famigliaId || a.famigliaId === '')
-        .sort((a,b) => (a.ordine || 0) - (b.ordine || 0));
+    // Filtra famiglie in base a ricercaFamiglie (per codice e nome/descrizione)
+    let famiglieFiltrate = famiglie;
+    if(ricercaFamiglie){
+        famiglieFiltrate = famiglie.filter(f => 
+            (f.codice && f.codice.toLowerCase().includes(ricercaFamiglie)) ||
+            (f.nome && f.nome.toLowerCase().includes(ricercaFamiglie)) ||
+            (f.descrizione && f.descrizione.toLowerCase().includes(ricercaFamiglie))
+        );
+    }
     
-    // Visualizza famiglie
+    // Filtra articoli (per ricercaArticoli)
+    let articoliFiltrati = articoli;
+    if(ricercaArticoli){
+        articoliFiltrati = articoli.filter(a => 
+            (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) ||
+            (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli))
+        );
+    }
+    
+    // Determina quali famiglie mostrare (anche se una famiglia non è filtrata, ma se ha articoli che corrispondono alla ricerca articoli? 
+    // Per semplicità: le famiglie sono filtrate solo dalla ricerca famiglie; la ricerca articoli filtra gli articoli visualizzati DENTRO le famiglie e nella sezione senza famiglia.
+    let famiglieDaMostrare = famiglieFiltrate;
+    
     let famiglieHtml = '';
-    for (const famiglia of famiglie) {
-        const articoliFamiglia = articoliConFamiglia.filter(a => a.famigliaId === famiglia.id);
-        
+    for(const famiglia of famiglieDaMostrare){
+        const articoliIds = famigliaArticoliMap.get(famiglia.id) || new Set();
+        let articoliFamiglia = articoli.filter(a => articoliIds.has(a.id));
+        if(ricercaArticoli){
+            articoliFamiglia = articoliFamiglia.filter(a => 
+                (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) ||
+                (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli))
+            );
+        }
+        if(articoliFamiglia.length === 0 && ricercaArticoli !== '') continue; // se nessun articolo matcha, nascondi famiglia
         famiglieHtml += `
             <div class="famiglia-container" data-id="${famiglia.id}">
                 <div class="famiglia-titolo">
                     <div>
-                        <h3>📁 ${escapeHtml(famiglia.nome)}</h3>
+                        <h3><span class="famiglia-codice">[${escapeHtml(famiglia.codice || '???')}]</span> ${escapeHtml(famiglia.nome)}</h3>
                         ${famiglia.descrizione ? `<div class="famiglia-descrizione">${escapeHtml(famiglia.descrizione)}</div>` : ''}
                     </div>
                     ${isAdminMode ? `
                         <div class="famiglia-buttons">
-                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'su')" ${famiglie.indexOf(famiglia) === 0 ? 'disabled style="opacity:0.5"' : ''}>⬆️</button>
-                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'giu')" ${famiglie.indexOf(famiglia) === famiglie.length-1 ? 'disabled style="opacity:0.5"' : ''}>⬇️</button>
+                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'su')" ${famiglieDaMostrare.indexOf(famiglia)===0?'disabled style="opacity:0.5"':''}>⬆️</button>
+                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'giu')" ${famiglieDaMostrare.indexOf(famiglia)===famiglieDaMostrare.length-1?'disabled style="opacity:0.5"':''}>⬇️</button>
                             <button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')">✏️</button>
                             <button class="card-btn" onclick="eliminaFamiglia('${famiglia.id}')">🗑</button>
                         </div>
@@ -890,11 +670,11 @@ function visualizzaArticoli() {
                         <div class="articolo-card">
                             ${isAdminMode ? `
                                 <div style="position:absolute; top:5px; right:5px; display:flex; gap:3px;">
-                                    <button class="card-btn edit" onclick="modificaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">✏️</button>
-                                    <button class="card-btn" onclick="eliminaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">🗑</button>
+                                    <button class="card-btn edit" onclick="modificaArticolo('${art.id}')" style="width:24px; height:24px;">✏️</button>
+                                    <button class="card-btn" onclick="eliminaArticolo('${art.id}')" style="width:24px; height:24px;">🗑</button>
                                 </div>
                             ` : ''}
-                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
                             <div class="articolo-info">
                                 <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
                                 <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
@@ -907,26 +687,31 @@ function visualizzaArticoli() {
     }
     famiglieContainer.innerHTML = famiglieHtml;
     
-    // Visualizza articoli senza famiglia
-    let senzaFamigliaHtml = '';
-    if (articoliSenzaFamiglia.length > 0) {
-        senzaFamigliaHtml = `
-            <div class="senza-famiglia-container" id="senzaFamigliaList">
-                <div class="senza-famiglia-titolo">
-                    <h3>📦 SENZA FAMIGLIA</h3>
-                </div>
+    // Sezione senza famiglia: articoli non associati a NESSUNA famiglia e che soddisfano filtro ricercaArticoli
+    const tuttiIdsAssociati = new Set();
+    for(const ids of famigliaArticoliMap.values()) ids.forEach(id => tuttiIdsAssociati.add(id));
+    let articoliSenza = articoli.filter(a => !tuttiIdsAssociati.has(a.id));
+    if(ricercaArticoli){
+        articoliSenza = articoliSenza.filter(a => 
+            (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) ||
+            (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli))
+        );
+    }
+    let senzaHtml = '';
+    if(articoliSenza.length > 0){
+        senzaHtml = `
+            <div class="senza-famiglia-container">
+                <div class="senza-famiglia-titolo"><h3>📦 ARTICOLI SENZA FAMIGLIA</h3></div>
                 <div class="senza-famiglia-grid" id="senzaFamigliaGrid">
-                    ${articoliSenzaFamiglia.map((art, idx) => `
-                        <div class="senza-famiglia-item" data-id="${art.id}">
+                    ${articoliSenza.map(art => `
+                        <div class="senza-famiglia-item">
                             ${isAdminMode ? `
                                 <div style="position:absolute; top:5px; right:5px; display:flex; gap:3px; z-index:10;">
-                                    <button class="btn-move-article" onclick="event.stopPropagation(); spostaArticolo('${art.id}', 'su')" ${idx === 0 ? 'disabled style="opacity:0.5"' : ''}>⬆️</button>
-                                    <button class="btn-move-article" onclick="event.stopPropagation(); spostaArticolo('${art.id}', 'giu')" ${idx === articoliSenzaFamiglia.length-1 ? 'disabled style="opacity:0.5"' : ''}>⬇️</button>
-                                    <button class="card-btn edit" onclick="event.stopPropagation(); modificaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">✏️</button>
-                                    <button class="card-btn" onclick="event.stopPropagation(); eliminaArticolo('${art.id}')" style="width:24px; height:24px; font-size:0.7rem;">🗑</button>
+                                    <button class="card-btn edit" onclick="modificaArticolo('${art.id}')" style="width:24px; height:24px;">✏️</button>
+                                    <button class="card-btn" onclick="eliminaArticolo('${art.id}')" style="width:24px; height:24px;">🗑</button>
                                 </div>
                             ` : ''}
-                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${art.descrizione}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
+                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
                             <div class="articolo-info">
                                 <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
                                 <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
@@ -937,140 +722,225 @@ function visualizzaArticoli() {
             </div>
         `;
     }
-    senzaFamigliaContainer.innerHTML = senzaFamigliaHtml;
+    senzaContainer.innerHTML = senzaHtml;
     
-    // Attiva Sortable solo su PC e in modalità admin
-    if (isAdminMode && !isMobile) {
-        // Sortable per famiglie
-        const famiglieElement = document.getElementById('famiglieContainer');
-        if (famiglieElement && !sortableFamiglie) {
-            sortableFamiglie = new Sortable(famiglieElement, {
+    // Drag & drop famiglie (solo admin, non mobile)
+    if(isAdminMode && !/Mobi|Android/i.test(navigator.userAgent)){
+        if(sortableFamiglie) sortableFamiglie.destroy();
+        const container = document.getElementById('famiglieContainer');
+        if(container){
+            sortableFamiglie = new Sortable(container, {
                 animation: 300,
                 handle: '.famiglia-titolo',
                 ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                onEnd: async function() {
-                    const nuoviOrdini = Array.from(famiglieElement.querySelectorAll('.famiglia-container'))
-                        .map(el => el.dataset.id);
-                    await salvaOrdineFamiglie(nuoviOrdini);
+                onEnd: async function(){
+                    const nuoviOrdini = Array.from(container.querySelectorAll('.famiglia-container')).map(el => el.dataset.id);
+                    for(let i=0; i<nuoviOrdini.length; i++){
+                        await db.collection('web_famiglie').doc(nuoviOrdini[i]).update({ ordine: i });
+                    }
+                    await caricaFamiglie();
+                    visualizza();
                 }
             });
         }
-        
-        // Sortable per articoli senza famiglia (solo su PC)
-        const senzaFamigliaGrid = document.getElementById('senzaFamigliaGrid');
-        if (senzaFamigliaGrid && !sortableSenzaFamiglia) {
-            sortableSenzaFamiglia = new Sortable(senzaFamigliaGrid, {
-                animation: 300,
-                handle: '.senza-famiglia-item',
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                onEnd: async function() {
-                    const nuoviOrdini = Array.from(senzaFamigliaGrid.querySelectorAll('.senza-famiglia-item'))
-                        .map(el => el.dataset.id);
-                    await salvaOrdineSenzaFamiglia(nuoviOrdini);
-                }
-            });
-        }
-    } else {
-        if (sortableFamiglie) sortableFamiglie.destroy();
-        if (sortableSenzaFamiglia) sortableSenzaFamiglia.destroy();
-        sortableFamiglie = null;
-        sortableSenzaFamiglia = null;
-    }
+    } else if(sortableFamiglie){ sortableFamiglie.destroy(); sortableFamiglie=null; }
 }
 
-// ==================== MODALI ====================
-function mostraModaleFamiglia(famiglia = null) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
+// MODALI
+async function modificaFamiglia(id){
+    const famiglia = famiglie.find(f=>f.id===id);
+    if(!famiglia) return;
+    // Ottieni articoli già associati
+    const articoliIds = famigliaArticoliMap.get(famiglia.id) || new Set();
+    const articoliAssociati = articoli.filter(a=>articoliIds.has(a.id));
+    mostraModaleFamiglia(famiglia, articoliAssociati);
+}
+
+function mostraModaleFamiglia(famiglia=null, associati=[]){
+    const isEdit = !!famiglia;
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    let codiceHtml = '';
+    if(isEdit){
+        codiceHtml = `<div><label>📟 Codice</label><input type="text" id="famCodice" value="${escapeHtml(famiglia.codice)}" readonly style="background:#f0f0f0;"></div>`;
+    } else {
+        // Calcola prossimo codice progressivo per questa categoria
+        let maxCodice = 0;
+        for(const f of famiglie){
+            if(f.codice && !isNaN(parseInt(f.codice))) maxCodice = Math.max(maxCodice, parseInt(f.codice));
+        }
+        const nuovoCodice = (maxCodice+1).toString().padStart(4,'0');
+        codiceHtml = `<div><label>📟 Codice (automatico)</label><input type="text" id="famCodice" value="${nuovoCodice}" readonly style="background:#f0f0f0;"></div>`;
+    }
+    
     modal.innerHTML = `
         <div class="modal-container">
-            <h3>${famiglia ? '✏️ MODIFICA FAMIGLIA' : '🏷️ NUOVA FAMIGLIA'}</h3>
+            <h3>${isEdit ? '✏️ MODIFICA FAMIGLIA' : '🏷️ NUOVA FAMIGLIA'}</h3>
+            ${codiceHtml}
             <label>📌 Nome famiglia *</label>
             <input type="text" id="famNome" value="${famiglia ? escapeHtml(famiglia.nome) : ''}" placeholder="es. Stoviglie">
             <label>📝 Descrizione</label>
-            <textarea id="famDescrizione" placeholder="Descrizione della famiglia...">${famiglia ? escapeHtml(famiglia.descrizione || '') : ''}</textarea>
-            <label>🔢 Ordine</label>
-            <input type="number" id="famOrdine" value="${famiglia ? (famiglia.ordine || 0) : famiglie.length + 1}">
+            <textarea id="famDescrizione" placeholder="Descrizione...">${famiglia ? escapeHtml(famiglia.descrizione || '') : ''}</textarea>
+            <label>🔗 Articoli associati (minimo 1)</label>
+            <div id="listaArticoliAssociati"></div>
+            <div class="ricerca-articolo">
+                <input type="text" id="cercaArticoloAssociazione" placeholder="Cerca per codice o descrizione">
+                <button type="button" id="btnCercaArticolo" class="btn-admin">🔍 Cerca</button>
+            </div>
+            <div id="risultatiRicercaArticoli" class="elenco-articoli" style="display:none;"></div>
             <div class="modal-buttons">
                 <button id="btnSalvaFamiglia" class="btn-salva-modal">💾 SALVA</button>
+                ${isEdit ? `<button id="btnEliminaFamiglia" class="btn-danger">🗑 ELIMINA FAMIGLIA</button>` : ''}
                 <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
     
+    const listaDiv = document.getElementById('listaArticoliAssociati');
+    const articoliSelezionati = new Set(associati.map(a=>a.id));
+    
+    function aggiornaLista(){
+        const selezionati = articoli.filter(a=>articoliSelezionati.has(a.id));
+        listaDiv.innerHTML = selezionati.map(a => `
+            <div class="articolo-associato">
+                <span><strong>${escapeHtml(a.codice)}</strong> - ${escapeHtml(a.descrizione)}</span>
+                <button type="button" class="card-btn" data-id="${a.id}" style="background:#e74c3c;">🗑</button>
+            </div>
+        `).join('');
+        // Aggiungi eventi rimozione
+        document.querySelectorAll('#listaArticoliAssociati .card-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.dataset.id;
+                articoliSelezionati.delete(id);
+                aggiornaLista();
+            });
+        });
+    }
+    aggiornaLista();
+    
+    const cercaInput = document.getElementById('cercaArticoloAssociazione');
+    const risultatiDiv = document.getElementById('risultatiRicercaArticoli');
+    const btnCerca = document.getElementById('btnCercaArticolo');
+    function cercaArticoli(){
+        const query = cercaInput.value.trim().toLowerCase();
+        if(!query){ risultatiDiv.style.display='none'; return; }
+        const trovati = articoli.filter(a => !articoliSelezionati.has(a.id) && (a.codice.toLowerCase().includes(query) || a.descrizione.toLowerCase().includes(query)));
+        if(trovati.length===0){
+            risultatiDiv.innerHTML = '<div style="padding:8px">Nessun articolo trovato</div>';
+            risultatiDiv.style.display='block';
+            return;
+        }
+        risultatiDiv.innerHTML = trovati.map(a => `
+            <div class="articolo-ricerca-item" data-id="${a.id}">
+                <span><strong>${escapeHtml(a.codice)}</strong> - ${escapeHtml(a.descrizione)}</span>
+                <button type="button" class="btn-admin" style="padding:2px 8px;">➕ Aggiungi</button>
+            </div>
+        `).join('');
+        risultatiDiv.style.display='block';
+        document.querySelectorAll('#risultatiRicercaArticoli .articolo-ricerca-item').forEach(item => {
+            const id = item.dataset.id;
+            const btn = item.querySelector('button');
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                articoliSelezionati.add(id);
+                aggiornaLista();
+                cercaInput.value = '';
+                risultatiDiv.style.display='none';
+            });
+        });
+    }
+    btnCerca.onclick = cercaArticoli;
+    cercaInput.addEventListener('keypress', (e) => { if(e.key==='Enter') cercaArticoli(); });
+    
     document.getElementById('btnSalvaFamiglia').onclick = async () => {
         const nome = document.getElementById('famNome').value.trim();
         const descrizione = document.getElementById('famDescrizione').value;
-        const ordine = parseInt(document.getElementById('famOrdine').value) || 0;
-        
-        if (!nome) {
-            showToast("Inserisci il nome della famiglia", true);
-            return;
-        }
-        
+        const codice = document.getElementById('famCodice').value.trim();
+        if(!nome){ showToast("Inserire il nome della famiglia", true); return; }
+        if(articoliSelezionati.size === 0){ showToast("La famiglia deve avere almeno un articolo associato", true); return; }
         try {
-            if (famiglia) {
-                await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, ordine });
-                showToast("✅ Famiglia modificata!");
+            if(isEdit){
+                await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, codice });
+                // Aggiorna associazioni: rimuovi tutte e reinserisci quelle selezionate
+                const oldAssoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get();
+                const batch = db.batch();
+                oldAssoc.forEach(doc => batch.delete(doc.ref));
+                for(const artId of articoliSelezionati){
+                    const ref = db.collection('web_famiglia_articoli').doc();
+                    batch.set(ref, { categoriaId, famigliaId: famiglia.id, articoloId: artId });
+                }
+                await batch.commit();
+                showToast("✅ Famiglia aggiornata!");
             } else {
-                await db.collection('web_famiglie').add({ categoriaId, nome, descrizione, ordine });
-                showToast("✅ Famiglia aggiunta!");
+                // Nuova famiglia: calcola ordine (massimo +1)
+                const maxOrdine = famiglie.reduce((max,f)=>Math.max(max, f.ordine||0),0);
+                const nuovoOrdine = maxOrdine+1;
+                const newFamRef = await db.collection('web_famiglie').add({
+                    categoriaId, nome, descrizione, codice, ordine: nuovoOrdine
+                });
+                const batch = db.batch();
+                for(const artId of articoliSelezionati){
+                    const ref = db.collection('web_famiglia_articoli').doc();
+                    batch.set(ref, { categoriaId, famigliaId: newFamRef.id, articoloId: artId });
+                }
+                await batch.commit();
+                showToast("✅ Famiglia creata!");
             }
-            await caricaArticoli();
+            await caricaFamiglie();
+            await caricaAssociazioni();
+            visualizza();
             modal.remove();
-        } catch(e) {
-            console.error(e);
-            showToast("Errore salvataggio famiglia", true);
-        }
+        } catch(e){ console.error(e); showToast("Errore salvataggio", true); }
     };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-async function modificaFamiglia(id) {
-    const famiglia = famiglie.find(f => f.id === id);
-    if (famiglia) mostraModaleFamiglia(famiglia);
-}
-
-async function eliminaFamiglia(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questa famiglia?\n\nGli articoli rimarranno senza famiglia!")) return;
-    try {
-        const articoliFamiglia = articoli.filter(a => a.famigliaId === id);
-        for (const art of articoliFamiglia) {
-            await db.collection('web_articoli').doc(art.id).update({ famigliaId: '' });
-        }
-        await db.collection('web_famiglie').doc(id).delete();
-        showToast("✅ Famiglia eliminata!");
-        await caricaArticoli();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore eliminazione famiglia", true);
+    if(isEdit){
+        document.getElementById('btnEliminaFamiglia').onclick = async () => {
+            if(!confirm("Eliminare questa famiglia? Gli articoli rimarranno ma verranno rimossi dalla famiglia.")) return;
+            try {
+                const assoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get();
+                const batch = db.batch();
+                assoc.forEach(doc => batch.delete(doc.ref));
+                batch.delete(db.collection('web_famiglie').doc(famiglia.id));
+                await batch.commit();
+                showToast("✅ Famiglia eliminata");
+                await caricaFamiglie();
+                await caricaAssociazioni();
+                visualizza();
+                modal.remove();
+            } catch(e){ console.error(e); showToast("Errore eliminazione", true); }
+        };
     }
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
 
-function mostraModaleArticolo(articolo = null) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
+async function eliminaFamiglia(id){
+    if(!confirm("Eliminare questa famiglia? Gli articoli rimarranno non associati.")) return;
+    try {
+        const assoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',id).where('categoriaId','==',categoriaId).get();
+        const batch = db.batch();
+        assoc.forEach(doc => batch.delete(doc.ref));
+        batch.delete(db.collection('web_famiglie').doc(id));
+        await batch.commit();
+        showToast("Famiglia eliminata");
+        await caricaFamiglie();
+        await caricaAssociazioni();
+        visualizza();
+    } catch(e){ showToast("Errore",true); }
+}
+
+// MODALE ARTICOLO (senza famiglia)
+function mostraModaleArticolo(articolo=null){
+    const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML = `
         <div class="modal-container">
             <h3>${articolo ? '✏️ MODIFICA ARTICOLO' : '➕ NUOVO ARTICOLO'}</h3>
             <label>🔢 Codice articolo *</label>
-            <input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice || '') : ''}" placeholder="es. MTR-001">
+            <input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice||'') : ''}" placeholder="es. MTR-001">
             <label>📝 Descrizione *</label>
-            <textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione || '') : ''}</textarea>
-            <label>🏷️ Famiglia di appartenenza</label>
-            <select id="artFamiglia" class="select-famiglia">
-                <option value="">-- Nessuna famiglia --</option>
-                ${famiglie.map(f => `<option value="${f.id}" ${articolo && articolo.famigliaId === f.id ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
-            </select>
+            <textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione||'') : ''}</textarea>
             <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl || '') : ''}">
-            <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
-            <div class="info-imgur">
-                📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto (.jpg)
-            </div>
+            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl||'') : ''}">
+            <img id="anteprimaImg" class="anteprima-img" style="display:none; max-width:100%; max-height:150px; margin-top:10px;">
+            <div class="info-imgur">📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto</div>
             <div class="modal-buttons">
                 <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
                 <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
@@ -1078,94 +948,134 @@ function mostraModaleArticolo(articolo = null) {
         </div>
     `;
     document.body.appendChild(modal);
-    
-    const fotoUrlInput = document.getElementById('artFotoUrl');
-    const anteprimaImg = document.getElementById('anteprimaImg');
-    
-    function aggiornaAnteprima() {
-        const url = fotoUrlInput.value.trim();
-        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-            anteprimaImg.src = url;
-            anteprimaImg.style.display = 'block';
-        } else {
-            anteprimaImg.style.display = 'none';
-        }
-    }
-    fotoUrlInput.addEventListener('input', aggiornaAnteprima);
-    aggiornaAnteprima();
-    
-    document.getElementById('btnSalvaArticolo').onclick = async () => {
+    const fotoInput = document.getElementById('artFotoUrl');
+    const anteprima = document.getElementById('anteprimaImg');
+    fotoInput.addEventListener('input', ()=>{
+        const url = fotoInput.value.trim();
+        if(url && (url.startsWith('http://')||url.startsWith('https://'))){ anteprima.src=url; anteprima.style.display='block'; }
+        else anteprima.style.display='none';
+    });
+    if(articolo && articolo.fotoUrl) { fotoInput.value = articolo.fotoUrl; anteprima.src=articolo.fotoUrl; anteprima.style.display='block'; }
+    document.getElementById('btnSalvaArticolo').onclick = async ()=>{
         const codice = document.getElementById('artCodice').value.trim();
         const descrizione = document.getElementById('artDescrizione').value.trim();
-        const famigliaId = document.getElementById('artFamiglia').value;
         const fotoUrl = document.getElementById('artFotoUrl').value.trim();
-        
-        if (!codice || !descrizione) {
-            showToast("Compila codice e descrizione", true);
-            return;
-        }
-        
+        if(!codice || !descrizione){ showToast("Compila codice e descrizione", true); return; }
         try {
-            if (articolo) {
-                await db.collection('web_articoli').doc(articolo.id).update({
-                    codice, descrizione, famigliaId, fotoUrl
-                });
-                showToast("✅ Articolo modificato!");
+            if(articolo){
+                await db.collection('web_articoli').doc(articolo.id).update({ codice, descrizione, fotoUrl });
+                showToast("Articolo modificato");
             } else {
-                await db.collection('web_articoli').add({
-                    categoriaId, codice, descrizione, famigliaId: famigliaId || '', fotoUrl: fotoUrl || ''
-                });
-                showToast("✅ Articolo aggiunto!");
+                await db.collection('web_articoli').add({ categoriaId, codice, descrizione, fotoUrl, ordine: articoli.length });
+                showToast("Articolo aggiunto");
             }
             await caricaArticoli();
+            await caricaAssociazioni();
+            visualizza();
             modal.remove();
-        } catch(e) {
-            console.error(e);
-            showToast("Errore salvataggio", true);
-        }
+        } catch(e){ showToast("Errore salvataggio", true); }
     };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-
-async function modificaArticolo(id) {
-    const art = articoli.find(a => a.id === id);
-    if (art) mostraModaleArticolo(art);
+async function modificaArticolo(id){
+    const art = articoli.find(a=>a.id===id);
+    if(art) mostraModaleArticolo(art);
 }
-
-async function eliminaArticolo(id) {
-    if (!confirm("⚠️ Eliminare questo articolo?")) return;
+async function eliminaArticolo(id){
+    if(!confirm("Eliminare questo articolo? Verrà rimosso da tutte le famiglie.")) return;
     try {
-        await db.collection('web_articoli').doc(id).delete();
-        showToast("✅ Articolo eliminato!");
+        const assoc = await db.collection('web_famiglia_articoli').where('articoloId','==',id).where('categoriaId','==',categoriaId).get();
+        const batch = db.batch();
+        assoc.forEach(doc => batch.delete(doc.ref));
+        batch.delete(db.collection('web_articoli').doc(id));
+        await batch.commit();
+        showToast("Articolo eliminato");
         await caricaArticoli();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore eliminazione", true);
-    }
+        await caricaAssociazioni();
+        visualizza();
+    } catch(e){ showToast("Errore",true); }
 }
 
-// ==================== EVENTI ====================
-document.getElementById('btnAdmin').onclick = () => {
-    if (isAdminMode) disattivaModalitaAdmin();
-    else mostraModalePassword();
-};
-document.getElementById('btnAggiungiArticolo').onclick = () => {
-    if (isAdminMode) mostraModaleArticolo(null);
-};
-document.getElementById('btnAggiungiFamiglia').onclick = () => {
-    if (isAdminMode) mostraModaleFamiglia(null);
-};
-document.getElementById('btnTornaHome').onclick = () => window.location.href = 'web.html';
-document.getElementById('btnHome').onclick = () => window.location.href = 'web.html';
+// SPOSTA FAMIGLIA (frecce)
+async function spostaFamiglia(id, direzione){
+    const index = famiglie.findIndex(f=>f.id===id);
+    if(index===-1) return;
+    const nuovoIndex = direzione==='su' ? index-1 : index+1;
+    if(nuovoIndex<0 || nuovoIndex>=famiglie.length) return;
+    const nuovoOrdine = [...famiglie];
+    [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]];
+    for(let i=0; i<nuovoOrdine.length; i++){
+        await db.collection('web_famiglie').doc(nuovoOrdine[i].id).update({ ordine: i });
+    }
+    await caricaFamiglie();
+    visualizza();
+}
 
-// ==================== AVVIO ====================
-checkMobile();
-const savedAdminMode = localStorage.getItem('web_admin_mode');
-if (savedAdminMode === 'true') isAdminMode = true;
+// ADMIN MODE
+function aggiornaUIAdmin(){
+    const btnAdmin = document.getElementById('btnAdmin');
+    const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
+    const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
+    const btnCaricaFoto = document.getElementById('btnCaricaFoto');
+    const searchBar = document.getElementById('searchBar');
+    if(isAdminMode){
+        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
+        btnAdmin.classList.add('active');
+        btnAggiungiFamiglia.classList.add('show');
+        btnAggiungiArticolo.classList.add('show');
+        if(btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
+        if(searchBar) searchBar.style.display = 'flex';
+    } else {
+        btnAdmin.textContent = "🔐 AREA ADMIN";
+        btnAdmin.classList.remove('active');
+        btnAggiungiFamiglia.classList.remove('show');
+        btnAggiungiArticolo.classList.remove('show');
+        if(btnCaricaFoto) btnCaricaFoto.style.display = 'none';
+        if(searchBar) searchBar.style.display = 'none';
+        if(sortableFamiglie) sortableFamiglie.destroy();
+        sortableFamiglie = null;
+    }
+    visualizza();
+}
 
-Promise.all([caricaLinkDaFile(), caricaCategoria(), caricaArticoli()]).then(() => {
+function mostraModalePassword(){
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnVerifica').onclick = ()=>{
+        const pwd = document.getElementById('passwordAdmin').value;
+        if(pwd === ADMIN_PASSWORD){
+            isAdminMode=true; localStorage.setItem('web_admin_mode','true');
+            showToast("Admin attivata");
+            aggiornaUIAdmin();
+            modal.remove();
+        } else showToast("Password errata", true);
+    };
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
+}
+function disattivaAdmin(){
+    isAdminMode=false; localStorage.removeItem('web_admin_mode');
+    showToast("Admin disattivata");
     aggiornaUIAdmin();
-    inizializzaTastoCaricaFoto();
+}
+
+// EVENTI
+document.getElementById('btnAdmin').onclick = ()=> isAdminMode ? disattivaAdmin() : mostraModalePassword();
+document.getElementById('btnAggiungiFamiglia').onclick = ()=>{ if(isAdminMode) mostraModaleFamiglia(null, []); };
+document.getElementById('btnAggiungiArticolo').onclick = ()=>{ if(isAdminMode) mostraModaleArticolo(null); };
+document.getElementById('btnTornaHome').onclick = ()=> window.location.href='web.html';
+document.getElementById('btnHome').onclick = ()=> window.location.href='web.html';
+document.getElementById('ricercaFamiglie').addEventListener('input', ()=> visualizza());
+document.getElementById('ricercaArticoli').addEventListener('input', ()=> visualizza());
+
+// AVVIO
+const savedAdmin = localStorage.getItem('web_admin_mode');
+if(savedAdmin === 'true') isAdminMode = true;
+caricaLinkDaFile().then(()=>{
+    caricaTutti().then(()=>{
+        aggiornaUIAdmin();
+        inizializzaTastoCaricaFoto();
+    });
 });
 </script>
 </body>
