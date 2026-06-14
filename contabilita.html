@@ -721,7 +721,7 @@
     <footer>Logo: 1 click→Link1 | Doppio click→Link2</footer>
 </div>
 
-<!-- Vecchio badge versione rimosso -->
+<!-- MINIBOX VERSIONE RIMOSSA -->
 
 <script>
 // ==================== VERSIONE ====================
@@ -2535,7 +2535,7 @@ function mostraModaleMenu() {
     document.getElementById('modaleContabilita').onclick = () => { modal.remove(); };
     document.getElementById('modaleAgenti').onclick = () => { modal.remove(); navigaConControllo('agenti.html'); };
     document.getElementById('modaleChangePwd').onclick = () => { modal.remove(); document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; };
-    document.getElementById('modaleLogout').onclick = () => { modal.remove(); navigaConControllo('index.html'); };
+    document.getElementById('modaleLogout').onclick = () => { modal.remove(); navigaConControllo('selezione.html'); };
     document.getElementById('modalMenuClose').onclick = () => modal.remove();
 }
 
@@ -2676,7 +2676,7 @@ document.getElementById('meseSelect').onchange = async () => { await cambiaMeseD
 document.getElementById('saldoInizialeHeader').onchange = async e => { if(currentMonthModifiable) { saldoIniziale = parseNumber(e.target.value); await salvaStatoFirebase(true); aggiornaTabelle(); marcaModificheNonSalvate(); } };
 setupImportField('saldoInizialeHeader');
 document.getElementById('btnVaiAgenti').onclick = () => navigaConControllo('agenti.html');
-document.getElementById('navLogout').onclick = () => navigaConControllo('index.html');
+document.getElementById('navLogout').onclick = () => navigaConControllo('selezione.html');
 let changePwdVisible = false;
 document.getElementById('navChangePwd').onclick = () => { if (!changePwdVisible) { document.getElementById('contabilitaContainer').style.display = 'none'; document.getElementById('changePwdContainer').style.display = 'block'; changePwdVisible = true; } };
 document.getElementById('btnAnnullaPassword').onclick = () => { document.getElementById('contabilitaContainer').style.display = 'block'; document.getElementById('changePwdContainer').style.display = 'none'; changePwdVisible = false; };
