@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
         
         .header {
             background: white;
@@ -44,12 +44,11 @@
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
         
-        .admin-area {
+        .top-buttons {
             display: flex;
-            align-items: center;
             gap: 15px;
         }
-        .btn-admin {
+        .btn-top {
             background: #f1c40f;
             color: #2c3e50;
             border: none;
@@ -58,23 +57,17 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
             transition: all 0.2s;
         }
-        .btn-admin:hover {
+        .btn-top:hover {
             background: #e67e22;
             color: white;
             transform: translateY(-2px);
         }
-        .btn-admin.active {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-salva {
-            background: #27ae60;
-            color: white;
-        }
         
-        /* ========== STILI TESTA (INFO AZIENDA) ========== */
+        /* ========== INFO AZIENDA ========== */
         .info-azienda {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
@@ -92,151 +85,18 @@
             line-height: 1.6;
         }
         
-        /* ========== SEZIONE TEAM ========== */
-        .team-section {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 20px;
-        }
-        .team-title {
-            text-align: center;
-            font-size: 2rem;
-            color: #2c3e50;
-            margin-bottom: 40px;
-        }
-        .team-grid {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-        }
-        .team-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 300px;
-            transition: transform 0.3s;
-            text-align: center;
-        }
-        .team-card:hover {
-            transform: translateY(-5px);
-        }
-        .team-foto {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            background: #ecf0f1;
-        }
-        .team-info {
-            padding: 20px;
-        }
-        .team-nome {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        .team-ruolo {
-            font-size: 0.9rem;
-            color: #3498db;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .team-telefono {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .team-telefono a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .btn-wa {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn-wa:hover {
-            background: #128C7E;
-        }
-        .team-email {
-            margin: 10px 0;
-        }
-        .team-email a {
-            color: #3498db;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
-        
-        /* ========== SEZIONE CONTATTI GENERALI ========== */
-        .contatti-generali {
-            background: #ecf0f1;
-            padding: 40px 20px;
-            text-align: center;
-            margin: 30px 0;
-        }
-        .contatti-generali h3 {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .social-links a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 1.1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: color 0.2s;
-        }
-        .social-links a:hover {
-            color: #3498db;
-        }
-        .email-generale {
-            margin-top: 15px;
-        }
-        .email-generale a {
-            color: #3498db;
-            text-decoration: none;
-            font-size: 1rem;
-        }
-        
         /* ========== SEZIONE CATEGORIE ========== */
         .categorie-container {
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
+            flex: 1;
         }
         .categorie-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
-            flex-wrap: wrap;
             margin-bottom: 30px;
-        }
-        .categorie-header h2 {
-            font-size: 1.8rem;
-            color: #2c3e50;
         }
         .btn-aggiungi {
             background: #27ae60;
@@ -391,18 +251,6 @@
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
         
-        /* MODALE TEAM */
-        .modal-team {
-            max-width: 500px;
-        }
-        .modal-team input, .modal-team textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        
         .toast-message {
             position: fixed;
             bottom: 30px;
@@ -448,18 +296,25 @@
             text-decoration: none;
         }
         
-        /* ========== PIEDE ========== */
         footer {
             background: #2c3e50;
             color: white;
             text-align: center;
-            padding: 30px 20px;
+            padding: 20px;
             margin-top: 50px;
-        }
-        footer p {
-            margin: 5px 0;
             font-size: 0.8rem;
-            color: #ccc;
+        }
+        .footer-admin {
+            background: none;
+            border: none;
+            color: #f1c40f;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        .footer-admin:hover {
+            color: #e67e22;
         }
         
         @media (max-width: 1024px) {
@@ -468,13 +323,10 @@
         @media (max-width: 768px) {
             .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .categoria-img { height: 150px; }
-            .categoria-nome { font-size: 1rem; }
             .info-azienda h1 { font-size: 1.8rem; }
             .info-azienda p { font-size: 0.9rem; }
             .header-row { flex-direction: column; }
-            .team-grid { gap: 20px; }
-            .team-card { width: 280px; }
-            .team-foto { height: 200px; }
+            .top-buttons { width: 100%; justify-content: center; }
         }
         @media (max-width: 480px) {
             .categorie-grid { grid-template-columns: 1fr; }
@@ -490,42 +342,21 @@
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
         </div>
-        <div class="admin-area">
-            <button id="btnCaricaFoto" class="btn-admin" style="display:none;">📸 CARICA FOTO</button>
-            <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
-            <button id="btnSalvaGlobale" class="btn-admin btn-salva" style="display:none;">💾 SALVA TUTTO</button>
+        <div class="top-buttons">
+            <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" class="btn-top">📘 Facebook</a>
+            <a href="organizzazione.html" class="btn-top">CHI SIAMO</a>
         </div>
     </div>
 </div>
 
-<!-- ========== INFO AZIENDA (caricata da file esterno) ========== -->
+<!-- ========== INFO AZIENDA ========== -->
 <div id="infoAzienda" class="info-azienda">
     <div class="loading">Caricamento informazioni...</div>
-</div>
-
-<!-- ========== SEZIONE TEAM ========== -->
-<div class="team-section">
-    <h2 class="team-title">👥 Il nostro team</h2>
-    <div id="teamGrid" class="team-grid">
-        <div style="text-align: center; width: 100%;">Caricamento team...</div>
-    </div>
-</div>
-
-<!-- ========== SEZIONE CONTATTI GENERALI ========== -->
-<div class="contatti-generali">
-    <h3>📱 Seguici e contattaci</h3>
-    <div class="social-links">
-        <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" id="facebookLink">📘 Facebook</a>
-    </div>
-    <div class="email-generale">
-        ✉️ <a href="mailto:insapasas@gmail.com" id="emailGeneraleLink">insapasas@gmail.com</a>
-    </div>
 </div>
 
 <!-- ========== SEZIONE CATEGORIE ========== -->
 <div class="categorie-container">
     <div class="categorie-header">
-        <h2>📁 Le nostre categorie</h2>
         <button id="btnAggiungiCategoria" class="btn-aggiungi">➕ NUOVA CATEGORIA</button>
     </div>
     <div id="categorieGrid" class="categorie-grid">
@@ -533,9 +364,9 @@
     </div>
 </div>
 
-<!-- ========== PIEDE (caricato da file esterno) ========== -->
-<footer id="footer">
-    <div class="loading">Caricamento footer...</div>
+<footer>
+    © dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati - 
+    <button id="btnAdminFooter" class="footer-admin">AREA ADMIN</button>
 </footer>
 
 <script>
@@ -556,104 +387,11 @@ const db = firebase.firestore();
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categorie = [];
-let currentEditCategoria = null;
-let teamData = [];
-let pressTimer = null;
-
-// ==================== GESTIONE TASTO CARICA FOTO ====================
-async function getFotoLink() {
-    try {
-        const doc = await db.collection('config').doc('link_tasto_extra').get();
-        if (doc.exists && doc.data().url) {
-            return doc.data().url;
-        }
-    } catch(e) { console.warn(e); }
-    return 'https://imgur.com/upload';
-}
-
-async function setFotoLink(url) {
-    await db.collection('config').doc('link_tasto_extra').set({ url: url });
-}
-
-function mostraModaleLink() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>🔗 MODIFICA LINK CARICA FOTO</h3>
-            <label>Inserisci il nuovo link (URL completo)</label>
-            <input type="text" id="nuovoLinkInput" placeholder="https://...">
-            <div class="modal-buttons">
-                <button id="btnSalvaLink" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnSalvaLink').onclick = async () => {
-        const nuovoLink = document.getElementById('nuovoLinkInput').value.trim();
-        if (nuovoLink && (nuovoLink.startsWith('http://') || nuovoLink.startsWith('https://'))) {
-            await setFotoLink(nuovoLink);
-            showToast("✅ Link salvato su Firebase!");
-        } else {
-            showToast("❌ Inserisci un link valido (http:// o https://)", true);
-        }
-        modal.remove();
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-function inizializzaTastoCaricaFoto() {
-    const btn = document.getElementById('btnCaricaFoto');
-    if (!btn) return;
-    
-    btn.addEventListener('mousedown', () => {
-        pressTimer = setTimeout(() => {
-            mostraModaleLink();
-            pressTimer = null;
-        }, 3000);
-    });
-    
-    btn.addEventListener('mouseup', async () => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-            const link = await getFotoLink();
-            window.open(link, '_blank');
-        }
-    });
-    
-    btn.addEventListener('mouseleave', () => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-    });
-    
-    // Per touch (mobile)
-    btn.addEventListener('touchstart', (e) => {
-        pressTimer = setTimeout(() => {
-            mostraModaleLink();
-            pressTimer = null;
-        }, 3000);
-    });
-    
-    btn.addEventListener('touchend', async (e) => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-            const link = await getFotoLink();
-            window.open(link, '_blank');
-        }
-    });
-}
 
 // ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    
     fetch('icons/logo.jpg').then(r => {
         if (r.ok) {
             logoImg.src = 'icons/logo.jpg';
@@ -685,8 +423,6 @@ async function caricaLinkDaFile() {
             const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
             if (lines.length >= 1) linkPrincipale = lines[0].trim();
             if (lines.length >= 2) linkSecondario = lines[1].trim();
-        } else {
-            console.warn("link.html non trovato");
         }
     } catch(e) { console.warn("Errore caricamento link.html:", e); }
 }
@@ -745,177 +481,11 @@ async function caricaTestiDaFile() {
             if (p) testataHtml += p.outerHTML;
             
             document.getElementById('infoAzienda').innerHTML = testataHtml;
-            
-            const footerContent = doc.querySelector('footer');
-            if (footerContent) {
-                document.getElementById('footer').innerHTML = footerContent.innerHTML;
-            }
         } else {
             console.warn("web_testa_piede.html non trovato");
         }
     } catch(e) {
         console.warn("Errore caricamento web_testa_piede.html:", e);
-    }
-}
-
-// ==================== CARICA DATI TEAM DA FIRESTORE ====================
-async function caricaTeam() {
-    try {
-        const snapshot = await db.collection('web_team').orderBy('ordine', 'asc').get();
-        teamData = [];
-        snapshot.forEach(doc => {
-            teamData.push({ id: doc.id, ...doc.data() });
-        });
-        
-        if (teamData.length === 0) {
-            const defaultTeam = [
-                { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", ordine: 1, whatsapp: "+393383012348" },
-                { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", ordine: 2, whatsapp: "+393357491607" }
-            ];
-            for (const member of defaultTeam) {
-                await db.collection('web_team').add(member);
-            }
-            await caricaTeam();
-            return;
-        }
-        
-        visualizzaTeam();
-    } catch(e) {
-        console.error("Errore caricamento team:", e);
-        teamData = [
-            { nome: "Claudia", ruolo: "Amministrazione", telefono: "+39 338 301 2348", email: "claudia@insapa.it", foto: "claudia.jpg", whatsapp: "+393383012348" },
-            { nome: "Stefano", ruolo: "Responsabile vendite", telefono: "+39 335 749 1607", email: "stefano@insapa.it", foto: "stefano.jpg", whatsapp: "+393357491607" }
-        ];
-        visualizzaTeam();
-    }
-}
-
-function visualizzaTeam() {
-    const grid = document.getElementById('teamGrid');
-    if (teamData.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>';
-        return;
-    }
-    
-    grid.innerHTML = teamData.map(member => `
-        <div class="team-card" data-id="${member.id}">
-            <img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'">
-            <div class="team-info">
-                <div class="team-nome">${escapeHtml(member.nome)}</div>
-                <div class="team-ruolo">${escapeHtml(member.ruolo)}</div>
-                <div class="team-telefono">
-                    📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
-                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a>
-                </div>
-                <div class="team-email">
-                    ✉️ <a href="mailto:${member.email}">${member.email}</a>
-                </div>
-                ${isAdminMode ? `
-                    <div style="margin-top: 10px;">
-                        <button class="card-btn edit" onclick="event.stopPropagation(); modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button>
-                        <button class="card-btn" onclick="event.stopPropagation(); eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `).join('');
-    
-    if (isAdminMode) {
-        const btnAggiungiMembro = document.createElement('button');
-        btnAggiungiMembro.className = 'btn-aggiungi show';
-        btnAggiungiMembro.style.margin = '20px auto 0';
-        btnAggiungiMembro.style.display = 'block';
-        btnAggiungiMembro.style.width = 'auto';
-        btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM';
-        btnAggiungiMembro.onclick = () => mostraModaleTeam(null);
-        if (!document.getElementById('btnAggiungiMembroTeam')) {
-            btnAggiungiMembro.id = 'btnAggiungiMembroTeam';
-            grid.parentNode.appendChild(btnAggiungiMembro);
-        }
-    } else {
-        const existingBtn = document.getElementById('btnAggiungiMembroTeam');
-        if (existingBtn) existingBtn.remove();
-    }
-}
-
-function mostraModaleTeam(membro = null) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container modal-team">
-            <h3>${membro ? '✏️ MODIFICA MEMBRO TEAM' : '➕ NUOVO MEMBRO TEAM'}</h3>
-            <label>📌 Nome *</label>
-            <input type="text" id="teamNome" value="${membro ? escapeHtml(membro.nome) : ''}" placeholder="es. Claudia">
-            <label>🎯 Ruolo *</label>
-            <input type="text" id="teamRuolo" value="${membro ? escapeHtml(membro.ruolo) : ''}" placeholder="es. Amministrazione">
-            <label>📞 Telefono</label>
-            <input type="text" id="teamTelefono" value="${membro ? escapeHtml(membro.telefono) : ''}" placeholder="es. +39 338 301 2348">
-            <label>📱 WhatsApp (numero con prefisso, senza spazi)</label>
-            <input type="text" id="teamWhatsapp" value="${membro ? escapeHtml(membro.whatsapp || '') : ''}" placeholder="es. 393383012348">
-            <label>✉️ Email</label>
-            <input type="email" id="teamEmail" value="${membro ? escapeHtml(membro.email) : ''}" placeholder="es. claudia@insapa.it">
-            <label>🖼️ Foto (nome file in icons/)</label>
-            <input type="text" id="teamFoto" value="${membro ? escapeHtml(membro.foto) : ''}" placeholder="es. claudia.jpg">
-            <label>🔢 Ordine</label>
-            <input type="number" id="teamOrdine" value="${membro ? (membro.ordine || 0) : teamData.length + 1}">
-            <div class="modal-buttons">
-                <button id="btnSalvaTeam" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnSalvaTeam').onclick = async () => {
-        const nome = document.getElementById('teamNome').value.trim();
-        const ruolo = document.getElementById('teamRuolo').value.trim();
-        const telefono = document.getElementById('teamTelefono').value.trim();
-        const whatsapp = document.getElementById('teamWhatsapp').value.trim();
-        const email = document.getElementById('teamEmail').value.trim();
-        const foto = document.getElementById('teamFoto').value.trim();
-        const ordine = parseInt(document.getElementById('teamOrdine').value) || 0;
-        
-        if (!nome || !ruolo) {
-            showToast("Inserisci nome e ruolo", true);
-            return;
-        }
-        
-        try {
-            if (membro) {
-                await db.collection('web_team').doc(membro.id).update({
-                    nome, ruolo, telefono, whatsapp, email, foto, ordine
-                });
-                showToast("✅ Membro aggiornato!");
-            } else {
-                await db.collection('web_team').add({
-                    nome, ruolo, telefono, whatsapp, email, foto, ordine
-                });
-                showToast("✅ Membro aggiunto!");
-            }
-            await caricaTeam();
-            modal.remove();
-        } catch(e) {
-            console.error(e);
-            showToast("Errore salvataggio", true);
-        }
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-async function modificaMembroTeam(id) {
-    const membro = teamData.find(m => m.id === id);
-    if (membro) mostraModaleTeam(membro);
-}
-
-async function eliminaMembroTeam(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questo membro dal team?")) return;
-    try {
-        await db.collection('web_team').doc(id).delete();
-        showToast("✅ Membro eliminato!");
-        await caricaTeam();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore eliminazione", true);
     }
 }
 
@@ -927,6 +497,16 @@ function showToast(message, isError = false) {
     toast.innerText = message;
     document.body.appendChild(toast);
     setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ==================== MODALITA' ADMIN ====================
@@ -968,27 +548,14 @@ function disattivaModalitaAdmin() {
 }
 
 function aggiornaUIModalitaAdmin() {
-    const btnAdmin = document.getElementById('btnAdmin');
-    const btnSalvaGlobale = document.getElementById('btnSalvaGlobale');
     const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
-    const btnCaricaFoto = document.getElementById('btnCaricaFoto');
-    
     if (isAdminMode) {
-        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
-        btnAdmin.classList.add('active');
-        btnSalvaGlobale.style.display = 'block';
         btnAggiungiCategoria.classList.add('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
-        if (btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
     } else {
-        btnAdmin.textContent = "🔐 AREA ADMIN";
-        btnAdmin.classList.remove('active');
-        btnSalvaGlobale.style.display = 'none';
         btnAggiungiCategoria.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
-        if (btnCaricaFoto) btnCaricaFoto.style.display = 'none';
     }
-    visualizzaTeam();
 }
 
 // ==================== CARICA CATEGORIE ====================
@@ -1036,20 +603,8 @@ function visualizzaCategorie() {
     });
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-// ==================== MODALE AGGIUNTA/MODIFICA CATEGORIA ====================
+// ==================== MODALE CATEGORIA ====================
 function mostraModaleCategoria(categoria = null) {
-    currentEditCategoria = categoria;
-    
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
@@ -1060,7 +615,7 @@ function mostraModaleCategoria(categoria = null) {
             <label>📝 Descrizione</label>
             <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
             <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine (es. https://i.imgur.com/abc123.jpg)" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
+            <input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
             <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
             <div class="info-imgur">
                 📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
@@ -1087,7 +642,6 @@ function mostraModaleCategoria(categoria = null) {
             anteprimaImg.style.display = 'none';
         }
     }
-    
     fotoUrlInput.addEventListener('input', aggiornaAnteprima);
     aggiornaAnteprima();
     
@@ -1116,7 +670,6 @@ function mostraModaleCategoria(categoria = null) {
                 });
                 showToast("✅ Categoria aggiunta!");
             }
-            
             await caricaCategorie();
             modal.remove();
         } catch(e) {
@@ -1124,7 +677,6 @@ function mostraModaleCategoria(categoria = null) {
             showToast("Errore salvataggio categoria", true);
         }
     };
-    
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
 }
 
@@ -1153,7 +705,7 @@ async function eliminaCategoria(id) {
 }
 
 // ==================== EVENTI ====================
-document.getElementById('btnAdmin').onclick = () => {
+document.getElementById('btnAdminFooter').onclick = () => {
     if (isAdminMode) {
         disattivaModalitaAdmin();
     } else {
@@ -1167,19 +719,14 @@ document.getElementById('btnAggiungiCategoria').onclick = () => {
     }
 };
 
-document.getElementById('btnSalvaGlobale').onclick = async () => {
-    showToast("💾 Tutto già salvato su Firebase!");
-};
-
 // ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('web_admin_mode');
 if (savedAdminMode === 'true') {
     isAdminMode = true;
 }
 
-Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaTeam(), caricaCategorie()]).then(() => {
+Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaCategorie()]).then(() => {
     aggiornaUIModalitaAdmin();
-    inizializzaTastoCaricaFoto();
 });
 </script>
 </body>
