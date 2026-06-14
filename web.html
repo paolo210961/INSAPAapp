@@ -9,328 +9,58 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        .header {
-            background: white;
-            padding: 20px 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            cursor: pointer;
-        }
-        .logo-rettangolo {
-            width: 200px;
-            height: 70px;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+        .header { background: white; padding: 20px 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; cursor: pointer; }
+        .logo-rettangolo { width: 200px; height: 70px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
-        
-        .top-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        .btn-top {
-            background: #f1c40f;
-            color: #2c3e50;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-        .btn-top:hover {
-            background: #e67e22;
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        /* ========== INFO AZIENDA ========== */
-        .info-azienda {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 50px 20px;
-            text-align: center;
-        }
-        .info-azienda h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-        .info-azienda p {
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        /* ========== SEZIONE CATEGORIE ========== */
-        .categorie-container {
-            max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 20px;
-            flex: 1;
-        }
-        .categorie-header {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .btn-aggiungi {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            display: none;
-        }
+        .top-buttons { display: flex; gap: 15px; }
+        .btn-top { background: #f1c40f; color: #2c3e50; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; text-decoration: none; display: inline-block; transition: all 0.2s; }
+        .btn-top:hover { background: #e67e22; color: white; transform: translateY(-2px); }
+        .info-azienda { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 50px 20px; text-align: center; }
+        .info-azienda h1 { font-size: 2.5rem; margin-bottom: 20px; }
+        .info-azienda p { font-size: 1.1rem; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        .categorie-container { max-width: 1400px; margin: 40px auto; padding: 0 20px; flex: 1; }
+        .categorie-header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 30px; }
+        .btn-aggiungi { background: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; display: none; }
         .btn-aggiungi:hover { background: #219a52; transform: translateY(-2px); }
         .btn-aggiungi.show { display: block; }
-        
-        .categorie-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-        }
-        .categoria-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            position: relative;
-        }
-        .categoria-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        }
-        .categoria-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background: #ecf0f1;
-        }
-        .categoria-info {
-            padding: 15px;
-        }
-        .categoria-nome {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        .categoria-descrizione {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            line-height: 1.4;
-        }
-        .card-buttons {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: none;
-            gap: 8px;
-        }
-        .card-buttons.show {
-            display: flex;
-        }
-        .card-btn {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        .card-btn:hover {
-            background: #e74c3c;
-            transform: scale(1.1);
-        }
+        .categorie-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
+        .categoria-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; position: relative; }
+        .categoria-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .categoria-img { width: 100%; height: 200px; object-fit: cover; background: #ecf0f1; }
+        .categoria-info { padding: 15px; }
+        .categoria-nome { font-size: 1.2rem; font-weight: bold; color: #2c3e50; margin-bottom: 8px; }
+        .categoria-descrizione { font-size: 0.85rem; color: #7f8c8d; line-height: 1.4; }
+        .card-buttons { position: absolute; top: 10px; right: 10px; display: none; gap: 8px; }
+        .card-buttons.show { display: flex; }
+        .card-btn { background: rgba(0,0,0,0.7); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+        .card-btn:hover { background: #e74c3c; transform: scale(1.1); }
         .card-btn.edit:hover { background: #3498db; }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .modal-container {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-container h3 {
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-        }
-        .modal-container label {
-            display: block;
-            font-weight: bold;
-            margin: 15px 0 5px 0;
-            color: #2c3e50;
-        }
-        .modal-container input, .modal-container textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        .modal-container textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .link-immagine {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 2px dashed #3498db;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
-        .anteprima-img {
-            max-width: 100%;
-            max-height: 150px;
-            margin-top: 10px;
-            border-radius: 8px;
-            display: none;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-container { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-container h3 { margin: 0 0 20px; color: #2c3e50; }
+        .modal-container label { display: block; font-weight: bold; margin: 15px 0 5px; color: #2c3e50; }
+        .modal-container input, .modal-container textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
+        .modal-container textarea { min-height: 80px; resize: vertical; }
+        .link-immagine { width: 100%; padding: 10px; margin: 10px 0; border: 2px dashed #3498db; border-radius: 8px; background: #f8f9fa; }
+        .anteprima-img { max-width: 100%; max-height: 150px; margin-top: 10px; border-radius: 8px; display: none; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
-        
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            background: #27ae60;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 2000;
-            font-weight: bold;
-            animation: fadeOut 3s ease forwards;
-        }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; display: none; }
-        }
-        
-        .password-modal {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-        }
-        .password-modal input {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        
-        .info-imgur {
-            font-size: 0.7rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-            text-align: center;
-        }
-        .info-imgur a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        
-        footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-            font-size: 0.8rem;
-        }
-        .footer-admin {
-            background: none;
-            border: none;
-            color: #f1c40f;
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-        .footer-admin:hover {
-            color: #e67e22;
-        }
-        
-        @media (max-width: 1024px) {
-            .categorie-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .categoria-img { height: 150px; }
-            .info-azienda h1 { font-size: 1.8rem; }
-            .info-azienda p { font-size: 0.9rem; }
-            .header-row { flex-direction: column; }
-            .top-buttons { width: 100%; justify-content: center; }
-        }
-        @media (max-width: 480px) {
-            .categorie-grid { grid-template-columns: 1fr; }
-        }
+        .toast-message { position: fixed; bottom: 30px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
+        .password-modal { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .password-modal input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .info-imgur { font-size: 0.7rem; color: #7f8c8d; margin-top: 5px; text-align: center; }
+        footer { background: #2c3e50; color: white; text-align: center; padding: 20px; margin-top: 50px; font-size: 0.8rem; }
+        .footer-admin { background: none; border: none; color: #f1c40f; cursor: pointer; text-decoration: underline; font-size: 0.8rem; margin-left: 10px; }
+        .footer-admin:hover { color: #e67e22; }
+        @media (max-width: 1024px) { .categorie-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; } .categoria-img { height: 150px; } .info-azienda h1 { font-size: 1.8rem; } .info-azienda p { font-size: 0.9rem; } .header-row { flex-direction: column; } .top-buttons { width: 100%; justify-content: center; } }
+        @media (max-width: 480px) { .categorie-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -349,12 +79,10 @@
     </div>
 </div>
 
-<!-- ========== INFO AZIENDA ========== -->
 <div id="infoAzienda" class="info-azienda">
     <div class="loading">Caricamento informazioni...</div>
 </div>
 
-<!-- ========== SEZIONE CATEGORIE ========== -->
 <div class="categorie-container">
     <div class="categorie-header">
         <button id="btnAggiungiCategoria" class="btn-aggiungi">➕ NUOVA CATEGORIA</button>
@@ -370,392 +98,143 @@
 </footer>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
-    authDomain: "insapa-database.firebaseapp.com",
-    projectId: "insapa-database",
-    storageBucket: "insapa-database.firebasestorage.app",
-    messagingSenderId: "331230245928",
-    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
-};
+const firebaseConfig = { apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ", authDomain: "insapa-database.firebaseapp.com", projectId: "insapa-database", storageBucket: "insapa-database.firebasestorage.app", messagingSenderId: "331230245928", appId: "1:331230245928:web:2ee43d9209e43c3c89b11d" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categorie = [];
 let pressTimer = null;
 
-// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    fetch('icons/logo.jpg').then(r => {
-        if (r.ok) {
-            logoImg.src = 'icons/logo.jpg';
-            logoImg.style.display = 'block';
-            logoSpan.style.display = 'none';
-        } else {
-            fetch('icons/logo.png').then(r2 => {
-                if (r2.ok) {
-                    logoImg.src = 'icons/logo.png';
-                    logoImg.style.display = 'block';
-                    logoSpan.style.display = 'none';
-                }
-            }).catch(() => {});
-        }
-    }).catch(() => {});
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); } }).catch(()=>{});
 }
 caricaLogo();
 
-// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
 function mostraModalePassword() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO ADMIN</h3>
-            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
-            <div class="modal-buttons">
-                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
-    document.getElementById('btnVerifica').onclick = () => {
+    document.getElementById('btnVerifica').onclick = ()=>{
         const pwd = document.getElementById('passwordAdmin').value;
-        if (pwd === ADMIN_PASSWORD) {
-            isAdminMode = true;
-            localStorage.setItem('web_admin_mode', 'true');
-            showToast("✅ Modalità admin attivata!");
-            aggiornaUIModalitaAdmin();
-            modal.remove();
-        } else {
-            showToast("❌ Password errata!", true);
-        }
+        if(pwd === ADMIN_PASSWORD){ isAdminMode=true; localStorage.setItem('web_admin_mode','true'); showToast("✅ Modalità admin attivata!"); aggiornaUIModalitaAdmin(); modal.remove(); }
+        else showToast("❌ Password errata!", true);
     };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-
-function disattivaModalitaAdmin() {
-    isAdminMode = false;
-    localStorage.removeItem('web_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIModalitaAdmin();
-}
-
-// Gestione pressione lunga sul logo
+function disattivaModalitaAdmin() { isAdminMode=false; localStorage.removeItem('web_admin_mode'); showToast("🔒 Modalità admin disattivata"); aggiornaUIModalitaAdmin(); }
 const logoDiv = document.getElementById('logoRettangolo');
-logoDiv.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => {
-        mostraModalePassword();
-        pressTimer = null;
-    }, 3000);
-});
-logoDiv.addEventListener('mouseup', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDiv.addEventListener('mouseleave', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-// Per touch (mobile)
-logoDiv.addEventListener('touchstart', () => {
-    pressTimer = setTimeout(() => {
-        mostraModalePassword();
-        pressTimer = null;
-    }, 3000);
-});
-logoDiv.addEventListener('touchend', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
+logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
+logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
+logoDiv.addEventListener('touchend', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
 
 function aggiornaUIModalitaAdmin() {
     const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
     const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
-    if (isAdminMode) {
+    if(isAdminMode){
         btnAggiungiCategoria.classList.add('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
-        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
+        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
     } else {
         btnAggiungiCategoria.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
-        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
+        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
     }
 }
 
-// ==================== LINK LOGO (doppio tap per link secondario) ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
-    try {
-        const response = await fetch('link.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
-            if (lines.length >= 1) linkPrincipale = lines[0].trim();
-            if (lines.length >= 2) linkSecondario = lines[1].trim();
-        }
-    } catch(e) { console.warn("Errore caricamento link.html:", e); }
+    try { const res = await fetch('link.html'); if(res.ok){ const text = await res.text(); const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<')); if(lines.length>=1) linkPrincipale = lines[0].trim(); if(lines.length>=2) linkSecondario = lines[1].trim(); } } catch(e){ console.warn("Errore caricamento link.html:", e); }
 }
-function apriLinkPrincipale() {
-    if (linkPrincipale && linkPrincipale !== "") {
-        window.open(linkPrincipale, '_blank');
-        showToast("🔗 Apertura link principale");
-    } else {
-        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
-    }
-}
-function apriLinkSecondario() {
-    if (linkSecondario && linkSecondario !== "") {
-        window.open(linkSecondario, '_blank');
-        showToast("🔗 Apertura link secondario");
-    } else {
-        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
-    }
-}
-// Il logo ha già l'evento di click per i link (1 tap, 2 tap). Aggiungiamo senza interferire con la pressione lunga.
-logoDiv.addEventListener('click', (e) => {
-    const now = Date.now();
-    if (now - lastTap < 300 && lastTap > 0) {
-        e.stopPropagation();
-        apriLinkSecondario();
-        lastTap = 0;
-    } else {
-        lastTap = now;
-        setTimeout(() => {
-            if (lastTap !== 0 && (Date.now() - lastTap) > 300) {
-                apriLinkPrincipale();
-                lastTap = 0;
-            }
-        }, 300);
-    }
-});
+function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
+function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
+logoDiv.addEventListener('click',(e)=>{ const now = Date.now(); if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; } else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); } });
 
-// ==================== CARICA TESTI DA FILE ESTERNO (web_testa_piede.html) ====================
 async function caricaTestiDaFile() {
     try {
-        const response = await fetch('web_testa_piede.html');
-        if (response.ok) {
-            const text = await response.text();
+        const res = await fetch('web_testa_piede.html');
+        if(res.ok){
+            const text = await res.text();
             const lines = text.split(/\r?\n/);
             let titolo = "", descrizione = "", footerText = "";
-            for (let line of lines) {
+            for(let line of lines){
                 line = line.trim();
-                if (line.startsWith("titolo:")) titolo = line.substring(7).trim();
-                else if (line.startsWith("descrizione:")) descrizione = line.substring(12).trim();
-                else if (line.startsWith("footer:")) footerText = line.substring(7).trim();
+                if(line.startsWith("titolo:")) titolo = line.substring(7).trim();
+                else if(line.startsWith("descrizione:")) descrizione = line.substring(12).trim();
+                else if(line.startsWith("footer:")) footerText = line.substring(7).trim();
             }
-            if (titolo) document.querySelector('#infoAzienda h1')?.remove();
-            if (descrizione) document.querySelector('#infoAzienda p')?.remove();
-            document.getElementById('infoAzienda').innerHTML = `
-                <h1>${titolo}</h1>
-                <p>${descrizione}</p>
-            `;
-            if (footerText) document.getElementById('footerText').innerText = footerText;
-        } else {
-            console.warn("web_testa_piede.html non trovato");
-        }
-    } catch(e) {
-        console.warn("Errore caricamento web_testa_piede.html:", e);
-    }
+            const infoDiv = document.getElementById('infoAzienda');
+            if(infoDiv){
+                infoDiv.innerHTML = `<h1>${titolo || "INSAPA un partner affidabile."}</h1><p>${descrizione || "Affidarsi a noi significa scegliere efficienza e professionalità: disponiamo di un ampio magazzino sempre rifornito, effettuiamo consegne rapide con i nostri mezzi diretti e mettiamo a disposizione personale specializzato per guidarti nella scelta dei migliori prodotti per la pulizia e l'igiene del tuo locale."}</p>`;
+            }
+            if(footerText) document.getElementById('footerText').innerText = footerText;
+        } else { console.warn("web_testa_piede.html non trovato"); }
+    } catch(e){ console.warn("Errore caricamento web_testa_piede.html:", e); }
 }
 
-// ==================== FUNZIONI UTILI ====================
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
-    toast.innerText = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
-}
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
+function showToast(msg, isErr=false){ const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
-// ==================== CARICA CATEGORIE ====================
-async function caricaCategorie() {
-    try {
-        const snapshot = await db.collection('web_categorie').orderBy('ordine', 'asc').get();
-        categorie = [];
-        snapshot.forEach(doc => {
-            categorie.push({ id: doc.id, ...doc.data() });
-        });
-        visualizzaCategorie();
-    } catch(e) {
-        console.error("Errore caricamento categorie:", e);
-        showToast("Errore caricamento categorie", true);
-    }
+async function caricaCategorie(){
+    try{ const snap = await db.collection('web_categorie').orderBy('ordine','asc').get(); categorie = []; snap.forEach(doc=>{ categorie.push({ id:doc.id, ...doc.data() }); }); visualizzaCategorie(); } catch(e){ console.error(e); showToast("Errore caricamento categorie", true); }
 }
-
-function visualizzaCategorie() {
+function visualizzaCategorie(){
     const grid = document.getElementById('categorieGrid');
-    if (categorie.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessuna categoria presente. ' + (isAdminMode ? 'Clicca su "NUOVA CATEGORIA" per aggiungerne una.' : '') + '</div>';
-        return;
-    }
-    
-    grid.innerHTML = categorie.map(cat => `
-        <div class="categoria-card" data-id="${cat.id}">
-            <div class="card-buttons ${isAdminMode ? 'show' : ''}">
-                <button class="card-btn edit" onclick="event.stopPropagation(); modificaCategoria('${cat.id}')">✏️</button>
-                <button class="card-btn" onclick="event.stopPropagation(); eliminaCategoria('${cat.id}')">🗑</button>
-            </div>
-            <img class="categoria-img" src="${cat.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${cat.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
-            <div class="categoria-info">
-                <div class="categoria-nome">${escapeHtml(cat.nome)}</div>
-                <div class="categoria-descrizione">${escapeHtml(cat.descrizione || '')}</div>
-            </div>
-        </div>
-    `).join('');
-    
-    document.querySelectorAll('.categoria-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('card-btn')) return;
-            const id = card.dataset.id;
-            window.location.href = `web-categoria.html?id=${id}`;
-        });
-    });
+    if(categorie.length===0){ grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 50px;">📭 Nessuna categoria presente. ' + (isAdminMode ? 'Clicca su "NUOVA CATEGORIA" per aggiungerne una.' : '') + '</div>'; return; }
+    grid.innerHTML = categorie.map(cat => `<div class="categoria-card" data-id="${cat.id}"><div class="card-buttons ${isAdminMode ? 'show' : ''}"><button class="card-btn edit" onclick="event.stopPropagation(); modificaCategoria('${cat.id}')">✏️</button><button class="card-btn" onclick="event.stopPropagation(); eliminaCategoria('${cat.id}')">🗑</button></div><img class="categoria-img" src="${cat.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" alt="${cat.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'"><div class="categoria-info"><div class="categoria-nome">${escapeHtml(cat.nome)}</div><div class="categoria-descrizione">${escapeHtml(cat.descrizione || '')}</div></div></div>`).join('');
+    document.querySelectorAll('.categoria-card').forEach(card => { card.addEventListener('click', (e) => { if(e.target.classList.contains('card-btn')) return; window.location.href = `web-categoria.html?id=${card.dataset.id}`; }); });
 }
 
-// ==================== MODALE CATEGORIA ====================
-function mostraModaleCategoria(categoria = null) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>${categoria ? '✏️ MODIFICA CATEGORIA' : '➕ NUOVA CATEGORIA'}</h3>
-            <label>📌 Nome categoria *</label>
-            <input type="text" id="catNome" value="${categoria ? escapeHtml(categoria.nome) : ''}" placeholder="es. Motori">
-            <label>📝 Descrizione</label>
-            <textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${categoria ? escapeHtml(categoria.descrizione || '') : ''}</textarea>
-            <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${categoria ? escapeHtml(categoria.fotoUrl || '') : ''}">
-            <img id="anteprimaImg" class="anteprima-img" src="" style="display: none;">
-            <div class="info-imgur">
-                📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"
-            </div>
-            <label>🔢 Ordine</label>
-            <input type="number" id="catOrdine" value="${categoria ? (categoria.ordine || 0) : categorie.length + 1}" placeholder="0,1,2...">
-            <div class="modal-buttons">
-                <button id="btnSalvaCategoria" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+function mostraModaleCategoria(cat=null){
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML = `<div class="modal-container"><h3>${cat ? '✏️ MODIFICA CATEGORIA' : '➕ NUOVA CATEGORIA'}</h3><label>📌 Nome categoria *</label><input type="text" id="catNome" value="${cat ? escapeHtml(cat.nome) : ''}" placeholder="es. Motori"><label>📝 Descrizione</label><textarea id="catDescrizione" placeholder="Descrizione breve della categoria...">${cat ? escapeHtml(cat.descrizione || '') : ''}</textarea><label>🖼️ Immagine (URL da Imgur)</label><input type="text" id="catFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${cat ? escapeHtml(cat.fotoUrl || '') : ''}"><img id="anteprimaImg" class="anteprima-img" src="" style="display: none;"><div class="info-imgur">📸 Come ottenere il link: vai su <a href="https://imgur.com/upload" target="_blank">Imgur.com</a>, carica la foto, clicca con il destro sulla foto e scegli "Copia indirizzo immagine"</div><label>🔢 Ordine</label><input type="number" id="catOrdine" value="${cat ? (cat.ordine || 0) : categorie.length + 1}" placeholder="0,1,2..."><div class="modal-buttons"><button id="btnSalvaCategoria" class="btn-salva-modal">💾 SALVA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
-    const fotoUrlInput = document.getElementById('catFotoUrl');
-    const anteprimaImg = document.getElementById('anteprimaImg');
-    
-    function aggiornaAnteprima() {
-        const url = fotoUrlInput.value.trim();
-        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-            anteprimaImg.src = url;
-            anteprimaImg.style.display = 'block';
-        } else {
-            anteprimaImg.style.display = 'none';
-        }
-    }
-    fotoUrlInput.addEventListener('input', aggiornaAnteprima);
-    aggiornaAnteprima();
-    
+    const fotoInput = document.getElementById('catFotoUrl');
+    const anteprima = document.getElementById('anteprimaImg');
+    const aggiornaAnteprima = () => { const url = fotoInput.value.trim(); if(url && (url.startsWith('http://')||url.startsWith('https://'))){ anteprima.src=url; anteprima.style.display='block'; } else anteprima.style.display='none'; };
+    fotoInput.addEventListener('input', aggiornaAnteprima); aggiornaAnteprima();
     document.getElementById('btnSalvaCategoria').onclick = async () => {
         const nome = document.getElementById('catNome').value.trim();
         const descrizione = document.getElementById('catDescrizione').value;
         const fotoUrl = document.getElementById('catFotoUrl').value.trim();
         const ordine = parseInt(document.getElementById('catOrdine').value) || 0;
-        
-        if (!nome) {
-            showToast("Inserisci il nome della categoria", true);
-            return;
-        }
-        
+        if(!nome){ showToast("Inserisci il nome della categoria", true); return; }
         try {
-            if (categoria) {
-                await db.collection('web_categorie').doc(categoria.id).update({
-                    nome, descrizione, ordine, fotoUrl,
-                    ultimoAggiornamento: new Date().toISOString()
-                });
-                showToast("✅ Categoria modificata!");
-            } else {
-                await db.collection('web_categorie').add({
-                    nome, descrizione, ordine, fotoUrl: fotoUrl || '',
-                    creatoIl: new Date().toISOString()
-                });
-                showToast("✅ Categoria aggiunta!");
-            }
-            await caricaCategorie();
-            modal.remove();
-        } catch(e) {
-            console.error(e);
-            showToast("Errore salvataggio categoria", true);
-        }
+            if(cat) await db.collection('web_categorie').doc(cat.id).update({ nome, descrizione, ordine, fotoUrl, ultimoAggiornamento: new Date().toISOString() });
+            else await db.collection('web_categorie').add({ nome, descrizione, ordine, fotoUrl: fotoUrl || '', creatoIl: new Date().toISOString() });
+            showToast("✅ Categoria "+(cat?"modificata":"aggiunta")+"!");
+            await caricaCategorie(); modal.remove();
+        } catch(e){ showToast("Errore salvataggio categoria", true); }
     };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-
-async function modificaCategoria(id) {
-    const cat = categorie.find(c => c.id === id);
-    if (cat) mostraModaleCategoria(cat);
-}
-
-async function eliminaCategoria(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli e le famiglie associate!\n\nOperazione IRREVERSIBILE!")) return;
-    
+async function modificaCategoria(id){ const cat = categorie.find(c=>c.id===id); if(cat) mostraModaleCategoria(cat); }
+async function eliminaCategoria(id){
+    if(!confirm("⚠️ Sei sicuro di voler eliminare questa categoria?\n\nVerranno eliminati anche TUTTI gli articoli e le famiglie associate!\n\nOperazione IRREVERSIBILE!")) return;
     try {
-        const articoliSnap = await db.collection('web_articoli').where('categoriaId', '==', id).get();
-        const famiglieSnap = await db.collection('web_famiglie').where('categoriaId', '==', id).get();
+        const articoliSnap = await db.collection('web_articoli').where('categoriaId','==',id).get();
+        const famiglieSnap = await db.collection('web_famiglie').where('categoriaId','==',id).get();
         const batch = db.batch();
-        articoliSnap.forEach(doc => batch.delete(doc.ref));
-        famiglieSnap.forEach(doc => batch.delete(doc.ref));
+        articoliSnap.forEach(doc=>batch.delete(doc.ref));
+        famiglieSnap.forEach(doc=>batch.delete(doc.ref));
         await batch.commit();
         await db.collection('web_categorie').doc(id).delete();
         showToast("✅ Categoria eliminata!");
         await caricaCategorie();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore eliminazione categoria", true);
-    }
+    } catch(e){ showToast("Errore eliminazione categoria", true); }
 }
 
-// ==================== EVENTI ====================
-document.getElementById('btnDisattivaAdmin').onclick = () => {
-    if (isAdminMode) disattivaModalitaAdmin();
-};
-document.getElementById('btnAggiungiCategoria').onclick = () => {
-    if (isAdminMode) {
-        mostraModaleCategoria(null);
-    }
-};
+document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
+document.getElementById('btnAggiungiCategoria').onclick = () => { if(isAdminMode) mostraModaleCategoria(null); };
 
-// ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('web_admin_mode');
-if (savedAdminMode === 'true') {
-    isAdminMode = true;
-}
-
-Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaCategorie()]).then(() => {
-    aggiornaUIModalitaAdmin();
-});
+if(savedAdminMode === 'true') isAdminMode = true;
+Promise.all([caricaLinkDaFile(), caricaTestiDaFile(), caricaCategorie()]).then(() => { aggiornaUIModalitaAdmin(); });
 </script>
 <script src="version.js"></script>
 </body>
