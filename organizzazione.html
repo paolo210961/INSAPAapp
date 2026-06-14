@@ -9,277 +9,50 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        .header {
-            background: white;
-            padding: 20px 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-        .logo-rettangolo {
-            width: 200px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+        .header { background: white; padding: 20px 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo-rettangolo { width: 200px; height: 70px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
-        
-        .top-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        .btn-top {
-            background: #f1c40f;
-            color: #2c3e50;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-        .btn-top:hover {
-            background: #e67e22;
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        .team-section {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 20px;
-            flex: 1;
-        }
-        .team-title {
-            text-align: center;
-            font-size: 2rem;
-            color: #2c3e50;
-            margin-bottom: 40px;
-        }
-        .team-grid {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-        }
-        .team-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 300px;
-            transition: transform 0.3s;
-            text-align: center;
-        }
-        .team-card:hover {
-            transform: translateY(-5px);
-        }
-        .team-foto {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            background: #ecf0f1;
-        }
-        .team-info {
-            padding: 20px;
-        }
-        .team-nome {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        .team-ruolo {
-            font-size: 0.9rem;
-            color: #3498db;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .team-telefono {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .team-telefono a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .btn-wa {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn-wa:hover {
-            background: #128C7E;
-        }
-        .team-email {
-            margin: 10px 0;
-        }
-        .team-email a {
-            color: #3498db;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .modal-container {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-container h3 {
-            margin: 0 0 20px;
-            color: #2c3e50;
-        }
-        .modal-container label {
-            display: block;
-            font-weight: bold;
-            margin: 15px 0 5px;
-            color: #2c3e50;
-        }
-        .modal-container input, .modal-container textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .top-buttons { display: flex; gap: 15px; }
+        .btn-top { background: #f1c40f; color: #2c3e50; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; text-decoration: none; display: inline-block; transition: all 0.2s; }
+        .btn-top:hover { background: #e67e22; color: white; transform: translateY(-2px); }
+        .team-section { max-width: 1200px; margin: 50px auto; padding: 0 20px; flex: 1; }
+        .team-title { text-align: center; font-size: 2rem; color: #2c3e50; margin-bottom: 40px; }
+        .team-grid { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+        .team-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 300px; transition: transform 0.3s; text-align: center; }
+        .team-card:hover { transform: translateY(-5px); }
+        .team-foto { width: 100%; height: 250px; object-fit: cover; background: #ecf0f1; }
+        .team-info { padding: 20px; }
+        .team-nome { font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .team-ruolo { font-size: 0.9rem; color: #3498db; margin-bottom: 15px; font-weight: bold; }
+        .team-telefono { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
+        .team-telefono a { color: #2c3e50; text-decoration: none; font-size: 0.9rem; }
+        .btn-wa { background: #25D366; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-wa:hover { background: #128C7E; }
+        .team-email { margin: 10px 0; }
+        .team-email a { color: #3498db; text-decoration: none; font-size: 0.85rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-container { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-container h3 { margin: 0 0 20px; color: #2c3e50; }
+        .modal-container label { display: block; font-weight: bold; margin: 15px 0 5px; color: #2c3e50; }
+        .modal-container input, .modal-container textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
-        .card-btn {
-            background: rgba(0,0,0,0.6);
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
+        .card-btn { background: rgba(0,0,0,0.6); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; }
         .card-btn.edit:hover { background: #3498db; }
         .card-btn:hover { background: #e74c3c; }
-        
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            background: #27ae60;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 2000;
-            font-weight: bold;
-            animation: fadeOut 3s ease forwards;
-        }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; display: none; }
-        }
-        
-        .password-modal {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-        }
-        .password-modal input {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        
-        footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-            font-size: 0.8rem;
-        }
-        .footer-admin {
-            background: none;
-            border: none;
-            color: #f1c40f;
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-        .footer-admin:hover {
-            color: #e67e22;
-        }
-        
-        @media (max-width: 768px) {
-            .team-card { width: 280px; }
-            .team-foto { height: 200px; }
-            .header-row { flex-direction: column; }
-            .top-buttons { width: 100%; justify-content: center; }
-        }
+        .toast-message { position: fixed; bottom: 30px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
+        .password-modal { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .password-modal input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
+        footer { background: #2c3e50; color: white; text-align: center; padding: 20px; margin-top: 50px; font-size: 0.8rem; }
+        .footer-admin { background: none; border: none; color: #f1c40f; cursor: pointer; text-decoration: underline; font-size: 0.8rem; margin-left: 10px; }
+        .footer-admin:hover { color: #e67e22; }
+        @media (max-width: 768px) { .team-card { width: 280px; } .team-foto { height: 200px; } .header-row { flex-direction: column; } .top-buttons { width: 100%; justify-content: center; } }
     </style>
 </head>
 <body>
@@ -306,66 +79,41 @@
 </div>
 
 <footer>
-    © dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati
+    <span id="footerText">© dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati</span>
     <button id="btnDisattivaAdmin" class="footer-admin" style="display:none;">🔒 DISATTIVA ADMIN</button>
 </footer>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
-    authDomain: "insapa-database.firebaseapp.com",
-    projectId: "insapa-database",
-    storageBucket: "insapa-database.firebasestorage.app",
-    messagingSenderId: "331230245928",
-    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
-};
+const firebaseConfig = { apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ", authDomain: "insapa-database.firebaseapp.com", projectId: "insapa-database", storageBucket: "insapa-database.firebasestorage.app", messagingSenderId: "331230245928", appId: "1:331230245928:web:2ee43d9209e43c3c89b11d" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let teamData = [];
 let pressTimer = null;
 
-// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    fetch('icons/logo.jpg').then(r => {
-        if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; }
-        else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); }
-    }).catch(()=>{});
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); } }).catch(()=>{});
 }
 caricaLogo();
 
-// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
 function mostraModalePassword() {
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('btnVerifica').onclick = ()=>{
         const pwd = document.getElementById('passwordAdmin').value;
-        if(pwd === ADMIN_PASSWORD){
-            isAdminMode=true; localStorage.setItem('organizzazione_admin_mode','true');
-            showToast("✅ Modalità admin attivata!");
-            aggiornaUIAdmin();
-            modal.remove();
-        } else showToast("❌ Password errata!", true);
+        if(pwd === ADMIN_PASSWORD){ isAdminMode=true; localStorage.setItem('organizzazione_admin_mode','true'); showToast("✅ Modalità admin attivata!"); aggiornaUIAdmin(); modal.remove(); }
+        else showToast("❌ Password errata!", true);
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-function disattivaModalitaAdmin() {
-    isAdminMode=false; localStorage.removeItem('organizzazione_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIAdmin();
-}
-
+function disattivaModalitaAdmin() { isAdminMode=false; localStorage.removeItem('organizzazione_admin_mode'); showToast("🔒 Modalità admin disattivata"); aggiornaUIAdmin(); }
 const logoDiv = document.getElementById('logoRettangolo');
-logoDiv.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000);
-});
+logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
 logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
 logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
 logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
@@ -373,207 +121,78 @@ logoDiv.addEventListener('touchend', () => { if(pressTimer){ clearTimeout(pressT
 
 function aggiornaUIAdmin() {
     const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
-    if(isAdminMode){
-        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
-    } else {
-        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
-    }
+    if(isAdminMode){ if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block'; }
+    else { if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none'; }
     visualizzaTeam();
 }
 
-// ==================== LINK LOGO (doppio tap) ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
-    try {
-        const res = await fetch('link.html');
-        if(res.ok){
-            const text = await res.text();
-            const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<'));
-            if(lines.length>=1) linkPrincipale = lines[0].trim();
-            if(lines.length>=2) linkSecondario = lines[1].trim();
-        }
-    } catch(e){ console.warn("Errore caricamento link.html:", e); }
+    try { const res = await fetch('link.html'); if(res.ok){ const text = await res.text(); const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<')); if(lines.length>=1) linkPrincipale = lines[0].trim(); if(lines.length>=2) linkSecondario = lines[1].trim(); } } catch(e){}
 }
 function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
 function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
-logoDiv.addEventListener('click',(e)=>{
-    const now = Date.now();
-    if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }
-    else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
-});
+logoDiv.addEventListener('click',(e)=>{ const now = Date.now(); if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; } else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); } });
 
-// ==================== CARICA TEAM ====================
 async function caricaTeam() {
     try {
-        console.log("Caricamento team...");
         const snapshot = await db.collection('web_team').orderBy('ordine', 'asc').get();
-        teamData = [];
-        snapshot.forEach(doc => {
-            teamData.push({ id: doc.id, ...doc.data() });
-        });
-        console.log("Team caricati:", teamData.length);
+        teamData = []; snapshot.forEach(doc => { teamData.push({ id: doc.id, ...doc.data() }); });
         visualizzaTeam();
-    } catch(e) {
-        console.error("Errore caricamento team:", e);
-        showToast("Errore caricamento team: " + e.message, true);
-        document.getElementById('teamGrid').innerHTML = '<div style="text-align: center; width: 100%; color: red;">Errore caricamento team. Controlla console.</div>';
-    }
+    } catch(e) { console.error(e); showToast("Errore caricamento team", true); document.getElementById('teamGrid').innerHTML = '<div style="text-align: center; width: 100%; color: red;">Errore caricamento team</div>'; }
 }
-
 function visualizzaTeam() {
     const grid = document.getElementById('teamGrid');
     if (!grid) return;
-    if (teamData.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>';
-        return;
-    }
-    
-    grid.innerHTML = teamData.map(member => `
-        <div class="team-card" data-id="${member.id}">
-            <img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'">
-            <div class="team-info">
-                <div class="team-nome">${escapeHtml(member.nome)}</div>
-                <div class="team-ruolo">${escapeHtml(member.ruolo)}</div>
-                <div class="team-telefono">
-                    📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
-                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a>
-                </div>
-                <div class="team-email">
-                    ✉️ <a href="mailto:${member.email}">${member.email}</a>
-                </div>
-                ${isAdminMode ? `
-                    <div style="margin-top: 10px;">
-                        <button class="card-btn edit" onclick="modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button>
-                        <button class="card-btn" onclick="eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `).join('');
-    
-    // Pulsante aggiungi membro (solo admin)
+    if (teamData.length === 0) { grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>'; return; }
+    grid.innerHTML = teamData.map(member => `<div class="team-card" data-id="${member.id}"><img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'"><div class="team-info"><div class="team-nome">${escapeHtml(member.nome)}</div><div class="team-ruolo">${escapeHtml(member.ruolo)}</div><div class="team-telefono">📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a><a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a></div><div class="team-email">✉️ <a href="mailto:${member.email}">${member.email}</a></div>${isAdminMode ? `<div style="margin-top: 10px;"><button class="card-btn edit" onclick="modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button><button class="card-btn" onclick="eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button></div>` : ''}</div></div>`).join('');
     if (isAdminMode) {
         const existingBtn = document.getElementById('btnAggiungiMembroTeam');
-        if (!existingBtn) {
-            const btnAggiungiMembro = document.createElement('button');
-            btnAggiungiMembro.id = 'btnAggiungiMembroTeam';
-            btnAggiungiMembro.className = 'btn-admin';
-            btnAggiungiMembro.style.margin = '20px auto 0';
-            btnAggiungiMembro.style.display = 'block';
-            btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM';
-            btnAggiungiMembro.onclick = () => mostraModaleTeam(null);
-            grid.parentNode.appendChild(btnAggiungiMembro);
-        }
-    } else {
-        const existingBtn = document.getElementById('btnAggiungiMembroTeam');
-        if (existingBtn) existingBtn.remove();
-    }
+        if (!existingBtn) { const btnAggiungiMembro = document.createElement('button'); btnAggiungiMembro.id = 'btnAggiungiMembroTeam'; btnAggiungiMembro.className = 'btn-admin'; btnAggiungiMembro.style.margin = '20px auto 0'; btnAggiungiMembro.style.display = 'block'; btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM'; btnAggiungiMembro.onclick = () => mostraModaleTeam(null); grid.parentNode.appendChild(btnAggiungiMembro); }
+    } else { const existingBtn = document.getElementById('btnAggiungiMembroTeam'); if (existingBtn) existingBtn.remove(); }
 }
+function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
+function showToast(msg, isErr=false){ const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;');
-}
-
-function showToast(msg, isErr=false){
-    const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg;
-    document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
-}
-
-// ==================== MODALI TEAM ====================
-function mostraModaleTeam(membro = null) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>${membro ? '✏️ MODIFICA MEMBRO TEAM' : '➕ NUOVO MEMBRO TEAM'}</h3>
-            <label>📌 Nome *</label>
-            <input type="text" id="teamNome" value="${membro ? escapeHtml(membro.nome) : ''}" placeholder="es. Claudia">
-            <label>🎯 Ruolo *</label>
-            <input type="text" id="teamRuolo" value="${membro ? escapeHtml(membro.ruolo) : ''}" placeholder="es. Amministrazione">
-            <label>📞 Telefono</label>
-            <input type="text" id="teamTelefono" value="${membro ? escapeHtml(membro.telefono) : ''}" placeholder="es. +39 338 301 2348">
-            <label>📱 WhatsApp (numero con prefisso, senza spazi)</label>
-            <input type="text" id="teamWhatsapp" value="${membro ? escapeHtml(membro.whatsapp || '') : ''}" placeholder="es. 393383012348">
-            <label>✉️ Email</label>
-            <input type="email" id="teamEmail" value="${membro ? escapeHtml(membro.email) : ''}" placeholder="es. claudia@insapa.it">
-            <label>🖼️ Foto (nome file in icons/)</label>
-            <input type="text" id="teamFoto" value="${membro ? escapeHtml(membro.foto) : ''}" placeholder="es. claudia.jpg">
-            <label>🔢 Ordine</label>
-            <input type="number" id="teamOrdine" value="${membro ? (membro.ordine || 0) : teamData.length + 1}">
-            <div class="modal-buttons">
-                <button id="btnSalvaTeam" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+function mostraModaleTeam(membro=null){
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML = `<div class="modal-container"><h3>${membro ? '✏️ MODIFICA MEMBRO TEAM' : '➕ NUOVO MEMBRO TEAM'}</h3><label>📌 Nome *</label><input type="text" id="teamNome" value="${membro ? escapeHtml(membro.nome) : ''}" placeholder="es. Claudia"><label>🎯 Ruolo *</label><input type="text" id="teamRuolo" value="${membro ? escapeHtml(membro.ruolo) : ''}" placeholder="es. Amministrazione"><label>📞 Telefono</label><input type="text" id="teamTelefono" value="${membro ? escapeHtml(membro.telefono) : ''}" placeholder="es. +39 338 301 2348"><label>📱 WhatsApp (numero con prefisso, senza spazi)</label><input type="text" id="teamWhatsapp" value="${membro ? escapeHtml(membro.whatsapp || '') : ''}" placeholder="es. 393383012348"><label>✉️ Email</label><input type="email" id="teamEmail" value="${membro ? escapeHtml(membro.email) : ''}" placeholder="es. claudia@insapa.it"><label>🖼️ Foto (nome file in icons/)</label><input type="text" id="teamFoto" value="${membro ? escapeHtml(membro.foto) : ''}" placeholder="es. claudia.jpg"><label>🔢 Ordine</label><input type="number" id="teamOrdine" value="${membro ? (membro.ordine || 0) : teamData.length + 1}"><div class="modal-buttons"><button id="btnSalvaTeam" class="btn-salva-modal">💾 SALVA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
     document.getElementById('btnSalvaTeam').onclick = async () => {
-        const nome = document.getElementById('teamNome').value.trim();
-        const ruolo = document.getElementById('teamRuolo').value.trim();
-        const telefono = document.getElementById('teamTelefono').value.trim();
-        const whatsapp = document.getElementById('teamWhatsapp').value.trim();
-        const email = document.getElementById('teamEmail').value.trim();
-        const foto = document.getElementById('teamFoto').value.trim();
-        const ordine = parseInt(document.getElementById('teamOrdine').value) || 0;
-        
-        if (!nome || !ruolo) {
-            showToast("Inserisci nome e ruolo", true);
-            return;
-        }
-        
+        const nome = document.getElementById('teamNome').value.trim(); const ruolo = document.getElementById('teamRuolo').value.trim(); const telefono = document.getElementById('teamTelefono').value.trim(); const whatsapp = document.getElementById('teamWhatsapp').value.trim(); const email = document.getElementById('teamEmail').value.trim(); const foto = document.getElementById('teamFoto').value.trim(); const ordine = parseInt(document.getElementById('teamOrdine').value) || 0;
+        if(!nome || !ruolo){ showToast("Inserisci nome e ruolo", true); return; }
         try {
-            if (membro) {
-                await db.collection('web_team').doc(membro.id).update({
-                    nome, ruolo, telefono, whatsapp, email, foto, ordine
-                });
-                showToast("✅ Membro aggiornato!");
-            } else {
-                await db.collection('web_team').add({
-                    nome, ruolo, telefono, whatsapp, email, foto, ordine
-                });
-                showToast("✅ Membro aggiunto!");
-            }
-            await caricaTeam();
-            modal.remove();
-        } catch(e) {
-            console.error(e);
-            showToast("Errore salvataggio", true);
-        }
+            if(membro) await db.collection('web_team').doc(membro.id).update({ nome, ruolo, telefono, whatsapp, email, foto, ordine });
+            else await db.collection('web_team').add({ nome, ruolo, telefono, whatsapp, email, foto, ordine });
+            showToast("✅ Membro " + (membro ? "aggiornato" : "aggiunto") + "!");
+            await caricaTeam(); modal.remove();
+        } catch(e){ console.error(e); showToast("Errore salvataggio", true); }
     };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
+async function modificaMembroTeam(id){ const membro = teamData.find(m=>m.id===id); if(membro) mostraModaleTeam(membro); }
+async function eliminaMembroTeam(id){ if(!confirm("⚠️ Sei sicuro di voler eliminare questo membro dal team?")) return; try { await db.collection('web_team').doc(id).delete(); showToast("✅ Membro eliminato!"); await caricaTeam(); } catch(e){ console.error(e); showToast("Errore eliminazione", true); } }
 
-async function modificaMembroTeam(id) {
-    const membro = teamData.find(m => m.id === id);
-    if (membro) mostraModaleTeam(membro);
-}
-
-async function eliminaMembroTeam(id) {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questo membro dal team?")) return;
+async function caricaTestiDaFile() {
     try {
-        await db.collection('web_team').doc(id).delete();
-        showToast("✅ Membro eliminato!");
-        await caricaTeam();
-    } catch(e) {
-        console.error(e);
-        showToast("Errore eliminazione", true);
-    }
+        const res = await fetch('web_testa_piede.html');
+        if(res.ok){
+            const text = await res.text();
+            const lines = text.split(/\r?\n/);
+            let footerText = "";
+            for(let line of lines){
+                line = line.trim();
+                if(line.startsWith("footer:")) footerText = line.substring(7).trim();
+            }
+            if(footerText) document.getElementById('footerText').innerText = footerText;
+        } else { console.warn("web_testa_piede.html non trovato"); }
+    } catch(e){ console.warn("Errore caricamento web_testa_piede.html:", e); }
 }
 
-// ==================== EVENTI ====================
 document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
-
-// ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('organizzazione_admin_mode');
-if (savedAdminMode === 'true') isAdminMode = true;
-caricaLinkDaFile().then(() => {
-    caricaTeam().then(() => aggiornaUIAdmin()).catch(err => {
-        console.error("Errore finale:", err);
-        showToast("Errore inizializzazione", true);
-    });
-});
+if(savedAdminMode === 'true') isAdminMode = true;
+caricaLinkDaFile().then(()=>{ caricaTestiDaFile().then(()=>{ caricaTeam().then(()=>{ aggiornaUIAdmin(); }); }); });
 </script>
 <script src="version.js"></script>
 </body>
