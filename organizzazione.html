@@ -288,12 +288,12 @@
         <div class="logo-area" id="btnHome">
             <div class="logo-rettangolo" id="logoRettangolo">
                 <img id="logoImmagine" style="display:none;">
-                <span id="logoSpan">?? inSAPA s.a.s.</span>
+                <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
         </div>
         <div class="top-buttons">
-            <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" class="btn-top">?? Facebook</a>
-            <a href="web.html" class="btn-top">? HOME</a>
+            <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" class="btn-top">📘 Facebook</a>
+            <a href="web.html" class="btn-top">◀ HOME</a>
         </div>
     </div>
 </div>
@@ -304,12 +304,12 @@
         <div style="text-align: center; width: 100%;">Caricamento team...</div>
     </div>
     <div style="text-align: center; margin-top: 30px;">
-        <button id="btnAdminTeam" class="btn-admin">?? AREA ADMIN</button>
+        <button id="btnAdminTeam" class="btn-admin">🔐 AREA ADMIN</button>
     </div>
 </div>
 
 <footer>
-    � dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ?? insapasas@gmail.com - Tutti i diritti riservati
+    © dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati
 </footer>
 
 <script>
@@ -403,16 +403,16 @@ function visualizzaTeam() {
                 <div class="team-nome">${escapeHtml(member.nome)}</div>
                 <div class="team-ruolo">${escapeHtml(member.ruolo)}</div>
                 <div class="team-telefono">
-                    ?? <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
-                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">?? WhatsApp</a>
+                    📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
+                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a>
                 </div>
                 <div class="team-email">
-                    ?? <a href="mailto:${member.email}">${member.email}</a>
+                    ✉️ <a href="mailto:${member.email}">${member.email}</a>
                 </div>
                 ${isAdminMode ? `
                     <div style="margin-top: 10px;">
-                        <button class="card-btn edit" onclick="modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">?? MODIFICA</button>
-                        <button class="card-btn" onclick="eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">?? ELIMINA</button>
+                        <button class="card-btn edit" onclick="modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button>
+                        <button class="card-btn" onclick="eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button>
                     </div>
                 ` : ''}
             </div>
@@ -428,7 +428,7 @@ function visualizzaTeam() {
             btnAggiungiMembro.className = 'btn-admin';
             btnAggiungiMembro.style.margin = '20px auto 0';
             btnAggiungiMembro.style.display = 'block';
-            btnAggiungiMembro.innerHTML = '? AGGIUNGI MEMBRO TEAM';
+            btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM';
             btnAggiungiMembro.onclick = () => mostraModaleTeam(null);
             grid.parentNode.appendChild(btnAggiungiMembro);
         }
@@ -454,23 +454,23 @@ function mostraModaleTeam(membro = null) {
     modal.className = 'modal-overlay';
     modal.innerHTML = `
         <div class="modal-container">
-            <h3>${membro ? '?? MODIFICA MEMBRO TEAM' : '? NUOVO MEMBRO TEAM'}</h3>
-            <label>?? Nome *</label>
+            <h3>${membro ? '✏️ MODIFICA MEMBRO TEAM' : '➕ NUOVO MEMBRO TEAM'}</h3>
+            <label>📌 Nome *</label>
             <input type="text" id="teamNome" value="${membro ? escapeHtml(membro.nome) : ''}" placeholder="es. Claudia">
-            <label>?? Ruolo *</label>
+            <label>🎯 Ruolo *</label>
             <input type="text" id="teamRuolo" value="${membro ? escapeHtml(membro.ruolo) : ''}" placeholder="es. Amministrazione">
-            <label>?? Telefono</label>
+            <label>📞 Telefono</label>
             <input type="text" id="teamTelefono" value="${membro ? escapeHtml(membro.telefono) : ''}" placeholder="es. +39 338 301 2348">
-            <label>?? WhatsApp (numero con prefisso, senza spazi)</label>
+            <label>📱 WhatsApp (numero con prefisso, senza spazi)</label>
             <input type="text" id="teamWhatsapp" value="${membro ? escapeHtml(membro.whatsapp || '') : ''}" placeholder="es. 393383012348">
-            <label>?? Email</label>
+            <label>✉️ Email</label>
             <input type="email" id="teamEmail" value="${membro ? escapeHtml(membro.email) : ''}" placeholder="es. claudia@insapa.it">
-            <label>??? Foto (nome file in icons/)</label>
+            <label>🖼️ Foto (nome file in icons/)</label>
             <input type="text" id="teamFoto" value="${membro ? escapeHtml(membro.foto) : ''}" placeholder="es. claudia.jpg">
-            <label>?? Ordine</label>
+            <label>🔢 Ordine</label>
             <input type="number" id="teamOrdine" value="${membro ? (membro.ordine || 0) : teamData.length + 1}">
             <div class="modal-buttons">
-                <button id="btnSalvaTeam" class="btn-salva-modal">?? SALVA</button>
+                <button id="btnSalvaTeam" class="btn-salva-modal">💾 SALVA</button>
                 <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
             </div>
         </div>
@@ -496,12 +496,12 @@ function mostraModaleTeam(membro = null) {
                 await db.collection('web_team').doc(membro.id).update({
                     nome, ruolo, telefono, whatsapp, email, foto, ordine
                 });
-                showToast("? Membro aggiornato!");
+                showToast("✅ Membro aggiornato!");
             } else {
                 await db.collection('web_team').add({
                     nome, ruolo, telefono, whatsapp, email, foto, ordine
                 });
-                showToast("? Membro aggiunto!");
+                showToast("✅ Membro aggiunto!");
             }
             await caricaTeam();
             modal.remove();
@@ -519,10 +519,10 @@ async function modificaMembroTeam(id) {
 }
 
 async function eliminaMembroTeam(id) {
-    if (!confirm("?? Sei sicuro di voler eliminare questo membro dal team?")) return;
+    if (!confirm("⚠️ Sei sicuro di voler eliminare questo membro dal team?")) return;
     try {
         await db.collection('web_team').doc(id).delete();
-        showToast("? Membro eliminato!");
+        showToast("✅ Membro eliminato!");
         await caricaTeam();
     } catch(e) {
         console.error(e);
@@ -536,7 +536,7 @@ function mostraModalePassword() {
     modal.className = 'modal-overlay';
     modal.innerHTML = `
         <div class="password-modal">
-            <h3>?? ACCESSO ADMIN</h3>
+            <h3>🔐 ACCESSO ADMIN</h3>
             <input type="password" id="passwordAdmin" placeholder="Inserisci password">
             <div class="modal-buttons">
                 <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
@@ -551,11 +551,11 @@ function mostraModalePassword() {
         if (pwd === ADMIN_PASSWORD) {
             isAdminMode = true;
             localStorage.setItem('organizzazione_admin_mode', 'true');
-            showToast("? Modalit� admin attivata!");
+            showToast("✅ Modalità admin attivata!");
             aggiornaUIAdmin();
             modal.remove();
         } else {
-            showToast("? Password errata!", true);
+            showToast("❌ Password errata!", true);
         }
     };
     document.getElementById('btnAnnulla').onclick = () => modal.remove();
@@ -564,17 +564,17 @@ function mostraModalePassword() {
 function disattivaModalitaAdmin() {
     isAdminMode = false;
     localStorage.removeItem('organizzazione_admin_mode');
-    showToast("?? Modalit� admin disattivata");
+    showToast("🔒 Modalità admin disattivata");
     aggiornaUIAdmin();
 }
 
 function aggiornaUIAdmin() {
     const btnAdmin = document.getElementById('btnAdminTeam');
     if (isAdminMode) {
-        btnAdmin.textContent = "?? DISATTIVA ADMIN";
+        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
         btnAdmin.classList.add('active');
     } else {
-        btnAdmin.textContent = "?? AREA ADMIN";
+        btnAdmin.textContent = "🔐 AREA ADMIN";
         btnAdmin.classList.remove('active');
     }
     visualizzaTeam();
@@ -594,5 +594,6 @@ caricaLinkDaFile().then(() => {
     caricaTeam().then(() => aggiornaUIAdmin());
 });
 </script>
+<script src="version.js"></script>
 </body>
 </html>
