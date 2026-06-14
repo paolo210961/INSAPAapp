@@ -30,6 +30,7 @@
             align-items: center;
             gap: 15px;
             flex-wrap: wrap;
+            cursor: pointer;
         }
         .logo-rettangolo {
             width: 200px;
@@ -39,7 +40,6 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: pointer;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
@@ -311,7 +311,7 @@
             cursor: pointer;
             text-decoration: underline;
             font-size: 0.8rem;
-            margin-left: 5px;
+            margin-left: 10px;
         }
         .footer-admin:hover {
             color: #e67e22;
@@ -336,8 +336,8 @@
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area">
-            <div id="logoRettangolo" class="logo-rettangolo">
+        <div class="logo-area" id="logoRettangolo">
+            <div class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
@@ -365,8 +365,8 @@
 </div>
 
 <footer>
-    © dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati - 
-    <button id="btnAdminFooter" class="footer-admin">AREA ADMIN</button>
+    <span id="footerText">© dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati</span>
+    <button id="btnDisattivaAdmin" class="footer-admin" style="display:none;">🔒 DISATTIVA ADMIN</button>
 </footer>
 
 <script>
@@ -379,7 +379,6 @@ const firebaseConfig = {
     messagingSenderId: "331230245928",
     appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -387,6 +386,7 @@ const db = firebase.firestore();
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categorie = [];
+let pressTimer = null;
 
 // ==================== LOGO ====================
 function caricaLogo() {
@@ -410,106 +410,7 @@ function caricaLogo() {
 }
 caricaLogo();
 
-// ==================== GESTIONE LINK PER LOGO (1 TAP, 2 TAP) ====================
-let linkPrincipale = "";
-let linkSecondario = "";
-let lastTap = 0;
-
-async function caricaLinkDaFile() {
-    try {
-        const response = await fetch('link.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
-            if (lines.length >= 1) linkPrincipale = lines[0].trim();
-            if (lines.length >= 2) linkSecondario = lines[1].trim();
-        }
-    } catch(e) { console.warn("Errore caricamento link.html:", e); }
-}
-
-function apriLinkPrincipale() {
-    if (linkPrincipale && linkPrincipale !== "") {
-        window.open(linkPrincipale, '_blank');
-        showToast("🔗 Apertura link principale");
-    } else {
-        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
-    }
-}
-
-function apriLinkSecondario() {
-    if (linkSecondario && linkSecondario !== "") {
-        window.open(linkSecondario, '_blank');
-        showToast("🔗 Apertura link secondario");
-    } else {
-        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
-    }
-}
-
-const logoSiti = document.getElementById('logoRettangolo');
-logoSiti.addEventListener('click', (e) => {
-    const now = new Date().getTime();
-    const tapLength = now - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
-        e.stopPropagation();
-        apriLinkSecondario();
-        lastTap = 0;
-    } else {
-        lastTap = now;
-        setTimeout(() => {
-            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
-                apriLinkPrincipale();
-                lastTap = 0;
-            }
-        }, 300);
-    }
-});
-
-// ==================== CARICA TESTI TESTA E PIEDE DA FILE ESTERNO ====================
-async function caricaTestiDaFile() {
-    try {
-        const response = await fetch('web_testa_piede.html');
-        if (response.ok) {
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            const h1 = doc.querySelector('h1');
-            const p = doc.querySelector('p');
-            
-            let testataHtml = '';
-            if (h1) testataHtml += h1.outerHTML;
-            if (p) testataHtml += p.outerHTML;
-            
-            document.getElementById('infoAzienda').innerHTML = testataHtml;
-        } else {
-            console.warn("web_testa_piede.html non trovato");
-        }
-    } catch(e) {
-        console.warn("Errore caricamento web_testa_piede.html:", e);
-    }
-}
-
-// ==================== FUNZIONI UTILI ====================
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
-    toast.innerText = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-// ==================== MODALITA' ADMIN ====================
+// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
 function mostraModalePassword() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -547,15 +448,147 @@ function disattivaModalitaAdmin() {
     aggiornaUIModalitaAdmin();
 }
 
+// Gestione pressione lunga sul logo
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('mousedown', () => {
+    pressTimer = setTimeout(() => {
+        mostraModalePassword();
+        pressTimer = null;
+    }, 3000);
+});
+logoDiv.addEventListener('mouseup', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+});
+logoDiv.addEventListener('mouseleave', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+});
+// Per touch (mobile)
+logoDiv.addEventListener('touchstart', () => {
+    pressTimer = setTimeout(() => {
+        mostraModalePassword();
+        pressTimer = null;
+    }, 3000);
+});
+logoDiv.addEventListener('touchend', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+});
+
 function aggiornaUIModalitaAdmin() {
     const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
+    const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
     if (isAdminMode) {
         btnAggiungiCategoria.classList.add('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
+        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
     } else {
         btnAggiungiCategoria.classList.remove('show');
         document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
+        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
     }
+}
+
+// ==================== LINK LOGO (doppio tap per link secondario) ====================
+let linkPrincipale = "", linkSecondario = "", lastTap = 0;
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+        }
+    } catch(e) { console.warn("Errore caricamento link.html:", e); }
+}
+function apriLinkPrincipale() {
+    if (linkPrincipale && linkPrincipale !== "") {
+        window.open(linkPrincipale, '_blank');
+        showToast("🔗 Apertura link principale");
+    } else {
+        showToast("⚠️ Link principale non configurato. Modifica il file link.html", true);
+    }
+}
+function apriLinkSecondario() {
+    if (linkSecondario && linkSecondario !== "") {
+        window.open(linkSecondario, '_blank');
+        showToast("🔗 Apertura link secondario");
+    } else {
+        showToast("⚠️ Link secondario non configurato. Modifica il file link.html", true);
+    }
+}
+// Il logo ha già l'evento di click per i link (1 tap, 2 tap). Aggiungiamo senza interferire con la pressione lunga.
+logoDiv.addEventListener('click', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300 && lastTap > 0) {
+        e.stopPropagation();
+        apriLinkSecondario();
+        lastTap = 0;
+    } else {
+        lastTap = now;
+        setTimeout(() => {
+            if (lastTap !== 0 && (Date.now() - lastTap) > 300) {
+                apriLinkPrincipale();
+                lastTap = 0;
+            }
+        }, 300);
+    }
+});
+
+// ==================== CARICA TESTI DA FILE ESTERNO (web_testa_piede.html) ====================
+async function caricaTestiDaFile() {
+    try {
+        const response = await fetch('web_testa_piede.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/);
+            let titolo = "", descrizione = "", footerText = "";
+            for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith("titolo:")) titolo = line.substring(7).trim();
+                else if (line.startsWith("descrizione:")) descrizione = line.substring(12).trim();
+                else if (line.startsWith("footer:")) footerText = line.substring(7).trim();
+            }
+            if (titolo) document.querySelector('#infoAzienda h1')?.remove();
+            if (descrizione) document.querySelector('#infoAzienda p')?.remove();
+            document.getElementById('infoAzienda').innerHTML = `
+                <h1>${titolo}</h1>
+                <p>${descrizione}</p>
+            `;
+            if (footerText) document.getElementById('footerText').innerText = footerText;
+        } else {
+            console.warn("web_testa_piede.html non trovato");
+        }
+    } catch(e) {
+        console.warn("Errore caricamento web_testa_piede.html:", e);
+    }
+}
+
+// ==================== FUNZIONI UTILI ====================
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { if(toast.parentNode) toast.remove(); }, 3000);
+}
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ==================== CARICA CATEGORIE ====================
@@ -705,14 +738,9 @@ async function eliminaCategoria(id) {
 }
 
 // ==================== EVENTI ====================
-document.getElementById('btnAdminFooter').onclick = () => {
-    if (isAdminMode) {
-        disattivaModalitaAdmin();
-    } else {
-        mostraModalePassword();
-    }
+document.getElementById('btnDisattivaAdmin').onclick = () => {
+    if (isAdminMode) disattivaModalitaAdmin();
 };
-
 document.getElementById('btnAggiungiCategoria').onclick = () => {
     if (isAdminMode) {
         mostraModaleCategoria(null);
