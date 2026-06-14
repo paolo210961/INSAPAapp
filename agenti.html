@@ -263,7 +263,7 @@
             <div id="navGrid" class="nav-grid">
                 <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
                 <button class="nav-btn disabled" disabled>AGENTI</button>
-                <button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button>
+                <button class="nav-btn" onclick="window.location.href='selezione.html'">ESCI</button>
             </div>
         </div>
     </div>
@@ -884,7 +884,7 @@ function buildScadenzeHtml(cliente) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += `</tbody></table></div>`;
+    html += `</tbody>}</table></div>`;
     return html;
 }
 
