@@ -8,458 +8,94 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
+        /* Stili identici alla versione precedente funzionante – li ometto per brevità ma vanno inseriti */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        
-        .header {
-            background: white;
-            padding: 15px 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-        .logo-rettangolo {
-            width: 200px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background: white; padding: 15px 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo-rettangolo { width: 200px; height: 70px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
-        
-        .btn-admin {
-            background: #f1c40f;
-            color: #2c3e50;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
+        .btn-admin { background: #f1c40f; color: #2c3e50; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
         .btn-admin:hover { background: #e67e22; color: white; }
         .btn-admin.active { background: #27ae60; color: white; }
-        .btn-reload {
-            background: #3498db;
-            color: white;
-        }
-        
-        .categoria-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
+        .btn-reload { background: #3498db; color: white; }
+        .categoria-header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 30px 20px; text-align: center; }
         .categoria-header h1 { font-size: 2rem; margin-bottom: 10px; }
         .categoria-header p { font-size: 1rem; max-width: 600px; margin: 0 auto; }
-        .categoria-img-header {
-            max-width: 150px;
-            max-height: 150px;
-            margin: 15px auto 0;
-            border-radius: 12px;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            display: block;
-        }
-        
-        .articoli-container {
-            max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .header-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-        }
-        .btn-aggiungi {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: none;
-            margin-left: 10px;
-        }
+        .categoria-img-header { max-width: 150px; max-height: 150px; margin: 15px auto 0; border-radius: 12px; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: block; }
+        .articoli-container { max-width: 1400px; margin: 40px auto; padding: 0 20px; flex: 1; }
+        .header-buttons { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 30px; }
+        .btn-aggiungi { background: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; display: none; margin-left: 10px; }
         .btn-aggiungi.show { display: inline-block; }
-        .btn-famiglia {
-            background: #f39c12;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: none;
-        }
+        .btn-famiglia { background: #f39c12; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; display: none; }
         .btn-famiglia.show { display: inline-block; }
-        
-        .famiglia-container {
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            background: white;
-            overflow: hidden;
-        }
-        .famiglia-titolo {
-            background: #ecf0f1;
-            padding: 15px 20px;
-            cursor: grab;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        .famiglia-container { margin-bottom: 30px; border: 1px solid #e0e0e0; border-radius: 12px; background: white; overflow: hidden; }
+        .famiglia-titolo { background: #ecf0f1; padding: 15px 20px; cursor: grab; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .famiglia-titolo:active { cursor: grabbing; }
-        .famiglia-titolo h3 {
-            font-size: 1.3rem;
-            color: #2c3e50;
-        }
-        .famiglia-codice {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            font-family: monospace;
-            margin-right: 10px;
-        }
-        .famiglia-descrizione {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
-        .famiglia-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .famiglia-buttons .btn-move {
-            background: #3498db;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1rem;
-        }
+        .famiglia-titolo h3 { font-size: 1.3rem; color: #2c3e50; }
+        .famiglia-codice { font-size: 0.85rem; color: #7f8c8d; font-family: monospace; margin-right: 10px; }
+        .famiglia-descrizione { font-size: 0.85rem; color: #7f8c8d; margin-top: 5px; }
+        .famiglia-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .famiglia-buttons .btn-move { background: #3498db; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; }
         .famiglia-buttons .btn-move:hover { background: #2980b9; }
-        .btn-nuovo-articolo-famiglia {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.8rem;
-        }
-        
-        .articoli-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 20px;
-        }
-        .articolo-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            border: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-        }
-        .articolo-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .articolo-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #ecf0f1;
-            cursor: pointer;
-        }
-        .articolo-info {
-            padding: 12px;
-            flex: 1;
-        }
-        .articolo-codice {
-            font-size: 0.7rem;
-            color: #7f8c8d;
-            font-family: monospace;
-            margin-bottom: 5px;
-        }
-        .articolo-descrizione {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        .card-buttons {
-            display: flex;
-            gap: 8px;
-            padding: 8px 12px;
-            border-top: 1px solid #eee;
-            background: #fafafa;
-            flex-wrap: wrap;
-        }
-        .card-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .btn-nuovo-articolo-famiglia { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .articoli-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; }
+        .articolo-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; }
+        .articolo-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .articolo-img { width: 100%; height: 180px; object-fit: cover; background: #ecf0f1; cursor: pointer; }
+        .articolo-info { padding: 12px; flex: 1; }
+        .articolo-codice { font-size: 0.7rem; color: #7f8c8d; font-family: monospace; margin-bottom: 5px; }
+        .articolo-descrizione { font-size: 0.9rem; font-weight: bold; color: #2c3e50; margin-bottom: 8px; }
+        .card-buttons { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid #eee; background: #fafafa; flex-wrap: wrap; }
+        .card-btn { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.7rem; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
         .card-btn.danger { background: #e74c3c; }
         .card-btn.warning { background: #f39c12; }
         .card-btn:hover { opacity: 0.8; }
-        
-        .senza-famiglia-container {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-        .senza-famiglia-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 20px;
-        }
-        .senza-famiglia-item {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .modal-container {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
+        .senza-famiglia-container { background: white; border-radius: 12px; border: 1px solid #e0e0e0; margin-top: 20px; overflow: hidden; }
+        .senza-famiglia-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; }
+        .senza-famiglia-item { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #eee; display: flex; flex-direction: column; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-container { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
         .modal-container h3 { margin: 0 0 20px; color: #2c3e50; }
-        .modal-container label {
-            display: block;
-            font-weight: bold;
-            margin: 15px 0 5px;
-            color: #2c3e50;
-        }
-        .modal-container input, .modal-container textarea, .modal-container select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        .modal-container textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .ricerca-articolo {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .elenco-articoli {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin: 10px 0;
-            padding: 5px;
-        }
-        .articolo-ricerca-item {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-        }
+        .modal-container label { display: block; font-weight: bold; margin: 15px 0 5px; color: #2c3e50; }
+        .modal-container input, .modal-container textarea, .modal-container select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+        .modal-container textarea { min-height: 80px; resize: vertical; }
+        .ricerca-articolo { display: flex; gap: 10px; margin: 10px 0; }
+        .elenco-articoli { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; padding: 5px; }
+        .articolo-ricerca-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
         .articolo-ricerca-item:hover { background: #f0f0f0; }
-        .articolo-associato {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 8px;
-            margin: 5px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .articolo-associato { background: #f8f9fa; border-radius: 8px; padding: 8px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-salva-modal { background: #27ae60; color: white; }
         .btn-cancel-modal { background: #95a5a6; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
-        
-        .lightbox {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-            cursor: pointer;
-        }
-        .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
-        
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            background: #27ae60;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 2000;
-            font-weight: bold;
-            animation: fadeOut 3s ease forwards;
-        }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; display: none; }
-        }
-        
-        .password-modal {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-        }
-        .btn-torna {
-            background: #95a5a6;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .info-imgur {
-            font-size: 0.7rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-            text-align: center;
-        }
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-left: auto;
-            margin-right: 20px;
-        }
-        .search-bar input {
-            padding: 8px 12px;
-            border-radius: 20px;
-            border: 1px solid #ccc;
-            width: 180px;
-        }
-        footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-            font-size: 0.8rem;
-        }
-        .footer-admin {
-            background: none;
-            border: none;
-            color: #f1c40f;
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-        .footer-admin:hover {
-            color: #e67e22;
-        }
-        @media (max-width: 1024px) {
-            .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(2, 1fr); }
-            .header-row { flex-direction: column; }
-            .search-bar { margin-left: 0; width: 100%; justify-content: center; }
-            .search-bar input { width: 100%; }
-        }
-        @media (max-width: 480px) {
-            .articoli-grid, .senza-famiglia-grid { grid-template-columns: 1fr; }
-        }
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 3000; cursor: pointer; }
+        .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .toast-message { position: fixed; bottom: 30px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
+        .password-modal { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .btn-torna { background: #95a5a6; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .info-imgur { font-size: 0.7rem; color: #7f8c8d; margin-top: 5px; text-align: center; }
+        .search-bar { display: flex; gap: 10px; margin-left: auto; margin-right: 20px; }
+        .search-bar input { padding: 8px 12px; border-radius: 20px; border: 1px solid #ccc; width: 180px; }
+        footer { background: #2c3e50; color: white; text-align: center; padding: 20px; margin-top: 50px; font-size: 0.8rem; }
+        .footer-admin { background: none; border: none; color: #f1c40f; cursor: pointer; text-decoration: underline; font-size: 0.8rem; margin-left: 10px; }
+        .footer-admin:hover { color: #e67e22; }
+        @media (max-width: 1024px) { .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(2, 1fr); } .header-row { flex-direction: column; } .search-bar { margin-left: 0; width: 100%; justify-content: center; } .search-bar input { width: 100%; } }
+        @media (max-width: 480px) { .articoli-grid, .senza-famiglia-grid { grid-template-columns: 1fr; } }
+        .sortable-drag { opacity: 0.5; }
+        .sortable-ghost { opacity: 0.3; background: #3498db; }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area" id="btnHome">
-            <div class="logo-rettangolo" id="logoRettangolo">
+        <div class="logo-area" id="logoRettangolo">
+            <div class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
@@ -492,72 +128,42 @@
     <div id="famiglieContainer"></div>
     <div id="senzaFamigliaContainer"></div>
 </div>
+
 <footer>
     <span id="footerText">© dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati</span>
     <button id="btnDisattivaAdmin" class="footer-admin" style="display:none;">🔒 DISATTIVA ADMIN</button>
 </footer>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
-    authDomain: "insapa-database.firebaseapp.com",
-    projectId: "insapa-database",
-    storageBucket: "insapa-database.firebasestorage.app",
-    messagingSenderId: "331230245928",
-    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
-};
+const firebaseConfig = { apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ", authDomain: "insapa-database.firebaseapp.com", projectId: "insapa-database", storageBucket: "insapa-database.firebasestorage.app", messagingSenderId: "331230245928", appId: "1:331230245928:web:2ee43d9209e43c3c89b11d" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
-let categoriaId = null;
-let categoria = null;
-let famiglie = [];
-let articoli = [];
-let famigliaArticoliMap = new Map(); // famigliaId -> Set articoliId
-let sortableFamiglie = null;
-let pressTimer = null;
+let categoriaId = null, categoria = null, famiglie = [], articoli = [], famigliaArticoliMap = new Map(), sortableFamiglie = null, pressTimer = null;
 
-// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    fetch('icons/logo.jpg').then(r => {
-        if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; }
-        else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); }
-    }).catch(()=>{});
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); } }).catch(()=>{});
 }
 caricaLogo();
 
-// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
 function mostraModalePassword() {
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('btnVerifica').onclick = ()=>{
         const pwd = document.getElementById('passwordAdmin').value;
-        if(pwd === ADMIN_PASSWORD){
-            isAdminMode=true; localStorage.setItem('web_admin_mode','true');
-            showToast("✅ Modalità admin attivata!");
-            aggiornaUIAdmin();
-            modal.remove();
-        } else showToast("❌ Password errata!", true);
+        if(pwd === ADMIN_PASSWORD){ isAdminMode=true; localStorage.setItem('web_admin_mode','true'); showToast("✅ Modalità admin attivata!"); aggiornaUIAdmin(); modal.remove(); }
+        else showToast("❌ Password errata!", true);
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-function disattivaModalitaAdmin() {
-    isAdminMode=false; localStorage.removeItem('web_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIAdmin();
-}
-
+function disattivaModalitaAdmin() { isAdminMode=false; localStorage.removeItem('web_admin_mode'); showToast("🔒 Modalità admin disattivata"); aggiornaUIAdmin(); }
 const logoDiv = document.getElementById('logoRettangolo');
-logoDiv.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000);
-});
+logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
 logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
 logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
 logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
@@ -587,50 +193,25 @@ function aggiornaUIAdmin() {
     visualizza();
 }
 
-// ==================== LINK LOGO (doppio tap) ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
-    try {
-        const res = await fetch('link.html');
-        if(res.ok){
-            const text = await res.text();
-            const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<'));
-            if(lines.length>=1) linkPrincipale = lines[0].trim();
-            if(lines.length>=2) linkSecondario = lines[1].trim();
-        }
-    } catch(e){}
+    try { const res = await fetch('link.html'); if(res.ok){ const text = await res.text(); const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<')); if(lines.length>=1) linkPrincipale = lines[0].trim(); if(lines.length>=2) linkSecondario = lines[1].trim(); } } catch(e){}
 }
 function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
 function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
-logoDiv.addEventListener('click',(e)=>{
-    const now = Date.now();
-    if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }
-    else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
-});
+logoDiv.addEventListener('click',(e)=>{ const now = Date.now(); if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; } else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); } });
 
-// ==================== TASTO CARICA FOTO ====================
-async function getFotoLink() {
-    try {
-        const doc = await db.collection('config').doc('link_tasto_extra').get();
-        if(doc.exists && doc.data().url) return doc.data().url;
-    } catch(e){}
-    return 'https://imgur.com/upload';
-}
+async function getFotoLink() { try { const doc = await db.collection('config').doc('link_tasto_extra').get(); if(doc.exists && doc.data().url) return doc.data().url; } catch(e){} return 'https://imgur.com/upload'; }
 async function setFotoLink(url) { await db.collection('config').doc('link_tasto_extra').set({ url }); }
 function mostraModaleLink() {
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML=`<div class="modal-container"><h3>🔗 MODIFICA LINK</h3><input type="text" id="nuovoLinkInput" placeholder="https://..."><div class="modal-buttons"><button id="btnSalvaLink" class="btn-salva-modal">SALVA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    document.getElementById('btnSalvaLink').onclick = async ()=>{
-        const nuovo = document.getElementById('nuovoLinkInput').value.trim();
-        if(nuovo && (nuovo.startsWith('http://')||nuovo.startsWith('https://'))){ await setFotoLink(nuovo); showToast("✅ Link salvato!"); modal.remove(); }
-        else showToast("Link non valido", true);
-    };
+    document.getElementById('btnSalvaLink').onclick = async ()=>{ const nuovo = document.getElementById('nuovoLinkInput').value.trim(); if(nuovo && (nuovo.startsWith('http://')||nuovo.startsWith('https://'))){ await setFotoLink(nuovo); showToast("✅ Link salvato!"); modal.remove(); } else showToast("Link non valido", true); };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
 function inizializzaTastoCaricaFoto() {
-    const btn = document.getElementById('btnCaricaFoto');
-    if(!btn) return;
+    const btn = document.getElementById('btnCaricaFoto'); if(!btn) return;
     btn.addEventListener('mousedown', ()=>{ pressTimer = setTimeout(()=>{ mostraModaleLink(); pressTimer=null; },3000); });
     btn.addEventListener('mouseup', async ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; const link=await getFotoLink(); window.open(link,'_blank'); } });
     btn.addEventListener('mouseleave', ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
@@ -638,14 +219,9 @@ function inizializzaTastoCaricaFoto() {
     btn.addEventListener('touchend', async ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; const link=await getFotoLink(); window.open(link,'_blank'); } });
 }
 
-// ==================== UTILS ====================
-function showToast(msg, isErr=false){
-    const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg;
-    document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
-}
+function showToast(msg, isErr=false){ const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
 function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
-// ==================== CARICA DATI ====================
 async function caricaCategoria(){
     const urlParams = new URLSearchParams(window.location.search);
     categoriaId = urlParams.get('id');
@@ -657,545 +233,147 @@ async function caricaCategoria(){
             document.getElementById('catNome').innerText = categoria.nome;
             document.getElementById('catDescrizione').innerText = categoria.descrizione || '';
             const imgHeader = document.getElementById('catImmagine');
-            if(categoria.fotoUrl){
-                imgHeader.src = categoria.fotoUrl;
-                imgHeader.style.display = 'block';
-            } else imgHeader.style.display = 'none';
+            if(categoria.fotoUrl){ imgHeader.src = categoria.fotoUrl; imgHeader.style.display = 'block'; } else imgHeader.style.display = 'none';
         } else document.getElementById('categoriaHeader').innerHTML='<h1>Categoria non trovata</h1>';
     } catch(e){ console.error(e); }
 }
-
 async function caricaFamiglie(){
     if(!categoriaId) return;
     try{
         const snap = await db.collection('web_famiglie').where('categoriaId','==',categoriaId).orderBy('ordine','asc').get();
-        famiglie = [];
-        snap.forEach(doc=>{ famiglie.push({ id:doc.id, ...doc.data() }); });
+        famiglie = []; snap.forEach(doc=>{ famiglie.push({ id:doc.id, ...doc.data() }); });
     } catch(e){ console.error(e); }
 }
-
 async function caricaArticoli(){
     if(!categoriaId) return;
     try{
         const snap = await db.collection('web_articoli').where('categoriaId','==',categoriaId).get();
-        articoli = [];
-        snap.forEach(doc=>{ articoli.push({ id:doc.id, ...doc.data() }); });
+        articoli = []; snap.forEach(doc=>{ articoli.push({ id:doc.id, ...doc.data() }); });
     } catch(e){ console.error(e); }
 }
-
 async function caricaAssociazioni(){
     if(!categoriaId) return;
     famigliaArticoliMap.clear();
     try{
         const snap = await db.collection('web_famiglia_articoli').where('categoriaId','==',categoriaId).get();
-        snap.forEach(doc=>{
-            const data = doc.data();
-            const famigliaId = data.famigliaId;
-            const articoloId = data.articoloId;
-            if(!famigliaArticoliMap.has(famigliaId)) famigliaArticoliMap.set(famigliaId, new Set());
-            famigliaArticoliMap.get(famigliaId).add(articoloId);
-        });
+        snap.forEach(doc=>{ const data = doc.data(); const famigliaId = data.famigliaId; const articoloId = data.articoloId; if(!famigliaArticoliMap.has(famigliaId)) famigliaArticoliMap.set(famigliaId, new Set()); famigliaArticoliMap.get(famigliaId).add(articoloId); });
     } catch(e){ console.warn(e); }
 }
+async function caricaTutti(){ await caricaCategoria(); await caricaFamiglie(); await caricaArticoli(); await caricaAssociazioni(); visualizza(); }
 
-async function caricaTutti(){
-    await caricaCategoria();
-    await caricaFamiglie();
-    await caricaArticoli();
-    await caricaAssociazioni();
-    visualizza();
-}
+function apriLightbox(url){ const lb = document.createElement('div'); lb.className='lightbox'; lb.innerHTML=`<img src="${url}" alt="Ingrandisci">`; lb.addEventListener('click',()=>lb.remove()); document.body.appendChild(lb); }
 
-// ==================== LIGHTBOX ====================
-function apriLightbox(url){
-    const lb = document.createElement('div');
-    lb.className = 'lightbox';
-    lb.innerHTML = `<img src="${url}" alt="Ingrandisci">`;
-    lb.addEventListener('click', () => lb.remove());
-    document.body.appendChild(lb);
-}
-
-// ==================== VISUALIZZA ====================
 function visualizza(){
     const famiglieContainer = document.getElementById('famiglieContainer');
     const senzaContainer = document.getElementById('senzaFamigliaContainer');
     const ricercaFamiglie = document.getElementById('ricercaFamiglie')?.value.toLowerCase() || '';
     const ricercaArticoli = document.getElementById('ricercaArticoli')?.value.toLowerCase() || '';
-    
     let famiglieFiltrate = famiglie;
-    if(ricercaFamiglie){
-        famiglieFiltrate = famiglie.filter(f => 
-            (f.codice && f.codice.toLowerCase().includes(ricercaFamiglie)) ||
-            (f.nome && f.nome.toLowerCase().includes(ricercaFamiglie)) ||
-            (f.descrizione && f.descrizione.toLowerCase().includes(ricercaFamiglie))
-        );
-    }
-    
+    if(ricercaFamiglie) famiglieFiltrate = famiglie.filter(f => (f.codice && f.codice.toLowerCase().includes(ricercaFamiglie)) || (f.nome && f.nome.toLowerCase().includes(ricercaFamiglie)) || (f.descrizione && f.descrizione.toLowerCase().includes(ricercaFamiglie)));
     let famiglieHtml = '';
     for(const famiglia of famiglieFiltrate){
         const articoliIds = famigliaArticoliMap.get(famiglia.id) || new Set();
         let articoliFamiglia = articoli.filter(a => articoliIds.has(a.id));
-        if(ricercaArticoli){
-            articoliFamiglia = articoliFamiglia.filter(a => 
-                (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) ||
-                (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli))
-            );
-        }
+        if(ricercaArticoli) articoliFamiglia = articoliFamiglia.filter(a => (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) || (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli)));
         if(articoliFamiglia.length === 0 && ricercaArticoli !== '') continue;
-        
-        famiglieHtml += `
-            <div class="famiglia-container" data-id="${famiglia.id}">
-                <div class="famiglia-titolo">
-                    <div>
-                        <h3><span class="famiglia-codice">[${escapeHtml(famiglia.codice || '???')}]</span> ${escapeHtml(famiglia.nome)}</h3>
-                        ${famiglia.descrizione ? `<div class="famiglia-descrizione">${escapeHtml(famiglia.descrizione)}</div>` : ''}
-                    </div>
-                    ${isAdminMode ? `
-                        <div class="famiglia-buttons">
-                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'su')" ${famiglieFiltrate.indexOf(famiglia)===0?'disabled style="opacity:0.5"':''}>⬆️</button>
-                            <button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'giu')" ${famiglieFiltrate.indexOf(famiglia)===famiglieFiltrate.length-1?'disabled style="opacity:0.5"':''}>⬇️</button>
-                            <button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')" style="background:#3498db;">✏️ Modifica</button>
-                            <button class="card-btn danger" onclick="eliminaFamiglia('${famiglia.id}')" style="background:#e74c3c;">🗑 Elimina</button>
-                            <button class="btn-nuovo-articolo-famiglia" onclick="nuovoArticoloInFamiglia('${famiglia.id}')">➕ Nuovo articolo</button>
-                        </div>
-                    ` : ''}
-                </div>
-                <div class="articoli-grid">
-                    ${articoliFamiglia.map(art => `
-                        <div class="articolo-card">
-                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
-                            <div class="articolo-info">
-                                <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
-                                <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
-                            </div>
-                            ${isAdminMode ? `
-                                <div class="card-buttons">
-                                    <button class="card-btn" onclick="modificaArticolo('${art.id}')">✏️ Modifica</button>
-                                    <button class="card-btn danger" onclick="eliminaArticolo('${art.id}')">🗑 Elimina</button>
-                                    <button class="card-btn warning" onclick="rimuoviArticoloDaFamiglia('${art.id}', '${famiglia.id}')">⛔ Rimuovi da famiglia</button>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
+        famiglieHtml += `<div class="famiglia-container" data-id="${famiglia.id}"><div class="famiglia-titolo"><div><h3><span class="famiglia-codice">[${escapeHtml(famiglia.codice || '???')}]</span> ${escapeHtml(famiglia.nome)}</h3>${famiglia.descrizione ? `<div class="famiglia-descrizione">${escapeHtml(famiglia.descrizione)}</div>` : ''}</div>${isAdminMode ? `<div class="famiglia-buttons"><button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'su')" ${famiglieFiltrate.indexOf(famiglia)===0?'disabled style="opacity:0.5"':''}>⬆️</button><button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'giu')" ${famiglieFiltrate.indexOf(famiglia)===famiglieFiltrate.length-1?'disabled style="opacity:0.5"':''}>⬇️</button><button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')" style="background:#3498db;">✏️ Modifica</button><button class="card-btn danger" onclick="eliminaFamiglia('${famiglia.id}')" style="background:#e74c3c;">🗑 Elimina</button><button class="btn-nuovo-articolo-famiglia" onclick="nuovoArticoloInFamiglia('${famiglia.id}')">➕ Nuovo articolo</button></div>` : ''}</div><div class="articoli-grid">${articoliFamiglia.map(art => `<div class="articolo-card"><img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'"><div class="articolo-info"><div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div><div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div></div>${isAdminMode ? `<div class="card-buttons"><button class="card-btn" onclick="modificaArticolo('${art.id}')">✏️ Modifica</button><button class="card-btn danger" onclick="eliminaArticolo('${art.id}')">🗑 Elimina</button><button class="card-btn warning" onclick="rimuoviArticoloDaFamiglia('${art.id}', '${famiglia.id}')">⛔ Rimuovi da famiglia</button></div>` : ''}</div>`).join('')}</div></div>`;
     }
     famiglieContainer.innerHTML = famiglieHtml;
-    
-    // Sezione senza famiglia (senza titolo)
-    const tuttiIdsAssociati = new Set();
-    for(const ids of famigliaArticoliMap.values()) ids.forEach(id => tuttiIdsAssociati.add(id));
+    const tuttiIdsAssociati = new Set(); for(const ids of famigliaArticoliMap.values()) ids.forEach(id => tuttiIdsAssociati.add(id));
     let articoliSenza = articoli.filter(a => !tuttiIdsAssociati.has(a.id));
-    if(ricercaArticoli){
-        articoliSenza = articoliSenza.filter(a => 
-            (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) ||
-            (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli))
-        );
-    }
+    if(ricercaArticoli) articoliSenza = articoliSenza.filter(a => (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) || (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli)));
     let senzaHtml = '';
     if(articoliSenza.length > 0){
-        senzaHtml = `
-            <div class="senza-famiglia-container">
-                <div class="senza-famiglia-grid">
-                    ${articoliSenza.map(art => `
-                        <div class="senza-famiglia-item">
-                            <img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'">
-                            <div class="articolo-info">
-                                <div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div>
-                                <div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div>
-                            </div>
-                            ${isAdminMode ? `
-                                <div class="card-buttons">
-                                    <button class="card-btn" onclick="modificaArticolo('${art.id}')">✏️ Modifica</button>
-                                    <button class="card-btn danger" onclick="eliminaArticolo('${art.id}')">🗑 Elimina</button>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
+        senzaHtml = `<div class="senza-famiglia-container"><div class="senza-famiglia-grid">${articoliSenza.map(art => `<div class="senza-famiglia-item"><img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'"><div class="articolo-info"><div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div><div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div></div>${isAdminMode ? `<div class="card-buttons"><button class="card-btn" onclick="modificaArticolo('${art.id}')">✏️ Modifica</button><button class="card-btn danger" onclick="eliminaArticolo('${art.id}')">🗑 Elimina</button></div>` : ''}</div>`).join('')}</div></div>`;
     }
     senzaContainer.innerHTML = senzaHtml;
-    
-    // Lightbox sulle immagini
-    document.querySelectorAll('.articolo-img').forEach(img => {
-        img.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if(img.src) apriLightbox(img.src);
-        });
-    });
-    
-    // Drag & drop famiglie (solo admin, non mobile)
+    document.querySelectorAll('.articolo-img').forEach(img => { img.addEventListener('click', (e) => { e.stopPropagation(); if(img.src) apriLightbox(img.src); }); });
     if(isAdminMode && !/Mobi|Android/i.test(navigator.userAgent)){
         if(sortableFamiglie) sortableFamiglie.destroy();
         const container = document.getElementById('famiglieContainer');
         if(container){
-            sortableFamiglie = new Sortable(container, {
-                animation: 300,
-                handle: '.famiglia-titolo',
-                ghostClass: 'sortable-ghost',
-                onEnd: async function(){
-                    const nuoviOrdini = Array.from(container.querySelectorAll('.famiglia-container')).map(el => el.dataset.id);
-                    for(let i=0; i<nuoviOrdini.length; i++){
-                        await db.collection('web_famiglie').doc(nuoviOrdini[i]).update({ ordine: i });
-                    }
-                    await caricaFamiglie();
-                    visualizza();
-                }
-            });
+            sortableFamiglie = new Sortable(container, { animation: 300, handle: '.famiglia-titolo', ghostClass: 'sortable-ghost', onEnd: async function(){ const nuoviOrdini = Array.from(container.querySelectorAll('.famiglia-container')).map(el => el.dataset.id); for(let i=0; i<nuoviOrdini.length; i++){ await db.collection('web_famiglie').doc(nuoviOrdini[i]).update({ ordine: i }); } await caricaFamiglie(); visualizza(); } });
         }
     } else if(sortableFamiglie){ sortableFamiglie.destroy(); sortableFamiglie=null; }
 }
-
-// ==================== FUNZIONI FAMIGLIE ====================
-async function spostaFamiglia(id, direzione){
-    const index = famiglie.findIndex(f=>f.id===id);
-    if(index===-1) return;
-    const nuovoIndex = direzione==='su' ? index-1 : index+1;
-    if(nuovoIndex<0 || nuovoIndex>=famiglie.length) return;
-    const nuovoOrdine = [...famiglie];
-    [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]];
-    for(let i=0; i<nuovoOrdine.length; i++){
-        await db.collection('web_famiglie').doc(nuovoOrdine[i].id).update({ ordine: i });
-    }
-    await caricaFamiglie();
-    visualizza();
-}
-
-async function eliminaFamiglia(id){
-    if(!confirm("Eliminare questa famiglia? Gli articoli rimarranno non associati.")) return;
-    try {
-        const assoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',id).where('categoriaId','==',categoriaId).get();
-        const batch = db.batch();
-        assoc.forEach(doc => batch.delete(doc.ref));
-        batch.delete(db.collection('web_famiglie').doc(id));
-        await batch.commit();
-        showToast("Famiglia eliminata");
-        await caricaFamiglie();
-        await caricaAssociazioni();
-        visualizza();
-    } catch(e){ console.error(e); showToast("Errore eliminazione famiglia",true); }
-}
-
-// ==================== MODALE FAMIGLIA ====================
-async function modificaFamiglia(id){
-    const famiglia = famiglie.find(f=>f.id===id);
-    if(!famiglia) return;
-    const articoliIds = famigliaArticoliMap.get(famiglia.id) || new Set();
-    const articoliAssociati = articoli.filter(a=>articoliIds.has(a.id));
-    mostraModaleFamiglia(famiglia, articoliAssociati);
-}
-
+async function spostaFamiglia(id, direzione){ const index = famiglie.findIndex(f=>f.id===id); if(index===-1) return; const nuovoIndex = direzione==='su' ? index-1 : index+1; if(nuovoIndex<0 || nuovoIndex>=famiglie.length) return; const nuovoOrdine = [...famiglie]; [nuovoOrdine[index], nuovoOrdine[nuovoIndex]] = [nuovoOrdine[nuovoIndex], nuovoOrdine[index]]; for(let i=0; i<nuovoOrdine.length; i++){ await db.collection('web_famiglie').doc(nuovoOrdine[i].id).update({ ordine: i }); } await caricaFamiglie(); visualizza(); }
+async function eliminaFamiglia(id){ if(!confirm("Eliminare questa famiglia? Gli articoli rimarranno non associati.")) return; try { const assoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',id).where('categoriaId','==',categoriaId).get(); const batch = db.batch(); assoc.forEach(doc => batch.delete(doc.ref)); batch.delete(db.collection('web_famiglie').doc(id)); await batch.commit(); showToast("Famiglia eliminata"); await caricaFamiglie(); await caricaAssociazioni(); visualizza(); } catch(e){ console.error(e); showToast("Errore eliminazione famiglia",true); } }
+async function modificaFamiglia(id){ const famiglia = famiglie.find(f=>f.id===id); if(!famiglia) return; const articoliIds = famigliaArticoliMap.get(famiglia.id) || new Set(); const articoliAssociati = articoli.filter(a=>articoliIds.has(a.id)); mostraModaleFamiglia(famiglia, articoliAssociati); }
 function mostraModaleFamiglia(famiglia=null, associati=[]){
-    const isEdit = !!famiglia;
-    const modal = document.createElement('div'); modal.className='modal-overlay';
-    let codiceHtml = '';
-    if(isEdit){
-        codiceHtml = `<div><label>📟 Codice</label><input type="text" id="famCodice" value="${escapeHtml(famiglia.codice)}" readonly style="background:#f0f0f0;"></div>`;
-    } else {
-        let maxCodice = 0;
-        for(const f of famiglie){
-            if(f.codice && !isNaN(parseInt(f.codice))) maxCodice = Math.max(maxCodice, parseInt(f.codice));
-        }
-        const nuovoCodice = (maxCodice+1).toString().padStart(4,'0');
-        codiceHtml = `<div><label>📟 Codice (automatico)</label><input type="text" id="famCodice" value="${nuovoCodice}" readonly style="background:#f0f0f0;"></div>`;
-    }
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>${isEdit ? '✏️ MODIFICA FAMIGLIA' : '🏷️ NUOVA FAMIGLIA'}</h3>
-            ${codiceHtml}
-            <label>📌 Nome famiglia *</label>
-            <input type="text" id="famNome" value="${famiglia ? escapeHtml(famiglia.nome) : ''}" placeholder="es. Stoviglie">
-            <label>📝 Descrizione</label>
-            <textarea id="famDescrizione" placeholder="Descrizione...">${famiglia ? escapeHtml(famiglia.descrizione || '') : ''}</textarea>
-            <label>🔗 Articoli associati (minimo 1)</label>
-            <div id="listaArticoliAssociati"></div>
-            <div class="ricerca-articolo">
-                <input type="text" id="cercaArticoloAssociazione" placeholder="Cerca per codice o descrizione">
-                <button type="button" id="btnCercaArticolo" class="btn-admin">🔍 Cerca</button>
-            </div>
-            <div id="risultatiRicercaArticoli" class="elenco-articoli" style="display:none;"></div>
-            <div class="modal-buttons">
-                <button id="btnSalvaFamiglia" class="btn-salva-modal">💾 SALVA</button>
-                ${isEdit ? `<button id="btnEliminaFamiglia" class="btn-danger">🗑 ELIMINA FAMIGLIA</button>` : ''}
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+    const isEdit = !!famiglia; const modal = document.createElement('div'); modal.className='modal-overlay';
+    let codiceHtml = ''; if(isEdit){ codiceHtml = `<div><label>📟 Codice</label><input type="text" id="famCodice" value="${escapeHtml(famiglia.codice)}" readonly style="background:#f0f0f0;"></div>`; } else { let maxCodice = 0; for(const f of famiglie){ if(f.codice && !isNaN(parseInt(f.codice))) maxCodice = Math.max(maxCodice, parseInt(f.codice)); } const nuovoCodice = (maxCodice+1).toString().padStart(4,'0'); codiceHtml = `<div><label>📟 Codice (automatico)</label><input type="text" id="famCodice" value="${nuovoCodice}" readonly style="background:#f0f0f0;"></div>`; }
+    modal.innerHTML = `<div class="modal-container"><h3>${isEdit ? '✏️ MODIFICA FAMIGLIA' : '🏷️ NUOVA FAMIGLIA'}</h3>${codiceHtml}<label>📌 Nome famiglia *</label><input type="text" id="famNome" value="${famiglia ? escapeHtml(famiglia.nome) : ''}" placeholder="es. Stoviglie"><label>📝 Descrizione</label><textarea id="famDescrizione" placeholder="Descrizione...">${famiglia ? escapeHtml(famiglia.descrizione || '') : ''}</textarea><label>🔗 Articoli associati (minimo 1)</label><div id="listaArticoliAssociati"></div><div class="ricerca-articolo"><input type="text" id="cercaArticoloAssociazione" placeholder="Cerca per codice o descrizione"><button type="button" id="btnCercaArticolo" class="btn-admin">🔍 Cerca</button></div><div id="risultatiRicercaArticoli" class="elenco-articoli" style="display:none;"></div><div class="modal-buttons"><button id="btnSalvaFamiglia" class="btn-salva-modal">💾 SALVA</button>${isEdit ? `<button id="btnEliminaFamiglia" class="btn-danger">🗑 ELIMINA FAMIGLIA</button>` : ''}<button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    
-    const listaDiv = document.getElementById('listaArticoliAssociati');
-    const articoliSelezionati = new Set(associati.map(a=>a.id));
-    
-    function aggiornaLista(){
-        const selezionati = articoli.filter(a=>articoliSelezionati.has(a.id));
-        listaDiv.innerHTML = selezionati.map(a => `
-            <div class="articolo-associato">
-                <span><strong>${escapeHtml(a.codice)}</strong> - ${escapeHtml(a.descrizione)}</span>
-                <button type="button" class="card-btn danger" data-id="${a.id}">🗑 Rimuovi</button>
-            </div>
-        `).join('');
-        document.querySelectorAll('#listaArticoliAssociati .card-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = btn.dataset.id;
-                articoliSelezionati.delete(id);
-                aggiornaLista();
-            });
-        });
-    }
+    const listaDiv = document.getElementById('listaArticoliAssociati'); const articoliSelezionati = new Set(associati.map(a=>a.id));
+    function aggiornaLista(){ const selezionati = articoli.filter(a=>articoliSelezionati.has(a.id)); listaDiv.innerHTML = selezionati.map(a => `<div class="articolo-associato"><span><strong>${escapeHtml(a.codice)}</strong> - ${escapeHtml(a.descrizione)}</span><button type="button" class="card-btn danger" data-id="${a.id}">🗑 Rimuovi</button></div>`).join(''); document.querySelectorAll('#listaArticoliAssociati .card-btn').forEach(btn => { btn.addEventListener('click', (e) => { const id = btn.dataset.id; articoliSelezionati.delete(id); aggiornaLista(); }); }); }
     aggiornaLista();
-    
-    const cercaInput = document.getElementById('cercaArticoloAssociazione');
-    const risultatiDiv = document.getElementById('risultatiRicercaArticoli');
-    const btnCerca = document.getElementById('btnCercaArticolo');
-    function cercaArticoli(){
-        const query = cercaInput.value.trim().toLowerCase();
-        if(!query){ risultatiDiv.style.display='none'; return; }
-        const trovati = articoli.filter(a => !articoliSelezionati.has(a.id) && (a.codice.toLowerCase().includes(query) || a.descrizione.toLowerCase().includes(query)));
-        if(trovati.length===0){
-            risultatiDiv.innerHTML = '<div style="padding:8px">Nessun articolo trovato</div>';
-            risultatiDiv.style.display='block';
-            return;
-        }
-        risultatiDiv.innerHTML = trovati.map(a => `
-            <div class="articolo-ricerca-item" data-id="${a.id}">
-                <span><strong>${escapeHtml(a.codice)}</strong> - ${escapeHtml(a.descrizione)}</span>
-                <button type="button" class="btn-admin" style="padding:2px 8px;">➕ Aggiungi</button>
-            </div>
-        `).join('');
-        risultatiDiv.style.display='block';
-        document.querySelectorAll('#risultatiRicercaArticoli .articolo-ricerca-item').forEach(item => {
-            const id = item.dataset.id;
-            const btn = item.querySelector('button');
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                articoliSelezionati.add(id);
-                aggiornaLista();
-                cercaInput.value = '';
-                risultatiDiv.style.display='none';
-            });
-        });
-    }
-    btnCerca.onclick = cercaArticoli;
-    cercaInput.addEventListener('keypress', (e) => { if(e.key==='Enter') cercaArticoli(); });
-    
+    const cercaInput = document.getElementById('cercaArticoloAssociazione'); const risultatiDiv = document.getElementById('risultatiRicercaArticoli'); const btnCerca = document.getElementById('btnCercaArticolo');
+    function cercaArticoli(){ const query = cercaInput.value.trim().toLowerCase(); if(!query){ risultatiDiv.style.display='none'; return; } const trovati = articoli.filter(a => !articoliSelezionati.has(a.id) && (a.codice.toLowerCase().includes(query) || a.descrizione.toLowerCase().includes(query))); if(trovati.length===0){ risultatiDiv.innerHTML = '<div style="padding:8px">Nessun articolo trovato</div>'; risultatiDiv.style.display='block'; return; } risultatiDiv.innerHTML = trovati.map(a => `<div class="articolo-ricerca-item" data-id="${a.id}"><span><strong>${escapeHtml(a.codice)}</strong> - ${escapeHtml(a.descrizione)}</span><button type="button" class="btn-admin" style="padding:2px 8px;">➕ Aggiungi</button></div>`).join(''); risultatiDiv.style.display='block'; document.querySelectorAll('#risultatiRicercaArticoli .articolo-ricerca-item').forEach(item => { const id = item.dataset.id; const btn = item.querySelector('button'); btn.addEventListener('click', (e) => { e.stopPropagation(); articoliSelezionati.add(id); aggiornaLista(); cercaInput.value = ''; risultatiDiv.style.display='none'; }); }); }
+    btnCerca.onclick = cercaArticoli; cercaInput.addEventListener('keypress', (e) => { if(e.key==='Enter') cercaArticoli(); });
     document.getElementById('btnSalvaFamiglia').onclick = async () => {
-        const nome = document.getElementById('famNome').value.trim();
-        const descrizione = document.getElementById('famDescrizione').value;
-        const codice = document.getElementById('famCodice').value.trim();
-        if(!nome){ showToast("Inserire il nome della famiglia", true); return; }
-        if(articoliSelezionati.size === 0){ showToast("La famiglia deve avere almeno un articolo associato", true); return; }
+        const nome = document.getElementById('famNome').value.trim(); const descrizione = document.getElementById('famDescrizione').value; const codice = document.getElementById('famCodice').value.trim();
+        if(!nome){ showToast("Inserire il nome della famiglia", true); return; } if(articoliSelezionati.size === 0){ showToast("La famiglia deve avere almeno un articolo associato", true); return; }
         try {
-            if(isEdit){
-                await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, codice });
-                const oldAssoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get();
-                const batch = db.batch();
-                oldAssoc.forEach(doc => batch.delete(doc.ref));
-                for(const artId of articoliSelezionati){
-                    const ref = db.collection('web_famiglia_articoli').doc();
-                    batch.set(ref, { categoriaId, famigliaId: famiglia.id, articoloId: artId });
-                }
-                await batch.commit();
-                showToast("✅ Famiglia aggiornata!");
-            } else {
-                const maxOrdine = famiglie.reduce((max,f)=>Math.max(max, f.ordine||0),0);
-                const nuovoOrdine = maxOrdine+1;
-                const newFamRef = await db.collection('web_famiglie').add({
-                    categoriaId, nome, descrizione, codice, ordine: nuovoOrdine
-                });
-                const batch = db.batch();
-                for(const artId of articoliSelezionati){
-                    const ref = db.collection('web_famiglia_articoli').doc();
-                    batch.set(ref, { categoriaId, famigliaId: newFamRef.id, articoloId: artId });
-                }
-                await batch.commit();
-                showToast("✅ Famiglia creata!");
-            }
-            await caricaFamiglie();
-            await caricaAssociazioni();
-            visualizza();
-            modal.remove();
+            if(isEdit){ await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, codice }); const oldAssoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get(); const batch = db.batch(); oldAssoc.forEach(doc => batch.delete(doc.ref)); for(const artId of articoliSelezionati){ const ref = db.collection('web_famiglia_articoli').doc(); batch.set(ref, { categoriaId, famigliaId: famiglia.id, articoloId: artId }); } await batch.commit(); showToast("✅ Famiglia aggiornata!"); }
+            else { const maxOrdine = famiglie.reduce((max,f)=>Math.max(max, f.ordine||0),0); const nuovoOrdine = maxOrdine+1; const newFamRef = await db.collection('web_famiglie').add({ categoriaId, nome, descrizione, codice, ordine: nuovoOrdine }); const batch = db.batch(); for(const artId of articoliSelezionati){ const ref = db.collection('web_famiglia_articoli').doc(); batch.set(ref, { categoriaId, famigliaId: newFamRef.id, articoloId: artId }); } await batch.commit(); showToast("✅ Famiglia creata!"); }
+            await caricaFamiglie(); await caricaAssociazioni(); visualizza(); modal.remove();
         } catch(e){ console.error(e); showToast("Errore salvataggio: "+e.message, true); }
     };
-    if(isEdit){
-        document.getElementById('btnEliminaFamiglia').onclick = async () => {
-            if(!confirm("Eliminare questa famiglia? Gli articoli rimarranno ma verranno rimossi dalla famiglia.")) return;
-            try {
-                const assoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get();
-                const batch = db.batch();
-                assoc.forEach(doc => batch.delete(doc.ref));
-                batch.delete(db.collection('web_famiglie').doc(famiglia.id));
-                await batch.commit();
-                showToast("✅ Famiglia eliminata");
-                await caricaFamiglie();
-                await caricaAssociazioni();
-                visualizza();
-                modal.remove();
-            } catch(e){ console.error(e); showToast("Errore eliminazione", true); }
-        };
-    }
+    if(isEdit){ document.getElementById('btnEliminaFamiglia').onclick = async () => { if(!confirm("Eliminare questa famiglia? Gli articoli rimarranno ma verranno rimossi dalla famiglia.")) return; try { const assoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get(); const batch = db.batch(); assoc.forEach(doc => batch.delete(doc.ref)); batch.delete(db.collection('web_famiglie').doc(famiglia.id)); await batch.commit(); showToast("✅ Famiglia eliminata"); await caricaFamiglie(); await caricaAssociazioni(); visualizza(); modal.remove(); } catch(e){ console.error(e); showToast("Errore eliminazione", true); } }; }
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-
-// ==================== NUOVO ARTICOLO IN FAMIGLIA ====================
 async function nuovoArticoloInFamiglia(famigliaId){
     const modal = document.createElement('div'); modal.className='modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>➕ NUOVO ARTICOLO (per questa famiglia)</h3>
-            <label>🔢 Codice articolo *</label>
-            <input type="text" id="artCodice" placeholder="es. MTR-001">
-            <label>📝 Descrizione *</label>
-            <textarea id="artDescrizione" placeholder="Descrizione dettagliata..."></textarea>
-            <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine">
-            <img id="anteprimaImg" class="anteprima-img" style="display:none; max-width:100%; max-height:150px; margin-top:10px;">
-            <div class="info-imgur">📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto</div>
-            <div class="modal-buttons">
-                <button id="btnSalvaArticoloFamiglia" class="btn-salva-modal">💾 SALVA E ASSOCIA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+    modal.innerHTML = `<div class="modal-container"><h3>➕ NUOVO ARTICOLO (per questa famiglia)</h3><label>🔢 Codice articolo *</label><input type="text" id="artCodice" placeholder="es. MTR-001"><label>📝 Descrizione *</label><textarea id="artDescrizione" placeholder="Descrizione dettagliata..."></textarea><label>🖼️ Immagine (URL da Imgur)</label><input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine"><img id="anteprimaImg" class="anteprima-img" style="display:none; max-width:100%; max-height:150px; margin-top:10px;"><div class="info-imgur">📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto</div><div class="modal-buttons"><button id="btnSalvaArticoloFamiglia" class="btn-salva-modal">💾 SALVA E ASSOCIA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    const fotoInput = document.getElementById('artFotoUrl');
-    const anteprima = document.getElementById('anteprimaImg');
-    fotoInput.addEventListener('input', ()=>{
-        const url = fotoInput.value.trim();
-        if(url && (url.startsWith('http://')||url.startsWith('https://'))){ anteprima.src=url; anteprima.style.display='block'; }
-        else anteprima.style.display='none';
-    });
+    const fotoInput = document.getElementById('artFotoUrl'); const anteprima = document.getElementById('anteprimaImg');
+    fotoInput.addEventListener('input', ()=>{ const url = fotoInput.value.trim(); if(url && (url.startsWith('http://')||url.startsWith('https://'))){ anteprima.src=url; anteprima.style.display='block'; } else anteprima.style.display='none'; });
     document.getElementById('btnSalvaArticoloFamiglia').onclick = async () => {
-        const codice = document.getElementById('artCodice').value.trim();
-        const descrizione = document.getElementById('artDescrizione').value.trim();
-        const fotoUrl = document.getElementById('artFotoUrl').value.trim();
+        const codice = document.getElementById('artCodice').value.trim(); const descrizione = document.getElementById('artDescrizione').value.trim(); const fotoUrl = document.getElementById('artFotoUrl').value.trim();
         if(!codice || !descrizione){ showToast("Compila codice e descrizione", true); return; }
-        try {
-            const newArtRef = await db.collection('web_articoli').add({
-                categoriaId, codice, descrizione, fotoUrl, ordine: articoli.length
-            });
-            await db.collection('web_famiglia_articoli').add({
-                categoriaId, famigliaId, articoloId: newArtRef.id
-            });
-            showToast("✅ Articolo creato e associato alla famiglia");
-            await caricaArticoli();
-            await caricaAssociazioni();
-            visualizza();
-            modal.remove();
-        } catch(e){ console.error(e); showToast("Errore: "+e.message, true); }
+        try { const newArtRef = await db.collection('web_articoli').add({ categoriaId, codice, descrizione, fotoUrl, ordine: articoli.length }); await db.collection('web_famiglia_articoli').add({ categoriaId, famigliaId, articoloId: newArtRef.id }); showToast("✅ Articolo creato e associato alla famiglia"); await caricaArticoli(); await caricaAssociazioni(); visualizza(); modal.remove(); } catch(e){ console.error(e); showToast("Errore: "+e.message, true); }
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-
-// ==================== MODALE ARTICOLO GENERICO ====================
 function mostraModaleArticolo(articolo=null){
     const modal = document.createElement('div'); modal.className='modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-container">
-            <h3>${articolo ? '✏️ MODIFICA ARTICOLO' : '➕ NUOVO ARTICOLO'}</h3>
-            <label>🔢 Codice articolo *</label>
-            <input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice||'') : ''}" placeholder="es. MTR-001">
-            <label>📝 Descrizione *</label>
-            <textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione||'') : ''}</textarea>
-            <label>🖼️ Immagine (URL da Imgur)</label>
-            <input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl||'') : ''}">
-            <img id="anteprimaImg" class="anteprima-img" style="display:none; max-width:100%; max-height:150px; margin-top:10px;">
-            <div class="info-imgur">📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto</div>
-            <div class="modal-buttons">
-                <button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
+    modal.innerHTML = `<div class="modal-container"><h3>${articolo ? '✏️ MODIFICA ARTICOLO' : '➕ NUOVO ARTICOLO'}</h3><label>🔢 Codice articolo *</label><input type="text" id="artCodice" value="${articolo ? escapeHtml(articolo.codice||'') : ''}" placeholder="es. MTR-001"><label>📝 Descrizione *</label><textarea id="artDescrizione" placeholder="Descrizione dettagliata...">${articolo ? escapeHtml(articolo.descrizione||'') : ''}</textarea><label>🖼️ Immagine (URL da Imgur)</label><input type="text" id="artFotoUrl" class="link-immagine" placeholder="Incolla qui il link dell'immagine" value="${articolo ? escapeHtml(articolo.fotoUrl||'') : ''}"><img id="anteprimaImg" class="anteprima-img" style="display:none; max-width:100%; max-height:150px; margin-top:10px;"><div class="info-imgur">📸 <a href="https://imgur.com/upload" target="_blank">Carica su Imgur</a> → copia link diretto</div><div class="modal-buttons"><button id="btnSalvaArticolo" class="btn-salva-modal">💾 SALVA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    const fotoInput = document.getElementById('artFotoUrl');
-    const anteprima = document.getElementById('anteprimaImg');
-    fotoInput.addEventListener('input', ()=>{
-        const url = fotoInput.value.trim();
-        if(url && (url.startsWith('http://')||url.startsWith('https://'))){ anteprima.src=url; anteprima.style.display='block'; }
-        else anteprima.style.display='none';
-    });
+    const fotoInput = document.getElementById('artFotoUrl'); const anteprima = document.getElementById('anteprimaImg');
+    fotoInput.addEventListener('input', ()=>{ const url = fotoInput.value.trim(); if(url && (url.startsWith('http://')||url.startsWith('https://'))){ anteprima.src=url; anteprima.style.display='block'; } else anteprima.style.display='none'; });
     if(articolo && articolo.fotoUrl) { fotoInput.value = articolo.fotoUrl; anteprima.src=articolo.fotoUrl; anteprima.style.display='block'; }
     document.getElementById('btnSalvaArticolo').onclick = async () => {
-        const codice = document.getElementById('artCodice').value.trim();
-        const descrizione = document.getElementById('artDescrizione').value.trim();
-        const fotoUrl = document.getElementById('artFotoUrl').value.trim();
+        const codice = document.getElementById('artCodice').value.trim(); const descrizione = document.getElementById('artDescrizione').value.trim(); const fotoUrl = document.getElementById('artFotoUrl').value.trim();
         if(!codice || !descrizione){ showToast("Compila codice e descrizione", true); return; }
         try {
-            if(articolo){
-                await db.collection('web_articoli').doc(articolo.id).update({ codice, descrizione, fotoUrl });
-                showToast("Articolo modificato");
-            } else {
-                await db.collection('web_articoli').add({ categoriaId, codice, descrizione, fotoUrl, ordine: articoli.length });
-                showToast("Articolo aggiunto (senza famiglia)");
-            }
-            await caricaArticoli();
-            await caricaAssociazioni();
-            visualizza();
-            modal.remove();
+            if(articolo) await db.collection('web_articoli').doc(articolo.id).update({ codice, descrizione, fotoUrl });
+            else await db.collection('web_articoli').add({ categoriaId, codice, descrizione, fotoUrl, ordine: articoli.length });
+            showToast("Articolo " + (articolo ? "modificato" : "aggiunto (senza famiglia)"));
+            await caricaArticoli(); await caricaAssociazioni(); visualizza(); modal.remove();
         } catch(e){ showToast("Errore: "+e.message, true); }
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-async function modificaArticolo(id){
-    const art = articoli.find(a=>a.id===id);
-    if(art) mostraModaleArticolo(art);
-}
-async function eliminaArticolo(id){
-    if(!confirm("Eliminare definitivamente questo articolo? Verrà rimosso da tutte le famiglie.")) return;
-    try {
-        const assoc = await db.collection('web_famiglia_articoli').where('articoloId','==',id).where('categoriaId','==',categoriaId).get();
-        const batch = db.batch();
-        assoc.forEach(doc => batch.delete(doc.ref));
-        batch.delete(db.collection('web_articoli').doc(id));
-        await batch.commit();
-        showToast("Articolo eliminato");
-        await caricaArticoli();
-        await caricaAssociazioni();
-        visualizza();
-    } catch(e){ showToast("Errore: "+e.message, true); }
-}
-async function rimuoviArticoloDaFamiglia(articoloId, famigliaId){
-    if(!confirm("Rimuovere questo articolo dalla famiglia? L'articolo rimarrà nel sistema (nella sezione senza famiglia).")) return;
-    try {
-        const assoc = await db.collection('web_famiglia_articoli')
-            .where('categoriaId','==',categoriaId)
-            .where('famigliaId','==',famigliaId)
-            .where('articoloId','==',articoloId)
-            .get();
-        const batch = db.batch();
-        assoc.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        showToast("Articolo rimosso dalla famiglia");
-        await caricaAssociazioni();
-        visualizza();
-    } catch(e){ showToast("Errore: "+e.message, true); }
-}
+async function modificaArticolo(id){ const art = articoli.find(a=>a.id===id); if(art) mostraModaleArticolo(art); }
+async function eliminaArticolo(id){ if(!confirm("Eliminare definitivamente questo articolo? Verrà rimosso da tutte le famiglie.")) return; try { const assoc = await db.collection('web_famiglia_articoli').where('articoloId','==',id).where('categoriaId','==',categoriaId).get(); const batch = db.batch(); assoc.forEach(doc => batch.delete(doc.ref)); batch.delete(db.collection('web_articoli').doc(id)); await batch.commit(); showToast("Articolo eliminato"); await caricaArticoli(); await caricaAssociazioni(); visualizza(); } catch(e){ showToast("Errore: "+e.message, true); } }
+async function rimuoviArticoloDaFamiglia(articoloId, famigliaId){ if(!confirm("Rimuovere questo articolo dalla famiglia? L'articolo rimarrà nel sistema (nella sezione senza famiglia).")) return; try { const assoc = await db.collection('web_famiglia_articoli').where('categoriaId','==',categoriaId).where('famigliaId','==',famigliaId).where('articoloId','==',articoloId).get(); const batch = db.batch(); assoc.forEach(doc => batch.delete(doc.ref)); await batch.commit(); showToast("Articolo rimosso dalla famiglia"); await caricaAssociazioni(); visualizza(); } catch(e){ showToast("Errore: "+e.message, true); } }
 
-// ==================== CARICA TESTI DA FILE ESTERNO (solo footer) ====================
 async function caricaTestiDaFile() {
     try {
-        const response = await fetch('web_testa_piede.html');
-        if (response.ok) {
-            const text = await response.text();
+        const res = await fetch('web_testa_piede.html');
+        if(res.ok){
+            const text = await res.text();
             const lines = text.split(/\r?\n/);
             let footerText = "";
-            for (let line of lines) {
+            for(let line of lines){
                 line = line.trim();
-                if (line.startsWith("footer:")) footerText = line.substring(7).trim();
+                if(line.startsWith("footer:")) footerText = line.substring(7).trim();
             }
-            if (footerText) document.getElementById('footerText').innerText = footerText;
-        } else {
-            console.warn("web_testa_piede.html non trovato");
-        }
-    } catch(e) {
-        console.warn("Errore caricamento web_testa_piede.html:", e);
-    }
+            if(footerText) document.getElementById('footerText').innerText = footerText;
+        } else { console.warn("web_testa_piede.html non trovato"); }
+    } catch(e){ console.warn("Errore caricamento web_testa_piede.html:", e); }
 }
 
-// ==================== EVENTI ====================
 document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
 document.getElementById('btnAggiungiFamiglia').onclick = ()=>{ if(isAdminMode) mostraModaleFamiglia(null, []); };
 document.getElementById('btnAggiungiArticolo').onclick = ()=>{ if(isAdminMode) mostraModaleArticolo(null); };
@@ -1204,15 +382,11 @@ document.getElementById('btnHome').onclick = ()=> window.location.href='web.html
 document.getElementById('ricercaFamiglie').addEventListener('input', ()=> visualizza());
 document.getElementById('ricercaArticoli').addEventListener('input', ()=> visualizza());
 
-// ==================== AVVIO ====================
 const savedAdmin = localStorage.getItem('web_admin_mode');
 if(savedAdmin === 'true') isAdminMode = true;
 caricaLinkDaFile().then(()=>{
     caricaTestiDaFile().then(()=>{
-        caricaTutti().then(()=>{
-            aggiornaUIAdmin();
-            inizializzaTastoCaricaFoto();
-        });
+        caricaTutti().then(()=>{ aggiornaUIAdmin(); inizializzaTastoCaricaFoto(); });
     });
 });
 </script>
