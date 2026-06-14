@@ -359,24 +359,6 @@
         .tabella td input[type="text"], .tabella td input[type="date"] { width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
         .edit-mode { background-color: #fffef5; }
         .action-buttons { display: none; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .version-box {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: #2c3e50;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            z-index: 100;
-            font-family: monospace;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        .version-box:hover {
-            background: #3498db;
-        }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         .toast-message { position: fixed; bottom: 80px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
@@ -739,8 +721,7 @@
     <footer>Logo: 1 click→Link1 | Doppio click→Link2</footer>
 </div>
 
-<!-- MINIBOX VERSIONE -->
-<div class="version-box" id="versionBox" title="Clicca per copiare la versione">📌 vC.5.58</div>
+<!-- Vecchio badge versione rimosso -->
 
 <script>
 // ==================== VERSIONE ====================
@@ -1495,7 +1476,7 @@ function esportaReportRagioniere() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td><tr>'}
+                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td></tr>'}
                 </tbody>
                 <tfoot>
                     <tr style="background: #f8f9fa; font-weight: bold;">
@@ -1598,7 +1579,7 @@ function esportaPDFMese() {
         </table>
         
         <h3>📄 FORNITORI</h3>
-        <tr>
+        <table>
         <thead><tr><th>Data</th><th>Fornitore</th><th>N. Fattura</th><th>N° interno</th></tr></thead>
         <tbody>`;
         
@@ -2722,14 +2703,6 @@ document.getElementById('mobileData')?.addEventListener('click', () => mostraMod
 document.getElementById('mobileSaldi')?.addEventListener('click', () => mostraModaleSaldiMobile());
 document.getElementById('mobileAltro')?.addEventListener('click', () => mostraModaleAltro());
 
-const versionBox = document.getElementById('versionBox');
-if (versionBox) {
-    versionBox.addEventListener('click', () => {
-        navigator.clipboard.writeText(APP_VERSION);
-        showToast(`📌 Versione ${APP_VERSION} copiata!`);
-    });
-}
-
 window.addEventListener('beforeunload', (e) => {
     if (modificheNonSalvate) { const message = "⚠️ ATTENZIONE! Hai modifiche non salvate nel mese corrente. Se esci ora, le perderai. Clicca ANNULLA, salva con MEMORIZZA, poi esci."; e.preventDefault(); e.returnValue = message; return message; }
 });
@@ -2809,5 +2782,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     setupSelectAllPrimaNota();
 });
 </script>
+<script src="version.js"></script>
 </body>
 </html>
