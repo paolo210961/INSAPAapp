@@ -55,7 +55,6 @@
         .storico-ordini { margin-top: 10px; padding-top: 10px; border-top: 2px solid #3498db; font-size: 0.75rem; display: none; }
         .storico-ordini.visible { display: block; }
         .storico-ordini span { display: inline-block; background: #ecf0f1; padding: 4px 8px; margin: 3px; border-radius: 6px; }
-        .version { position: fixed; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; z-index: 100; }
         footer { text-align: center; margin: 20px; font-size: 0.7rem; color: #95a5a6; }
         
         /* Modale listino con iframe */
@@ -308,7 +307,7 @@
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<div class="version">vA.6.04 - Persistenza ordine minimizzato</div>
+<!-- Vecchio badge versione rimosso -->
 
 <script>
 // Firebase configuration
@@ -1031,5 +1030,6 @@ Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
     // Il ripristino avviene dentro selezionaAgente -> ripristinaOrdineDaStorageSeNecessario
 });
 </script>
+<script src="version.js"></script>
 </body>
 </html>
