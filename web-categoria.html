@@ -421,6 +421,26 @@
             border: 1px solid #ccc;
             width: 180px;
         }
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+            font-size: 0.8rem;
+        }
+        .footer-admin {
+            background: none;
+            border: none;
+            color: #f1c40f;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        .footer-admin:hover {
+            color: #e67e22;
+        }
         @media (max-width: 1024px) {
             .articoli-grid, .senza-famiglia-grid { grid-template-columns: repeat(3, 1fr); }
         }
@@ -433,15 +453,6 @@
         @media (max-width: 480px) {
             .articoli-grid, .senza-famiglia-grid { grid-template-columns: 1fr; }
         }
-        footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: 50px;
-        }
-        .sortable-drag { opacity: 0.5; }
-        .sortable-ghost { opacity: 0.3; background: #3498db; }
     </style>
 </head>
 <body>
@@ -455,8 +466,6 @@
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button id="btnCaricaFoto" class="btn-admin" style="display:none;">📸 CARICA FOTO</button>
-            <button id="btnAdmin" class="btn-admin">🔐 AREA ADMIN</button>
-            <button id="btnRicarica" class="btn-admin btn-reload" style="display:none;">🔄 RICARICA</button>
             <div class="search-bar" id="searchBar" style="display:none;">
                 <input type="text" id="ricercaFamiglie" placeholder="🔍 Cerca famiglia (codice/nome)">
                 <input type="text" id="ricercaArticoli" placeholder="🔍 Cerca articolo (codice/descrizione)">
@@ -483,7 +492,10 @@
     <div id="famiglieContainer"></div>
     <div id="senzaFamigliaContainer"></div>
 </div>
-<footer><p>© 2025 inSAPA s.a.s. - Tutti i diritti riservati</p></footer>
+<footer>
+    <span id="footerText">© dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati</span>
+    <button id="btnDisattivaAdmin" class="footer-admin" style="display:none;">🔒 DISATTIVA ADMIN</button>
+</footer>
 
 <script>
 // ==================== FIREBASE CONFIG ====================
@@ -520,7 +532,62 @@ function caricaLogo() {
 }
 caricaLogo();
 
-// ==================== LINK LOGO ====================
+// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
+function mostraModalePassword() {
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnVerifica').onclick = ()=>{
+        const pwd = document.getElementById('passwordAdmin').value;
+        if(pwd === ADMIN_PASSWORD){
+            isAdminMode=true; localStorage.setItem('web_admin_mode','true');
+            showToast("✅ Modalità admin attivata!");
+            aggiornaUIAdmin();
+            modal.remove();
+        } else showToast("❌ Password errata!", true);
+    };
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
+}
+function disattivaModalitaAdmin() {
+    isAdminMode=false; localStorage.removeItem('web_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIAdmin();
+}
+
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('mousedown', () => {
+    pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000);
+});
+logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
+logoDiv.addEventListener('touchend', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+
+function aggiornaUIAdmin() {
+    const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
+    const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
+    const btnCaricaFoto = document.getElementById('btnCaricaFoto');
+    const searchBar = document.getElementById('searchBar');
+    const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
+    if(isAdminMode){
+        btnAggiungiFamiglia.classList.add('show');
+        btnAggiungiArticolo.classList.add('show');
+        if(btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
+        if(searchBar) searchBar.style.display = 'flex';
+        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
+    } else {
+        btnAggiungiFamiglia.classList.remove('show');
+        btnAggiungiArticolo.classList.remove('show');
+        if(btnCaricaFoto) btnCaricaFoto.style.display = 'none';
+        if(searchBar) searchBar.style.display = 'none';
+        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
+        if(sortableFamiglie) sortableFamiglie.destroy();
+        sortableFamiglie = null;
+    }
+    visualizza();
+}
+
+// ==================== LINK LOGO (doppio tap) ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
     try {
@@ -535,7 +602,7 @@ async function caricaLinkDaFile() {
 }
 function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
 function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
-document.getElementById('logoRettangolo').addEventListener('click',(e)=>{
+logoDiv.addEventListener('click',(e)=>{
     const now = Date.now();
     if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }
     else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
@@ -604,7 +671,6 @@ async function caricaFamiglie(){
         const snap = await db.collection('web_famiglie').where('categoriaId','==',categoriaId).orderBy('ordine','asc').get();
         famiglie = [];
         snap.forEach(doc=>{ famiglie.push({ id:doc.id, ...doc.data() }); });
-        console.log("Famiglie caricate:", famiglie.length);
     } catch(e){ console.error(e); }
 }
 
@@ -614,7 +680,6 @@ async function caricaArticoli(){
         const snap = await db.collection('web_articoli').where('categoriaId','==',categoriaId).get();
         articoli = [];
         snap.forEach(doc=>{ articoli.push({ id:doc.id, ...doc.data() }); });
-        console.log("Articoli caricati:", articoli.length);
     } catch(e){ console.error(e); }
 }
 
@@ -630,7 +695,6 @@ async function caricaAssociazioni(){
             if(!famigliaArticoliMap.has(famigliaId)) famigliaArticoliMap.set(famigliaId, new Set());
             famigliaArticoliMap.get(famigliaId).add(articoloId);
         });
-        console.log("Associazioni caricate, famiglie con articoli:", famigliaArticoliMap.size);
     } catch(e){ console.warn(e); }
 }
 
@@ -815,7 +879,7 @@ async function eliminaFamiglia(id){
     } catch(e){ console.error(e); showToast("Errore eliminazione famiglia",true); }
 }
 
-// ==================== MODALE FAMIGLIA (MIGLIORATO) ====================
+// ==================== MODALE FAMIGLIA ====================
 async function modificaFamiglia(id){
     const famiglia = famiglie.find(f=>f.id===id);
     if(!famiglia) return;
@@ -926,7 +990,6 @@ function mostraModaleFamiglia(famiglia=null, associati=[]){
         try {
             if(isEdit){
                 await db.collection('web_famiglie').doc(famiglia.id).update({ nome, descrizione, codice });
-                // Aggiorna associazioni
                 const oldAssoc = await db.collection('web_famiglia_articoli').where('famigliaId','==',famiglia.id).where('categoriaId','==',categoriaId).get();
                 const batch = db.batch();
                 oldAssoc.forEach(doc => batch.delete(doc.ref));
@@ -976,7 +1039,7 @@ function mostraModaleFamiglia(famiglia=null, associati=[]){
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
 
-// ==================== NUOVO ARTICOLO IN UNA FAMIGLIA ====================
+// ==================== NUOVO ARTICOLO IN FAMIGLIA ====================
 async function nuovoArticoloInFamiglia(famigliaId){
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML = `
@@ -1111,69 +1174,33 @@ async function rimuoviArticoloDaFamiglia(articoloId, famigliaId){
     } catch(e){ showToast("Errore: "+e.message, true); }
 }
 
-// ==================== ADMIN MODE ====================
-function aggiornaUIAdmin(){
-    const btnAdmin = document.getElementById('btnAdmin');
-    const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
-    const btnAggiungiArticolo = document.getElementById('btnAggiungiArticolo');
-    const btnCaricaFoto = document.getElementById('btnCaricaFoto');
-    const btnRicarica = document.getElementById('btnRicarica');
-    const searchBar = document.getElementById('searchBar');
-    if(isAdminMode){
-        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
-        btnAdmin.classList.add('active');
-        btnAggiungiFamiglia.classList.add('show');
-        btnAggiungiArticolo.classList.add('show');
-        if(btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
-        if(btnRicarica) btnRicarica.style.display = 'inline-block';
-        if(searchBar) searchBar.style.display = 'flex';
-    } else {
-        btnAdmin.textContent = "🔐 AREA ADMIN";
-        btnAdmin.classList.remove('active');
-        btnAggiungiFamiglia.classList.remove('show');
-        btnAggiungiArticolo.classList.remove('show');
-        if(btnCaricaFoto) btnCaricaFoto.style.display = 'none';
-        if(btnRicarica) btnRicarica.style.display = 'none';
-        if(searchBar) searchBar.style.display = 'none';
-        if(sortableFamiglie) sortableFamiglie.destroy();
-        sortableFamiglie = null;
+// ==================== CARICA TESTI DA FILE ESTERNO (solo footer) ====================
+async function caricaTestiDaFile() {
+    try {
+        const response = await fetch('web_testa_piede.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/);
+            let footerText = "";
+            for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith("footer:")) footerText = line.substring(7).trim();
+            }
+            if (footerText) document.getElementById('footerText').innerText = footerText;
+        } else {
+            console.warn("web_testa_piede.html non trovato");
+        }
+    } catch(e) {
+        console.warn("Errore caricamento web_testa_piede.html:", e);
     }
-    visualizza();
-}
-
-function mostraModalePassword(){
-    const modal = document.createElement('div'); modal.className='modal-overlay';
-    modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('btnVerifica').onclick = ()=>{
-        const pwd = document.getElementById('passwordAdmin').value;
-        if(pwd === ADMIN_PASSWORD){
-            isAdminMode=true; localStorage.setItem('web_admin_mode','true');
-            showToast("Admin attivata");
-            aggiornaUIAdmin();
-            modal.remove();
-        } else showToast("Password errata", true);
-    };
-    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
-}
-function disattivaAdmin(){
-    isAdminMode=false; localStorage.removeItem('web_admin_mode');
-    showToast("Admin disattivata");
-    aggiornaUIAdmin();
-}
-async function ricaricaDati(){
-    showToast("🔄 Ricaricamento dati...");
-    await caricaTutti();
-    showToast("✅ Dati ricaricati");
 }
 
 // ==================== EVENTI ====================
-document.getElementById('btnAdmin').onclick = ()=> isAdminMode ? disattivaAdmin() : mostraModalePassword();
+document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
 document.getElementById('btnAggiungiFamiglia').onclick = ()=>{ if(isAdminMode) mostraModaleFamiglia(null, []); };
 document.getElementById('btnAggiungiArticolo').onclick = ()=>{ if(isAdminMode) mostraModaleArticolo(null); };
 document.getElementById('btnTornaHome').onclick = ()=> window.location.href='web.html';
 document.getElementById('btnHome').onclick = ()=> window.location.href='web.html';
-document.getElementById('btnRicarica').onclick = ()=> ricaricaDati();
 document.getElementById('ricercaFamiglie').addEventListener('input', ()=> visualizza());
 document.getElementById('ricercaArticoli').addEventListener('input', ()=> visualizza());
 
@@ -1181,9 +1208,11 @@ document.getElementById('ricercaArticoli').addEventListener('input', ()=> visual
 const savedAdmin = localStorage.getItem('web_admin_mode');
 if(savedAdmin === 'true') isAdminMode = true;
 caricaLinkDaFile().then(()=>{
-    caricaTutti().then(()=>{
-        aggiornaUIAdmin();
-        inizializzaTastoCaricaFoto();
+    caricaTestiDaFile().then(()=>{
+        caricaTutti().then(()=>{
+            aggiornaUIAdmin();
+            inizializzaTastoCaricaFoto();
+        });
     });
 });
 </script>
