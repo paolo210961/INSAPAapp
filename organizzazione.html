@@ -303,11 +303,10 @@
     <div id="teamGrid" class="team-grid">
         <div style="text-align: center; width: 100%;">Caricamento team...</div>
     </div>
-    <!-- Nessun pulsante admin qui, ora si attiva con pressione lunga sul logo -->
 </div>
 
 <footer>
-    <span id="footerText">© dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati</span>
+    © dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati
     <button id="btnDisattivaAdmin" class="footer-admin" style="display:none;">🔒 DISATTIVA ADMIN</button>
 </footer>
 
@@ -393,7 +392,7 @@ async function caricaLinkDaFile() {
             if(lines.length>=1) linkPrincipale = lines[0].trim();
             if(lines.length>=2) linkSecondario = lines[1].trim();
         }
-    } catch(e){}
+    } catch(e){ console.warn("Errore caricamento link.html:", e); }
 }
 function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
 function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
@@ -406,20 +405,24 @@ logoDiv.addEventListener('click',(e)=>{
 // ==================== CARICA TEAM ====================
 async function caricaTeam() {
     try {
+        console.log("Caricamento team...");
         const snapshot = await db.collection('web_team').orderBy('ordine', 'asc').get();
         teamData = [];
         snapshot.forEach(doc => {
             teamData.push({ id: doc.id, ...doc.data() });
         });
+        console.log("Team caricati:", teamData.length);
         visualizzaTeam();
     } catch(e) {
         console.error("Errore caricamento team:", e);
-        showToast("Errore caricamento team", true);
+        showToast("Errore caricamento team: " + e.message, true);
+        document.getElementById('teamGrid').innerHTML = '<div style="text-align: center; width: 100%; color: red;">Errore caricamento team. Controlla console.</div>';
     }
 }
 
 function visualizzaTeam() {
     const grid = document.getElementById('teamGrid');
+    if (!grid) return;
     if (teamData.length === 0) {
         grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>';
         return;
@@ -559,37 +562,16 @@ async function eliminaMembroTeam(id) {
     }
 }
 
-// ==================== CARICA TESTI DA FILE ESTERNO (solo footer) ====================
-async function caricaTestiDaFile() {
-    try {
-        const response = await fetch('web_testa_piede.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/);
-            let footerText = "";
-            for (let line of lines) {
-                line = line.trim();
-                if (line.startsWith("footer:")) footerText = line.substring(7).trim();
-            }
-            if (footerText) document.getElementById('footerText').innerText = footerText;
-        } else {
-            console.warn("web_testa_piede.html non trovato");
-        }
-    } catch(e) {
-        console.warn("Errore caricamento web_testa_piede.html:", e);
-    }
-}
-
 // ==================== EVENTI ====================
 document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
-document.getElementById('btnHome').onclick = () => window.location.href = 'web.html';
 
 // ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('organizzazione_admin_mode');
 if (savedAdminMode === 'true') isAdminMode = true;
 caricaLinkDaFile().then(() => {
-    caricaTestiDaFile().then(() => {
-        caricaTeam().then(() => aggiornaUIAdmin());
+    caricaTeam().then(() => aggiornaUIAdmin()).catch(err => {
+        console.error("Errore finale:", err);
+        showToast("Errore inizializzazione", true);
     });
 });
 </script>
