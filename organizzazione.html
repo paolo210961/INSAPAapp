@@ -27,8 +27,8 @@
         .team-info { padding: 20px; }
         .team-nome { font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
         .team-ruolo { font-size: 0.9rem; color: #3498db; margin-bottom: 15px; font-weight: bold; }
-        .team-telefono { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
-        .team-telefono a { color: #2c3e50; text-decoration: none; font-size: 0.9rem; }
+        .team-telefono { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+        .team-telefono a[href^="tel:"] { font-weight: bold; white-space: nowrap; }
         .btn-wa { background: #25D366; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .btn-wa:hover { background: #128C7E; }
         .team-email { margin: 10px 0; }
@@ -145,7 +145,28 @@ function visualizzaTeam() {
     const grid = document.getElementById('teamGrid');
     if (!grid) return;
     if (teamData.length === 0) { grid.innerHTML = '<div style="text-align: center; width: 100%;">Nessun membro del team</div>'; return; }
-    grid.innerHTML = teamData.map(member => `<div class="team-card" data-id="${member.id}"><img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'"><div class="team-info"><div class="team-nome">${escapeHtml(member.nome)}</div><div class="team-ruolo">${escapeHtml(member.ruolo)}</div><div class="team-telefono">📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a><a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa">📱 WhatsApp</a></div><div class="team-email">✉️ <a href="mailto:${member.email}">${member.email}</a></div>${isAdminMode ? `<div style="margin-top: 10px;"><button class="card-btn edit" onclick="modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button><button class="card-btn" onclick="eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button></div>` : ''}</div></div>`).join('');
+    grid.innerHTML = teamData.map(member => `
+        <div class="team-card" data-id="${member.id}">
+            <img class="team-foto" src="icons/${member.foto}" alt="${member.nome}" onerror="this.src='https://via.placeholder.com/300x250?text=${encodeURIComponent(member.nome)}'">
+            <div class="team-info">
+                <div class="team-nome">${escapeHtml(member.nome)}</div>
+                <div class="team-ruolo">${escapeHtml(member.ruolo)}</div>
+                <div class="team-telefono">
+                    📞 <a href="tel:${member.telefono.replace(/[^0-9+]/g, '')}">${member.telefono}</a>
+                    <a href="https://wa.me/${member.whatsapp || member.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-wa" title="WhatsApp"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" style="width: 16px; height: 16px;"></a>
+                </div>
+                <div class="team-email">
+                    ✉️ <a href="mailto:${member.email}">${member.email}</a>
+                </div>
+                ${isAdminMode ? `
+                    <div style="margin-top: 10px;">
+                        <button class="card-btn edit" onclick="modificaMembroTeam('${member.id}')" style="background:#3498db; width:auto; padding:5px 15px; border-radius:20px;">✏️ MODIFICA</button>
+                        <button class="card-btn" onclick="eliminaMembroTeam('${member.id}')" style="background:#e74c3c; width:auto; padding:5px 15px; border-radius:20px;">🗑 ELIMINA</button>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
     if (isAdminMode) {
         const existingBtn = document.getElementById('btnAggiungiMembroTeam');
         if (!existingBtn) { const btnAggiungiMembro = document.createElement('button'); btnAggiungiMembro.id = 'btnAggiungiMembroTeam'; btnAggiungiMembro.className = 'btn-admin'; btnAggiungiMembro.style.margin = '20px auto 0'; btnAggiungiMembro.style.display = 'block'; btnAggiungiMembro.innerHTML = '➕ AGGIUNGI MEMBRO TEAM'; btnAggiungiMembro.onclick = () => mostraModaleTeam(null); grid.parentNode.appendChild(btnAggiungiMembro); }
