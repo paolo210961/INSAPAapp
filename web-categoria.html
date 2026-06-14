@@ -2,13 +2,12 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>inSAPA - Categoria</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        /* Stili identici alla versione precedente funzionante – li ometto per brevità ma vanno inseriti */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
         .header { background: white; padding: 15px 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
@@ -77,6 +76,7 @@
         .toast-message { position: fixed; bottom: 30px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2000; font-weight: bold; animation: fadeOut 3s ease forwards; }
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; display: none; } }
         .password-modal { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .password-modal input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
         .btn-torna { background: #95a5a6; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .info-imgur { font-size: 0.7rem; color: #7f8c8d; margin-top: 5px; text-align: center; }
         .search-bar { display: flex; gap: 10px; margin-left: auto; margin-right: 20px; }
@@ -135,39 +135,69 @@
 </footer>
 
 <script>
-const firebaseConfig = { apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ", authDomain: "insapa-database.firebaseapp.com", projectId: "insapa-database", storageBucket: "insapa-database.firebasestorage.app", messagingSenderId: "331230245928", appId: "1:331230245928:web:2ee43d9209e43c3c89b11d" };
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
+    authDomain: "insapa-database.firebaseapp.com",
+    projectId: "insapa-database",
+    storageBucket: "insapa-database.firebasestorage.app",
+    messagingSenderId: "331230245928",
+    appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
+};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// ==================== VARIABILI ====================
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
-let categoriaId = null, categoria = null, famiglie = [], articoli = [], famigliaArticoliMap = new Map(), sortableFamiglie = null, pressTimer = null;
+let categoriaId = null;
+let categoria = null;
+let famiglie = [];
+let articoli = [];
+let famigliaArticoliMap = new Map();
+let sortableFamiglie = null;
+let pressTimer = null;
 
+// ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
-    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); } }).catch(()=>{});
+    fetch('icons/logo.jpg').then(r => {
+        if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; }
+        else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); }
+    }).catch(()=>{});
 }
 caricaLogo();
 
+// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA ====================
 function mostraModalePassword() {
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('btnVerifica').onclick = ()=>{
         const pwd = document.getElementById('passwordAdmin').value;
-        if(pwd === ADMIN_PASSWORD){ isAdminMode=true; localStorage.setItem('web_admin_mode','true'); showToast("✅ Modalità admin attivata!"); aggiornaUIAdmin(); modal.remove(); }
-        else showToast("❌ Password errata!", true);
+        if(pwd === ADMIN_PASSWORD){
+            isAdminMode=true; localStorage.setItem('web_admin_mode','true');
+            showToast("✅ Modalità admin attivata!");
+            aggiornaUIAdmin();
+            modal.remove();
+        } else showToast("❌ Password errata!", true);
     };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
-function disattivaModalitaAdmin() { isAdminMode=false; localStorage.removeItem('web_admin_mode'); showToast("🔒 Modalità admin disattivata"); aggiornaUIAdmin(); }
+function disattivaModalitaAdmin() {
+    isAdminMode=false; localStorage.removeItem('web_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIAdmin();
+}
 const logoDiv = document.getElementById('logoRettangolo');
-logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
-logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
-logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
-logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
-logoDiv.addEventListener('touchend', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+if (logoDiv) {
+    logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
+    logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+    logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+    logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
+    logoDiv.addEventListener('touchend', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+}
 
 function aggiornaUIAdmin() {
     const btnAggiungiFamiglia = document.getElementById('btnAggiungiFamiglia');
@@ -176,14 +206,14 @@ function aggiornaUIAdmin() {
     const searchBar = document.getElementById('searchBar');
     const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
     if(isAdminMode){
-        btnAggiungiFamiglia.classList.add('show');
-        btnAggiungiArticolo.classList.add('show');
+        if(btnAggiungiFamiglia) btnAggiungiFamiglia.classList.add('show');
+        if(btnAggiungiArticolo) btnAggiungiArticolo.classList.add('show');
         if(btnCaricaFoto) btnCaricaFoto.style.display = 'inline-block';
         if(searchBar) searchBar.style.display = 'flex';
         if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
     } else {
-        btnAggiungiFamiglia.classList.remove('show');
-        btnAggiungiArticolo.classList.remove('show');
+        if(btnAggiungiFamiglia) btnAggiungiFamiglia.classList.remove('show');
+        if(btnAggiungiArticolo) btnAggiungiArticolo.classList.remove('show');
         if(btnCaricaFoto) btnCaricaFoto.style.display = 'none';
         if(searchBar) searchBar.style.display = 'none';
         if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
@@ -193,21 +223,47 @@ function aggiornaUIAdmin() {
     visualizza();
 }
 
+// ==================== LINK LOGO (doppio tap) ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
-    try { const res = await fetch('link.html'); if(res.ok){ const text = await res.text(); const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<')); if(lines.length>=1) linkPrincipale = lines[0].trim(); if(lines.length>=2) linkSecondario = lines[1].trim(); } } catch(e){}
+    try {
+        const res = await fetch('link.html');
+        if(res.ok){
+            const text = await res.text();
+            const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith('<'));
+            if(lines.length>=1) linkPrincipale = lines[0].trim();
+            if(lines.length>=2) linkSecondario = lines[1].trim();
+        }
+    } catch(e){}
 }
 function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
 function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
-logoDiv.addEventListener('click',(e)=>{ const now = Date.now(); if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; } else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); } });
+if (logoDiv) {
+    logoDiv.addEventListener('click',(e)=>{
+        const now = Date.now();
+        if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }
+        else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
+    });
+}
 
-async function getFotoLink() { try { const doc = await db.collection('config').doc('link_tasto_extra').get(); if(doc.exists && doc.data().url) return doc.data().url; } catch(e){} return 'https://imgur.com/upload'; }
+// ==================== TASTO CARICA FOTO ====================
+async function getFotoLink() {
+    try {
+        const doc = await db.collection('config').doc('link_tasto_extra').get();
+        if(doc.exists && doc.data().url) return doc.data().url;
+    } catch(e){}
+    return 'https://imgur.com/upload';
+}
 async function setFotoLink(url) { await db.collection('config').doc('link_tasto_extra').set({ url }); }
 function mostraModaleLink() {
     const modal = document.createElement('div'); modal.className='modal-overlay';
     modal.innerHTML=`<div class="modal-container"><h3>🔗 MODIFICA LINK</h3><input type="text" id="nuovoLinkInput" placeholder="https://..."><div class="modal-buttons"><button id="btnSalvaLink" class="btn-salva-modal">SALVA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
     document.body.appendChild(modal);
-    document.getElementById('btnSalvaLink').onclick = async ()=>{ const nuovo = document.getElementById('nuovoLinkInput').value.trim(); if(nuovo && (nuovo.startsWith('http://')||nuovo.startsWith('https://'))){ await setFotoLink(nuovo); showToast("✅ Link salvato!"); modal.remove(); } else showToast("Link non valido", true); };
+    document.getElementById('btnSalvaLink').onclick = async ()=>{
+        const nuovo = document.getElementById('nuovoLinkInput').value.trim();
+        if(nuovo && (nuovo.startsWith('http://')||nuovo.startsWith('https://'))){ await setFotoLink(nuovo); showToast("✅ Link salvato!"); modal.remove(); }
+        else showToast("Link non valido", true);
+    };
     document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
 }
 function inizializzaTastoCaricaFoto() {
@@ -219,9 +275,14 @@ function inizializzaTastoCaricaFoto() {
     btn.addEventListener('touchend', async ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; const link=await getFotoLink(); window.open(link,'_blank'); } });
 }
 
-function showToast(msg, isErr=false){ const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+// ==================== UTILS ====================
+function showToast(msg, isErr=false){
+    const t=document.createElement('div'); t.className='toast-message'; t.style.backgroundColor=isErr?'#e74c3c':'#27ae60'; t.innerText=msg;
+    document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
+}
 function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
+// ==================== CARICA DATI ====================
 async function caricaCategoria(){
     const urlParams = new URLSearchParams(window.location.search);
     categoriaId = urlParams.get('id');
@@ -259,9 +320,17 @@ async function caricaAssociazioni(){
         snap.forEach(doc=>{ const data = doc.data(); const famigliaId = data.famigliaId; const articoloId = data.articoloId; if(!famigliaArticoliMap.has(famigliaId)) famigliaArticoliMap.set(famigliaId, new Set()); famigliaArticoliMap.get(famigliaId).add(articoloId); });
     } catch(e){ console.warn(e); }
 }
-async function caricaTutti(){ await caricaCategoria(); await caricaFamiglie(); await caricaArticoli(); await caricaAssociazioni(); visualizza(); }
+async function caricaTutti(){
+    await caricaCategoria();
+    await caricaFamiglie();
+    await caricaArticoli();
+    await caricaAssociazioni();
+    visualizza();
+}
 
-function apriLightbox(url){ const lb = document.createElement('div'); lb.className='lightbox'; lb.innerHTML=`<img src="${url}" alt="Ingrandisci">`; lb.addEventListener('click',()=>lb.remove()); document.body.appendChild(lb); }
+function apriLightbox(url){
+    const lb = document.createElement('div'); lb.className='lightbox'; lb.innerHTML=`<img src="${url}" alt="Ingrandisci">`; lb.addEventListener('click',()=>lb.remove()); document.body.appendChild(lb);
+}
 
 function visualizza(){
     const famiglieContainer = document.getElementById('famiglieContainer');
@@ -278,7 +347,7 @@ function visualizza(){
         if(articoliFamiglia.length === 0 && ricercaArticoli !== '') continue;
         famiglieHtml += `<div class="famiglia-container" data-id="${famiglia.id}"><div class="famiglia-titolo"><div><h3><span class="famiglia-codice">[${escapeHtml(famiglia.codice || '???')}]</span> ${escapeHtml(famiglia.nome)}</h3>${famiglia.descrizione ? `<div class="famiglia-descrizione">${escapeHtml(famiglia.descrizione)}</div>` : ''}</div>${isAdminMode ? `<div class="famiglia-buttons"><button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'su')" ${famiglieFiltrate.indexOf(famiglia)===0?'disabled style="opacity:0.5"':''}>⬆️</button><button class="btn-move" onclick="spostaFamiglia('${famiglia.id}', 'giu')" ${famiglieFiltrate.indexOf(famiglia)===famiglieFiltrate.length-1?'disabled style="opacity:0.5"':''}>⬇️</button><button class="card-btn edit" onclick="modificaFamiglia('${famiglia.id}')" style="background:#3498db;">✏️ Modifica</button><button class="card-btn danger" onclick="eliminaFamiglia('${famiglia.id}')" style="background:#e74c3c;">🗑 Elimina</button><button class="btn-nuovo-articolo-famiglia" onclick="nuovoArticoloInFamiglia('${famiglia.id}')">➕ Nuovo articolo</button></div>` : ''}</div><div class="articoli-grid">${articoliFamiglia.map(art => `<div class="articolo-card"><img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'"><div class="articolo-info"><div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div><div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div></div>${isAdminMode ? `<div class="card-buttons"><button class="card-btn" onclick="modificaArticolo('${art.id}')">✏️ Modifica</button><button class="card-btn danger" onclick="eliminaArticolo('${art.id}')">🗑 Elimina</button><button class="card-btn warning" onclick="rimuoviArticoloDaFamiglia('${art.id}', '${famiglia.id}')">⛔ Rimuovi da famiglia</button></div>` : ''}</div>`).join('')}</div></div>`;
     }
-    famiglieContainer.innerHTML = famiglieHtml;
+    if(famiglieContainer) famiglieContainer.innerHTML = famiglieHtml;
     const tuttiIdsAssociati = new Set(); for(const ids of famigliaArticoliMap.values()) ids.forEach(id => tuttiIdsAssociati.add(id));
     let articoliSenza = articoli.filter(a => !tuttiIdsAssociati.has(a.id));
     if(ricercaArticoli) articoliSenza = articoliSenza.filter(a => (a.codice && a.codice.toLowerCase().includes(ricercaArticoli)) || (a.descrizione && a.descrizione.toLowerCase().includes(ricercaArticoli)));
@@ -286,7 +355,7 @@ function visualizza(){
     if(articoliSenza.length > 0){
         senzaHtml = `<div class="senza-famiglia-container"><div class="senza-famiglia-grid">${articoliSenza.map(art => `<div class="senza-famiglia-item"><img class="articolo-img" src="${art.fotoUrl || 'https://via.placeholder.com/300x200?text=Nessuna+immagine'}" onerror="this.src='https://via.placeholder.com/300x200?text=Immagine+non+trovata'"><div class="articolo-info"><div class="articolo-codice">📄 ${escapeHtml(art.codice || '')}</div><div class="articolo-descrizione">${escapeHtml(art.descrizione || '')}</div></div>${isAdminMode ? `<div class="card-buttons"><button class="card-btn" onclick="modificaArticolo('${art.id}')">✏️ Modifica</button><button class="card-btn danger" onclick="eliminaArticolo('${art.id}')">🗑 Elimina</button></div>` : ''}</div>`).join('')}</div></div>`;
     }
-    senzaContainer.innerHTML = senzaHtml;
+    if(senzaContainer) senzaContainer.innerHTML = senzaHtml;
     document.querySelectorAll('.articolo-img').forEach(img => { img.addEventListener('click', (e) => { e.stopPropagation(); if(img.src) apriLightbox(img.src); }); });
     if(isAdminMode && !/Mobi|Android/i.test(navigator.userAgent)){
         if(sortableFamiglie) sortableFamiglie.destroy();
@@ -374,19 +443,31 @@ async function caricaTestiDaFile() {
     } catch(e){ console.warn("Errore caricamento web_testa_piede.html:", e); }
 }
 
-document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
-document.getElementById('btnAggiungiFamiglia').onclick = ()=>{ if(isAdminMode) mostraModaleFamiglia(null, []); };
-document.getElementById('btnAggiungiArticolo').onclick = ()=>{ if(isAdminMode) mostraModaleArticolo(null); };
-document.getElementById('btnTornaHome').onclick = ()=> window.location.href='web.html';
-document.getElementById('btnHome').onclick = ()=> window.location.href='web.html';
-document.getElementById('ricercaFamiglie').addEventListener('input', ()=> visualizza());
-document.getElementById('ricercaArticoli').addEventListener('input', ()=> visualizza());
+// ==================== EVENTI ====================
+const btnDisattiva = document.getElementById('btnDisattivaAdmin');
+if (btnDisattiva) btnDisattiva.onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
+const btnAddFamiglia = document.getElementById('btnAggiungiFamiglia');
+if (btnAddFamiglia) btnAddFamiglia.onclick = ()=>{ if(isAdminMode) mostraModaleFamiglia(null, []); };
+const btnAddArticolo = document.getElementById('btnAggiungiArticolo');
+if (btnAddArticolo) btnAddArticolo.onclick = ()=>{ if(isAdminMode) mostraModaleArticolo(null); };
+const btnTorna = document.getElementById('btnTornaHome');
+if (btnTorna) btnTorna.onclick = ()=> window.location.href='web.html';
+const btnHome = document.getElementById('btnHome');
+if (btnHome) btnHome.onclick = ()=> window.location.href='web.html';
+const searchFam = document.getElementById('ricercaFamiglie');
+if (searchFam) searchFam.addEventListener('input', ()=> visualizza());
+const searchArt = document.getElementById('ricercaArticoli');
+if (searchArt) searchArt.addEventListener('input', ()=> visualizza());
 
+// ==================== AVVIO ====================
 const savedAdmin = localStorage.getItem('web_admin_mode');
 if(savedAdmin === 'true') isAdminMode = true;
 caricaLinkDaFile().then(()=>{
     caricaTestiDaFile().then(()=>{
-        caricaTutti().then(()=>{ aggiornaUIAdmin(); inizializzaTastoCaricaFoto(); });
+        caricaTutti().then(()=>{
+            aggiornaUIAdmin();
+            inizializzaTastoCaricaFoto();
+        });
     });
 });
 </script>
