@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
         
         .header {
             background: white;
@@ -69,6 +69,7 @@
             max-width: 1200px;
             margin: 50px auto;
             padding: 0 20px;
+            flex: 1;
         }
         .team-title {
             text-align: center;
@@ -152,19 +153,6 @@
             text-decoration: none;
             font-size: 0.85rem;
         }
-        
-        .btn-admin {
-            background: #f1c40f;
-            color: #2c3e50;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        .btn-admin:hover { background: #e67e22; color: white; }
-        .btn-admin.active { background: #27ae60; color: white; }
         
         .modal-overlay {
             position: fixed;
@@ -273,6 +261,18 @@
             margin-top: 50px;
             font-size: 0.8rem;
         }
+        .footer-admin {
+            background: none;
+            border: none;
+            color: #f1c40f;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        .footer-admin:hover {
+            color: #e67e22;
+        }
         
         @media (max-width: 768px) {
             .team-card { width: 280px; }
@@ -285,8 +285,8 @@
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area" id="btnHome">
-            <div class="logo-rettangolo" id="logoRettangolo">
+        <div class="logo-area" id="logoRettangolo">
+            <div class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
@@ -303,13 +303,12 @@
     <div id="teamGrid" class="team-grid">
         <div style="text-align: center; width: 100%;">Caricamento team...</div>
     </div>
-    <div style="text-align: center; margin-top: 30px;">
-        <button id="btnAdminTeam" class="btn-admin">🔐 AREA ADMIN</button>
-    </div>
+    <!-- Nessun pulsante admin qui, ora si attiva con pressione lunga sul logo -->
 </div>
 
 <footer>
-    © dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati
+    <span id="footerText">© dal 1990 inSAPA s.a.s. - P.IVA 0 643 958 0 488 - ✉️ insapasas@gmail.com - Tutti i diritti riservati</span>
+    <button id="btnDisattivaAdmin" class="footer-admin" style="display:none;">🔒 DISATTIVA ADMIN</button>
 </footer>
 
 <script>
@@ -322,7 +321,6 @@ const firebaseConfig = {
     messagingSenderId: "331230245928",
     appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -330,30 +328,61 @@ const db = firebase.firestore();
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let teamData = [];
+let pressTimer = null;
 
 // ==================== LOGO ====================
 function caricaLogo() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     fetch('icons/logo.jpg').then(r => {
-        if (r.ok) {
-            logoImg.src = 'icons/logo.jpg';
-            logoImg.style.display = 'block';
-            logoSpan.style.display = 'none';
-        } else {
-            fetch('icons/logo.png').then(r2 => {
-                if (r2.ok) {
-                    logoImg.src = 'icons/logo.png';
-                    logoImg.style.display = 'block';
-                    logoSpan.style.display = 'none';
-                }
-            }).catch(() => {});
-        }
-    }).catch(() => {});
+        if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; }
+        else { fetch('icons/logo.png').then(r2 => { if(r2.ok){ logoImg.src='icons/logo.png'; logoImg.style.display='block'; logoSpan.style.display='none'; } }).catch(()=>{}); }
+    }).catch(()=>{});
 }
 caricaLogo();
 
-// ==================== GESTIONE LINK PER LOGO ====================
+// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
+function mostraModalePassword() {
+    const modal = document.createElement('div'); modal.className='modal-overlay';
+    modal.innerHTML=`<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnVerifica').onclick = ()=>{
+        const pwd = document.getElementById('passwordAdmin').value;
+        if(pwd === ADMIN_PASSWORD){
+            isAdminMode=true; localStorage.setItem('organizzazione_admin_mode','true');
+            showToast("✅ Modalità admin attivata!");
+            aggiornaUIAdmin();
+            modal.remove();
+        } else showToast("❌ Password errata!", true);
+    };
+    document.getElementById('btnAnnulla').onclick = ()=>modal.remove();
+}
+function disattivaModalitaAdmin() {
+    isAdminMode=false; localStorage.removeItem('organizzazione_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIAdmin();
+}
+
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('mousedown', () => {
+    pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000);
+});
+logoDiv.addEventListener('mouseup', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+logoDiv.addEventListener('mouseleave', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePassword(); pressTimer=null; }, 3000); });
+logoDiv.addEventListener('touchend', () => { if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } });
+
+function aggiornaUIAdmin() {
+    const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
+    if(isAdminMode){
+        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
+    } else {
+        if(btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
+    }
+    visualizzaTeam();
+}
+
+// ==================== LINK LOGO (doppio tap) ====================
 let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 async function caricaLinkDaFile() {
     try {
@@ -368,7 +397,7 @@ async function caricaLinkDaFile() {
 }
 function apriLinkPrincipale() { if(linkPrincipale) window.open(linkPrincipale,'_blank'); else showToast("Link principale non configurato",true); }
 function apriLinkSecondario() { if(linkSecondario) window.open(linkSecondario,'_blank'); else showToast("Link secondario non configurato",true); }
-document.getElementById('logoRettangolo').addEventListener('click',(e)=>{
+logoDiv.addEventListener('click',(e)=>{
     const now = Date.now();
     if(now - lastTap < 300 && lastTap>0){ e.stopPropagation(); apriLinkSecondario(); lastTap=0; }
     else { lastTap=now; setTimeout(()=>{ if(lastTap && Date.now()-lastTap>300){ apriLinkPrincipale(); lastTap=0; } },300); }
@@ -530,68 +559,38 @@ async function eliminaMembroTeam(id) {
     }
 }
 
-// ==================== ADMIN MODE ====================
-function mostraModalePassword() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO ADMIN</h3>
-            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
-            <div class="modal-buttons">
-                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnVerifica').onclick = () => {
-        const pwd = document.getElementById('passwordAdmin').value;
-        if (pwd === ADMIN_PASSWORD) {
-            isAdminMode = true;
-            localStorage.setItem('organizzazione_admin_mode', 'true');
-            showToast("✅ Modalità admin attivata!");
-            aggiornaUIAdmin();
-            modal.remove();
+// ==================== CARICA TESTI DA FILE ESTERNO (solo footer) ====================
+async function caricaTestiDaFile() {
+    try {
+        const response = await fetch('web_testa_piede.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/);
+            let footerText = "";
+            for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith("footer:")) footerText = line.substring(7).trim();
+            }
+            if (footerText) document.getElementById('footerText').innerText = footerText;
         } else {
-            showToast("❌ Password errata!", true);
+            console.warn("web_testa_piede.html non trovato");
         }
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-
-function disattivaModalitaAdmin() {
-    isAdminMode = false;
-    localStorage.removeItem('organizzazione_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIAdmin();
-}
-
-function aggiornaUIAdmin() {
-    const btnAdmin = document.getElementById('btnAdminTeam');
-    if (isAdminMode) {
-        btnAdmin.textContent = "🔒 DISATTIVA ADMIN";
-        btnAdmin.classList.add('active');
-    } else {
-        btnAdmin.textContent = "🔐 AREA ADMIN";
-        btnAdmin.classList.remove('active');
+    } catch(e) {
+        console.warn("Errore caricamento web_testa_piede.html:", e);
     }
-    visualizzaTeam();
 }
 
 // ==================== EVENTI ====================
-document.getElementById('btnAdminTeam').onclick = () => {
-    if (isAdminMode) disattivaModalitaAdmin();
-    else mostraModalePassword();
-};
+document.getElementById('btnDisattivaAdmin').onclick = () => { if(isAdminMode) disattivaModalitaAdmin(); };
 document.getElementById('btnHome').onclick = () => window.location.href = 'web.html';
 
 // ==================== AVVIO ====================
 const savedAdminMode = localStorage.getItem('organizzazione_admin_mode');
 if (savedAdminMode === 'true') isAdminMode = true;
 caricaLinkDaFile().then(() => {
-    caricaTeam().then(() => aggiornaUIAdmin());
+    caricaTestiDaFile().then(() => {
+        caricaTeam().then(() => aggiornaUIAdmin());
+    });
 });
 </script>
 <script src="version.js"></script>
