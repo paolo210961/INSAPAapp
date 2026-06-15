@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.07</title>
+    <title>inSAPA - Agenti vA.6.08</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -144,13 +144,25 @@
         .iframe-container { flex: 1; background: white; }
         .iframe-container iframe { width: 100%; height: 100%; border: none; }
         
-        /* Modale NOTE */
+        /* Modale NOTE - versione ottimizzata */
         .modal-note-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-note-content { background: white; border-radius: 24px; width: 90%; max-width: 500px; padding: 20px; }
         .modal-note-content h3 { margin: 0 0 15px 0; color: #2c3e50; }
         .modal-note-content textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: vertical; min-height: 150px; margin-bottom: 15px; }
-        .modal-note-buttons { display: flex; gap: 10px; justify-content: flex-end; }
-        .modal-note-buttons button { width: auto; margin: 0; padding: 8px 16px; }
+        .modal-note-buttons { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .modal-note-buttons button { 
+            flex: 1;
+            min-width: calc(25% - 10px);
+            margin: 0; 
+            padding: 10px 8px; 
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
         
         /* Modale ordine - stile tabella (testata fissa) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
@@ -220,10 +232,6 @@
             padding: 10px;
             font-size: 0.9rem;
             margin: 0;
-        }
-        /* Stile speciale per pulsante NOTE su mobile (NASCOSTO perché ora c'è nella barra superiore) */
-        .btn-note-modal {
-            display: none !important;
         }
         .tabella-articoli-container {
             flex: 1;
@@ -338,6 +346,19 @@
             .note-field-actions { justify-content: flex-end; }
             .modal-link-buttons { gap: 8px; }
             .modal-link-btn, .modal-note-btn { padding: 8px 12px; font-size: 0.8rem; }
+            
+            /* Versione mobile per i bottoni del modale NOTE */
+            .modal-note-buttons { 
+                gap: 8px;
+            }
+            .modal-note-buttons button { 
+                flex: 1;
+                min-width: calc(25% - 8px);
+                padding: 10px 4px;
+                font-size: 0.75rem;
+                white-space: normal;
+                word-break: keep-all;
+            }
         }
     </style>
 </head>
@@ -422,15 +443,13 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
-let notaCorrente = ""; // Variabile per memorizzare la nota temporanea
+let notaCorrente = "";
 
 let linkPrincipale = "", linkSecondario = "";
 
-// Gestione modali minimizzabili
 let modaliAperti = [];
 let nextModalId = 1;
 
-// ------------------ PERSISTENZA ORDINE IN sessionStorage ------------------
 const STORAGE_KEY = "ordineInCorso";
 
 function salvaOrdineInStorage(id, cliente, articoli, qMap, nota) {
@@ -483,7 +502,6 @@ function caricaOrdineDaStorage() {
         return null;
     }
 }
-// -------------------------------------------------------------------------
 
 function aggiungiBarrettaMinimizzata(id, titolo) {
     const container = document.getElementById('minimizedBarContainer');
@@ -539,7 +557,6 @@ function chiudiModale(id) {
     }
 }
 
-// Funzione per aprire modale listino (iframe)
 function apriModaleListinoIframe() {
     const id = nextModalId++;
     const modal = document.createElement('div');
@@ -563,7 +580,6 @@ function apriModaleListinoIframe() {
     modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
-// ================== FUNZIONI PER LINK E NOTE ==================
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -591,7 +607,6 @@ function apriAdmin() {
     showToast("Accesso ADMIN");
 }
 
-// Funzioni per la gestione della NOTA
 function apriModaleNote() {
     const modal = document.createElement('div');
     modal.className = 'modal-note-overlay';
@@ -650,8 +665,6 @@ function aggiornaCampoNotePC() {
 function creaCampoNotePC() {
     const dettaglioDiv = document.getElementById('dettaglioAgenti');
     if (!dettaglioDiv) return;
-    
-    // Verifica se esiste già
     if (document.getElementById('noteFieldContainer')) return;
     
     const noteHtml = `
@@ -685,7 +698,6 @@ function azzeraNota() {
     showToast("Nota azzerata, pronta per il prossimo ordine");
 }
 
-// ================== FUNZIONI PER ORDINI, CLIENTI, ECC. ==================
 function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '>'); }
 
 function showToast(msg, isError = false) {
@@ -872,12 +884,13 @@ function inviaScadenzeWhatsApp(cliente) {
         setTimeout(() => showToast("Se WhatsApp non si apre, verifica di averlo installato."), 1000);
     }
 }
+
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
 function generaHtmlOrdine(cliente, articoli, nota) {
     let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
     for (let a of articoli) html += '<tr><td style="border:1px solid #ddd;padding:8px;">'+a.codice+'</td><td style="border:1px solid #ddd;padding:8px;">'+a.descrizione+'</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">'+a.quantita+' pz</td></tr>';
-    html += '</tbody></tr>';
+    html += '</tbody></table>';
     if (nota && nota.trim() !== "") {
         html += '<div style="margin-top:20px;padding:12px;background:#fff3cd;border-left:4px solid #f1c40f;font-size:12px;"><strong>📝 NOTA:</strong><br>' + nota.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + '</div>';
     }
@@ -925,7 +938,6 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
     const id = idPrefixed !== null ? idPrefixed : nextModalId++;
     const isDesktop = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
     
-    // Ripristino nota se presente
     if (notaPrestored !== null) notaCorrente = notaPrestored;
     
     const modalDiv = document.createElement('div');
@@ -943,7 +955,6 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
                     <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
                     <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
                 </div>
-                <!-- NUOVA RIGA PULSANTI LINK e NOTE dentro il modale -->
                 <div class="modal-link-buttons">
                     <button id="modalBtnLink1_${id}" class="modal-link-btn">🔗 Link-01</button>
                     <button id="modalBtnNote_${id}" class="modal-note-btn">📝 NOTE</button>
@@ -970,7 +981,6 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
     let qMap = qMapPrestored ? { ...qMapPrestored } : {};
     modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap, nota: notaCorrente });
     
-    // Aggiungo eventi per i nuovi pulsanti nel modale
     document.getElementById(`modalBtnLink1_${id}`).onclick = () => apriLink(1);
     document.getElementById(`modalBtnLink2_${id}`).onclick = () => apriLink(2);
     document.getElementById(`modalBtnNote_${id}`).onclick = () => apriModaleNote();
@@ -983,7 +993,7 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
             filtered = articoli.filter(a => a.codice.toLowerCase().includes(low) || a.descrizione.toLowerCase().includes(low));
         }
         if (!filtered.length) {
-            tbody.innerHTML = '</table><td colspan="4" style="text-align:center; padding:40px;">Nessun articolo trovato</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px;">Nessun articolo trovato</td></tr>';
             return;
         }
         let html = '';
@@ -1140,7 +1150,7 @@ function mostraDettaglioCliente(codice) {
         html += `</div>`;
     } else { html += '<div class="scadenze-box">Nessun ordine per ' + cliente.ragione + '</div>'; }
     document.getElementById('dettaglioAgenti').innerHTML = html;
-    creaCampoNotePC(); // Aggiungo il campo note in alto
+    creaCampoNotePC();
     document.querySelectorAll('.articolo-item').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
@@ -1233,11 +1243,9 @@ async function caricaListinoGlobale(file) {
     } catch(e) { alert("Errore: "+e.message); return false; }
 }
 
-// Event listeners
 document.getElementById('hamburgerBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); };
 document.addEventListener('click', (e) => { let nav = document.getElementById('navGrid'); if (!nav.contains(e.target) && !document.getElementById('hamburgerBtn').contains(e.target)) nav.classList.remove('open'); });
 
-// Logo con pressione lunga per ADMIN
 const logoDivEl = document.getElementById('logoRettangolo');
 let pressTimer = null;
 logoDivEl.addEventListener('mousedown', () => {
@@ -1258,7 +1266,6 @@ logoDivEl.addEventListener('mouseleave', () => {
         pressTimer = null;
     }
 });
-// Per touch screen
 logoDivEl.addEventListener('touchstart', (e) => {
     pressTimer = setTimeout(() => {
         apriAdmin();
@@ -1294,15 +1301,15 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
 document.getElementById('fileInput').onchange = async (e) => { if (e.target.files.length) await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('fileListinoInput').onchange = async (e) => { if (e.target.files.length) { await caricaListinoGlobale(e.target.files[0]); e.target.value = ''; } };
 
-// All'avvio: carica agenti e poi ripristina eventuale ordine in sessionStorage
 Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
     caricaLogoSaved();
 });
-</script>
-<script>
-try {
-    if (typeof version !== 'undefined') console.log("Version:", version);
-} catch(e) {}
+
+function caricaLogoSaved() {
+    const logoImg = document.getElementById('logoImmagine');
+    const logoSpan = document.getElementById('logoSpan');
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+}
 </script>
 </body>
 </html>
