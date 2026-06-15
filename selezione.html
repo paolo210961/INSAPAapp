@@ -209,8 +209,11 @@ document.getElementById('btnContabilita').onclick = () => {
     });
 };
 
+// MODIFICA: Aggiunta protezione password anche per AGENTI
 document.getElementById('btnAgenti').onclick = () => {
-    window.location.href = 'agenti.html';
+    mostraPasswordOverlay((success) => {
+        if (success) window.location.href = 'agenti.html';
+    });
 };
 
 // ==================== REGISTRAZIONE SERVICE WORKER PER PWA ====================
