@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.04</title>
+    <title>inSAPA - Agenti vA.6.05</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -108,8 +108,26 @@
             margin-bottom: 15px;
             flex-shrink: 0;
             border-left: 4px solid #e67e22;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .cliente-info-modale p { margin: 5px 0; font-size: 0.9rem; }
+        .btn-note {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .btn-note:hover { background: #e67e22; transform: translateY(-1px); }
+        
         .ricerca-articolo-ordine {
             margin-bottom: 15px;
             flex-shrink: 0;
@@ -135,6 +153,9 @@
             padding: 10px;
             font-size: 0.9rem;
             margin: 0;
+        }
+        .btn-group-modal .btn-note {
+            flex: 0.5;
         }
         .tabella-articoli-container {
             flex: 1;
@@ -189,6 +210,37 @@
         }
         .codice-col { font-weight: bold; font-family: monospace; }
         .descrizione-col { max-width: 300px; word-break: break-word; }
+        
+        /* Modale nota */
+        .modal-nota-content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-nota-content h3 { margin: 0 0 20px; color: #2c3e50; }
+        .modal-nota-content textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 120px;
+        }
+        .modal-nota-content .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-nota-content .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            margin: 0;
+        }
         
         /* Barretta minimizzata */
         .minimized-bar-container { position: fixed; bottom: 0; left: 0; right: 0; z-index: 3000; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; }
@@ -245,6 +297,7 @@
             .codice-col { min-width: 70px; }
             .descrizione-col { max-width: 180px; }
             .ordine-tabella input { width: 60px; padding: 4px; }
+            .btn-group-modal .btn-note { flex: 0.4; font-size: 0.75rem; padding: 8px 4px; }
         }
     </style>
 </head>
@@ -307,7 +360,6 @@
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<!-- Vecchio badge versione rimosso -->
 
 <script>
 // Firebase configuration
@@ -335,6 +387,65 @@ let linkPrincipale = "", linkSecondario = "";
 // Gestione modali minimizzabili
 let modaliAperti = [];
 let nextModalId = 1;
+
+// ------------------ GESTIONE NOTE ------------------
+function getNotaKey(clienteId) {
+    return `nota_ordine_${clienteId}_${new Date().toISOString().slice(0,10)}`;
+}
+
+function salvaNota(clienteId, nota) {
+    const key = getNotaKey(clienteId);
+    if (nota && nota.trim() !== '') {
+        localStorage.setItem(key, nota);
+    } else {
+        localStorage.removeItem(key);
+    }
+}
+
+function getNota(clienteId) {
+    const key = getNotaKey(clienteId);
+    return localStorage.getItem(key) || '';
+}
+
+function eliminaNota(clienteId) {
+    const key = getNotaKey(clienteId);
+    localStorage.removeItem(key);
+}
+
+function mostraModaleNota(clienteId, callback) {
+    const notaCorrente = getNota(clienteId);
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal-overlay';
+    modalDiv.innerHTML = `
+        <div class="modal-nota-content">
+            <h3>📝 NOTE ORDINE</h3>
+            <textarea id="notaTesto" placeholder="Scrivi qui le tue note... (verranno stampate nel PDF)">${escapeHtml(notaCorrente)}</textarea>
+            <div class="modal-buttons">
+                <button id="btnSalvaNota" class="btn-success">💾 SALVA</button>
+                <button id="btnEliminaNota" class="btn-danger">🗑 ELIMINA</button>
+                <button id="btnAnnullaNota" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    document.getElementById('btnSalvaNota').onclick = () => {
+        const nuovaNota = document.getElementById('notaTesto').value;
+        salvaNota(clienteId, nuovaNota);
+        modalDiv.remove();
+        if (callback) callback(nuovaNota);
+        showToast("✅ Nota salvata!");
+    };
+    document.getElementById('btnEliminaNota').onclick = () => {
+        eliminaNota(clienteId);
+        modalDiv.remove();
+        if (callback) callback('');
+        showToast("🗑 Nota eliminata!");
+    };
+    document.getElementById('btnAnnullaNota').onclick = () => {
+        modalDiv.remove();
+    };
+}
 
 // ------------------ PERSISTENZA ORDINE IN sessionStorage ------------------
 const STORAGE_KEY = "ordineInCorso";
@@ -370,12 +481,11 @@ function caricaOrdineDaStorage() {
     try {
         const data = JSON.parse(saved);
         if (!data.cliente || !data.articoli) return null;
-        // Ricostruisci l'oggetto cliente (le funzioni successive si aspettano che esista un oggetto cliente con ordini)
         const cliente = {
             codice: data.cliente.codice,
             ragione: data.cliente.ragione,
             scadenze: data.cliente.scadenze || [],
-            ordini: data.articoli  // importante: per apriModaleOrdine serve cliente.ordini
+            ordini: data.articoli
         };
         return {
             cliente: cliente,
@@ -388,7 +498,6 @@ function caricaOrdineDaStorage() {
         return null;
     }
 }
-// -------------------------------------------------------------------------
 
 function aggiungiBarrettaMinimizzata(id, titolo) {
     const container = document.getElementById('minimizedBarContainer');
@@ -415,8 +524,6 @@ function minimizzaModale(id) {
     let titolo = modale.tipo === 'ordine' ? '📝 Ordine in corso' : '📋 Listino';
     aggiungiBarrettaMinimizzata(id, titolo);
     modale.minimizzato = true;
-    
-    // Se è un ordine, salva lo stato in sessionStorage
     if (modale.tipo === 'ordine' && modale.cliente && modale.articoli && modale.qMap) {
         salvaOrdineInStorage(id, modale.cliente, modale.articoli, modale.qMap);
     }
@@ -428,7 +535,6 @@ function ripristinaModale(id) {
     if (modale.modalElement) modale.modalElement.style.display = 'flex';
     rimuoviBarrettaMinimizzata(id);
     modale.minimizzato = false;
-    // Dopo ripristino, rimuovi lo storage perché non serve più tenerlo (tanto se lo riminimizza lo risalva)
     if (modale.tipo === 'ordine') {
         rimuoviOrdineDaStorage();
     }
@@ -446,7 +552,6 @@ function chiudiModale(id) {
     }
 }
 
-// Funzione per aprire modale listino (iframe)
 function apriModaleListinoIframe() {
     const id = nextModalId++;
     const modal = document.createElement('div');
@@ -470,8 +575,8 @@ function apriModaleListinoIframe() {
     modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
-// ================== FUNZIONI PER ORDINI, CLIENTI, ECC. ==================
 function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -556,7 +661,6 @@ async function selezionaAgente(codice) {
     document.getElementById('cercaArticoloInline').value = '';
     document.getElementById('dettaglioAgenti').innerHTML = '';
     resetModificheNonSalvate();
-    // Dopo aver caricato i clienti, proviamo a ripristinare un eventuale ordine salvato
     ripristinaOrdineDaStorageSeNecessario();
 }
 
@@ -647,33 +751,38 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
-// 🔁 MODIFICA QUI: usa whatsapp://send per aprire direttamente l'app desktop
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza"); return; }
     let msg = "SCADENZE CLIENTE\n"+cliente.codice+" - "+cliente.ragione+"\n\n";
     let tot = 0;
     for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
     msg += "\nTOTALE: EUR "+tot.toFixed(2);
-    // Usa protocollo whatsapp:// per aprire l'app desktop (se installata) senza passare dal browser
     window.open("whatsapp://send?text="+encodeURIComponent(msg), '_blank');
 }
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
-function generaHtmlOrdine(cliente, articoli) {
+function generaHtmlOrdine(cliente, articoli, nota) {
     let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
     for (let a of articoli) html += '<tr><td style="border:1px solid #ddd;padding:8px;">'+a.codice+'</td><td style="border:1px solid #ddd;padding:8px;">'+a.descrizione+'</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">'+a.quantita+' pz</td></tr>';
-    html += '</tbody></table><div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
+    html += '</tbody></table>';
+    if (nota && nota.trim() !== '') {
+        html += '<div class="note-footer" style="margin-top:30px; border-top:1px solid #ccc; padding-top:15px;"><strong>📝 Note:</strong><br> '+nota.replace(/\n/g, '<br>')+'</div>';
+    }
+    html += '<div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
     return html;
 }
-function stampaPDF(cliente, articoli) {
+
+function stampaPDF(cliente, articoli, nota) {
     const w = window.open('', '_blank');
-    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente,articoli)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
+    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente, articoli, nota)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
     w.document.close();
 }
-function inviaEmailOrdine(cliente, articoli) {
+
+function inviaEmailOrdine(cliente, articoli, nota) {
     let subj = "ORDINE da "+cliente.codice+" - "+cliente.ragione;
     let body = "ORDINE CLIENTE: "+cliente.codice+" - "+cliente.ragione+"\n\nARTICOLI ORDINATI:\n----------------------------------------\n";
     for (let a of articoli) body += "📦 "+a.codice+" - "+a.descrizione+"\n   Quantità: "+a.quantita+" pz\n\n";
+    if (nota && nota.trim() !== '') body += "\n📝 NOTE:\n"+nota+"\n\n";
     body += "----------------------------------------\nOrdine generato da inSAPA Agenti il "+new Date().toLocaleDateString('it-IT');
     window.location.href = "mailto:?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
 }
@@ -685,7 +794,6 @@ function calcolaUltimaDataArticolo(art) {
     return dates[0];
 }
 
-// Funzione principale per aprire il modale ordine (con supporto al ripristino delle quantità)
 function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     if (!cliente) { alert("Seleziona un cliente!"); return; }
     if (!cliente.ordini || !cliente.ordini.length) { alert("Nessun articolo disponibile per questo cliente."); return; }
@@ -700,6 +808,7 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     const id = idPrefixed !== null ? idPrefixed : nextModalId++;
     const isDesktop = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
     const btnText = isDesktop ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
+    const notaCorrente = getNota(cliente.codice);
     
     const modalDiv = document.createElement('div');
     modalDiv.className = 'modal-overlay';
@@ -713,20 +822,26 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
             </div>
             <div class="modal-ordine-body">
                 <div class="cliente-info-modale">
-                    <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
-                    <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
+                    <div>
+                        <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
+                        <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
+                    </div>
+                    <button id="btnNota_${id}" class="btn-note">📝 NOTE</button>
                 </div>
                 <div class="ricerca-articolo-ordine">
                     <input type="text" id="ricercaOrd_${id}" placeholder="🔍 Cerca articolo per codice o descrizione...">
                 </div>
                 <div class="tabella-articoli-container" id="tabellaContainer_${id}">
                     <table class="ordine-tabella" id="tabellaOrdine_${id}">
-                        <thead><tr><th>Codice</th><th>Descrizione</th><th>Ultimo acquisto</th><th style="text-align:center">Quantità</th></tr></thead>
+                        <thead>
+                            <tr><th>Codice</th><th>Descrizione</th><th>Ultimo acquisto</th><th style="text-align:center">Quantità</th></tr>
+                        </thead>
                         <tbody id="tabellaBody_${id}"></tbody>
                     </table>
                 </div>
                 <div class="btn-group-modal">
                     <button id="btnConferma_${id}" class="btn-success">${btnText}</button>
+                    <button id="btnNotaMobile_${id}" class="btn-note" style="display:none;">📝 NOTE</button>
                     <button id="btnApriListino_${id}" class="btn-primary">📋 APRI LISTINO</button>
                 </div>
             </div>
@@ -734,8 +849,28 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     `;
     document.body.appendChild(modalDiv);
     
+    // Mostra/nascondi tasto nota mobile in base alla larghezza
+    const btnNotaMobile = document.getElementById(`btnNotaMobile_${id}`);
+    const isMobile = window.innerWidth <= 768;
+    if (btnNotaMobile) btnNotaMobile.style.display = isMobile ? 'inline-block' : 'none';
+    
     let qMap = qMapPrestored ? { ...qMapPrestored } : {};
     modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap });
+    
+    // Gestione tasto nota (sia desktop che mobile)
+    const btnNota = document.getElementById(`btnNota_${id}`);
+    if (btnNota) {
+        btnNota.onclick = () => {
+            mostraModaleNota(cliente.codice, (nuovaNota) => {
+                // Aggiorna eventuale visualizzazione se necessario
+            });
+        };
+    }
+    if (btnNotaMobile) {
+        btnNotaMobile.onclick = () => {
+            mostraModaleNota(cliente.codice, (nuovaNota) => {});
+        };
+    }
     
     function renderTabella(search = '') {
         const tbody = document.getElementById(`tabellaBody_${id}`);
@@ -797,8 +932,9 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
             if (q > 0) selected.push({ codice: a.codice, descrizione: a.descrizione, quantita: q });
         }
         if (!selected.length) { alert("Inserisci almeno una quantità > 0"); return; }
-        if (isDesktop) stampaPDF(cliente, selected);
-        else inviaEmailOrdine(cliente, selected);
+        const nota = getNota(cliente.codice);
+        if (isDesktop) stampaPDF(cliente, selected, nota);
+        else inviaEmailOrdine(cliente, selected, nota);
         chiudiModale(id);
     };
     document.getElementById(`btnApriListino_${id}`).onclick = () => { apriModaleListinoIframe(); };
@@ -806,39 +942,31 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     modalDiv.querySelector('.close-modal-btn').onclick = () => chiudiModale(id);
 }
 
-// Ripristino automatico all'avvio
 function ripristinaOrdineDaStorageSeNecessario() {
     const ordineSalvato = caricaOrdineDaStorage();
     if (!ordineSalvato) return;
     const { cliente, articoli, qMap, idSalvato } = ordineSalvato;
-    // Verifica che il cliente esista ancora nella lista clientiUnici (potrebbe essere stato cancellato?)
     const clienteEsistente = clientiUnici.find(c => c.codice === cliente.codice);
     if (!clienteEsistente) {
-        // Il cliente non esiste più, pulisci storage
         rimuoviOrdineDaStorage();
         return;
     }
-    // Ricostruisci l'oggetto cliente con i dati aggiornati (importante: deve avere ordini)
     const clienteCompleto = {
         ...clienteEsistente,
         ordini: clienteEsistente.ordini,
         scadenze: clienteEsistente.scadenze || []
     };
-    // Usa l'id salvato se non già in uso, altrimenti generane uno nuovo
     let finalId = idSalvato;
     if (modaliAperti.some(m => m.id === finalId)) {
         finalId = nextModalId++;
     } else {
-        // Assicuriamoci che nextModalId sia maggiore di finalId
         if (finalId >= nextModalId) nextModalId = finalId + 1;
     }
     apriModaleOrdine(clienteCompleto, qMap, finalId);
-    // Dopo aver aperto, minimizzalo subito perché l'utente aveva lo stato minimizzato
     const modaleAppenaAperto = modaliAperti.find(m => m.id === finalId);
     if (modaleAppenaAperto) {
         minimizzaModale(finalId);
     }
-    // Rimuovi lo storage per evitare duplicati (dopo il ripristino)
     rimuoviOrdineDaStorage();
 }
 
@@ -1026,10 +1154,9 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
 document.getElementById('fileInput').onchange = async (e) => { if (e.target.files.length) await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('fileListinoInput').onchange = async (e) => { if (e.target.files.length) { await caricaListinoGlobale(e.target.files[0]); e.target.value = ''; } };
 
-// All'avvio: carica agenti e poi ripristina eventuale ordine in sessionStorage
+// All'avvio
 Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
     caricaLogoSaved();
-    // Il ripristino avviene dentro selezionaAgente -> ripristinaOrdineDaStorageSeNecessario
 });
 </script>
 <script src="version.js"></script>
