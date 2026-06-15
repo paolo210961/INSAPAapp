@@ -345,7 +345,7 @@
             <div id="logoRettangolo" class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">LOGO</span>
-                <div class="logo-tooltip">Tieni premuto per ADMIN</div>
+                <div class="logo-tooltip">Clicca per andare su insapa.it</div>
             </div>
         </div>
         <div class="nav-box">
@@ -396,7 +396,7 @@
 
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
-<footer>Logo: tieni premuto per ADMIN</footer>
+<footer>Logo: clicca per aprire insapa.it</footer>
 
 <script>
 // Firebase configuration
@@ -584,7 +584,7 @@ function apriLink(numeroLink) {
 
 function apriAdmin() {
     window.open('https://www.insapa.it/', '_blank');
-    showToast("Accesso ADMIN");
+    showToast("Accesso sito principale");
 }
 
 // Funzioni per la gestione della NOTA
@@ -1232,38 +1232,11 @@ async function caricaListinoGlobale(file) {
 document.getElementById('hamburgerBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); };
 document.addEventListener('click', (e) => { let nav = document.getElementById('navGrid'); if (!nav.contains(e.target) && !document.getElementById('hamburgerBtn').contains(e.target)) nav.classList.remove('open'); });
 
-// Logo con pressione lunga per ADMIN
+// LOGO: solo clic breve (nessuna pressione lunga)
 const logoDivEl = document.getElementById('logoRettangolo');
-let pressTimer = null;
-logoDivEl.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => {
-        apriAdmin();
-        pressTimer = null;
-    }, 500);
-});
-logoDivEl.addEventListener('mouseup', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDivEl.addEventListener('mouseleave', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDivEl.addEventListener('touchstart', (e) => {
-    pressTimer = setTimeout(() => {
-        apriAdmin();
-        pressTimer = null;
-    }, 500);
-});
-logoDivEl.addEventListener('touchend', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
+logoDivEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    apriAdmin();
 });
 
 document.getElementById('selectAgente').onchange = (e) => {
