@@ -263,7 +263,7 @@
             <div id="navGrid" class="nav-grid">
                 <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
                 <button class="nav-btn disabled" disabled>AGENTI</button>
-                <button class="nav-btn" onclick="window.location.href='selezione.html'">ESCI</button>
+                <button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button>
             </div>
         </div>
     </div>
@@ -647,13 +647,15 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
+// 🔁 MODIFICA QUI: usa whatsapp://send per aprire direttamente l'app desktop
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza"); return; }
     let msg = "SCADENZE CLIENTE\n"+cliente.codice+" - "+cliente.ragione+"\n\n";
     let tot = 0;
     for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
     msg += "\nTOTALE: EUR "+tot.toFixed(2);
-    window.open("whatsapp://send?text=" + encodeURIComponent(msg), '_blank');
+    // Usa protocollo whatsapp:// per aprire l'app desktop (se installata) senza passare dal browser
+    window.open("whatsapp://send?text="+encodeURIComponent(msg), '_blank');
 }
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
@@ -884,7 +886,7 @@ function buildScadenzeHtml(cliente) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += `</tbody>}</table></div>`;
+    html += `</tbody>}</div>`;
     return html;
 }
 
