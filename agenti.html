@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti</title>
+    <title>inSAPA - Agenti vA.6.04</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -12,7 +12,6 @@
         .header { background: white; padding: 15px 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
         .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 15px; }
         .header-row-bottom { background: #fff3cd; border: 1px solid #ffecb3; border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
-        
         .logo-area { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; }
         .logo-rettangolo { width: 300px; height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -36,82 +35,6 @@
         .btn-ordine-header { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .btn-listino-verde { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
-        
-        /* STILE CAMPO NOTE PC */
-        .note-field-container {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .note-field-label {
-            font-weight: bold;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .note-field-textarea {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 60px;
-        }
-        .note-field-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .note-field-actions button {
-            width: auto;
-            margin: 0;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-        }
-        
-        /* Pulsanti Link e NOTE dentro il modale */
-        .modal-link-buttons {
-            display: flex;
-            gap: 12px;
-            margin: 15px 0;
-            flex-shrink: 0;
-        }
-        .modal-link-btn {
-            flex: 1;
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            text-align: center;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-        .modal-link-btn:hover { background: #219a52; transform: translateY(-1px); }
-        .modal-note-btn {
-            flex: 1;
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            text-align: center;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-        .modal-note-btn:hover { background: #2980b9; transform: translateY(-1px); }
-        
         .tooltip-wrapper { position: relative; display: inline-block; }
         .tooltip-wrapper .tooltip-text { visibility: hidden; width: 280px; background-color: #2c3e50; color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.7rem; font-weight: normal; white-space: normal; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .tooltip-wrapper .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #2c3e50 transparent transparent transparent; }
@@ -143,14 +66,6 @@
         .modal-iframe-header .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; width: auto; margin: 0; padding: 0 0 0 12px; }
         .iframe-container { flex: 1; background: white; }
         .iframe-container iframe { width: 100%; height: 100%; border: none; }
-        
-        /* Modale NOTE */
-        .modal-note-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-note-content { background: white; border-radius: 24px; width: 90%; max-width: 500px; padding: 20px; }
-        .modal-note-content h3 { margin: 0 0 15px 0; color: #2c3e50; }
-        .modal-note-content textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: vertical; min-height: 150px; margin-bottom: 15px; }
-        .modal-note-buttons { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
-        .modal-note-buttons button { width: auto; margin: 0; padding: 8px 16px; }
         
         /* Modale ordine - stile tabella (testata fissa) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
@@ -330,11 +245,6 @@
             .codice-col { min-width: 70px; }
             .descrizione-col { max-width: 180px; }
             .ordine-tabella input { width: 60px; padding: 4px; }
-            .note-field-container { flex-direction: column; align-items: stretch; }
-            .note-field-actions { justify-content: flex-end; }
-            .modal-link-buttons { gap: 8px; }
-            .modal-link-btn, .modal-note-btn { padding: 8px 12px; font-size: 0.8rem; }
-            .modal-note-buttons button { padding: 10px 12px; font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -345,7 +255,7 @@
             <div id="logoRettangolo" class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">LOGO</span>
-                <div class="logo-tooltip">Tieni premuto per ADMIN</div>
+                <div class="logo-tooltip">1 tap: insapa.it</div>
             </div>
         </div>
         <div class="nav-box">
@@ -396,8 +306,7 @@
 
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
-<footer>Logo: tieni premuto per ADMIN</footer>
-
+<footer>Logo: 1 tap → insapa.it</footer>
 <script>
 // Firebase configuration
 const firebaseConfig = {
@@ -418,7 +327,6 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
-let notaCorrente = "";
 
 let linkPrincipale = "", linkSecondario = "";
 
@@ -429,7 +337,7 @@ let nextModalId = 1;
 // ------------------ PERSISTENZA ORDINE IN sessionStorage ------------------
 const STORAGE_KEY = "ordineInCorso";
 
-function salvaOrdineInStorage(id, cliente, articoli, qMap, nota) {
+function salvaOrdineInStorage(id, cliente, articoli, qMap) {
     if (!cliente) return;
     const ordineData = {
         id: id,
@@ -445,8 +353,7 @@ function salvaOrdineInStorage(id, cliente, articoli, qMap, nota) {
             prezzo: a.prezzo,
             sconto1: a.sconto1
         })),
-        qMap: { ...qMap },
-        nota: nota
+        qMap: { ...qMap }
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ordineData));
 }
@@ -471,8 +378,7 @@ function caricaOrdineDaStorage() {
             cliente: cliente,
             articoli: data.articoli,
             qMap: data.qMap || {},
-            idSalvato: data.id,
-            nota: data.nota || ""
+            idSalvato: data.id
         };
     } catch(e) {
         console.error("Errore nel recupero dell'ordine salvato", e);
@@ -506,9 +412,8 @@ function minimizzaModale(id) {
     let titolo = modale.tipo === 'ordine' ? '📝 Ordine in corso' : '📋 Listino';
     aggiungiBarrettaMinimizzata(id, titolo);
     modale.minimizzato = true;
-    
     if (modale.tipo === 'ordine' && modale.cliente && modale.articoli && modale.qMap) {
-        salvaOrdineInStorage(id, modale.cliente, modale.articoli, modale.qMap, modale.nota || "");
+        salvaOrdineInStorage(id, modale.cliente, modale.articoli, modale.qMap);
     }
 }
 
@@ -535,7 +440,6 @@ function chiudiModale(id) {
     }
 }
 
-// Funzione per aprire modale listino (iframe)
 function apriModaleListinoIframe() {
     const id = nextModalId++;
     const modal = document.createElement('div');
@@ -559,148 +463,31 @@ function apriModaleListinoIframe() {
     modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
-// ================== FUNZIONI PER LINK E NOTE ==================
-async function caricaLinkDaFile() {
-    try {
-        const response = await fetch('link.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('<'));
-            if (lines.length >= 1) linkPrincipale = lines[0].trim();
-            if (lines.length >= 2) linkSecondario = lines[1].trim();
-        }
-    } catch(e) {}
-}
-
-function apriLink(numeroLink) {
-    let url = numeroLink === 1 ? linkPrincipale : linkSecondario;
-    if (url && url !== "") {
-        window.open(url, '_blank');
-        showToast(`Apertura Link-0${numeroLink}`);
-    } else {
-        showToast("Tasto non attivo", true);
-    }
-}
-
-function apriAdmin() {
-    window.open('https://www.insapa.it/', '_blank');
-    showToast("Accesso ADMIN");
-}
-
-// Funzioni per la gestione della NOTA
-function apriModaleNote() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-note-overlay';
-    modal.innerHTML = `
-        <div class="modal-note-content">
-            <h3>📝 Nota per ordine</h3>
-            <textarea id="notaTextarea" placeholder="Inserisci qui la tua nota...">${notaCorrente.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-            <div class="modal-note-buttons">
-                <button id="btnSalvaNota" class="btn-success">💾 SALVA</button>
-                <button id="btnModificaNota" class="btn-primary">✏️ MODIFICA</button>
-                <button id="btnEliminaNota" class="btn-danger">🗑️ ELIMINA</button>
-                <button id="btnChiudiNota">❌ CHIUDI</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const textarea = modal.querySelector('#notaTextarea');
-    
-    modal.querySelector('#btnSalvaNota').onclick = () => {
-        notaCorrente = textarea.value;
-        showToast("Nota salvata!");
-        aggiornaCampoNotePC();
-        modal.remove();
-    };
-    
-    modal.querySelector('#btnModificaNota').onclick = () => {
-        textarea.disabled = false;
-        textarea.focus();
-        showToast("Modifica la nota e premi SALVA");
-    };
-    
-    modal.querySelector('#btnEliminaNota').onclick = () => {
-        notaCorrente = "";
-        textarea.value = "";
-        showToast("Nota eliminata!");
-        aggiornaCampoNotePC();
-        modal.remove();
-    };
-    
-    modal.querySelector('#btnChiudiNota').onclick = () => {
-        modal.remove();
-    };
-    
-    textarea.disabled = true;
-}
-
-function aggiornaCampoNotePC() {
-    const container = document.getElementById('noteFieldContainer');
-    if (container) {
-        const textarea = container.querySelector('textarea');
-        if (textarea) textarea.value = notaCorrente;
-    }
-}
-
-function creaCampoNotePC() {
-    const dettaglioDiv = document.getElementById('dettaglioAgenti');
-    if (!dettaglioDiv) return;
-    if (document.getElementById('noteFieldContainer')) return;
-    
-    const noteHtml = `
-        <div id="noteFieldContainer" class="note-field-container">
-            <div class="note-field-label">
-                📝 <strong>NOTA PER ORDINE:</strong>
-            </div>
-            <textarea id="notaCorrentePC" class="note-field-textarea" placeholder="Inserisci una nota da stampare nel PDF...">${notaCorrente.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-            <div class="note-field-actions">
-                <button id="btnApriNotaPC" class="btn-primary" style="background:#3498db;">✏️ MODIFICA</button>
-            </div>
-        </div>
-    `;
-    dettaglioDiv.insertAdjacentHTML('afterbegin', noteHtml);
-    
-    const textareaPC = document.getElementById('notaCorrentePC');
-    if (textareaPC) {
-        textareaPC.addEventListener('input', (e) => {
-            notaCorrente = e.target.value;
-        });
-    }
-    
-    document.getElementById('btnApriNotaPC')?.addEventListener('click', () => {
-        apriModaleNote();
-    });
-}
-
-function azzeraNota() {
-    notaCorrente = "";
-    aggiornaCampoNotePC();
-    showToast("Nota azzerata, pronta per il prossimo ordine");
-}
-
 // ================== FUNZIONI PER ORDINI, CLIENTI, ECC. ==================
-function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '>'); }
+function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+
+// Logo: solo clic breve -> www.insapa.it
+function apriLinkPrincipale() {
+    window.open('https://www.insapa.it', '_blank');
+    showToast("🔗 Apertura sito aziendale");
+}
+function caricaLogoSaved() {
+    const logoImg = document.getElementById('logoImmagine');
+    const logoSpan = document.getElementById('logoSpan');
+    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
+}
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('click', (e) => { e.stopPropagation(); apriLinkPrincipale(); });
+caricaLogoSaved();
 
 function showToast(msg, isError = false) {
     const toast = document.createElement('div');
     toast.className = 'toast-message';
     toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
     toast.innerText = msg;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.color = 'white';
-    toast.style.padding = '8px 16px';
-    toast.style.borderRadius = '30px';
-    toast.style.zIndex = '10000';
-    toast.style.fontSize = '0.85rem';
-    toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
-
 function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
 function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
 function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
@@ -841,62 +628,32 @@ function parseSCA(text) {
 }
 
 function inviaScadenzeWhatsApp(cliente) {
-    if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza da inviare."); return; }
-    let msg = "*SCADENZE CLIENTE*%0A" + cliente.codice + " - " + cliente.ragione + "%0A%0A";
+    if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza"); return; }
+    let msg = "SCADENZE CLIENTE\n"+cliente.codice+" - "+cliente.ragione+"\n\n";
     let tot = 0;
-    for (let s of cliente.scadenze) { 
-        msg += "📅 Scadenza: " + s.scadenza + "%0A";
-        msg += "📄 Data Doc: " + s.dataDoc + "%0A";
-        msg += "🧾 N.Doc: " + s.numDoc + "%0A";
-        msg += "💰 Importo: EUR " + s.importo.toFixed(2) + "%0A---%0A"; 
-        tot += s.importo; 
-    }
-    msg += "%0A💵 *TOTALE: EUR " + tot.toFixed(2) + "*";
-    
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    let url;
-    if (isMobile) {
-        url = "https://wa.me/?text=" + msg;
-        if (confirm("Stai per condividere dati sensibili via WhatsApp. Continuare?")) {
-            window.open(url, '_blank');
-        }
-    } else {
-        url = "whatsapp://send?text=" + msg;
-        window.open(url, '_blank');
-        setTimeout(() => showToast("Se WhatsApp non si apre, verifica di averlo installato."), 1000);
-    }
+    for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
+    msg += "\nTOTALE: EUR "+tot.toFixed(2);
+    window.open("https://wa.me/?text="+encodeURIComponent(msg), '_blank');
 }
-
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
-function generaHtmlOrdine(cliente, articoli, nota) {
+function generaHtmlOrdine(cliente, articoli) {
     let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
     for (let a of articoli) html += '<tr><td style="border:1px solid #ddd;padding:8px;">'+a.codice+'</td><td style="border:1px solid #ddd;padding:8px;">'+a.descrizione+'</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">'+a.quantita+' pz</td></tr>';
-    html += '</tbody></table>';
-    if (nota && nota.trim() !== "") {
-        html += '<div style="margin-top:20px;padding:12px;background:#fff3cd;border-left:4px solid #f1c40f;font-size:12px;"><strong>📝 NOTA:</strong><br>' + nota.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + '</div>';
-    }
-    html += '<div style="margin-top:20px;font-size:12px;color:#666;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
+    html += '</tbody></table><div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
     return html;
 }
-
 function stampaPDF(cliente, articoli) {
     const w = window.open('', '_blank');
-    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente, articoli, notaCorrente)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
+    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente,articoli)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
     w.document.close();
-    azzeraNota();
 }
-
 function inviaEmailOrdine(cliente, articoli) {
     let subj = "ORDINE da "+cliente.codice+" - "+cliente.ragione;
     let body = "ORDINE CLIENTE: "+cliente.codice+" - "+cliente.ragione+"\n\nARTICOLI ORDINATI:\n----------------------------------------\n";
     for (let a of articoli) body += "📦 "+a.codice+" - "+a.descrizione+"\n   Quantità: "+a.quantita+" pz\n\n";
-    if (notaCorrente && notaCorrente.trim() !== "") {
-        body += "\n📝 NOTA:\n----------------------------------------\n" + notaCorrente + "\n\n";
-    }
     body += "----------------------------------------\nOrdine generato da inSAPA Agenti il "+new Date().toLocaleDateString('it-IT');
     window.location.href = "mailto:?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
-    azzeraNota();
 }
 
 function calcolaUltimaDataArticolo(art) {
@@ -906,7 +663,7 @@ function calcolaUltimaDataArticolo(art) {
     return dates[0];
 }
 
-function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, notaPrestored = null) {
+function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     if (!cliente) { alert("Seleziona un cliente!"); return; }
     if (!cliente.ordini || !cliente.ordini.length) { alert("Nessun articolo disponibile per questo cliente."); return; }
     let articoli = [...cliente.ordini];
@@ -920,8 +677,6 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
     const id = idPrefixed !== null ? idPrefixed : nextModalId++;
     const isDesktop = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
     const btnText = isDesktop ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
-    
-    if (notaPrestored !== null) notaCorrente = notaPrestored;
     
     const modalDiv = document.createElement('div');
     modalDiv.className = 'modal-overlay';
@@ -937,12 +692,6 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
                 <div class="cliente-info-modale">
                     <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
                     <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
-                </div>
-                <!-- PULSANTI LINK E NOTE NEL MODALE -->
-                <div class="modal-link-buttons">
-                    <button id="modalBtnLink1_${id}" class="modal-link-btn">🔗 Link-01</button>
-                    <button id="modalBtnNote_${id}" class="modal-note-btn">📝 NOTE</button>
-                    <button id="modalBtnLink2_${id}" class="modal-link-btn">🔗 Link-02</button>
                 </div>
                 <div class="ricerca-articolo-ordine">
                     <input type="text" id="ricercaOrd_${id}" placeholder="🔍 Cerca articolo per codice o descrizione...">
@@ -963,12 +712,7 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
     document.body.appendChild(modalDiv);
     
     let qMap = qMapPrestored ? { ...qMapPrestored } : {};
-    modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap, nota: notaCorrente });
-    
-    // Eventi per i pulsanti Link e NOTE
-    document.getElementById(`modalBtnLink1_${id}`).onclick = () => apriLink(1);
-    document.getElementById(`modalBtnLink2_${id}`).onclick = () => apriLink(2);
-    document.getElementById(`modalBtnNote_${id}`).onclick = () => apriModaleNote();
+    modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap });
     
     function renderTabella(search = '') {
         const tbody = document.getElementById(`tabellaBody_${id}`);
@@ -1042,7 +786,7 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null, nota
 function ripristinaOrdineDaStorageSeNecessario() {
     const ordineSalvato = caricaOrdineDaStorage();
     if (!ordineSalvato) return;
-    const { cliente, articoli, qMap, idSalvato, nota } = ordineSalvato;
+    const { cliente, articoli, qMap, idSalvato } = ordineSalvato;
     const clienteEsistente = clientiUnici.find(c => c.codice === cliente.codice);
     if (!clienteEsistente) {
         rimuoviOrdineDaStorage();
@@ -1059,7 +803,7 @@ function ripristinaOrdineDaStorageSeNecessario() {
     } else {
         if (finalId >= nextModalId) nextModalId = finalId + 1;
     }
-    apriModaleOrdine(clienteCompleto, qMap, finalId, nota);
+    apriModaleOrdine(clienteCompleto, qMap, finalId);
     const modaleAppenaAperto = modaliAperti.find(m => m.id === finalId);
     if (modaleAppenaAperto) {
         minimizzaModale(finalId);
@@ -1106,12 +850,12 @@ function filtraClienti() {
 function buildScadenzeHtml(cliente) {
     let html = `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
                 <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div>
-                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></tr></thead><tbody>`;
+                <table style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#e9ecef"><th>Scadenza</th><th>Data Doc.</th><th>N.Doc</th><th>Importo</th></table></thead><tbody>`;
     for (let s of cliente.scadenze) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += `</tbody>}墨</div>`;
+    html += `</tbody>}</table></div>`;
     return html;
 }
 
@@ -1135,7 +879,6 @@ function mostraDettaglioCliente(codice) {
         html += `</div>`;
     } else { html += '<div class="scadenze-box">Nessun ordine per ' + cliente.ragione + '</div>'; }
     document.getElementById('dettaglioAgenti').innerHTML = html;
-    creaCampoNotePC();
     document.querySelectorAll('.articolo-item').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
@@ -1163,7 +906,6 @@ function filtraArticoli() {
         html += `</div>`;
     } else { html += '<div class="scadenze-box">Nessun articolo trovato</div>'; }
     document.getElementById('dettaglioAgenti').innerHTML = html;
-    creaCampoNotePC();
     document.querySelectorAll('.articolo-item').forEach(el => {
         el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
@@ -1195,7 +937,7 @@ async function caricaFile(files) {
     await salvaDatiAgente();
     aggiornaClienti();
     document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
-    alert("Caricato! ORD: "+datiOrd.length+" clienti, SCA: "+datiSca.length);
+    alert("Caricato! ORD: "+datiOrd.length+" clienti, SCA: "+datiSca.length+" clienti");
     return true;
 }
 
@@ -1231,41 +973,6 @@ async function caricaListinoGlobale(file) {
 // Event listeners
 document.getElementById('hamburgerBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); };
 document.addEventListener('click', (e) => { let nav = document.getElementById('navGrid'); if (!nav.contains(e.target) && !document.getElementById('hamburgerBtn').contains(e.target)) nav.classList.remove('open'); });
-
-// Logo con pressione lunga per ADMIN
-const logoDivEl = document.getElementById('logoRettangolo');
-let pressTimer = null;
-logoDivEl.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => {
-        apriAdmin();
-        pressTimer = null;
-    }, 500);
-});
-logoDivEl.addEventListener('mouseup', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDivEl.addEventListener('mouseleave', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDivEl.addEventListener('touchstart', (e) => {
-    pressTimer = setTimeout(() => {
-        apriAdmin();
-        pressTimer = null;
-    }, 500);
-});
-logoDivEl.addEventListener('touchend', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-
 document.getElementById('selectAgente').onchange = (e) => {
     if (e.target.value && modificheNonSalvate) {
         if (confirm("Modifiche non salvate. Salvare?")) salvaDatiAgente().then(() => selezionaAgente(e.target.value));
@@ -1288,14 +995,7 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
 document.getElementById('fileInput').onchange = async (e) => { if (e.target.files.length) await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('fileListinoInput').onchange = async (e) => { if (e.target.files.length) { await caricaListinoGlobale(e.target.files[0]); e.target.value = ''; } };
 
-function caricaLogoSaved() {
-    const logoImg = document.getElementById('logoImmagine');
-    const logoSpan = document.getElementById('logoSpan');
-    fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
-}
-
-// All'avvio
-Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
+Promise.all([caricaAgenti()]).then(() => {
     caricaLogoSaved();
 });
 </script>
