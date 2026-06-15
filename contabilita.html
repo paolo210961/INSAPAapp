@@ -661,7 +661,7 @@
                 <div id="tabellaContantiContainer" class="scadenze-box" style="display: none;">
                     <h3 id="contantiTitle">💵 INCASSO CONTANTI</h3>
                     <table class="tabella" id="tabellaContanti">
-                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></td></thead>
+                        <thead><tr><th style="width:40px"><input type="checkbox" id="selectAllContanti"></th><th style="width:50px">#</th><th>Data</th><th>Descrizione</th><th class="text-right">Incasso (€)</th></tr></thead>
                         <tbody id="contantiBody"></tbody>
                     </table>
                     <div id="contantiCards" class="cards-container"></div>
@@ -844,12 +844,9 @@ function setupImportField(fieldId) {
     }
 }
 
+// MODIFICATA: ora è sempre true
 function isMeseModificabile(anno, mese) {
-    const oggi = new Date();
-    const annoCorrente = oggi.getFullYear();
-    const meseCorrente = oggi.getMonth();
-    const diffMesi = (annoCorrente - anno) * 12 + (meseCorrente - mese);
-    return diffMesi >= 0 && diffMesi <= 2;
+    return true; // tutti i mesi sono modificabili
 }
 function applyModificationRestrictions(isModifiable) {
     const btnMem = document.getElementById('btnMemorizza');
@@ -1474,7 +1471,7 @@ function esportaReportRagioniere() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td></table>'}
+                    ${rowsHtml || '<tr><td colspan="7" style="text-align:center">Nessun movimento presente</td></tr>'}
                 </tbody>
                 <tfoot>
                     <tr style="background: #f8f9fa; font-weight: bold;">
@@ -1559,7 +1556,7 @@ function esportaPDFMese() {
      </table>
         
         <h3>💵 CONTANTI</h3>
-        <table>
+    <table>
         <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th></tr></thead>
         <tbody>`;
         
@@ -1577,7 +1574,7 @@ function esportaPDFMese() {
      </table>
         
         <h3>📄 FORNITORI</h3>
-        <table>
+    <table>
         <thead><tr><th>Data</th><th>Fornitore</th><th>N. Fattura</th><th>N° interno</th></tr></thead>
         <tbody>`;
         
@@ -2871,5 +2868,6 @@ Promise.all([caricaLinkDaFile(), caricaLogoSaved()]).then(async () => {
     setupSelectAllPrimaNota();
 });
 </script>
+<script src="version.js"></script>
 </body>
 </html>
