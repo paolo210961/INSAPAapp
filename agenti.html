@@ -653,7 +653,7 @@ function inviaScadenzeWhatsApp(cliente) {
     let tot = 0;
     for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
     msg += "\nTOTALE: EUR "+tot.toFixed(2);
-    window.open("https://wa.me/?text="+encodeURIComponent(msg), '_blank');
+    window.open("whatsapp://send?text=" + encodeURIComponent(msg), '_blank');
 }
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
