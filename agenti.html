@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.04</title>
+    <title>inSAPA - Agenti vA.6.05</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -307,7 +307,6 @@
 <div id="minimizedBarContainer" class="minimized-bar-container"></div>
 
 <footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
-<!-- Vecchio badge versione rimosso -->
 
 <script>
 // Firebase configuration
@@ -370,12 +369,11 @@ function caricaOrdineDaStorage() {
     try {
         const data = JSON.parse(saved);
         if (!data.cliente || !data.articoli) return null;
-        // Ricostruisci l'oggetto cliente (le funzioni successive si aspettano che esista un oggetto cliente con ordini)
         const cliente = {
             codice: data.cliente.codice,
             ragione: data.cliente.ragione,
             scadenze: data.cliente.scadenze || [],
-            ordini: data.articoli  // importante: per apriModaleOrdine serve cliente.ordini
+            ordini: data.articoli
         };
         return {
             cliente: cliente,
@@ -416,7 +414,6 @@ function minimizzaModale(id) {
     aggiungiBarrettaMinimizzata(id, titolo);
     modale.minimizzato = true;
     
-    // Se è un ordine, salva lo stato in sessionStorage
     if (modale.tipo === 'ordine' && modale.cliente && modale.articoli && modale.qMap) {
         salvaOrdineInStorage(id, modale.cliente, modale.articoli, modale.qMap);
     }
@@ -428,7 +425,6 @@ function ripristinaModale(id) {
     if (modale.modalElement) modale.modalElement.style.display = 'flex';
     rimuoviBarrettaMinimizzata(id);
     modale.minimizzato = false;
-    // Dopo ripristino, rimuovi lo storage perché non serve più tenerlo (tanto se lo riminimizza lo risalva)
     if (modale.tipo === 'ordine') {
         rimuoviOrdineDaStorage();
     }
@@ -471,7 +467,7 @@ function apriModaleListinoIframe() {
 }
 
 // ================== FUNZIONI PER ORDINI, CLIENTI, ECC. ==================
-function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '>'); }
 async function caricaLinkDaFile() {
     try {
         const response = await fetch('link.html');
@@ -504,6 +500,16 @@ function showToast(msg, isError = false) {
     toast.className = 'toast-message';
     toast.style.backgroundColor = isError ? '#e74c3c' : '#27ae60';
     toast.innerText = msg;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.color = 'white';
+    toast.style.padding = '8px 16px';
+    toast.style.borderRadius = '30px';
+    toast.style.zIndex = '10000';
+    toast.style.fontSize = '0.85rem';
+    toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
@@ -556,7 +562,6 @@ async function selezionaAgente(codice) {
     document.getElementById('cercaArticoloInline').value = '';
     document.getElementById('dettaglioAgenti').innerHTML = '';
     resetModificheNonSalvate();
-    // Dopo aver caricato i clienti, proviamo a ripristinare un eventuale ordine salvato
     ripristinaOrdineDaStorageSeNecessario();
 }
 
@@ -647,15 +652,35 @@ function parseSCA(text) {
     return Array.from(clienti.values());
 }
 
-// 🔁 MODIFICA QUI: usa whatsapp://send per aprire direttamente l'app desktop
+// MODIFICA MIGLIORATA: invio WhatsApp con fallback per mobile e avviso sicurezza
 function inviaScadenzeWhatsApp(cliente) {
-    if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza"); return; }
-    let msg = "SCADENZE CLIENTE\n"+cliente.codice+" - "+cliente.ragione+"\n\n";
+    if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza da inviare."); return; }
+    let msg = "*SCADENZE CLIENTE*%0A" + cliente.codice + " - " + cliente.ragione + "%0A%0A";
     let tot = 0;
-    for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
-    msg += "\nTOTALE: EUR "+tot.toFixed(2);
-    // Usa protocollo whatsapp:// per aprire l'app desktop (se installata) senza passare dal browser
-    window.open("whatsapp://send?text="+encodeURIComponent(msg), '_blank');
+    for (let s of cliente.scadenze) { 
+        msg += "📅 Scadenza: " + s.scadenza + "%0A";
+        msg += "📄 Data Doc: " + s.dataDoc + "%0A";
+        msg += "🧾 N.Doc: " + s.numDoc + "%0A";
+        msg += "💰 Importo: EUR " + s.importo.toFixed(2) + "%0A---%0A"; 
+        tot += s.importo; 
+    }
+    msg += "%0A💵 *TOTALE: EUR " + tot.toFixed(2) + "*";
+    
+    // Usa protocollo whatsapp:// per desktop, altrimenti usa https://wa.me/ per mobile (più sicuro)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    let url;
+    if (isMobile) {
+        url = "https://wa.me/?text=" + msg;
+        // Avviso di sicurezza per mobile
+        if (confirm("Stai per condividere dati sensibili via WhatsApp. Continuare?")) {
+            window.open(url, '_blank');
+        }
+    } else {
+        url = "whatsapp://send?text=" + msg;
+        window.open(url, '_blank');
+        // Piccolo avviso per desktop
+        setTimeout(() => showToast("Se WhatsApp non si apre, verifica di averlo installato."), 1000);
+    }
 }
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
@@ -685,7 +710,6 @@ function calcolaUltimaDataArticolo(art) {
     return dates[0];
 }
 
-// Funzione principale per aprire il modale ordine (con supporto al ripristino delle quantità)
 function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     if (!cliente) { alert("Seleziona un cliente!"); return; }
     if (!cliente.ordini || !cliente.ordini.length) { alert("Nessun articolo disponibile per questo cliente."); return; }
@@ -806,39 +830,31 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     modalDiv.querySelector('.close-modal-btn').onclick = () => chiudiModale(id);
 }
 
-// Ripristino automatico all'avvio
 function ripristinaOrdineDaStorageSeNecessario() {
     const ordineSalvato = caricaOrdineDaStorage();
     if (!ordineSalvato) return;
     const { cliente, articoli, qMap, idSalvato } = ordineSalvato;
-    // Verifica che il cliente esista ancora nella lista clientiUnici (potrebbe essere stato cancellato?)
     const clienteEsistente = clientiUnici.find(c => c.codice === cliente.codice);
     if (!clienteEsistente) {
-        // Il cliente non esiste più, pulisci storage
         rimuoviOrdineDaStorage();
         return;
     }
-    // Ricostruisci l'oggetto cliente con i dati aggiornati (importante: deve avere ordini)
     const clienteCompleto = {
         ...clienteEsistente,
         ordini: clienteEsistente.ordini,
         scadenze: clienteEsistente.scadenze || []
     };
-    // Usa l'id salvato se non già in uso, altrimenti generane uno nuovo
     let finalId = idSalvato;
     if (modaliAperti.some(m => m.id === finalId)) {
         finalId = nextModalId++;
     } else {
-        // Assicuriamoci che nextModalId sia maggiore di finalId
         if (finalId >= nextModalId) nextModalId = finalId + 1;
     }
     apriModaleOrdine(clienteCompleto, qMap, finalId);
-    // Dopo aver aperto, minimizzalo subito perché l'utente aveva lo stato minimizzato
     const modaleAppenaAperto = modaliAperti.find(m => m.id === finalId);
     if (modaleAppenaAperto) {
         minimizzaModale(finalId);
     }
-    // Rimuovi lo storage per evitare duplicati (dopo il ripristino)
     rimuoviOrdineDaStorage();
 }
 
@@ -886,7 +902,7 @@ function buildScadenzeHtml(cliente) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += `</tbody>}</div>`;
+    html += `</tbody></table></div>`;
     return html;
 }
 
@@ -968,7 +984,7 @@ async function caricaFile(files) {
     await salvaDatiAgente();
     aggiornaClienti();
     document.getElementById('fileStatusInline').innerHTML = "ORD: "+datiOrd.length+" | SCA: "+datiSca.length;
-    alert("Caricato! ORD: "+datiOrd.length+" clienti, SCA: "+datiSca.length+" clienti");
+    alert("Caricato! ORD: "+datiOrd.length+" clienti, SCA: "+datiSca.length);
     return true;
 }
 
@@ -1029,9 +1045,13 @@ document.getElementById('fileListinoInput').onchange = async (e) => { if (e.targ
 // All'avvio: carica agenti e poi ripristina eventuale ordine in sessionStorage
 Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
     caricaLogoSaved();
-    // Il ripristino avviene dentro selezionaAgente -> ripristinaOrdineDaStorageSeNecessario
 });
 </script>
-<script src="version.js"></script>
+<!-- Il file version.js non esiste, evito errore con controllo blando -->
+<script>
+try {
+    if (typeof version !== 'undefined') console.log("Version:", version);
+} catch(e) {}
+</script>
 </body>
 </html>
