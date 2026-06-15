@@ -22,7 +22,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             gap: 20px;
         }
         .logo-area {
@@ -46,14 +46,13 @@
         
         .top-buttons {
             display: flex;
-            gap: 12px;
-            flex-wrap: nowrap;
+            gap: 15px;
         }
         .btn-top {
             background: #f1c40f;
             color: #2c3e50;
             border: none;
-            padding: 10px 16px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -61,7 +60,6 @@
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
-            white-space: nowrap;
         }
         .btn-top:hover {
             background: #e67e22;
@@ -293,6 +291,10 @@
             margin-top: 5px;
             text-align: center;
         }
+        .info-imgur a {
+            color: #3498db;
+            text-decoration: none;
+        }
         
         footer {
             background: #2c3e50;
@@ -315,23 +317,36 @@
             color: #e67e22;
         }
         
-        @media (max-width: 1024px) {
-            .categorie-grid { grid-template-columns: repeat(3, 1fr); }
-            .btn-top { padding: 8px 12px; font-size: 0.8rem; }
-        }
         @media (max-width: 768px) {
             .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .categoria-img { height: 150px; }
             .info-azienda h1 { font-size: 1.8rem; }
             .info-azienda p { font-size: 0.9rem; }
-            .header-row { flex-wrap: wrap; justify-content: center; }
-            .logo-area { justify-content: center; width: 100%; }
-            .top-buttons { justify-content: center; width: 100%; margin-top: 10px; }
-            .btn-top { padding: 6px 10px; font-size: 0.7rem; }
+            .header-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .top-buttons {
+                width: 100%;
+                justify-content: stretch;
+                gap: 10px;
+                flex-wrap: nowrap;
+            }
+            .btn-top {
+                flex: 1;
+                text-align: center;
+                padding: 14px 8px;
+                font-size: 1rem;
+                white-space: nowrap;
+            }
         }
+        
         @media (max-width: 480px) {
             .categorie-grid { grid-template-columns: 1fr; }
-            .btn-top { padding: 5px 8px; font-size: 0.65rem; }
+            .btn-top {
+                font-size: 0.9rem;
+                padding: 12px 4px;
+            }
         }
     </style>
 </head>
@@ -382,7 +397,6 @@ const firebaseConfig = {
     messagingSenderId: "331230245928",
     appId: "1:331230245928:web:2ee43d9209e43c3c89b11d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -390,6 +404,7 @@ const db = firebase.firestore();
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categorie = [];
+let pressTimer = null;
 
 // ==================== LOGO ====================
 function caricaLogo() {
@@ -414,9 +429,7 @@ function caricaLogo() {
 caricaLogo();
 
 // ==================== GESTIONE LINK PER LOGO (1 TAP, 2 TAP) ====================
-let linkPrincipale = "";
-let linkSecondario = "";
-let lastTap = 0;
+let linkPrincipale = "", linkSecondario = "", lastTap = 0;
 
 async function caricaLinkDaFile() {
     try {
@@ -467,7 +480,92 @@ logoSiti.addEventListener('click', (e) => {
     }
 });
 
-// ==================== CARICA TESTI TESTA E PIEDE DA FILE ESTERNO ====================
+// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
+function mostraModalePassword() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="password-modal">
+            <h3>🔐 ACCESSO ADMIN</h3>
+            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
+            <div class="modal-buttons">
+                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnVerifica').onclick = () => {
+        const pwd = document.getElementById('passwordAdmin').value;
+        if (pwd === ADMIN_PASSWORD) {
+            isAdminMode = true;
+            localStorage.setItem('web_admin_mode', 'true');
+            showToast("✅ Modalità admin attivata!");
+            aggiornaUIModalitaAdmin();
+            modal.remove();
+        } else {
+            showToast("❌ Password errata!", true);
+        }
+    };
+    document.getElementById('btnAnnulla').onclick = () => modal.remove();
+}
+
+function disattivaModalitaAdmin() {
+    isAdminMode = false;
+    localStorage.removeItem('web_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIModalitaAdmin();
+}
+
+// Pressione lunga sul logo per attivare admin
+const logoDiv = document.getElementById('logoRettangolo');
+logoDiv.addEventListener('mousedown', () => {
+    pressTimer = setTimeout(() => {
+        mostraModalePassword();
+        pressTimer = null;
+    }, 3000);
+});
+logoDiv.addEventListener('mouseup', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+});
+logoDiv.addEventListener('mouseleave', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+});
+logoDiv.addEventListener('touchstart', () => {
+    pressTimer = setTimeout(() => {
+        mostraModalePassword();
+        pressTimer = null;
+    }, 3000);
+});
+logoDiv.addEventListener('touchend', () => {
+    if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+});
+
+function aggiornaUIModalitaAdmin() {
+    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
+    const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
+    if (isAdminMode) {
+        btnAggiungiCategoria.classList.add('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
+        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
+    } else {
+        btnAggiungiCategoria.classList.remove('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
+        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
+    }
+}
+
+// ==================== CARICA TESTI DA FILE ESTERNO ====================
 async function caricaTestiDaFile() {
     try {
         const response = await fetch('web_testa_piede.html');
@@ -484,6 +582,12 @@ async function caricaTestiDaFile() {
             if (p) testataHtml += p.outerHTML;
             
             document.getElementById('infoAzienda').innerHTML = testataHtml;
+            
+            const footerContent = doc.querySelector('footer');
+            if (footerContent) {
+                const footerText = footerContent.querySelector('p')?.innerText || '';
+                if (footerText) document.getElementById('footerText').innerText = footerText;
+            }
         } else {
             console.warn("web_testa_piede.html non trovato");
         }
@@ -510,62 +614,6 @@ function escapeHtml(str) {
         if (m === '>') return '&gt;';
         return m;
     });
-}
-
-// ==================== MODALITA' ADMIN ====================
-function mostraModalePassword(callback) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO ADMIN</h3>
-            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
-            <div class="modal-buttons">
-                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
-                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnVerifica').onclick = () => {
-        const pwd = document.getElementById('passwordAdmin').value;
-        if (pwd === ADMIN_PASSWORD) {
-            modal.remove();
-            if (callback) callback(true);
-            else {
-                isAdminMode = true;
-                localStorage.setItem('web_admin_mode', 'true');
-                showToast("✅ Modalità admin attivata!");
-                aggiornaUIModalitaAdmin();
-            }
-        } else {
-            showToast("❌ Password errata!", true);
-            if (callback) callback(false);
-        }
-    };
-    document.getElementById('btnAnnulla').onclick = () => {
-        modal.remove();
-        if (callback) callback(false);
-    };
-}
-
-function disattivaModalitaAdmin() {
-    isAdminMode = false;
-    localStorage.removeItem('web_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIModalitaAdmin();
-}
-
-function aggiornaUIModalitaAdmin() {
-    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
-    if (isAdminMode) {
-        btnAggiungiCategoria.classList.add('show');
-        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
-    } else {
-        btnAggiungiCategoria.classList.remove('show');
-        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
-    }
 }
 
 // ==================== CARICA CATEGORIE ====================
@@ -714,22 +762,36 @@ async function eliminaCategoria(id) {
     }
 }
 
-// ==================== PULSANTI HEADER ====================
-document.getElementById('btnFacebook').onclick = () => {
-    window.open('https://www.facebook.com/share/1F4PDK2biv/', '_blank');
-};
-document.getElementById('btnContatti').onclick = () => {
-    window.location.href = 'organizzazione.html';
-};
-document.getElementById('btnConAge').onclick = () => {
-    mostraModalePassword((success) => {
-        if (success) {
+// ==================== PULSANTE ConAge (area riservata) ====================
+function mostraModaleConAge() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="password-modal">
+            <h3>🔐 ACCESSO AREA RISERVATA</h3>
+            <input type="password" id="pwdConAge" placeholder="Inserisci password">
+            <div class="modal-buttons">
+                <button id="btnVerificaConAge" class="btn-salva-modal">VERIFICA</button>
+                <button id="btnAnnullaConAge" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnVerificaConAge').onclick = () => {
+        const pwd = document.getElementById('pwdConAge').value;
+        if (pwd === ADMIN_PASSWORD) {
+            modal.remove();
             window.location.href = 'selezione.html';
+        } else {
+            alert("Password errata!");
+            modal.remove();
         }
-    });
-};
+    };
+    document.getElementById('btnAnnullaConAge').onclick = () => modal.remove();
+}
 
-// ==================== EVENTI ADMIN ====================
+// ==================== EVENTI ====================
 document.getElementById('btnDisattivaAdmin').onclick = () => {
     if (isAdminMode) disattivaModalitaAdmin();
 };
@@ -737,6 +799,15 @@ document.getElementById('btnAggiungiCategoria').onclick = () => {
     if (isAdminMode) {
         mostraModaleCategoria(null);
     }
+};
+document.getElementById('btnFacebook').onclick = () => {
+    window.open('https://www.facebook.com/share/1F4PDK2biv/', '_blank');
+};
+document.getElementById('btnContatti').onclick = () => {
+    window.location.href = 'organizzazione.html';
+};
+document.getElementById('btnConAge').onclick = () => {
+    mostraModaleConAge();
 };
 
 // ==================== AVVIO ====================
