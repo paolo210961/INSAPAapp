@@ -22,7 +22,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 20px;
         }
         .logo-area {
@@ -30,7 +30,6 @@
             align-items: center;
             gap: 15px;
             flex-wrap: wrap;
-            cursor: pointer;
         }
         .logo-rettangolo {
             width: 200px;
@@ -40,19 +39,21 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            cursor: pointer;
         }
         .logo-rettangolo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-rettangolo span { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
         
         .top-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            flex-wrap: nowrap;
         }
         .btn-top {
             background: #f1c40f;
             color: #2c3e50;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 16px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -60,6 +61,7 @@
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         .btn-top:hover {
             background: #e67e22;
@@ -307,7 +309,7 @@
             cursor: pointer;
             text-decoration: underline;
             font-size: 0.8rem;
-            margin-left: 5px;
+            margin-left: 10px;
         }
         .footer-admin:hover {
             color: #e67e22;
@@ -315,33 +317,37 @@
         
         @media (max-width: 1024px) {
             .categorie-grid { grid-template-columns: repeat(3, 1fr); }
+            .btn-top { padding: 8px 12px; font-size: 0.8rem; }
         }
         @media (max-width: 768px) {
             .categorie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .categoria-img { height: 150px; }
             .info-azienda h1 { font-size: 1.8rem; }
             .info-azienda p { font-size: 0.9rem; }
-            .header-row { flex-direction: column; }
-            .top-buttons { width: 100%; justify-content: center; }
+            .header-row { flex-wrap: wrap; justify-content: center; }
+            .logo-area { justify-content: center; width: 100%; }
+            .top-buttons { justify-content: center; width: 100%; margin-top: 10px; }
+            .btn-top { padding: 6px 10px; font-size: 0.7rem; }
         }
         @media (max-width: 480px) {
             .categorie-grid { grid-template-columns: 1fr; }
+            .btn-top { padding: 5px 8px; font-size: 0.65rem; }
         }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="header-row">
-        <div class="logo-area" id="logoRettangolo">
-            <div class="logo-rettangolo">
+        <div class="logo-area">
+            <div id="logoRettangolo" class="logo-rettangolo">
                 <img id="logoImmagine" style="display:none;">
                 <span id="logoSpan">🏢 inSAPA s.a.s.</span>
             </div>
         </div>
         <div class="top-buttons">
-            <a href="https://www.facebook.com/share/1F4PDK2biv/" target="_blank" class="btn-top">📘 Facebook</a>
-            <a href="organizzazione.html" class="btn-top">CHI SIAMO</a>
-            <button id="btnConAge" class="btn-top">CON AGE</button>
+            <button id="btnFacebook" class="btn-top">FB</button>
+            <button id="btnContatti" class="btn-top">CONTATTI</button>
+            <button id="btnConAge" class="btn-top">ConAge</button>
         </div>
     </div>
 </div>
@@ -384,7 +390,6 @@ const db = firebase.firestore();
 let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
 let isAdminMode = false;
 let categorie = [];
-let pressTimer = null;
 
 // ==================== LOGO ====================
 function caricaLogo() {
@@ -462,109 +467,23 @@ logoSiti.addEventListener('click', (e) => {
     }
 });
 
-// ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA ====================
-function mostraModalePasswordAdmin() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO ADMIN</h3>
-            <input type="password" id="passwordAdminModal" placeholder="Inserisci password">
-            <div class="modal-buttons">
-                <button id="btnVerificaAdmin" class="btn-salva-modal">VERIFICA</button>
-                <button id="btnAnnullaAdmin" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('btnVerificaAdmin').onclick = () => {
-        const pwd = document.getElementById('passwordAdminModal').value;
-        if (pwd === ADMIN_PASSWORD) {
-            isAdminMode = true;
-            localStorage.setItem('web_admin_mode', 'true');
-            showToast("✅ Modalità admin attivata!");
-            aggiornaUIModalitaAdmin();
-            modal.remove();
-        } else {
-            showToast("❌ Password errata!", true);
-        }
-    };
-    document.getElementById('btnAnnullaAdmin').onclick = () => modal.remove();
-}
-
-function disattivaModalitaAdmin() {
-    isAdminMode = false;
-    localStorage.removeItem('web_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-    aggiornaUIModalitaAdmin();
-}
-
-// Pressione lunga sul logo per attivare admin
-const logoDiv = document.getElementById('logoRettangolo');
-logoDiv.addEventListener('mousedown', () => {
-    pressTimer = setTimeout(() => {
-        mostraModalePasswordAdmin();
-        pressTimer = null;
-    }, 3000);
-});
-logoDiv.addEventListener('mouseup', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDiv.addEventListener('mouseleave', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-logoDiv.addEventListener('touchstart', () => {
-    pressTimer = setTimeout(() => {
-        mostraModalePasswordAdmin();
-        pressTimer = null;
-    }, 3000);
-});
-logoDiv.addEventListener('touchend', () => {
-    if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-    }
-});
-
-function aggiornaUIModalitaAdmin() {
-    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
-    const btnDisattivaAdmin = document.getElementById('btnDisattivaAdmin');
-    if (isAdminMode) {
-        btnAggiungiCategoria.classList.add('show');
-        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
-        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'inline-block';
-    } else {
-        btnAggiungiCategoria.classList.remove('show');
-        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
-        if (btnDisattivaAdmin) btnDisattivaAdmin.style.display = 'none';
-    }
-}
-
-// ==================== CARICA TESTI DA FILE ESTERNO ====================
+// ==================== CARICA TESTI TESTA E PIEDE DA FILE ESTERNO ====================
 async function caricaTestiDaFile() {
     try {
         const response = await fetch('web_testa_piede.html');
         if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/);
-            let titolo = "", descrizione = "", footerText = "";
-            for (let line of lines) {
-                line = line.trim();
-                if (line.startsWith("titolo:")) titolo = line.substring(7).trim();
-                else if (line.startsWith("descrizione:")) descrizione = line.substring(12).trim();
-                else if (line.startsWith("footer:")) footerText = line.substring(7).trim();
-            }
-            const infoDiv = document.getElementById('infoAzienda');
-            if (infoDiv) {
-                infoDiv.innerHTML = `<h1>${titolo || "INSAPA un partner affidabile."}</h1><p>${descrizione || "Affidarsi a noi significa scegliere efficienza e professionalità: disponiamo di un ampio magazzino sempre rifornito, effettuiamo consegne rapide con i nostri mezzi diretti e mettiamo a disposizione personale specializzato per guidarti nella scelta dei migliori prodotti per la pulizia e l'igiene del tuo locale."}</p>`;
-            }
-            if (footerText) document.getElementById('footerText').innerText = footerText;
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const h1 = doc.querySelector('h1');
+            const p = doc.querySelector('p');
+            
+            let testataHtml = '';
+            if (h1) testataHtml += h1.outerHTML;
+            if (p) testataHtml += p.outerHTML;
+            
+            document.getElementById('infoAzienda').innerHTML = testataHtml;
         } else {
             console.warn("web_testa_piede.html non trovato");
         }
@@ -591,6 +510,62 @@ function escapeHtml(str) {
         if (m === '>') return '&gt;';
         return m;
     });
+}
+
+// ==================== MODALITA' ADMIN ====================
+function mostraModalePassword(callback) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="password-modal">
+            <h3>🔐 ACCESSO ADMIN</h3>
+            <input type="password" id="passwordAdmin" placeholder="Inserisci password">
+            <div class="modal-buttons">
+                <button id="btnVerifica" class="btn-salva-modal">VERIFICA</button>
+                <button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnVerifica').onclick = () => {
+        const pwd = document.getElementById('passwordAdmin').value;
+        if (pwd === ADMIN_PASSWORD) {
+            modal.remove();
+            if (callback) callback(true);
+            else {
+                isAdminMode = true;
+                localStorage.setItem('web_admin_mode', 'true');
+                showToast("✅ Modalità admin attivata!");
+                aggiornaUIModalitaAdmin();
+            }
+        } else {
+            showToast("❌ Password errata!", true);
+            if (callback) callback(false);
+        }
+    };
+    document.getElementById('btnAnnulla').onclick = () => {
+        modal.remove();
+        if (callback) callback(false);
+    };
+}
+
+function disattivaModalitaAdmin() {
+    isAdminMode = false;
+    localStorage.removeItem('web_admin_mode');
+    showToast("🔒 Modalità admin disattivata");
+    aggiornaUIModalitaAdmin();
+}
+
+function aggiornaUIModalitaAdmin() {
+    const btnAggiungiCategoria = document.getElementById('btnAggiungiCategoria');
+    if (isAdminMode) {
+        btnAggiungiCategoria.classList.add('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.add('show'));
+    } else {
+        btnAggiungiCategoria.classList.remove('show');
+        document.querySelectorAll('.card-buttons').forEach(btn => btn.classList.remove('show'));
+    }
 }
 
 // ==================== CARICA CATEGORIE ====================
@@ -739,34 +714,22 @@ async function eliminaCategoria(id) {
     }
 }
 
-// ==================== PULSANTE CON AGE (accesso a selezione.html con password) ====================
-function mostraModaleConAge() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO AREA RISERVATA</h3>
-            <input type="password" id="passwordConAge" placeholder="Inserisci password">
-            <div class="modal-buttons">
-                <button id="btnVerificaConAge" class="btn-salva-modal">VERIFICA</button>
-                <button id="btnAnnullaConAge" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('btnVerificaConAge').onclick = () => {
-        const pwd = document.getElementById('passwordConAge').value;
-        if (pwd === ADMIN_PASSWORD) {
-            modal.remove();
+// ==================== PULSANTI HEADER ====================
+document.getElementById('btnFacebook').onclick = () => {
+    window.open('https://www.facebook.com/share/1F4PDK2biv/', '_blank');
+};
+document.getElementById('btnContatti').onclick = () => {
+    window.location.href = 'organizzazione.html';
+};
+document.getElementById('btnConAge').onclick = () => {
+    mostraModalePassword((success) => {
+        if (success) {
             window.location.href = 'selezione.html';
-        } else {
-            showToast("❌ Password errata!", true);
         }
-    };
-    document.getElementById('btnAnnullaConAge').onclick = () => modal.remove();
-}
+    });
+};
 
-// ==================== EVENTI ====================
+// ==================== EVENTI ADMIN ====================
 document.getElementById('btnDisattivaAdmin').onclick = () => {
     if (isAdminMode) disattivaModalitaAdmin();
 };
@@ -774,9 +737,6 @@ document.getElementById('btnAggiungiCategoria').onclick = () => {
     if (isAdminMode) {
         mostraModaleCategoria(null);
     }
-};
-document.getElementById('btnConAge').onclick = () => {
-    mostraModaleConAge();
 };
 
 // ==================== AVVIO ====================
