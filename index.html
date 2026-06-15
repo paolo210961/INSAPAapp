@@ -462,23 +462,8 @@ function apriLinkSecondario() {
 }
 
 const logoSiti = document.getElementById('logoRettangolo');
-logoSiti.addEventListener('click', (e) => {
-    const now = new Date().getTime();
-    const tapLength = now - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
-        e.stopPropagation();
-        apriLinkSecondario();
-        lastTap = 0;
-    } else {
-        lastTap = now;
-        setTimeout(() => {
-            if (lastTap !== 0 && (new Date().getTime() - lastTap) > 300) {
-                apriLinkPrincipale();
-                lastTap = 0;
-            }
-        }, 300);
-    }
-});
+// Rimosso evento click per il logo (non deve fare nulla)
+// Mantenuta solo la pressione lunga per admin (vedi sotto)
 
 // ==================== ATTIVAZIONE ADMIN CON PRESSIONE LUNGA SUL LOGO ====================
 function mostraModalePassword() {
@@ -518,7 +503,7 @@ function disattivaModalitaAdmin() {
     aggiornaUIModalitaAdmin();
 }
 
-// Pressione lunga sul logo per attivare admin
+// Pressione lunga sul logo per attivare admin (nessuna azione al clic breve)
 const logoDiv = document.getElementById('logoRettangolo');
 logoDiv.addEventListener('mousedown', () => {
     pressTimer = setTimeout(() => {
