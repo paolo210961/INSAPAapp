@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>inSAPA - Agenti vA.6.07</title>
+    <title>inSAPA - Agenti vA.6.04</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        /* ==================== STILI ESATTAMENTE COME PRIMA ==================== */
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #eef2f5; min-height: 100vh; }
         .header { background: white; padding: 15px 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
@@ -33,8 +32,6 @@
         .btn-success { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-primary { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-link { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-link:hover { background: #219a52; transform: translateY(-1px); }
         .btn-ordine-header { background: #e67e22; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .btn-listino-verde { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
         .file-status-inline { font-size: 0.7rem; color: #27ae60; margin-left: 10px; }
@@ -111,36 +108,87 @@
             margin-bottom: 15px;
             flex-shrink: 0;
             border-left: 4px solid #e67e22;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
         }
         .cliente-info-modale p { margin: 5px 0; font-size: 0.9rem; }
-        .btn-note { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
-        .btn-note:hover { background: #2980b9; transform: translateY(-1px); }
-        
-        .ricerca-articolo-ordine { margin-bottom: 15px; flex-shrink: 0; }
-        .ricerca-articolo-ordine input { width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid #ddd; border-radius: 30px; outline: none; transition: 0.2s; }
+        .ricerca-articolo-ordine {
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        .ricerca-articolo-ordine input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            transition: 0.2s;
+        }
         .ricerca-articolo-ordine input:focus { border-color: #e67e22; }
-        .btn-group-modal { display: flex; gap: 12px; margin-top: 15px; flex-shrink: 0; }
-        .btn-group-modal button { flex: 1; padding: 10px; font-size: 0.9rem; margin: 0; border-radius: 8px; }
-        .tabella-articoli-container { flex: 1; overflow-y: auto; margin-top: 10px; border-radius: 12px; border: 1px solid #e0e0e0; }
-        .ordine-tabella { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .ordine-tabella th { background: #e67e22; color: white; padding: 12px 8px; text-align: left; position: sticky; top: 0; z-index: 10; }
-        .ordine-tabella td { padding: 10px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        .ordine-tabella tr:hover td { background-color: #fff3e0; }
-        .ordine-tabella input { width: 80px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 8px; }
+        .btn-group-modal {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-shrink: 0;
+        }
+        .btn-group-modal button {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .tabella-articoli-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        .tabella-articoli-container::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        .tabella-articoli-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .tabella-articoli-container::-webkit-scrollbar-thumb {
+            background: #e67e22;
+            border-radius: 10px;
+        }
+        .tabella-articoli-container::-webkit-scrollbar-thumb:hover {
+            background: #d35400;
+        }
+        .ordine-tabella {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .ordine-tabella th {
+            background: #e67e22;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .ordine-tabella td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        .ordine-tabella tr:hover td {
+            background-color: #fff3e0;
+        }
+        .ordine-tabella input {
+            width: 80px;
+            padding: 6px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
         .codice-col { font-weight: bold; font-family: monospace; }
         .descrizione-col { max-width: 300px; word-break: break-word; }
-        
-        /* Modale nota */
-        .modal-nota-content { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-        .modal-nota-content h3 { margin: 0 0 20px; color: #2c3e50; }
-        .modal-nota-content textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; resize: vertical; min-height: 120px; }
-        .modal-nota-content .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-nota-content .modal-buttons button { flex: 1; padding: 10px; margin: 0; }
         
         /* Barretta minimizzata */
         .minimized-bar-container { position: fixed; bottom: 0; left: 0; right: 0; z-index: 3000; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; }
@@ -150,16 +198,13 @@
         .minimized-bar .bar-restore { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; width: auto; margin: 0; padding: 0 4px; }
         .minimized-bar .bar-restore:hover { color: #f1c40f; transform: none; }
         
-        /* PASSWORD OVERLAY */
-        .password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 3000; }
-        .password-modal { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 350px; text-align: center; }
-        .password-modal input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .btn-salva-modal { background: #27ae60; color: white; }
-        .btn-cancel-modal { background: #95a5a6; color: white; }
+        @media (min-width: 769px) {
+            .pc-only { display: inline-flex !important; }
+        }
         
-        @media (min-width: 769px) { .pc-only { display: inline-flex !important; } }
         @media (max-width: 768px) {
-            .header-row, .header-row-bottom { flex-direction: column; align-items: stretch; }
+            .header-row { flex-direction: column; align-items: stretch; }
+            .header-row-bottom { flex-direction: column; align-items: stretch; }
             .logo-area { justify-content: center; flex-direction: column; }
             .logo-rettangolo { width: 250px; height: 70px; margin: 0 auto; }
             .logo-tooltip { display: none; }
@@ -171,67 +216,101 @@
             .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
             .action-group label { display: none; }
             .action-group select, .action-group button, .action-group input { width: 100%; padding: 10px; font-size: 0.9rem; margin: 0; }
+            .action-group select { min-width: unset; }
+            .action-group input { min-width: unset; }
+            .action-group:first-child { grid-template-columns: 1fr; }
+            .action-group:first-child select { width: 100%; }
+            .action-group:first-child input { display: none; }
             .main-container { flex-direction: column; }
             .sidebar { width: 100%; position: static; top: 0; max-height: none; margin-bottom: 20px; }
             .content-area { width: 100%; }
-            .btn-group-modal .btn-note { font-size: 0.75rem; padding: 8px 4px; }
+            button, .btn-success, .btn-primary, .btn-danger, .btn-whatsapp { padding: 10px; font-size: 0.9rem; }
+            body { font-size: 15px; }
+            h3 { font-size: 1.1rem; }
+            select, input { padding: 10px; font-size: 0.9rem; }
+            .scadenze-box { overflow-x: auto; }
+            .scadenze-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .btn-whatsapp { width: 100%; justify-content: center; }
+            .file-status-inline { grid-column: span 2; text-align: center; margin-top: 5px; }
+            .tooltip-wrapper .tooltip-text { width: 240px; font-size: 0.65rem; bottom: auto; top: 125%; }
+            .tooltip-wrapper .tooltip-text::after { top: auto; bottom: 100%; border-color: transparent transparent #2c3e50 transparent; }
+            .avviso-modifiche { top: 156px; font-size: 0.7rem; padding: 8px; }
+            .modal-ordine-content { width: 95%; height: 85vh; }
+            .modal-iframe-content { width: 95%; height: 85vh; }
+            .pc-only { display: none !important; }
+            .minimized-bar-container { padding: 6px; gap: 6px; }
+            .minimized-bar { padding: 6px 12px; }
+            .minimized-bar .bar-title { font-size: 0.75rem; }
+            .ordine-tabella th, .ordine-tabella td { padding: 8px 4px; font-size: 0.75rem; }
+            .codice-col { min-width: 70px; }
+            .descrizione-col { max-width: 180px; }
+            .ordine-tabella input { width: 60px; padding: 4px; }
         }
     </style>
 </head>
 <body>
-<div id="appContainer" style="display: flex; flex-direction: column; height: 100%; display: none;">
-    <!-- TUTTO IL CONTENUTO NORMALE DELLA PAGINA (HEADER, MAIN, FOOTER, ECC.) -->
-    <div class="header">
-        <div class="header-row">
-            <div class="logo-area">
-                <div id="logoRettangolo" class="logo-rettangolo">
-                    <img id="logoImmagine" style="display:none;">
-                    <span id="logoSpan">LOGO</span>
-                    <div class="logo-tooltip">Pressione lunga per ADMIN</div>
-                </div>
-            </div>
-            <div class="nav-box">
-                <button id="hamburgerBtn" class="hamburger-btn">☰</button>
-                <div id="navGrid" class="nav-grid">
-                    <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
-                    <button class="nav-btn disabled" disabled>AGENTI</button>
-                    <button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button>
-                </div>
+<div class="header">
+    <div class="header-row">
+        <div class="logo-area">
+            <div id="logoRettangolo" class="logo-rettangolo">
+                <img id="logoImmagine" style="display:none;">
+                <span id="logoSpan">LOGO</span>
+                <div class="logo-tooltip">1 tap: Link1 | 2 tap: Link2</div>
             </div>
         </div>
-        <div class="header-row-bottom">
-            <div class="action-group">
-                <select id="selectAgente"><option value="">-- Seleziona agente --</option></select>
-                <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
-            </div>
-            <div class="action-group">
-                <button id="btnListinoVerde" class="btn-listino-verde">📋 LISTINO</button>
-                <div class="tooltip-wrapper pc-only"><button id="btnCaricaFile" class="btn-ordine-header">ORD+SCA</button><span class="tooltip-text">File: ORD{codice}.txt e SCA{codice}.txt</span></div>
-                <div class="tooltip-wrapper pc-only"><button id="btnCaricaListino" class="btn-ordine-header">CAR_LIST</button><span class="tooltip-text">Carica listino.txt - visibile a TUTTI</span></div>
-                <button id="btnCompilaOrdine" class="btn-ordine-header">📝 COMPILA ORDINE</button>
-                <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
-                <input type="file" id="fileListinoInput" accept=".txt,.csv" style="display:none;">
-                <span id="fileStatusInline" class="file-status-inline"></span>
+        <div class="nav-box">
+            <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+            <div id="navGrid" class="nav-grid">
+                <button class="nav-btn" onclick="window.location.href='contabilita.html'">CONTABILITA</button>
+                <button class="nav-btn disabled" disabled>AGENTI</button>
+                <button class="nav-btn" onclick="window.location.href='index.html'">ESCI</button>
             </div>
         </div>
     </div>
-    <div class="main-container">
-        <div class="sidebar">
-            <h3>Cerca Cliente</h3>
-            <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
-            <h3 style="margin-top:20px;">Seleziona Cliente</h3>
-            <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select>
+    <div class="header-row-bottom">
+        <div class="action-group">
+            <select id="selectAgente"><option value="">-- Seleziona agente --</option></select>
+            <input type="text" id="cercaArticoloInline" placeholder="Cerca articolo...">
         </div>
-        <div class="content-area">
-            <div id="dettaglioAgenti"></div>
+        <div class="action-group">
+            <button id="btnListinoVerde" class="btn-listino-verde">📋 LISTINO</button>
+            <div class="tooltip-wrapper pc-only">
+                <button id="btnCaricaFile" class="btn-ordine-header">ORD+SCA</button>
+                <span class="tooltip-text">File: ORD{codice}.txt e SCA{codice}.txt</span>
+            </div>
+            <div class="tooltip-wrapper pc-only">
+                <button id="btnCaricaListino" class="btn-ordine-header">CAR_LIST</button>
+                <span class="tooltip-text">Carica listino.txt - visibile a TUTTI</span>
+            </div>
+            <button id="btnCompilaOrdine" class="btn-ordine-header">📝 COMPILA ORDINE</button>
+            <input type="file" id="fileInput" multiple accept=".txt,.csv" style="display:none;">
+            <input type="file" id="fileListinoInput" accept=".txt,.csv" style="display:none;">
+            <span id="fileStatusInline" class="file-status-inline"></span>
         </div>
     </div>
-    <div id="minimizedBarContainer" class="minimized-bar-container"></div>
-    <footer>Logo: pressione lunga per attivare ADMIN</footer>
 </div>
 
+<div class="avviso-modifiche" id="avvisoModifiche">ATTENZIONE: Modifiche non salvate! Premi "SALVA" prima di cambiare.</div>
+
+<div class="main-container">
+    <div class="sidebar">
+        <h3>Cerca Cliente</h3>
+        <input type="text" id="cercaCliente" placeholder="Digita nome o codice cliente...">
+        <h3 style="margin-top:20px;">Seleziona Cliente</h3>
+        <select id="selectClienteAgenti" size="8" style="height: auto; min-height: 150px;"><option value="">-- Seleziona cliente --</option></select>
+    </div>
+    <div class="content-area">
+        <div id="dettaglioAgenti"></div>
+    </div>
+</div>
+
+<div id="minimizedBarContainer" class="minimized-bar-container"></div>
+
+<footer>Logo: 1 tap Link1 | 2 tap Link2</footer>
+<!-- Vecchio badge versione rimosso -->
+
 <script>
-// ==================== FIREBASE CONFIG ====================
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBAqGSqRE7xfH5YGgPOmTInv24ESU3jkvQ",
     authDomain: "insapa-database.firebaseapp.com",
@@ -243,9 +322,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ==================== VARIABILI GLOBALI ====================
-let ADMIN_PASSWORD = localStorage.getItem('admin_password') || "insapa2026";
-let isAdminMode = false;
 let agentiLista = [];
 let agenteCorrente = null;
 let datiOrd = [];
@@ -253,133 +329,16 @@ let datiSca = [];
 let clientiUnici = [];
 let clienteScadenzeCorrente = null;
 let modificheNonSalvate = false;
+
+let linkPrincipale = "", linkSecondario = "";
+
+// Gestione modali minimizzabili
 let modaliAperti = [];
 let nextModalId = 1;
-let pressTimer = null;
 
-// ==================== GESTIONE ACCESSO CON PASSWORD ====================
-function mostraPasswordAgenti(callback) {
-    const overlay = document.createElement('div');
-    overlay.className = 'password-overlay';
-    overlay.innerHTML = `
-        <div class="password-modal">
-            <h3>🔐 ACCESSO AGENTI</h3>
-            <p>Inserisci la password</p>
-            <input type="password" id="pwdInput" placeholder="Password">
-            <div class="btn-group" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                <button id="pwdOkBtn" class="btn-salva-modal">OK</button>
-                <button id="pwdCancelBtn" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-    document.getElementById('pwdOkBtn').onclick = () => {
-        const pwd = document.getElementById('pwdInput').value;
-        if (pwd === ADMIN_PASSWORD) {
-            overlay.remove();
-            localStorage.setItem('agenti_accesso', 'true');
-            if (callback) callback(true);
-        } else {
-            alert("Password errata!");
-            overlay.remove();
-            if (callback) callback(false);
-        }
-    };
-    document.getElementById('pwdCancelBtn').onclick = () => {
-        overlay.remove();
-        if (callback) callback(false);
-        window.location.href = 'index.html';
-    };
-}
-
-function verificaAccesso() {
-    const accesso = localStorage.getItem('agenti_accesso');
-    if (accesso === 'true') {
-        document.getElementById('appContainer').style.display = 'flex';
-        caricaAgenti();
-    } else {
-        mostraPasswordAgenti((ok) => {
-            if (ok) {
-                document.getElementById('appContainer').style.display = 'flex';
-                caricaAgenti();
-            }
-        });
-    }
-}
-
-// ==================== GESTIONE NOTE ====================
-function getNotaKey(clienteId) {
-    return `nota_ordine_${clienteId}_${new Date().toISOString().slice(0,10)}`;
-}
-function salvaNota(clienteId, nota) {
-    const key = getNotaKey(clienteId);
-    if (nota && nota.trim() !== '') localStorage.setItem(key, nota);
-    else localStorage.removeItem(key);
-}
-function getNota(clienteId) {
-    return localStorage.getItem(getNotaKey(clienteId)) || '';
-}
-function eliminaNota(clienteId) {
-    localStorage.removeItem(getNotaKey(clienteId));
-}
-function mostraModaleNota(clienteId, callback) {
-    const notaCorrente = getNota(clienteId);
-    const modalDiv = document.createElement('div');
-    modalDiv.className = 'modal-overlay';
-    modalDiv.innerHTML = `
-        <div class="modal-nota-content">
-            <h3>📝 NOTE ORDINE</h3>
-            <textarea id="notaTesto" placeholder="Scrivi qui le tue note...">${escapeHtml(notaCorrente)}</textarea>
-            <div class="modal-buttons">
-                <button id="btnSalvaNota" class="btn-success">💾 SALVA</button>
-                <button id="btnEliminaNota" class="btn-danger">🗑 ELIMINA</button>
-                <button id="btnAnnullaNota" class="btn-cancel-modal">ANNULLA</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modalDiv);
-    document.getElementById('btnSalvaNota').onclick = () => {
-        const nuovaNota = document.getElementById('notaTesto').value;
-        salvaNota(clienteId, nuovaNota);
-        modalDiv.remove();
-        if (callback) callback(nuovaNota);
-        showToast("✅ Nota salvata!");
-    };
-    document.getElementById('btnEliminaNota').onclick = () => {
-        eliminaNota(clienteId);
-        modalDiv.remove();
-        if (callback) callback('');
-        showToast("🗑 Nota eliminata!");
-    };
-    document.getElementById('btnAnnullaNota').onclick = () => {
-        modalDiv.remove();
-    };
-}
-
-// ==================== GESTIONE LINK PER PULSANTI ====================
-async function apriLink(numero) {
-    try {
-        const response = await fetch('link.html');
-        if (response.ok) {
-            const text = await response.text();
-            const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('<'));
-            const link = numero === 1 ? (lines[0] || '').trim() : (lines[1] || '').trim();
-            if (link && link !== '') {
-                window.open(link, '_blank');
-                showToast(`🔗 Apertura Link-0${numero}`);
-            } else {
-                showToast(`⚠️ Link-0${numero} non configurato`, true);
-            }
-        } else {
-            showToast(`⚠️ Link-0${numero} non disponibile`, true);
-        }
-    } catch(e) {
-        showToast(`⚠️ Link-0${numero} non configurato`, true);
-    }
-}
-
-// ==================== PERSISTENZA ORDINE ====================
+// ------------------ PERSISTENZA ORDINE IN sessionStorage ------------------
 const STORAGE_KEY = "ordineInCorso";
+
 function salvaOrdineInStorage(id, cliente, articoli, qMap) {
     if (!cliente) return;
     const ordineData = {
@@ -400,20 +359,23 @@ function salvaOrdineInStorage(id, cliente, articoli, qMap) {
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ordineData));
 }
+
 function rimuoviOrdineDaStorage() {
     sessionStorage.removeItem(STORAGE_KEY);
 }
+
 function caricaOrdineDaStorage() {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (!saved) return null;
     try {
         const data = JSON.parse(saved);
         if (!data.cliente || !data.articoli) return null;
+        // Ricostruisci l'oggetto cliente (le funzioni successive si aspettano che esista un oggetto cliente con ordini)
         const cliente = {
             codice: data.cliente.codice,
             ragione: data.cliente.ragione,
             scadenze: data.cliente.scadenze || [],
-            ordini: data.articoli
+            ordini: data.articoli  // importante: per apriModaleOrdine serve cliente.ordini
         };
         return {
             cliente: cliente,
@@ -426,6 +388,7 @@ function caricaOrdineDaStorage() {
         return null;
     }
 }
+// -------------------------------------------------------------------------
 
 function aggiungiBarrettaMinimizzata(id, titolo) {
     const container = document.getElementById('minimizedBarContainer');
@@ -439,10 +402,12 @@ function aggiungiBarrettaMinimizzata(id, titolo) {
     bar.querySelector('.bar-restore').onclick = (e) => { e.stopPropagation(); ripristinaModale(id); };
     container.appendChild(bar);
 }
+
 function rimuoviBarrettaMinimizzata(id) {
     const bar = document.getElementById(`minimized-bar-${id}`);
     if (bar) bar.remove();
 }
+
 function minimizzaModale(id) {
     const modale = modaliAperti.find(m => m.id === id);
     if (!modale || modale.minimizzato) return;
@@ -450,20 +415,25 @@ function minimizzaModale(id) {
     let titolo = modale.tipo === 'ordine' ? '📝 Ordine in corso' : '📋 Listino';
     aggiungiBarrettaMinimizzata(id, titolo);
     modale.minimizzato = true;
+    
+    // Se è un ordine, salva lo stato in sessionStorage
     if (modale.tipo === 'ordine' && modale.cliente && modale.articoli && modale.qMap) {
         salvaOrdineInStorage(id, modale.cliente, modale.articoli, modale.qMap);
     }
 }
+
 function ripristinaModale(id) {
     const modale = modaliAperti.find(m => m.id === id);
     if (!modale) return;
     if (modale.modalElement) modale.modalElement.style.display = 'flex';
     rimuoviBarrettaMinimizzata(id);
     modale.minimizzato = false;
+    // Dopo ripristino, rimuovi lo storage perché non serve più tenerlo (tanto se lo riminimizza lo risalva)
     if (modale.tipo === 'ordine') {
         rimuoviOrdineDaStorage();
     }
 }
+
 function chiudiModale(id) {
     const modale = modaliAperti.find(m => m.id === id);
     if (!modale) return;
@@ -476,6 +446,7 @@ function chiudiModale(id) {
     }
 }
 
+// Funzione per aprire modale listino (iframe)
 function apriModaleListinoIframe() {
     const id = nextModalId++;
     const modal = document.createElement('div');
@@ -499,12 +470,33 @@ function apriModaleListinoIframe() {
     modal.querySelector('.close-btn').onclick = () => chiudiModale(id);
 }
 
+// ================== FUNZIONI PER ORDINI, CLIENTI, ECC. ==================
 function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+async function caricaLinkDaFile() {
+    try {
+        const response = await fetch('link.html');
+        if (response.ok) {
+            const text = await response.text();
+            const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('<'));
+            if (lines.length >= 1) linkPrincipale = lines[0].trim();
+            if (lines.length >= 2) linkSecondario = lines[1].trim();
+        }
+    } catch(e) {}
+}
+function apriLinkPrincipale() { if (linkPrincipale) { window.open(linkPrincipale, '_blank'); showToast("Link principale"); } else showToast("Link principale non configurato", true); }
+function apriLinkSecondario() { if (linkSecondario) { window.open(linkSecondario, '_blank'); showToast("Link secondario"); } else showToast("Link secondario non configurato", true); }
 function caricaLogoSaved() {
     const logoImg = document.getElementById('logoImmagine');
     const logoSpan = document.getElementById('logoSpan');
     fetch('icons/logo.jpg').then(r => { if (r.ok) { logoImg.src = 'icons/logo.jpg'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { fetch('icons/logo.png').then(r2 => { if (r2.ok) { logoImg.src = 'icons/logo.png'; logoImg.style.display = 'block'; logoSpan.style.display = 'none'; } else { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; }); } }).catch(() => { logoImg.style.display = 'none'; logoSpan.style.display = 'block'; });
 }
+const logoDiv = document.getElementById('logoRettangolo');
+let lastTap = 0;
+logoDiv.addEventListener('click', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300) { e.stopPropagation(); apriLinkSecondario(); lastTap = 0; }
+    else { lastTap = now; setTimeout(() => { if (lastTap && Date.now() - lastTap > 300) { apriLinkPrincipale(); lastTap = 0; } }, 300); }
+});
 caricaLogoSaved();
 
 function showToast(msg, isError = false) {
@@ -515,7 +507,7 @@ function showToast(msg, isError = false) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
-function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche')?.classList.toggle('show', modificheNonSalvate); }
+function aggiornaAvvisoModifiche() { document.getElementById('avvisoModifiche').classList.toggle('show', modificheNonSalvate); }
 function marcaModificheNonSalvate() { modificheNonSalvate = true; aggiornaAvvisoModifiche(); }
 function resetModificheNonSalvate() { modificheNonSalvate = false; aggiornaAvvisoModifiche(); }
 function normalizzaCodiceAgente(c) { return c.toString(); }
@@ -528,6 +520,7 @@ async function pulisciVecchiDocumentiMonolitici(codice) {
         if (scaOld.exists && scaOld.data().dati) await db.collection('agenti_dati').doc('sca_'+codice).delete();
     } catch(e) {}
 }
+
 async function caricaAgenti() {
     try {
         const snap = await db.collection('agenti_lista').get();
@@ -541,6 +534,7 @@ async function caricaAgenti() {
         if (last && agentiLista.find(a => a.codice === last)) { select.value = last; selezionaAgente(last); }
     } catch(e) { alert("Errore caricamento agenti: "+e.message); }
 }
+
 async function caricaDatiAgente(codice) {
     try {
         const ordSnap = await db.collection('agenti_dati').doc('ord_'+codice).collection('clienti').get();
@@ -551,6 +545,7 @@ async function caricaDatiAgente(codice) {
         return true;
     } catch(e) { return false; }
 }
+
 async function selezionaAgente(codice) {
     agenteCorrente = agentiLista.find(a => a.codice === codice);
     if (!agenteCorrente) return;
@@ -561,17 +556,21 @@ async function selezionaAgente(codice) {
     document.getElementById('cercaArticoloInline').value = '';
     document.getElementById('dettaglioAgenti').innerHTML = '';
     resetModificheNonSalvate();
+    // Dopo aver caricato i clienti, proviamo a ripristinare un eventuale ordine salvato
     ripristinaOrdineDaStorageSeNecessario();
 }
+
 async function salvaDatiAgente() {
     if (!agenteCorrente) return;
     try {
         const ordRef = db.collection('agenti_dati').doc('ord_' + agenteCorrente.codice).collection('clienti');
         const batch = db.batch();
-        const oldOrd = await ordRef.get(); oldOrd.forEach(doc => batch.delete(doc.ref));
+        const oldOrd = await ordRef.get();
+        oldOrd.forEach(doc => batch.delete(doc.ref));
         for (let cl of datiOrd) { batch.set(ordRef.doc(cl.codice.toString()), { codice: cl.codice, ragione: cl.ragione, articoli: cl.articoli }); }
         const scaRef = db.collection('agenti_dati').doc('sca_' + agenteCorrente.codice).collection('clienti');
-        const oldSca = await scaRef.get(); oldSca.forEach(doc => batch.delete(doc.ref));
+        const oldSca = await scaRef.get();
+        oldSca.forEach(doc => batch.delete(doc.ref));
         for (let cl of datiSca) { batch.set(scaRef.doc(cl.codice.toString()), { codice: cl.codice, ragione: cl.ragione, scadenze: cl.scadenze }); }
         await batch.commit();
         await pulisciVecchiDocumentiMonolitici(agenteCorrente.codice);
@@ -581,6 +580,7 @@ async function salvaDatiAgente() {
         return true;
     } catch(e) { alert("Errore salvataggio: "+e.message); return false; }
 }
+
 function convertiImportoItaliano(s) {
     if (!s) return 0;
     let neg = s.endsWith('-');
@@ -589,6 +589,7 @@ function convertiImportoItaliano(s) {
     if (neg && !isNaN(num)) num = -num;
     return isNaN(num) ? 0 : num;
 }
+
 function parseORD(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
@@ -619,6 +620,7 @@ function parseORD(text) {
     }
     return Array.from(clienti.values());
 }
+
 function parseSCA(text) {
     const lines = text.split(/\r?\n/);
     const clienti = new Map();
@@ -644,46 +646,46 @@ function parseSCA(text) {
     }
     return Array.from(clienti.values());
 }
+
+// 🔁 MODIFICA QUI: usa whatsapp://send per aprire direttamente l'app desktop
 function inviaScadenzeWhatsApp(cliente) {
     if (!cliente || !cliente.scadenze || !cliente.scadenze.length) { alert("Nessuna scadenza"); return; }
     let msg = "SCADENZE CLIENTE\n"+cliente.codice+" - "+cliente.ragione+"\n\n";
     let tot = 0;
     for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
     msg += "\nTOTALE: EUR "+tot.toFixed(2);
+    // Usa protocollo whatsapp:// per aprire l'app desktop (se installata) senza passare dal browser
     window.open("whatsapp://send?text="+encodeURIComponent(msg), '_blank');
 }
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
-function generaHtmlOrdine(cliente, articoli, nota) {
+
+function generaHtmlOrdine(cliente, articoli) {
     let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
     for (let a of articoli) html += '<tr><td style="border:1px solid #ddd;padding:8px;">'+a.codice+'</td><td style="border:1px solid #ddd;padding:8px;">'+a.descrizione+'</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">'+a.quantita+' pz</td></tr>';
-    html += '</tbody></table>';
-    if (nota && nota.trim() !== '') {
-        html += '<div class="note-footer" style="margin-top:30px; border-top:1px solid #ccc; padding-top:15px;"><strong>📝 Note:</strong><br> '+nota.replace(/\n/g, '<br>')+'</div>';
-    }
-    html += '<div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
+    html += '</tbody></table><div style="margin-top:20px;font-size:12px;">Generato da inSAPA Agenti il '+new Date().toLocaleString('it-IT')+'</div></div>';
     return html;
 }
-function stampaPDF(cliente, articoli, nota) {
+function stampaPDF(cliente, articoli) {
     const w = window.open('', '_blank');
-    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente, articoli, nota)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
+    w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente,articoli)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
     w.document.close();
-    eliminaNota(cliente.codice);
 }
-function inviaEmailOrdine(cliente, articoli, nota) {
+function inviaEmailOrdine(cliente, articoli) {
     let subj = "ORDINE da "+cliente.codice+" - "+cliente.ragione;
     let body = "ORDINE CLIENTE: "+cliente.codice+" - "+cliente.ragione+"\n\nARTICOLI ORDINATI:\n----------------------------------------\n";
     for (let a of articoli) body += "📦 "+a.codice+" - "+a.descrizione+"\n   Quantità: "+a.quantita+" pz\n\n";
-    if (nota && nota.trim() !== '') body += "\n📝 NOTE:\n"+nota+"\n\n";
     body += "----------------------------------------\nOrdine generato da inSAPA Agenti il "+new Date().toLocaleDateString('it-IT');
     window.location.href = "mailto:?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
-    eliminaNota(cliente.codice);
 }
+
 function calcolaUltimaDataArticolo(art) {
     if (!art.coppie || !art.coppie.length) return null;
     let dates = art.coppie.map(c => ({ data: c.data, ts: new Date(c.data.split('/').reverse().join('-')).getTime() }));
     dates.sort((a,b) => b.ts - a.ts);
     return dates[0];
 }
+
+// Funzione principale per aprire il modale ordine (con supporto al ripristino delle quantità)
 function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     if (!cliente) { alert("Seleziona un cliente!"); return; }
     if (!cliente.ordini || !cliente.ordini.length) { alert("Nessun articolo disponibile per questo cliente."); return; }
@@ -698,6 +700,7 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
     const id = idPrefixed !== null ? idPrefixed : nextModalId++;
     const isDesktop = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 768;
     const btnText = isDesktop ? "🖨️ STAMPA PDF" : "📧 INVIA EMAIL";
+    
     const modalDiv = document.createElement('div');
     modalDiv.className = 'modal-overlay';
     modalDiv.style.display = 'flex';
@@ -710,44 +713,30 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
             </div>
             <div class="modal-ordine-body">
                 <div class="cliente-info-modale">
-                    <div>
-                        <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
-                        <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
-                    </div>
-                    <button id="btnNota_${id}" class="btn-note">📝 NOTE</button>
+                    <p><strong>Codice:</strong> ${escapeHtml(cliente.codice)} &nbsp;|&nbsp; <strong>Ragione Sociale:</strong> ${escapeHtml(cliente.ragione)}</p>
+                    <p><strong>Scadenze in sospeso:</strong> ${cliente.scadenze ? cliente.scadenze.length : 0}</p>
                 </div>
                 <div class="ricerca-articolo-ordine">
                     <input type="text" id="ricercaOrd_${id}" placeholder="🔍 Cerca articolo per codice o descrizione...">
                 </div>
                 <div class="tabella-articoli-container" id="tabellaContainer_${id}">
                     <table class="ordine-tabella" id="tabellaOrdine_${id}">
-                        <thead>
-                            <tr><th>Codice</th><th>Descrizione</th><th>Ultimo acquisto</th><th style="text-align:center">Quantità</th></tr>
-                        </thead>
+                        <thead><tr><th>Codice</th><th>Descrizione</th><th>Ultimo acquisto</th><th style="text-align:center">Quantità</th></tr></thead>
                         <tbody id="tabellaBody_${id}"></tbody>
                     </table>
                 </div>
                 <div class="btn-group-modal">
-                    <button id="btnLink1_${id}" class="btn-link">🔗 Link-01</button>
-                    <button id="btnNotaMobile_${id}" class="btn-note" style="display:none;">📝 NOTE</button>
-                    <button id="btnLink2_${id}" class="btn-link">🔗 Link-02</button>
+                    <button id="btnConferma_${id}" class="btn-success">${btnText}</button>
+                    <button id="btnApriListino_${id}" class="btn-primary">📋 APRI LISTINO</button>
                 </div>
             </div>
         </div>
     `;
     document.body.appendChild(modalDiv);
-    const btnNotaMobile = document.getElementById(`btnNotaMobile_${id}`);
-    const isMobile = window.innerWidth <= 768;
-    if (btnNotaMobile) btnNotaMobile.style.display = isMobile ? 'inline-block' : 'none';
+    
     let qMap = qMapPrestored ? { ...qMapPrestored } : {};
     modaliAperti.push({ id, tipo: 'ordine', modalElement: modalDiv, minimizzato: false, cliente, articoli, qMap });
-    const btnNota = document.getElementById(`btnNota_${id}`);
-    if (btnNota) btnNota.onclick = () => { mostraModaleNota(cliente.codice, () => {}); };
-    if (btnNotaMobile) btnNotaMobile.onclick = () => { mostraModaleNota(cliente.codice, () => {}); };
-    const btnLink1 = document.getElementById(`btnLink1_${id}`);
-    const btnLink2 = document.getElementById(`btnLink2_${id}`);
-    if (btnLink1) btnLink1.onclick = () => apriLink(1);
-    if (btnLink2) btnLink2.onclick = () => apriLink(2);
+    
     function renderTabella(search = '') {
         const tbody = document.getElementById(`tabellaBody_${id}`);
         let filtered = articoli;
@@ -796,47 +785,63 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
             }
         }
     }
+    
     renderTabella();
     const searchInput = document.getElementById(`ricercaOrd_${id}`);
     searchInput.addEventListener('input', (e) => renderTabella(e.target.value));
-    const btnConferma = document.createElement('button');
-    btnConferma.id = `btnConferma_${id}`;
-    btnConferma.className = 'btn-success';
-    btnConferma.textContent = btnText;
-    btnConferma.onclick = () => {
+    
+    document.getElementById(`btnConferma_${id}`).onclick = () => {
         let selected = [];
         for (let a of articoli) {
             let q = qMap[a.codice] || 0;
             if (q > 0) selected.push({ codice: a.codice, descrizione: a.descrizione, quantita: q });
         }
         if (!selected.length) { alert("Inserisci almeno una quantità > 0"); return; }
-        const nota = getNota(cliente.codice);
-        if (isDesktop) stampaPDF(cliente, selected, nota);
-        else inviaEmailOrdine(cliente, selected, nota);
+        if (isDesktop) stampaPDF(cliente, selected);
+        else inviaEmailOrdine(cliente, selected);
         chiudiModale(id);
     };
-    const btnGroup = modalDiv.querySelector('.btn-group-modal');
-    if (btnGroup && btnConferma) btnGroup.insertBefore(btnConferma, btnGroup.firstChild);
-    const btnApriListino = document.getElementById(`btnApriListino_${id}`);
-    if (btnApriListino) btnApriListino.onclick = () => { apriModaleListinoIframe(); };
+    document.getElementById(`btnApriListino_${id}`).onclick = () => { apriModaleListinoIframe(); };
     modalDiv.querySelector('.minimize-btn').onclick = () => minimizzaModale(id);
     modalDiv.querySelector('.close-modal-btn').onclick = () => chiudiModale(id);
 }
+
+// Ripristino automatico all'avvio
 function ripristinaOrdineDaStorageSeNecessario() {
     const ordineSalvato = caricaOrdineDaStorage();
     if (!ordineSalvato) return;
     const { cliente, articoli, qMap, idSalvato } = ordineSalvato;
+    // Verifica che il cliente esista ancora nella lista clientiUnici (potrebbe essere stato cancellato?)
     const clienteEsistente = clientiUnici.find(c => c.codice === cliente.codice);
-    if (!clienteEsistente) { rimuoviOrdineDaStorage(); return; }
-    const clienteCompleto = { ...clienteEsistente, ordini: clienteEsistente.ordini, scadenze: clienteEsistente.scadenze || [] };
+    if (!clienteEsistente) {
+        // Il cliente non esiste più, pulisci storage
+        rimuoviOrdineDaStorage();
+        return;
+    }
+    // Ricostruisci l'oggetto cliente con i dati aggiornati (importante: deve avere ordini)
+    const clienteCompleto = {
+        ...clienteEsistente,
+        ordini: clienteEsistente.ordini,
+        scadenze: clienteEsistente.scadenze || []
+    };
+    // Usa l'id salvato se non già in uso, altrimenti generane uno nuovo
     let finalId = idSalvato;
-    if (modaliAperti.some(m => m.id === finalId)) finalId = nextModalId++;
-    else if (finalId >= nextModalId) nextModalId = finalId + 1;
+    if (modaliAperti.some(m => m.id === finalId)) {
+        finalId = nextModalId++;
+    } else {
+        // Assicuriamoci che nextModalId sia maggiore di finalId
+        if (finalId >= nextModalId) nextModalId = finalId + 1;
+    }
     apriModaleOrdine(clienteCompleto, qMap, finalId);
+    // Dopo aver aperto, minimizzalo subito perché l'utente aveva lo stato minimizzato
     const modaleAppenaAperto = modaliAperti.find(m => m.id === finalId);
-    if (modaleAppenaAperto) minimizzaModale(finalId);
+    if (modaleAppenaAperto) {
+        minimizzaModale(finalId);
+    }
+    // Rimuovi lo storage per evitare duplicati (dopo il ripristino)
     rimuoviOrdineDaStorage();
 }
+
 function aggiornaClienti() {
     const map = new Map();
     for (let c of datiOrd) { map.set(c.codice.toString(), { codice: c.codice.toString(), ragione: c.ragione, hasScadenze: false, scadenze: [], ordini: c.articoli }); }
@@ -849,11 +854,13 @@ function aggiornaClienti() {
     clientiUnici = Array.from(map.values());
     filtraClienti();
 }
+
 function filtraClienti() {
     let txt = document.getElementById('cercaCliente').value.toLowerCase();
     let filtrati = clientiUnici.filter(c => c.codice.toLowerCase().includes(txt) || c.ragione.toLowerCase().includes(txt));
     filtrati.sort((a,b) => {
-        let aHas = a.hasScadenze && a.scadenze.length, bHas = b.hasScadenze && b.scadenze.length;
+        let aHas = a.hasScadenze && a.scadenze.length;
+        let bHas = b.hasScadenze && b.scadenze.length;
         if (aHas && !bHas) return -1;
         if (!aHas && bHas) return 1;
         return a.ragione.localeCompare(b.ragione);
@@ -870,6 +877,7 @@ function filtraClienti() {
     }
     if (!filtrati.length) document.getElementById('dettaglioAgenti').innerHTML = '<div class="scadenze-box">Nessun cliente trovato</div>';
 }
+
 function buildScadenzeHtml(cliente) {
     let html = `<div class="scadenze-box"><div class="scadenze-header"><h3 style="margin:0;">📅 Scadenze - ${cliente.codice} ${cliente.ragione}</h3>
                 <button class="btn-whatsapp" onclick="inviaScadenzeWhatsApp(clienteScadenzeCorrente)"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.47 3.45 1.35 4.95L2 22l5.25-1.38c1.45.85 3.1 1.3 4.79 1.3 5.46 0 9.91-4.45 9.91-9.91 0-2.66-1.04-5.16-2.93-7.05A9.87 9.87 0 0 0 12.04 2z"/></svg> Invia Scadenze</button></div>
@@ -878,9 +886,10 @@ function buildScadenzeHtml(cliente) {
         let cls = s.importo < 0 ? 'style="color:#e74c3c"' : '';
         html += `<tr><td style="white-space:nowrap">${s.scadenza}</td><td style="white-space:nowrap">${s.dataDoc || ''}</td><td>${s.numDoc}</td><td align="right" ${cls}>${s.importo.toFixed(2)} €</td></tr>`;
     }
-    html += `</tbody></table></div>`;
+    html += `</tbody>}</div>`;
     return html;
 }
+
 function mostraDettaglioCliente(codice) {
     let cliente = clientiUnici.find(c => c.codice === codice);
     if (!cliente) return;
@@ -905,6 +914,7 @@ function mostraDettaglioCliente(codice) {
         el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
 }
+
 function filtraArticoli() {
     let cod = document.getElementById('selectClienteAgenti').value;
     if (!cod) return;
@@ -931,6 +941,7 @@ function filtraArticoli() {
         el.onclick = (e) => { e.stopPropagation(); let sd = el.querySelector('.storico-ordini'); if (sd) sd.classList.toggle('visible'); };
     });
 }
+
 function nomeFileCorrisponde(nome, codice, tipo) {
     let base = nome.replace(/\.[a-zA-Z0-9]+$/, '');
     let m = base.match(/^([A-Z]+)(\d+)$/i);
@@ -938,6 +949,7 @@ function nomeFileCorrisponde(nome, codice, tipo) {
     if (m[1].toUpperCase() !== tipo) return false;
     return parseInt(m[2],10) === parseInt(codice,10);
 }
+
 async function caricaFile(files) {
     if (!agenteCorrente) { alert("Seleziona un agente!"); return false; }
     if (files.length !== 2) { alert("Servono ESATTAMENTE 2 file (ORD e SCA)!"); return false; }
@@ -959,6 +971,7 @@ async function caricaFile(files) {
     alert("Caricato! ORD: "+datiOrd.length+" clienti, SCA: "+datiSca.length+" clienti");
     return true;
 }
+
 async function caricaListinoGlobale(file) {
     if (!file) { alert("Seleziona file listino.txt"); return false; }
     try {
@@ -988,38 +1001,7 @@ async function caricaListinoGlobale(file) {
     } catch(e) { alert("Errore: "+e.message); return false; }
 }
 
-// ==================== ADMIN (pressione lunga sul logo) ====================
-function mostraModalePasswordAdmin() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `<div class="password-modal"><h3>🔐 ACCESSO ADMIN</h3><input type="password" id="passwordAdmin" placeholder="Password"><div class="modal-buttons"><button id="btnVerifica" class="btn-salva-modal">VERIFICA</button><button id="btnAnnulla" class="btn-cancel-modal">ANNULLA</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('btnVerifica').onclick = () => {
-        const pwd = document.getElementById('passwordAdmin').value;
-        if (pwd === ADMIN_PASSWORD) {
-            isAdminMode = true;
-            localStorage.setItem('web_admin_mode', 'true');
-            showToast("✅ Modalità admin attivata!");
-            modal.remove();
-        } else showToast("❌ Password errata!", true);
-    };
-    document.getElementById('btnAnnulla').onclick = () => modal.remove();
-}
-function disattivaModalitaAdmin() {
-    isAdminMode = false;
-    localStorage.removeItem('web_admin_mode');
-    showToast("🔒 Modalità admin disattivata");
-}
-const logoDiv = document.getElementById('logoRettangolo');
-if (logoDiv) {
-    logoDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { mostraModalePasswordAdmin(); pressTimer = null; }, 3000); });
-    logoDiv.addEventListener('mouseup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-    logoDiv.addEventListener('mouseleave', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-    logoDiv.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { mostraModalePasswordAdmin(); pressTimer = null; }, 3000); });
-    logoDiv.addEventListener('touchend', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-}
-
-// ==================== EVENTI UI ====================
+// Event listeners
 document.getElementById('hamburgerBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('navGrid').classList.toggle('open'); };
 document.addEventListener('click', (e) => { let nav = document.getElementById('navGrid'); if (!nav.contains(e.target) && !document.getElementById('hamburgerBtn').contains(e.target)) nav.classList.remove('open'); });
 document.getElementById('selectAgente').onchange = (e) => {
@@ -1044,8 +1026,11 @@ document.getElementById('btnCompilaOrdine').onclick = () => {
 document.getElementById('fileInput').onchange = async (e) => { if (e.target.files.length) await caricaFile(Array.from(e.target.files)); e.target.value = ''; };
 document.getElementById('fileListinoInput').onchange = async (e) => { if (e.target.files.length) { await caricaListinoGlobale(e.target.files[0]); e.target.value = ''; } };
 
-// ==================== AVVIO ====================
-verificaAccesso();
+// All'avvio: carica agenti e poi ripristina eventuale ordine in sessionStorage
+Promise.all([caricaLinkDaFile(), caricaAgenti()]).then(() => {
+    caricaLogoSaved();
+    // Il ripristino avviene dentro selezionaAgente -> ripristinaOrdineDaStorageSeNecessario
+});
 </script>
 <script src="version.js"></script>
 </body>
