@@ -762,7 +762,7 @@ function inviaScadenzeWhatsApp(cliente) {
 function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
 function generaHtmlOrdine(cliente, articoli, nota) {
-    let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
+    let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th><tr></thead><tbody>';
     for (let a of articoli) html += '<tr><td style="border:1px solid #ddd;padding:8px;">'+a.codice+'</td><td style="border:1px solid #ddd;padding:8px;">'+a.descrizione+'</td><td style="border:1px solid #ddd;padding:8px;text-align:center;">'+a.quantita+' pz</td></tr>';
     html += '</tbody></table>';
     if (nota && nota.trim() !== '') {
@@ -776,6 +776,8 @@ function stampaPDF(cliente, articoli, nota) {
     const w = window.open('', '_blank');
     w.document.write('<!DOCTYPE html><html><head><title>Ordine_'+cliente.codice+'</title><meta charset="UTF-8"><style>body{font-family:Segoe UI,sans-serif;padding:20px;}@media print{body{margin:0;padding:0;}}</style></head><body>'+generaHtmlOrdine(cliente, articoli, nota)+'<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}};<\/script></body></html>');
     w.document.close();
+    // Dopo la stampa, elimina la nota (come per gli articoli)
+    eliminaNota(cliente.codice);
 }
 
 function inviaEmailOrdine(cliente, articoli, nota) {
@@ -785,6 +787,8 @@ function inviaEmailOrdine(cliente, articoli, nota) {
     if (nota && nota.trim() !== '') body += "\n📝 NOTE:\n"+nota+"\n\n";
     body += "----------------------------------------\nOrdine generato da inSAPA Agenti il "+new Date().toLocaleDateString('it-IT');
     window.location.href = "mailto:?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
+    // Dopo l'invio email, elimina la nota (come per gli articoli)
+    eliminaNota(cliente.codice);
 }
 
 function calcolaUltimaDataArticolo(art) {
@@ -933,8 +937,13 @@ function apriModaleOrdine(cliente, qMapPrestored = null, idPrefixed = null) {
         }
         if (!selected.length) { alert("Inserisci almeno una quantità > 0"); return; }
         const nota = getNota(cliente.codice);
-        if (isDesktop) stampaPDF(cliente, selected, nota);
-        else inviaEmailOrdine(cliente, selected, nota);
+        if (isDesktop) {
+            stampaPDF(cliente, selected, nota);
+            // La nota viene cancellata DENTRO stampaPDF()
+        } else {
+            inviaEmailOrdine(cliente, selected, nota);
+            // La nota viene cancellata DENTRO inviaEmailOrdine()
+        }
         chiudiModale(id);
     };
     document.getElementById(`btnApriListino_${id}`).onclick = () => { apriModaleListinoIframe(); };
