@@ -653,9 +653,10 @@ function inviaScadenzeWhatsApp(cliente) {
     let tot = 0;
     for (let s of cliente.scadenze) { msg += "Scadenza: "+s.scadenza+"\nData Doc: "+s.dataDoc+"\nN.Doc: "+s.numDoc+"\nImporto: EUR "+s.importo.toFixed(2)+"\n---\n"; tot += s.importo; }
     msg += "\nTOTALE: EUR "+tot.toFixed(2);
-    window.open("https://wa.me/?text="+encodeURIComponent(msg), '_blank');
+    // 🔁 CAMBIO QUI: uso web.whatsapp.com invece di wa.me
+    window.open("https://web.whatsapp.com/send?text="+encodeURIComponent(msg), '_blank');
 }
-function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
+    function inviaScadenzeClienteCorrente() { if (clienteScadenzeCorrente) inviaScadenzeWhatsApp(clienteScadenzeCorrente); else alert("Seleziona un cliente"); }
 
 function generaHtmlOrdine(cliente, articoli) {
     let html = '<div style="font-family:Segoe UI,sans-serif;padding:20px;"><h2>📝 ORDINE DA CLIENTE</h2><div style="background:#eef2f5;padding:15px;border-radius:8px;"><p><strong>Codice:</strong> '+cliente.codice+'</p><p><strong>Ragione:</strong> '+cliente.ragione+'</p><p><strong>Data:</strong> '+new Date().toLocaleDateString('it-IT')+'</p></div><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><thead><tr bgcolor="#f1c40f"><th>Codice</th><th>Descrizione</th><th>Quantità</th></tr></thead><tbody>';
